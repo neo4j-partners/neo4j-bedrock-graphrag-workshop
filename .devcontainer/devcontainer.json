@@ -1,0 +1,56 @@
+{
+  "name": "neo4j-aws-bedrock-workshop",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12-bookworm",
+  "forwardPorts": [8000],
+
+  "features": {
+    "ghcr.io/devcontainers/features/aws-cli:1": {},
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "amazonwebservices.aws-toolkit-vscode",
+        "ms-python.python",
+        "ms-toolsai.jupyter",
+        "github.copilot"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.terminal.activateEnvironment": true
+      }
+    },
+    "codespaces": {
+      "openFiles": ["GUIDE_DEV_CONTAINERS.md"]
+    }
+  },
+
+  "postCreateCommand": "bash scripts/post_create.sh",
+  "postStartCommand": "bash scripts/post_start.sh",
+  "remoteUser": "vscode",
+  "hostRequirements": {
+    "memory": "8gb"
+  },
+
+  "secrets": {
+    "AWS_ACCESS_KEY_ID": {
+      "description": "AWS Access Key ID for Bedrock access"
+    },
+    "AWS_SECRET_ACCESS_KEY": {
+      "description": "AWS Secret Access Key for Bedrock access"
+    },
+    "NEO4J_URI": {
+      "description": "Neo4j Aura connection URI (neo4j+s://xxx.databases.neo4j.io)"
+    },
+    "NEO4J_USERNAME": {
+      "description": "Neo4j username (usually 'neo4j')"
+    },
+    "NEO4J_PASSWORD": {
+      "description": "Neo4j password"
+    }
+  }
+}
