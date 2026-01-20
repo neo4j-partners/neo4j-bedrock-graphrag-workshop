@@ -2,64 +2,77 @@
 Configuration module for Neo4j and AWS Bedrock integration.
 
 This module provides:
-- Environment configuration loading
-- Bedrock client initialization
-- BedrockEmbedder class for neo4j-graphrag compatibility
-- BedrockLLM class for neo4j-graphrag compatibility
+- Environment configuration loading using pydantic-settings
 - Neo4j driver initialization
+- Bedrock LLM and Embedder access via neo4j-graphrag native classes
+
+The neo4j-graphrag library now includes native Bedrock support through:
+- neo4j_graphrag.embeddings.BedrockEmbeddings
+- neo4j_graphrag.llm.BedrockLLM
+
+These use boto3's default credential chain and support inference profiles
+for cross-region access to newer Claude models.
 """
 
-import json
-import os
-from typing import Any
+from pathlib import Path
 
-import boto3
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
-from neo4j_graphrag.embeddings import Embedder
-from neo4j_graphrag.llm import LLMInterface, LLMResponse
-from pydantic import BaseModel
+from neo4j_graphrag.embeddings import BedrockEmbeddings
+from neo4j_graphrag.llm import BedrockLLM
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# Load environment variables from .env file
-load_dotenv()
+# Load .env from project root
+_root_env = Path(__file__).parent / ".env"
+load_dotenv(_root_env)
 
 
-class AWSConfig(BaseModel):
-    """AWS configuration settings.
+class Neo4jConfig(BaseSettings):
+    """Neo4j configuration loaded from environment variables."""
 
-    Model IDs:
-    - Claude 3.5 Sonnet v2: anthropic.claude-3-5-sonnet-20241022-v2:0 (default, widely available)
-    - Claude Sonnet 4: anthropic.claude-sonnet-4-20250514-v1:0 (latest, may require access)
-    - Titan Embeddings V2: amazon.titan-embed-text-v2:0 (1024 dimensions)
+    model_config = SettingsConfigDict(env_prefix="", extra="ignore")
+
+    uri: str = Field(validation_alias="NEO4J_URI")
+    username: str = Field(default="neo4j", validation_alias="NEO4J_USERNAME")
+    password: str = Field(validation_alias="NEO4J_PASSWORD")
+    vector_index_name: str = Field(
+        default="chunkEmbeddings", validation_alias="NEO4J_VECTOR_INDEX_NAME"
+    )
+
+
+class AWSConfig(BaseSettings):
+    """AWS Bedrock configuration loaded from environment variables.
+
+    Model IDs and Inference Profiles:
+    - Claude Sonnet 4.5: us.anthropic.claude-sonnet-4-5-20250929-v1:0 (inference profile)
+    - Claude 3.5 Sonnet v2: anthropic.claude-3-5-sonnet-20241022-v2:0 (direct model ID)
+    - Titan Embeddings V2: amazon.titan-embed-text-v2:0 (1024 dimensions default)
+
+    Note: Newer Claude models require inference profiles for cross-region access.
+    See: https://docs.aws.amazon.com/bedrock/latest/userguide/inference-profiles-support.html
     """
 
-    region: str = os.getenv("AWS_REGION", "us-east-1")
-    bedrock_model_id: str = os.getenv(
-        "AWS_BEDROCK_MODEL_ID", "anthropic.claude-3-5-sonnet-20241022-v2:0"
+    model_config = SettingsConfigDict(env_prefix="", extra="ignore")
+
+    region: str = Field(default="us-east-1", validation_alias="AWS_REGION")
+    # Claude Sonnet 4.5 US cross-region inference profile
+    bedrock_inference_profile_id: str = Field(
+        default="us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        validation_alias="AWS_BEDROCK_INFERENCE_PROFILE_ID",
     )
-    bedrock_embedding_model_id: str = os.getenv(
-        "AWS_BEDROCK_EMBEDDING_MODEL_ID", "amazon.titan-embed-text-v2:0"
+    bedrock_embedding_model_id: str = Field(
+        default="amazon.titan-embed-text-v2:0",
+        validation_alias="AWS_BEDROCK_EMBEDDING_MODEL_ID",
     )
-    embedding_dimensions: int = int(os.getenv("EMBEDDING_DIMENSIONS", "1024"))
-
-
-class Neo4jConfig(BaseModel):
-    """Neo4j configuration settings."""
-
-    uri: str = os.getenv("NEO4J_URI", "")
-    username: str = os.getenv("NEO4J_USERNAME", "neo4j")
-    password: str = os.getenv("NEO4J_PASSWORD", "")
-    vector_index_name: str = os.getenv("NEO4J_VECTOR_INDEX_NAME", "chunkEmbeddings")
+    embedding_dimensions: int = Field(
+        default=1024, validation_alias="EMBEDDING_DIMENSIONS"
+    )
 
 
 # Global configuration instances
-aws_config = AWSConfig()
 neo4j_config = Neo4jConfig()
-
-
-def get_bedrock_client():
-    """Get a Bedrock Runtime client for model invocation."""
-    return boto3.client("bedrock-runtime", region_name=aws_config.region)
+aws_config = AWSConfig()
 
 
 def get_neo4j_driver():
@@ -74,174 +87,36 @@ def get_neo4j_driver():
     )
 
 
-class BedrockEmbedder(Embedder):
+def get_embedder() -> BedrockEmbeddings:
     """
-    Embedder implementation using Amazon Titan Text Embeddings V2.
+    Get a BedrockEmbeddings instance using neo4j-graphrag native support.
 
-    This class implements the neo4j-graphrag Embedder interface,
-    allowing it to be used with VectorRetriever and other GraphRAG components.
-    """
-
-    def __init__(
-        self,
-        model_id: str | None = None,
-        dimensions: int | None = None,
-        normalize: bool = True,
-    ):
-        """
-        Initialize the Bedrock embedder.
-
-        Args:
-            model_id: Bedrock embedding model ID. Defaults to Titan Embeddings V2.
-            dimensions: Output embedding dimensions (256, 512, or 1024 for Titan V2).
-            normalize: Whether to normalize embeddings. Defaults to True.
-        """
-        self.client = get_bedrock_client()
-        self.model_id = model_id or aws_config.bedrock_embedding_model_id
-        self.dimensions = dimensions or aws_config.embedding_dimensions
-        self.normalize = normalize
-
-    def embed_query(self, text: str) -> list[float]:
-        """
-        Generate embeddings for a single query text.
-
-        Args:
-            text: The text to embed.
-
-        Returns:
-            A list of floats representing the embedding vector.
-        """
-        request_body = {
-            "inputText": text,
-            "dimensions": self.dimensions,
-            "normalize": self.normalize,
-        }
-
-        response = self.client.invoke_model(
-            modelId=self.model_id,
-            contentType="application/json",
-            accept="application/json",
-            body=json.dumps(request_body),
-        )
-
-        response_body = json.loads(response["body"].read())
-        return response_body["embedding"]
-
-
-class BedrockLLM(LLMInterface):
-    """
-    LLM implementation using Amazon Bedrock Converse API.
-
-    This class implements the neo4j-graphrag LLMInterface,
-    allowing it to be used with Text2CypherRetriever and other GraphRAG components.
-    The Converse API provides a unified interface for all Bedrock models.
-    """
-
-    def __init__(
-        self,
-        model_id: str | None = None,
-        temperature: float = 0.0,
-        max_tokens: int = 4096,
-    ):
-        """
-        Initialize the Bedrock LLM.
-
-        Args:
-            model_id: Bedrock model ID. Defaults to Claude 3.5 Sonnet.
-            temperature: Sampling temperature (0.0 = deterministic).
-            max_tokens: Maximum tokens in response.
-        """
-        self.client = get_bedrock_client()
-        self.model_id = model_id or aws_config.bedrock_model_id
-        self.temperature = temperature
-        self.max_tokens = max_tokens
-
-    def invoke(self, input: str) -> LLMResponse:
-        """
-        Invoke the LLM with a text prompt.
-
-        Args:
-            input: The prompt text.
-
-        Returns:
-            LLMResponse containing the model's response.
-        """
-        messages = [{"role": "user", "content": [{"text": input}]}]
-
-        response = self.client.converse(
-            modelId=self.model_id,
-            messages=messages,
-            inferenceConfig={
-                "temperature": self.temperature,
-                "maxTokens": self.max_tokens,
-            },
-        )
-
-        # Extract text from response
-        output_message = response["output"]["message"]
-        response_text = ""
-        for content_block in output_message["content"]:
-            if "text" in content_block:
-                response_text += content_block["text"]
-
-        return LLMResponse(content=response_text)
-
-    async def ainvoke(self, input: str) -> LLMResponse:
-        """
-        Async version of invoke. Currently wraps the sync version.
-
-        Args:
-            input: The prompt text.
-
-        Returns:
-            LLMResponse containing the model's response.
-        """
-        return self.invoke(input)
-
-
-def get_embedder(
-    model_id: str | None = None,
-    dimensions: int | None = None,
-    normalize: bool = True,
-) -> BedrockEmbedder:
-    """
-    Get a BedrockEmbedder instance.
-
-    Args:
-        model_id: Optional model ID override.
-        dimensions: Optional dimensions override.
-        normalize: Whether to normalize embeddings.
+    Uses boto3's default credential chain (env vars, ~/.aws/credentials, IAM role).
+    Returns BedrockEmbeddings configured for Amazon Titan Text Embeddings V2.
 
     Returns:
-        Configured BedrockEmbedder instance.
+        Configured BedrockEmbeddings instance with 1024 dimensions.
     """
-    return BedrockEmbedder(
-        model_id=model_id,
-        dimensions=dimensions,
-        normalize=normalize,
+    return BedrockEmbeddings(
+        model_id=aws_config.bedrock_embedding_model_id,
+        region_name=aws_config.region,
     )
 
 
-def get_llm(
-    model_id: str | None = None,
-    temperature: float = 0.0,
-    max_tokens: int = 4096,
-) -> BedrockLLM:
+def get_llm() -> BedrockLLM:
     """
-    Get a BedrockLLM instance.
+    Get a BedrockLLM instance using neo4j-graphrag native support.
 
-    Args:
-        model_id: Optional model ID override.
-        temperature: Sampling temperature.
-        max_tokens: Maximum response tokens.
+    Uses boto3's default credential chain (env vars, ~/.aws/credentials, IAM role).
+    Returns BedrockLLM configured for Claude Sonnet 4.5 via the Converse API
+    with US cross-region inference profile.
 
     Returns:
         Configured BedrockLLM instance.
     """
     return BedrockLLM(
-        model_id=model_id,
-        temperature=temperature,
-        max_tokens=max_tokens,
+        inference_profile_id=aws_config.bedrock_inference_profile_id,
+        region_name=aws_config.region,
     )
 
 

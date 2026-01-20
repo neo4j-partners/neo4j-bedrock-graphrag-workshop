@@ -154,6 +154,73 @@ Run queries against the populated knowledge graph:
 uv run python -m solutions.01_04_full_dataset_queries
 ```
 
+#### Expected Output (Full Dataset)
+
+After running the full data load, the query script should display a summary like this:
+
+```
+============================================================
+KNOWLEDGE GRAPH SUMMARY
+============================================================
+
+NODE COUNTS BY LABEL:
+   __KGBuilder__: 3221
+   __Entity__: 2795
+   RiskFactor: 1073
+   FinancialMetric: 844
+   Product: 656
+   Chunk: 417
+   Company: 173
+   Executive: 51
+   AssetManager: 15
+   Document: 9
+
+RELATIONSHIP COUNTS BY TYPE:
+   FROM_CHUNK: 3152
+   FROM_DOCUMENT: 417
+   NEXT_CHUNK: 408
+   OWNS: 103
+   FACES_RISK: 77
+   REPORTS: 73
+   OFFERS: 59
+   PARTNERS_WITH: 1
+   HAS_EXECUTIVE: 1
+
+LEXICAL GRAPH:
+   Documents: 9
+   Chunks: 417
+
+EXTRACTED ENTITIES BY TYPE:
+   RiskFactor: 1073
+   FinancialMetric: 844
+   Product: 656
+   Company: 171
+   Executive: 51
+
+PROVENANCE TRACKING:
+   Entities with FROM_CHUNK links: 2795
+   Total provenance links: 3152
+
+EMBEDDINGS:
+   Chunks with embeddings: 417
+   Embedding dimensions: 1024
+
+SCHEMA RELATIONSHIPS (Company -> ...):
+   Company-[FACES_RISK]->RiskFactor: 77
+   Company-[REPORTS]->FinancialMetric: 73
+   Company-[OFFERS]->Product: 59
+   Company-[PARTNERS_WITH]->Company: 1
+   Company-[HAS_EXECUTIVE]->Executive: 1
+
+ASSET MANAGER HOLDINGS:
+   Asset managers: 15
+   Total holdings: 103
+
+------------------------------------------------------------
+TOTALS: 9254 nodes, 4291 relationships
+============================================================
+```
+
 ### Full Data Load (Optional)
 
 Process all SEC 10-K PDFs with `SimpleKGPipeline` + Bedrock:
