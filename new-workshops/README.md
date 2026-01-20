@@ -290,6 +290,42 @@ llm = BedrockLLM(
 - [Introducing Claude Sonnet 4.5 in Amazon Bedrock](https://aws.amazon.com/blogs/aws/introducing-claude-sonnet-4-5-in-amazon-bedrock-anthropics-most-intelligent-model-best-for-coding-and-complex-agents/)
 - [Optimizing Claude Models on Bedrock](https://repost.aws/articles/ARRfe9jE4dQmK8Y2oMYMqbfQ/how-to-optimize-workload-performance-when-using-anthropic-claude-models-on-bedrock)
 
+## Developing with Local neo4j-graphrag-python
+
+When making changes to the local `neo4j-graphrag-python` library, you need to reinstall it for changes to take effect.
+
+### Force Reinstall After Library Changes
+
+```bash
+# From the new-workshops/ directory
+uv pip install --force-reinstall /path/to/neo4j-graphrag-python
+
+# Example with absolute path
+uv pip install --force-reinstall ~/projects/neo4j-graphrag-python
+```
+
+**Why `--force-reinstall`?** The `uv sync` command caches installed packages. Even if you modify the library source code, `uv sync` won't detect changes because the package path hasn't changed. Use `--force-reinstall` to ensure your latest changes are picked up.
+
+### Verify Installation
+
+Check that your changes are installed:
+
+```bash
+# Verify a specific function or class exists
+uv run python -c "from neo4j_graphrag.neo4j_queries import upsert_node_query_merge; print('OK')"
+
+# Print the generated query to verify changes
+uv run python -c "from neo4j_graphrag.neo4j_queries import upsert_node_query_merge; print(upsert_node_query_merge(True))"
+```
+
+### Run Tests
+
+After making library changes, run the MERGE behavior tests:
+
+```bash
+uv run python -m solutions.01_test_full_data_load
+```
+
 ## File Structure
 
 ```
@@ -301,11 +337,13 @@ new-workshops/
     ├── __init__.py
     ├── config.py               # Shared configuration
     ├── test_connection.py      # Connection test
+    ├── name_utils.py           # Company name normalization
     ├── 01_01_data_loading.py   # Demo: basic data loading
     ├── 01_02_embeddings.py
     ├── 01_03_entity_extraction.py
     ├── 01_04_full_dataset_queries.py
     ├── 01_full_data_load.py    # Full PDF processing with SimpleKGPipeline
+    ├── 01_test_full_data_load.py  # MERGE behavior test suite
     ├── 02_01_vector_retriever.py
     ├── 02_02_vector_cypher_retriever.py
     ├── 02_03_text2cypher_retriever.py
@@ -315,3 +353,76 @@ new-workshops/
     ├── 05_01_fulltext_search.py
     └── 05_02_hybrid_search.py
 ```
+
+---
+
+## Lessons Learned: Entity Deduplication in KG Pipelines
+
+During development of this workshop, we encountered and resolved a significant issue with entity duplication. This section documents the problem, root cause analysis, and solution for future reference.
+
+### The Problem
+
+When running `01_full_data_load.py`, the pipeline failed with:
+
+```
+IndexEntryConflictException: Node already exists with label `Company` and property `name` = 'Apple Inc.'
+```
+
+### Root Cause Analysis
+
+The issue had multiple layers:
+
+1. **Document Chunking Creates Duplicate Extractions**
+   - Documents are split into chunks (e.g., 2000 characters each)
+   - The LLM extracts entities from each chunk independently
+   - If "Apple Inc." appears in chunks 1, 3, and 7, it's extracted three times
+   - Each extraction has a unique internal ID
+
+2. **Library Used CREATE Instead of MERGE**
+   - The original `KGWriter` used Cypher `CREATE` statements
+   - This attempted to create three separate "Apple Inc." nodes
+   - With a uniqueness constraint on `Company.name`, the second creation failed
+
+3. **Entity Resolution Runs Too Late**
+   - The pipeline has an entity resolution step, but it runs AFTER the writer
+   - The constraint violation occurs at write time, before resolution can help
+
+4. **Label Mismatch Prevented Merging**
+   - Even after switching to `apoc.merge.node`, merging failed
+   - Pre-existing nodes (from CSV) had only `Company` label
+   - Extracted nodes had `['Company', '__Entity__']` labels
+   - `apoc.merge.node(['Company', '__Entity__'], ...)` couldn't find nodes with only `Company` label
+
+### The Solution
+
+We modified the `neo4j-graphrag-python` library to:
+
+1. **Use MERGE by default** (`use_merge=True` in `Neo4jWriter`)
+2. **Merge on primary label only** - Use `[row.labels[0]]` (e.g., `['Company']`) for matching
+3. **Add auxiliary labels after merge** - Labels like `__Entity__` and `__KGBuilder__` are added post-merge
+
+The final query pattern:
+
+```cypher
+-- Merge on primary label only (finds pre-existing nodes)
+CALL apoc.merge.node(['Company'], {name: 'Apple Inc.'}, props, props) YIELD node
+-- Add auxiliary labels afterward
+CALL apoc.create.addLabels(node, ['Company', '__Entity__', '__KGBuilder__'])
+```
+
+### Key Takeaways
+
+| Lesson | Details |
+|--------|---------|
+| **CREATE vs MERGE** | Always use MERGE for entities that may be extracted multiple times |
+| **Label Strategy** | Merge on semantic labels (Company), add technical labels (__KGBuilder__) afterward |
+| **Pre-existing Data** | Design for integration with nodes created outside the pipeline |
+| **Constraint Timing** | Uniqueness constraints are checked at write time, not resolution time |
+| **uv Caching** | Use `--force-reinstall` when developing local packages |
+| **APOC Required** | Dynamic labels require `apoc.merge.node` (native MERGE doesn't support parameterized labels) |
+
+### Related Documentation
+
+- `CONFLICT_V2.md` - Detailed root cause analysis
+- `CREATE_MERGE.md` (in neo4j-graphrag-python) - Library changes documentation
+- `01_test_full_data_load.py` - Test suite validating MERGE behavior
