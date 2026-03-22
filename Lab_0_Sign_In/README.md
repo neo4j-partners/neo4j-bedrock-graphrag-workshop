@@ -32,8 +32,7 @@ If you are using your own AWS account:
 1. Ensure you have an IAM user with appropriate permissions for:
    - Amazon Bedrock (model access and agent creation)
    - CloudFormation (for CDK deployment)
-   - CloudWatch Logs (for monitoring)
-2. Create access keys for programmatic access if needed for Labs 4-8
+2. Create access keys for programmatic access if needed for Labs 4-7
 
 ## Sign into AWS Console
 
@@ -44,8 +43,6 @@ If you are using your own AWS account:
 ![AWS Sign In](images/aws_signin.png)
 
 3. Enter your IAM username and password, then click **Sign in**
-
-![AWS Password](images/aws_password.png)
 
 4. You are now signed in to the AWS Console
 
@@ -58,21 +55,11 @@ Amazon Bedrock is available in select regions. For this workshop, we recommend *
 1. Look at the region selector in the top-right corner of the console
 2. Click on it and select **US East (N. Virginia)**
 
-![Region Selector](images/region_selector.png)
-
 ## Verify Bedrock Access
 
 1. In the AWS Console search bar, type **Bedrock** and select **Amazon Bedrock**
-
-![Find Bedrock](images/find_bedrock.png)
-
 2. You should see the Amazon Bedrock welcome page
-
-![Bedrock Console](images/bedrock_console.png)
-
 3. In the left sidebar, click **Model access** to verify which models are available
-
-![Model Access](images/model_access.png)
 
 **Note:** If this is your first time using Bedrock, you may need to request access to specific models:
 - Click **Manage model access**
@@ -97,7 +84,7 @@ Amazon Bedrock is available in select regions. For this workshop, we recommend *
 
 ## Improving the Labs
 
-As you work through these labs, we'd appreciate your feedback. Help us improve by opening an issue at [GitHub Issues](https://github.com/your-org/lab-neo4j-aws/issues). Bug reports, usability suggestions, and general comments are all welcome. Pull requests are great too!
+As you work through these labs, we'd appreciate your feedback. Help us improve by opening an issue at [GitHub Issues](https://github.com/neo4j-partners/lab-neo4j-aws/issues). Bug reports, usability suggestions, and general comments are all welcome. Pull requests are great too!
 
 ## Next Steps
 

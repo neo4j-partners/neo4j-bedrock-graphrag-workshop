@@ -178,6 +178,37 @@ Participants follow the same progression regardless of which domain workshop the
   - Removed: new-workshops/, Lab_3_Bedrock_Setup/, Lab_6_Knowledge_Graph/,
     Lab_7_Retrievers/, Lab_8_Agents/, Lab_9_Hybrid_Search/, config.py, setup_env.py
 
+### Missing Images
+
+The following images are referenced in documentation but do not exist yet. These need to be captured as screenshots from the live UI.
+
+**Lab 0 — Sign In** (`Lab_0_Sign_In/images/`):
+- `aws_signin.png` — AWS Console sign-in page with Account ID field
+
+**Lab 1 — Aura Signup** (`Lab_1_Aura_Setup/images/`):
+- `find_marketplace.png` — AWS Console search bar showing "marketplace" search
+- `search_neo4j.png` — AWS Marketplace search results for "neo4j aura"
+- `neo4j_aura_listing.png` — Neo4j AuraDB Professional product listing
+- `continue_subscribe.png` — Product details page with "Continue to Subscribe" button
+- `accept_terms.png` — Terms and conditions acceptance dialog
+- `setup_account.png` — "Set Up Your Account" link after subscription
+- `signup_aura.png` — Neo4j Aura sign-up form
+- `select_marketplace_org.png` — Organization dropdown showing Marketplace Organization
+- `instance_running.png` — Aura console showing instance with green "Running" status
+
+**Lab 1 — Explore** (`Lab_1_Aura_Setup/images/`):
+- `build_pattern.png` — Explore search bar with AssetManager → OWNS → Company → FACES_RISK → RiskFactor pattern
+- `company_graph.png` — Graph visualization showing asset managers, companies, and risk factors
+- `centrality_results.png` — Graph with nodes sized by degree centrality scores
+
+**Lab 2 — Aura Agents** (`Lab_2_Aura_Agents/images/`):
+- `agent_config.png` — Agent creation form with name, description, and system instructions
+- `shared_risks_tool.png` — Cypher template tool configuration for find_shared_risks
+- `apple_query.png` — Agent response to Apple company overview question
+- `apple_reasoning.png` — Agent tool selection reasoning panel
+- `ai_ml_query.png` — Agent response to AI/ML semantic search question
+- `risk_factors.png` — Agent response showing Text2Cypher risk factor query
+
 ### Phase 3: Verification
 
 - [ ] Run `setup/populate/` against a fresh Aura instance and verify node/relationship counts

@@ -98,13 +98,13 @@ Try these patterns to explore more of the knowledge graph:
 
 ### Find Document Structure
 ```
-Document — HAS_CHUNK → Chunk
+Company — FILED → Document — FROM_DOCUMENT ← Chunk
 ```
 Shows how SEC filings are split into text chunks for processing.
 
 ### Explore Company Details
 ```
-Company — HAS_PRODUCT → Product
+Company — OFFERS_PRODUCT → Product
 Company — HAS_EXECUTIVE → Executive
 ```
 Reveals products and leadership mentioned in filings.
