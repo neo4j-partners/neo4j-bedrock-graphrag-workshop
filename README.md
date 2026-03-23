@@ -35,7 +35,7 @@ A hands-on workshop teaching Graph Retrieval-Augmented Generation (GraphRAG) pat
 
 ### Option 1: AWS SageMaker Studio (Recommended for workshops)
 
-Follow [Lab 4](Lab_4_Intro_to_Bedrock_and_Agents/) to set up SageMaker Studio and clone the repository.
+Follow [Lab 4](Lab_4_Intro_to_Bedrock_and_Agents/README.md) to set up SageMaker Studio and clone the repository.
 
 ### Option 2: Local Development
 
