@@ -30,10 +30,12 @@ cd financial_data_load
 
 ### 1. Install Dependencies
 
-From the **project root**:
-
 ```bash
+# Bedrock users
 uv sync --prerelease=allow
+
+# Azure users (includes azure-identity)
+uv sync --prerelease=allow --extra azure
 ```
 
 ### 2. Configure Neo4j
