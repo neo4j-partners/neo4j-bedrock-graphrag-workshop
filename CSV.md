@@ -424,15 +424,16 @@ MATCH (c:Company {companyId: row.company_id})
 MERGE (m)-[:OWNS {shares: toInteger(row.shares)}]->(c);
 
 // Company -[:COMPETES_WITH]-> Company
+// Target may be a mentioned company — MERGE creates it if needed
 LOAD CSV WITH HEADERS FROM 'https://neo4j-workshop-data.s3.amazonaws.com/sec-filings/company_competitors.csv' AS row
 MATCH (a:Company {companyId: row.source_company_id})
-MATCH (b:Company {companyId: row.target_company_id})
+MERGE (b:Company {name: row.target_company_name})
 MERGE (a)-[:COMPETES_WITH]->(b);
 
 // Company -[:PARTNERS_WITH]-> Company
 LOAD CSV WITH HEADERS FROM 'https://neo4j-workshop-data.s3.amazonaws.com/sec-filings/company_partners.csv' AS row
 MATCH (a:Company {companyId: row.source_company_id})
-MATCH (b:Company {companyId: row.target_company_id})
+MERGE (b:Company {name: row.target_company_name})
 MERGE (a)-[:PARTNERS_WITH]->(b);
 ```
 

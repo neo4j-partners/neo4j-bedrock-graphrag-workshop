@@ -47,29 +47,19 @@ FOR (m:AssetManager) REQUIRE m.managerId IS UNIQUE;
 Each statement reads a CSV file from S3 and creates (or updates) the corresponding nodes.
 
 ```cypher
-// Companies
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/companies.csv' AS row
 MERGE (c:Company {companyId: row.company_id})
 SET c.name = row.name, c.ticker = row.ticker,
     c.cik = row.cik, c.cusip = row.cusip;
-```
-
-```cypher
-// Products
+    
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/products.csv' AS row
 MERGE (p:Product {productId: row.product_id})
 SET p.name = row.name, p.description = row.description;
-```
 
-```cypher
-// Risk Factors
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/risk_factors.csv' AS row
 MERGE (r:RiskFactor {riskId: row.risk_id})
 SET r.name = row.name, r.description = row.description;
-```
 
-```cypher
-// Asset Managers
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/asset_managers.csv' AS row
 MERGE (m:AssetManager {managerId: row.manager_id})
 SET m.name = row.name;
@@ -105,9 +95,10 @@ MERGE (m)-[:OWNS {shares: toInteger(row.shares)}]->(c);
 
 ```cypher
 // Company -[:COMPETES_WITH]-> Company
+// Target may be a mentioned company (not a filing company) — MERGE creates it if needed
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/company_competitors.csv' AS row
 MATCH (a:Company {companyId: row.source_company_id})
-MATCH (b:Company {companyId: row.target_company_id})
+MERGE (b:Company {name: row.target_company_name})
 MERGE (a)-[:COMPETES_WITH]->(b);
 ```
 
@@ -115,7 +106,7 @@ MERGE (a)-[:COMPETES_WITH]->(b);
 // Company -[:PARTNERS_WITH]-> Company
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/company_partners.csv' AS row
 MATCH (a:Company {companyId: row.source_company_id})
-MATCH (b:Company {companyId: row.target_company_id})
+MERGE (b:Company {name: row.target_company_name})
 MERGE (a)-[:PARTNERS_WITH]->(b);
 ```
 
@@ -131,24 +122,30 @@ ON EACH [n.name, n.description];
 
 ### Step 5: Verify the Load
 
-Run this query to confirm your node counts:
+Run this query to confirm your node and relationship counts:
 
 ```cypher
-CALL db.labels() YIELD label
-CALL db.stats.retrieve("GRAPH COUNTS") YIELD nodeCount
-WITH label, nodeCount
-MATCH (n) WHERE label IN labels(n)
-WITH label, count(n) AS count
+MATCH (n)
+WITH labels(n)[0] AS label, count(n) AS count
 RETURN label, count ORDER BY label;
 ```
 
 You should see approximately:
+
 | Label | Count |
 |---|---|
 | AssetManager | 15 |
-| Company | 9 |
+| Company | ~60 |
 | Product | 274 |
 | RiskFactor | 203 |
+
+> **Note:** The Company count is higher than 9 because COMPETES_WITH and PARTNERS_WITH
+> relationships reference companies mentioned in filings (e.g., Google, Samsung, OpenAI) that
+> aren't themselves filing companies. These "mentioned companies" have a `name` but no
+> `companyId`, `ticker`, or other identifiers. The 9 filing companies can be found with:
+> ```cypher
+> MATCH (c:Company) WHERE c.companyId IS NOT NULL RETURN c.name, c.ticker ORDER BY c.name;
+> ```
 
 ## Part 3: Explore the Knowledge Graph
 
