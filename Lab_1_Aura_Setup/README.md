@@ -70,40 +70,26 @@ SET m.name = row.name;
 These statements read junction CSVs and create relationships between the nodes loaded above.
 
 ```cypher
-// Company -[:OFFERS]-> Product
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/company_products.csv' AS row
 MATCH (c:Company {companyId: row.company_id})
 MATCH (p:Product {productId: row.product_id})
 MERGE (c)-[:OFFERS]->(p);
-```
 
-```cypher
-// Company -[:FACES_RISK]-> RiskFactor
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/company_risk_factors.csv' AS row
 MATCH (c:Company {companyId: row.company_id})
 MATCH (r:RiskFactor {riskId: row.risk_id})
 MERGE (c)-[:FACES_RISK]->(r);
-```
 
-```cypher
-// AssetManager -[:OWNS]-> Company
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/asset_manager_companies.csv' AS row
 MATCH (m:AssetManager {managerId: row.manager_id})
 MATCH (c:Company {companyId: row.company_id})
 MERGE (m)-[:OWNS {shares: toInteger(row.shares)}]->(c);
-```
 
-```cypher
-// Company -[:COMPETES_WITH]-> Company
-// Target may be a mentioned company (not a filing company) — MERGE creates it if needed
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/company_competitors.csv' AS row
 MATCH (a:Company {companyId: row.source_company_id})
 MERGE (b:Company {name: row.target_company_name})
 MERGE (a)-[:COMPETES_WITH]->(b);
-```
 
-```cypher
-// Company -[:PARTNERS_WITH]-> Company
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/company_partners.csv' AS row
 MATCH (a:Company {companyId: row.source_company_id})
 MERGE (b:Company {name: row.target_company_name})
