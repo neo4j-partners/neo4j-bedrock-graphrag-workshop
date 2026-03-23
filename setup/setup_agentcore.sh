@@ -238,17 +238,7 @@ DEPLOY_POLICY=$(cat <<EOF
       "Sid": "AgentCoreRuntimeAccess",
       "Effect": "Allow",
       "Action": [
-        "bedrock-agentcore:CreateAgentRuntime",
-        "bedrock-agentcore:UpdateAgentRuntime",
-        "bedrock-agentcore:DeleteAgentRuntime",
-        "bedrock-agentcore:GetAgentRuntime",
-        "bedrock-agentcore:ListAgentRuntimes",
-        "bedrock-agentcore:InvokeAgentRuntime",
-        "bedrock-agentcore:StopRuntimeSession",
-        "bedrock-agentcore:CreateMemory",
-        "bedrock-agentcore:GetMemory",
-        "bedrock-agentcore:DeleteMemory",
-        "bedrock-agentcore:ListMemories"
+        "bedrock-agentcore:*"
       ],
       "Resource": "*"
     },
