@@ -1,16 +1,34 @@
 executive_id,name,title,company_id
-E001,Tim Cook,Chief Executive Officer,C001
-E002,Luca Maestri,Chief Financial Officer,C001
-E003,Craig Federighi,Senior Vice President of Software Engineering,C001
-E004,Satya Nadella,Chief Executive Officer,C002
-E005,Amy Hood,Chief Financial Officer,C002
-E006,Kevin Scott,Chief Technology Officer,C002
-E007,Jensen Huang,Chief Executive Officer,C003
-E008,Colette Kress,Chief Financial Officer,C003
-E009,Bill Dally,Chief Scientist,C003
-E010,Sundar Pichai,Chief Executive Officer,C004
-E011,Ruth Porat,Chief Financial Officer,C004
-E012,Kent Walker,President of Global Affairs,C004
-E013,Andy Jassy,Chief Executive Officer,C005
-E014,Brian Olsavsky,Chief Financial Officer,C005
-E015,Werner Vogels,Chief Technology Officer,C005
+E001,Adam N. Selipsky,CEO Amazon Web Services,C001
+E002,Andrew R. Jassy,President and Chief Executive Officer,C001
+E003,Brian T. Olsavsky,Senior Vice President and Chief Financial Officer,C001
+E004,David A. Zapolsky,"Senior Vice President, General Counsel, and Secretary",C001
+E005,Douglas J. Herrington,CEO Worldwide Amazon Stores,C001
+E006,Employees,Full-time and part-time,C001
+E007,Jeffrey P. Bezos,Executive Chair,C001
+E008,Shelley L. Reynolds,"Vice President, Worldwide Controller, and Principal Accounting Officer",C001
+E009,Chief Executive Officer,,C003
+E010,Amy E. Hood,Executive Vice President and Chief Financial Officer,C006
+E011,Bradford L. Smith,Vice Chair and President,C006
+E012,Christopher C. Capossela,Executive Vice President and Chief Marketing Officer,C006
+E013,Christopher D. Young,"Executive Vice President, Business Development, Strategy, and Ventures",C006
+E014,Compensation Committee,Approves stock awards,C006
+E015,Judson B. Althoff,Executive Vice President and Chief Commercial Officer,C006
+E016,Kathleen T. Hogan,Executive Vice President and Chief Human Resources Officer,C006
+E017,Mr. Capossela,"Executive Vice President, Chief Marketing Officer",C006
+E018,Mr. Smith,Vice Chair and President,C006
+E019,Mr. Young,"Executive Vice President, Business Development, Strategy, and Ventures",C006
+E020,Ms. Hogan,"Executive Vice President, Human Resources",C006
+E021,Ms. Hood,"Executive Vice President, Chief Financial Officer",C006
+E022,Satya Nadella,"['Chairman and Chief Executive Officer', 'Chief Executive Officer']",C006
+E023,Ajay K. Puri,"Executive Vice President, Worldwide Field Operations",C007
+E024,Colette M. Kress,Executive Vice President and Chief Financial Officer,C007
+E025,Debora Shoquist,"['Executive Vice President, Operations', 'Executive Vice President of Operations']",C007
+E026,Jen-Hsun Huang,President and Chief Executive Officer,C007
+E027,Timothy S. Teter,"['Executive Vice President and General Counsel', 'Executive Vice President, General Counsel and Secretary']",C007
+E028,Unnamed executive,Executive,C007
+E029,Board of Directors,"['People and Compensation Committee', 'Board of Directors']",C008
+E030,Board of Directors of PG&E Corporation,,C008
+E031,Executive Vice President,"People, Shared Services and Supply Chain",C008
+E032,"Executive Vice President, People, Shared Services and Supply Chain",,C008
+E033,Dan Schulman,,C009

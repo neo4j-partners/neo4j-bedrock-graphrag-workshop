@@ -95,17 +95,14 @@ def process_all_pdfs(
     log_file = _setup_logging()
     logger.info(f"Logging to: {log_file}")
 
-    from .embeddings import _resolve_provider
-
     print("Initializing LLM and Embedder...")
     llm = get_llm()
     embedder = get_embedder()
     agent_config = AgentConfig()
-    provider = _resolve_provider()
-    print(f"  Model: {agent_config.model_name}")
-    print(f"  Embedder: {agent_config.embedding_name} (provider: {provider})")
-    if agent_config.inference_endpoint:
-        print(f"  Endpoint: {agent_config.inference_endpoint}")
+    print(f"  LLM: {agent_config.llm_model_id}")
+    print(f"  Embeddings: {agent_config.embedding_model_id or 'amazon.titan-embed-text-v2:0'}")
+    if agent_config.aws_region:
+        print(f"  Region: {agent_config.aws_region}")
 
     schema = build_extraction_schema()
 
@@ -160,8 +157,6 @@ def process_all_pdfs(
 
             results.append(result)
 
-        # Close LLM async client
-        await llm.async_client.close()
 
     asyncio.run(_run_all())
 

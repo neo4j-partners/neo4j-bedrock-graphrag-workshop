@@ -1,0 +1,37 @@
+source_company_id,target_company_id,target_company_name
+C006,,3M Corporation
+C006,,Activision Blizzard
+C006,,"Alaska Air Group, Inc."
+C006,,American Express Company
+C006,,Dell
+C006,,GitHub
+C006,,Hewlett-Packard
+C006,,Lenovo
+C006,,LinkedIn
+C006,,"Netflix, Inc."
+C006,,Nuance
+C006,,OpenAI
+C006,,Yahoo
+C007,,Amkor Technology
+C007,,BYD Auto Co. Ltd.
+C007,,Fabrinet
+C007,,Flex Ltd.
+C007,,Hon Hai Precision Industry Co.
+C007,,Ibiden Co. Ltd.
+C007,,Jabil Inc.
+C007,,"King Yuan Electronics Co., Ltd."
+C007,,Kinsus Interconnect Technology Corporation
+C007,,Micron Technology
+C007,,"Omni Logistics, LLC"
+C007,,SK Hynix
+C007,,Samsung Electronics Co. Ltd
+C007,,"Samsung Semiconductor, Inc."
+C007,,Siliconware Precision Industries Company Ltd.
+C007,,SoftBank
+C007,,Taiwan Semiconductor Manufacturing Company Limited
+C007,,Unimicron Technology Corporation
+C007,,"Universal Scientific Industrial Co., Ltd."
+C007,,Wistron Corporation
+C007,,cloud service providers
+C008,,The Utility
+C008,,Utility

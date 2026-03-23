@@ -1,0 +1,38 @@
+source_company_id,target_company_id,target_company_name
+C001,,"1Life Healthcare, Inc."
+C001,,Competitors
+C001,,Local companies
+C001,,MGM Holdings Inc.
+C001,,iRobot Corporation
+C006,,Activision Blizzard
+C006,C001,"Amazon.com, Inc."
+C006,C003,Apple Inc.
+C006,,"Cisco Systems, Inc."
+C006,,Google Inc.
+C006,,Hewlett-Packard
+C006,,IBM
+C006,,Meta
+C006,,Nintendo
+C006,,Nokia
+C006,,"Nuance Communications, Inc."
+C006,,Okta
+C006,,Oracle
+C006,,Proofpoint
+C006,,Red Hat
+C006,,SAP
+C006,,Slack
+C006,,Snowflake
+C006,,Sony
+C006,,Symantec
+C006,,Tencent
+C006,,VMware
+C006,,ZeniMax Media Inc.
+C006,,Zoom
+C007,,Arm
+C007,,Arm Limited
+C007,,SoftBank
+C008,,California Independent System Operator Corporation
+C008,,FERC
+C008,,Pacific Gas and Electric Company
+C008,,Pacific Generation LLC
+C008,,Utility

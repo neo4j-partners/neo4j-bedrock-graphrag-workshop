@@ -5,34 +5,14 @@ from __future__ import annotations
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Any
 
 from neo4j import Driver
-from pydantic import BaseModel
+
+from .models import EntitySnapshot, SnapshotEntity
 
 logger = logging.getLogger(__name__)
 
 SNAPSHOT_DIR = Path(__file__).resolve().parent.parent / "snapshots"
-
-
-class SnapshotEntity(BaseModel):
-    """A single entity exported from Neo4j."""
-
-    element_id: str
-    name: str
-    labels: list[str]
-    properties: dict[str, Any]
-    source_chunks: list[str]
-    relationship_count: int
-
-
-class EntitySnapshot(BaseModel):
-    """Complete entity snapshot for a label group."""
-
-    exported_at: str
-    label: str
-    entity_count: int
-    entities: list[SnapshotEntity]
 
 
 def export_snapshot(driver: Driver, label: str = "Company") -> Path:

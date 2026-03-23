@@ -15,6 +15,8 @@ from typing import Any
 
 from pydantic import BaseModel
 
+from .models import GroundTruthResult
+
 LOG_DIR = Path(__file__).resolve().parent.parent / "logs"
 
 
@@ -81,12 +83,6 @@ FORBIDDEN_MERGES: list[dict[str, Any]] = [
 # ---------------------------------------------------------------------------
 # Data models
 # ---------------------------------------------------------------------------
-
-
-class GroundTruthResult(BaseModel):
-    label: str
-    passed: bool
-    detail: str
 
 
 class RunSummary(BaseModel):

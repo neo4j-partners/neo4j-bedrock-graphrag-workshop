@@ -1,6 +1,6 @@
 # SEC 10-K Financial Data Architecture
 
-This document describes the graph data model used for the SEC 10-K financial filing workshop.
+This document describes the graph data model used for the SEC 10-K financial filing workshop. The data is extracted from real SEC 10-K filings by the `financial_data_load/` pipeline using LLM-powered entity extraction, then exported and filtered to the 9 primary filing companies and their directly-connected entities.
 
 ## Graph Schema
 
@@ -8,37 +8,62 @@ This document describes the graph data model used for the SEC 10-K financial fil
 
 | Node Label | Properties | Source File |
 |---|---|---|
-| **Company** | company_id, name, ticker, sector, cik, fiscal_year_end | `companies.csv` |
-| **Product** | product_id, name, description, category | `products.csv` |
-| **Service** | service_id, name, description, category | `services.csv` |
-| **RiskFactor** | risk_id, name, description, category, severity | `risk_factors.csv` |
-| **FinancialMetric** | metric_id, company_id, metric_name, value, unit, fiscal_year | `financial_metrics.csv` |
+| **Company** | company_id, name, ticker, cik, cusip | `companies.csv` |
+| **Product** | product_id, name, description | `products.csv` |
+| **RiskFactor** | risk_id, name, description | `risk_factors.csv` |
+| **FinancialMetric** | metric_id, company_id, metric_name, value, period | `financial_metrics.csv` |
 | **Executive** | executive_id, name, title, company_id | `executives.csv` |
-| **AssetManager** | manager_id, name, aum_billions, type | `asset_managers.csv` |
-| **Document** | filing_id, company_id, filing_type, filing_date, fiscal_year, url | `sec_filings.csv` |
+| **AssetManager** | manager_id, name | `asset_managers.csv` |
 
 ### Relationships
 
 | Relationship | From | To | Properties | Source File |
 |---|---|---|---|---|
-| `OFFERS_PRODUCT` | Company | Product | - | `company_products.csv` |
-| `OFFERS_SERVICE` | Company | Service | - | `company_services.csv` |
+| `OFFERS` | Company | Product | - | `company_products.csv` |
 | `FACES_RISK` | Company | RiskFactor | - | `company_risk_factors.csv` |
-| `HAS_METRIC` | Company | FinancialMetric | - | `financial_metrics.csv` (via company_id) |
+| `REPORTS` | Company | FinancialMetric | - | `financial_metrics.csv` (via company_id) |
 | `HAS_EXECUTIVE` | Company | Executive | - | `executives.csv` (via company_id) |
-| `OWNS` | AssetManager | Company | ownership_percentage | `asset_manager_companies.csv` |
-| `FILED` | Company | Document | - | `sec_filings.csv` (via company_id) |
+| `OWNS` | AssetManager | Company | shares | `asset_manager_companies.csv` |
+| `COMPETES_WITH` | Company | Company | - | `company_competitors.csv` |
+| `PARTNERS_WITH` | Company | Company | - | `company_partners.csv` |
+
+### Schema Diagram
+
+```
+(:AssetManager)  -[:OWNS {shares}]->  (:Company)
+(:Company)       -[:OFFERS]->         (:Product)
+(:Company)       -[:FACES_RISK]->     (:RiskFactor)
+(:Company)       -[:REPORTS]->        (:FinancialMetric)
+(:Company)       -[:HAS_EXECUTIVE]->  (:Executive)
+(:Company)       -[:COMPETES_WITH]->  (:Company)
+(:Company)       -[:PARTNERS_WITH]->  (:Company)
+```
+
+## Filing Companies
+
+The dataset contains 9 companies that filed SEC 10-K reports:
+
+| ID | Name | Ticker | Sector |
+|----|------|--------|--------|
+| C001 | Amazon.com, Inc. | AMZN | Consumer Discretionary |
+| C002 | American International Group, Inc. | AIG | Financial Services |
+| C003 | Apple Inc. | AAPL | Technology |
+| C004 | Intel Corporation | INTC | Technology |
+| C005 | McDonald's Corporation | MCD | Consumer Discretionary |
+| C006 | Microsoft Corporation | MSFT | Technology |
+| C007 | NVIDIA Corporation | NVDA | Technology |
+| C008 | PG&E Corporation | PCG | Utilities |
+| C009 | PayPal Holdings, Inc. | PYPL | Financial Services |
 
 ## Key Traversal Patterns
 
 ### 1. Company to Risk Analysis
 
-Find all risk factors for a given company, grouped by category and severity.
+Find all risk factors for a given company.
 
 ```cypher
 MATCH (c:Company {ticker: 'AAPL'})-[:FACES_RISK]->(r:RiskFactor)
-RETURN r.name, r.category, r.severity
-ORDER BY r.severity DESC
+RETURN r.name, r.description
 ```
 
 ### 2. Cross-Company Risk Exposure
@@ -49,18 +74,19 @@ Identify risk factors shared across multiple companies.
 MATCH (c:Company)-[:FACES_RISK]->(r:RiskFactor)
 WITH r, collect(c.ticker) AS affected_companies, count(c) AS company_count
 WHERE company_count > 1
-RETURN r.name, r.category, affected_companies, company_count
+RETURN r.name, affected_companies, company_count
 ORDER BY company_count DESC
 ```
 
 ### 3. Asset Manager Portfolio Analysis
 
-Analyze an asset manager's portfolio holdings and total exposure.
+Analyze an asset manager's holdings.
 
 ```cypher
-MATCH (am:AssetManager {name: 'The Vanguard Group'})-[o:OWNS]->(c:Company)
-RETURN c.name, c.ticker, o.ownership_percentage
-ORDER BY o.ownership_percentage DESC
+MATCH (am:AssetManager)-[o:OWNS]->(c:Company)
+WHERE am.name CONTAINS 'BlackRock'
+RETURN c.name, c.ticker, o.shares
+ORDER BY o.shares DESC
 ```
 
 ### 4. Portfolio Risk Aggregation
@@ -70,24 +96,17 @@ Determine aggregate risk exposure across an asset manager's portfolio.
 ```cypher
 MATCH (am:AssetManager)-[:OWNS]->(c:Company)-[:FACES_RISK]->(r:RiskFactor)
 WITH am, r, count(DISTINCT c) AS companies_exposed
-RETURN am.name, r.name, r.severity, companies_exposed
+RETURN am.name, r.name, companies_exposed
 ORDER BY companies_exposed DESC
 ```
 
-### 5. Filing to Entity Traversal
+### 5. Competitive Landscape
 
-Starting from a SEC filing, traverse to all related entities.
+Find competitors of a given company.
 
 ```cypher
-MATCH (c:Company)-[:FILED]->(d:Document {filing_type: '10-K', fiscal_year: 2024})
-OPTIONAL MATCH (c)-[:OFFERS_PRODUCT]->(p:Product)
-OPTIONAL MATCH (c)-[:OFFERS_SERVICE]->(s:Service)
-OPTIONAL MATCH (c)-[:FACES_RISK]->(r:RiskFactor)
-OPTIONAL MATCH (c)-[:HAS_METRIC]->(fm:FinancialMetric)
-RETURN c.name, collect(DISTINCT p.name) AS products,
-       collect(DISTINCT s.name) AS services,
-       collect(DISTINCT r.name) AS risks,
-       collect(DISTINCT fm.metric_name) AS metrics
+MATCH (c:Company {ticker: 'MSFT'})-[:COMPETES_WITH]->(competitor:Company)
+RETURN competitor.name
 ```
 
 ### 6. Financial Comparison Across Companies
@@ -95,8 +114,9 @@ RETURN c.name, collect(DISTINCT p.name) AS products,
 Compare a specific metric across all companies.
 
 ```cypher
-MATCH (c:Company)-[:HAS_METRIC]->(fm:FinancialMetric {metric_name: 'Revenue', fiscal_year: 2024})
-RETURN c.ticker, fm.value, fm.unit
+MATCH (c:Company)-[:REPORTS]->(fm:FinancialMetric)
+WHERE fm.metric_name CONTAINS 'Revenue'
+RETURN c.ticker, fm.value, fm.period
 ORDER BY fm.value DESC
 ```
 
@@ -110,51 +130,40 @@ RETURN c.name, e.name, e.title
 ORDER BY c.name, e.title
 ```
 
-## Embedding Targets
+### 8. Partner Network
 
-For semantic search and RAG (Retrieval-Augmented Generation) use cases, the following fields are candidates for vector embeddings:
-
-| Target | Field | Purpose |
-|---|---|---|
-| **RiskFactor.description** | Text description of each risk factor | Semantic search over risk factors to find similar risks across filings |
-| **Product.description** | Text description of each product | Product similarity and comparison queries |
-| **Service.description** | Text description of each service | Service similarity and overlap detection |
-| **Chunk.text** | (Future) Chunked text extracted from 10-K filing documents | Full-text semantic search over filing content |
-
-The primary embedding target for the workshop is **Chunk.text**, which would be created by chunking the raw 10-K filing text and storing each chunk as a node linked to its source Document. This enables semantic search queries such as:
+Explore partnership relationships.
 
 ```cypher
-// Find chunks semantically similar to a query, then traverse to the filing's company
-MATCH (chunk:Chunk)
-WHERE chunk.embedding IS NOT NULL
-WITH chunk, gds.similarity.cosine(chunk.embedding, $query_embedding) AS score
-ORDER BY score DESC
-LIMIT 5
-MATCH (c:Company)-[:FILED]->(d:Document)-[:HAS_CHUNK]->(chunk)
-RETURN c.name, d.filing_type, d.fiscal_year, chunk.text, score
+MATCH (c:Company {ticker: 'NVDA'})-[:PARTNERS_WITH]->(partner:Company)
+RETURN partner.name
 ```
 
-## Entity Counts (Expected After Loading)
+## Entity Counts
 
 | Entity | Count |
 |---|---|
-| Company | 5 |
-| Product | 15 |
-| Service | 12 |
-| RiskFactor | 15 |
-| FinancialMetric | 20 |
-| Executive | 15 |
-| AssetManager | 4 |
-| Document (SEC Filing) | 10 |
-| **Total Nodes** | **96** |
+| Company | 9 |
+| Product | 274 |
+| RiskFactor | 203 |
+| Executive | 33 |
+| FinancialMetric | 111 |
+| AssetManager | 15 |
+| **Total Nodes** | **~645** |
 
 | Relationship | Count |
 |---|---|
-| OFFERS_PRODUCT | 15 |
-| OFFERS_SERVICE | 12 |
-| FACES_RISK | 34 |
-| HAS_METRIC | 20 |
-| HAS_EXECUTIVE | 15 |
-| OWNS | 20 |
-| FILED | 10 |
-| **Total Relationships** | **126** |
+| OFFERS | 276 |
+| FACES_RISK | 211 |
+| REPORTS | 111 |
+| OWNS | 103 |
+| COMPETES_WITH | 37 |
+| PARTNERS_WITH | 36 |
+| HAS_EXECUTIVE | 33 |
+| **Total Relationships** | **~807** |
+
+## Data Provenance
+
+The entity and relationship data was extracted from SEC 10-K filings using the `financial_data_load/` pipeline with `neo4j-graphrag`'s `SimpleKGPipeline`. The pipeline processes PDF filings through LLM-powered extraction, entity resolution, and graph construction. The CSVs in this directory were exported from the resulting graph, filtered to the 9 primary filing companies and their directly-connected entities.
+
+Asset manager holdings come from real SEC 13-F filings (Q3 2023) loaded from `financial_data_load/financial-data/Asset_Manager_Holdings.csv`.

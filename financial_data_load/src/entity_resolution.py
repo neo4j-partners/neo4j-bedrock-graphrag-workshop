@@ -17,7 +17,8 @@ from typing import Any
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from .snapshot import EntitySnapshot, SnapshotEntity, SNAPSHOT_DIR
+from .config import get_llm_deterministic
+from .models import EntitySnapshot, MergeDecision, ResolutionResult, SnapshotEntity
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +41,6 @@ class EntityResolutionConfig(BaseSettings):
     confidence_mode: str = "binary"
     confidence_threshold: float = 0.8
     max_group_size: int = 10
-    model_name: str = "gpt-4.1-mini"
 
 
 # ---------------------------------------------------------------------------
@@ -52,16 +52,6 @@ class CandidatePair(BaseModel):
     entity_a: SnapshotEntity
     entity_b: SnapshotEntity
     pre_filter_score: float
-
-
-class MergeDecision(BaseModel):
-    entity_a_name: str
-    entity_a_element_id: str
-    entity_b_name: str
-    entity_b_element_id: str
-    decision: str  # "merge" or "no_merge"
-    confidence: float | None = None
-    reasoning: str
 
 
 class MergePlan(BaseModel):
@@ -118,9 +108,107 @@ def _prefix_pre_filter(
     return pairs
 
 
+def _honorific_pre_filter(
+    entities: list[SnapshotEntity],
+    threshold: float,
+) -> list[CandidatePair]:
+    """Generate candidate pairs with honorific-aware matching for Executive entities.
+
+    Combines standard fuzzy matching with honorific normalization so that
+    "Mr. Smith" and "Bradford L. Smith" are flagged as candidates even when
+    fuzzy similarity alone would miss them.
+    """
+    import re
+
+    from rapidfuzz import fuzz, utils
+
+    # Honorific pattern: Mr., Ms., Mrs., Dr., etc.
+    honorific_re = re.compile(
+        r"^(Mr\.?|Ms\.?|Mrs\.?|Dr\.?|Prof\.?|Sir|Dame)\s+", re.IGNORECASE
+    )
+
+    def strip_honorific(name: str) -> str:
+        return honorific_re.sub("", name).strip()
+
+    def extract_last_name(name: str) -> str:
+        """Extract likely last name (last token) from a name."""
+        parts = name.split()
+        return parts[-1].lower() if parts else ""
+
+    pairs: list[CandidatePair] = []
+    seen: set[tuple[str, str]] = set()
+
+    for i, a in enumerate(entities):
+        for b in entities[i + 1 :]:
+            pair_key = (
+                min(a.element_id, b.element_id),
+                max(a.element_id, b.element_id),
+            )
+            if pair_key in seen:
+                continue
+
+            # Standard fuzzy score
+            score = (
+                fuzz.WRatio(a.name, b.name, processor=utils.default_process) / 100
+            )
+
+            if score >= threshold:
+                seen.add(pair_key)
+                pairs.append(
+                    CandidatePair(entity_a=a, entity_b=b, pre_filter_score=score)
+                )
+                continue
+
+            # Honorific-aware: if one name is "Mr./Ms. <LastName>" and the other
+            # contains that last name, they are candidates.
+            a_stripped = strip_honorific(a.name)
+            b_stripped = strip_honorific(b.name)
+
+            # Check if stripping honorifics improves the fuzzy score
+            stripped_score = (
+                fuzz.WRatio(
+                    a_stripped, b_stripped, processor=utils.default_process
+                )
+                / 100
+            )
+            if stripped_score >= threshold:
+                seen.add(pair_key)
+                pairs.append(
+                    CandidatePair(
+                        entity_a=a, entity_b=b, pre_filter_score=stripped_score
+                    )
+                )
+                continue
+
+            # Last-name matching: "Ms. Hood" matches "Amy E. Hood"
+            a_has_honorific = honorific_re.match(a.name) is not None
+            b_has_honorific = honorific_re.match(b.name) is not None
+
+            if a_has_honorific != b_has_honorific:
+                # One has an honorific, the other doesn't
+                honorific_name = a if a_has_honorific else b
+                full_name = b if a_has_honorific else a
+
+                hon_last = extract_last_name(strip_honorific(honorific_name.name))
+                full_last = extract_last_name(full_name.name)
+
+                if hon_last and full_last and hon_last == full_last:
+                    seen.add(pair_key)
+                    pairs.append(
+                        CandidatePair(
+                            entity_a=a,
+                            entity_b=b,
+                            pre_filter_score=0.7,  # strong signal from last-name match
+                        )
+                    )
+
+    return pairs
+
+
 PRE_FILTERS = {
     "fuzzy": _fuzzy_pre_filter,
     "prefix": _prefix_pre_filter,
+    "honorific": _honorific_pre_filter,
 }
 
 
@@ -199,19 +287,6 @@ Return JSON: {"decisions": [{"pair_index": N, "same_entity": bool, \
 "confidence": float, "reasoning": "..."}]}"""
 
 
-def _create_llm_client():
-    """Create an OpenAI client using the same credentials as the pipeline."""
-    from openai import OpenAI
-
-    from .config import AgentConfig, get_azure_token
-
-    agent_config = AgentConfig()
-    if agent_config.use_openai:
-        return OpenAI(api_key=agent_config.openai_api_key)
-    token = get_azure_token()
-    return OpenAI(base_url=agent_config.inference_endpoint, api_key=token)
-
-
 def _format_entity(entity: SnapshotEntity) -> str:
     """Format an entity for the LLM prompt."""
     props = {
@@ -249,21 +324,19 @@ def _call_llm_batch(
     pairs: list[CandidatePair],
     config: EntityResolutionConfig,
     client,
+    system_prompt: str | None = None,
 ) -> list[MergeDecision]:
     """Send a batch of candidate pairs to the LLM and parse decisions."""
     prompt = _build_batch_prompt(pairs)
+    effective_prompt = system_prompt or SYSTEM_PROMPT
 
     try:
-        response = client.chat.completions.create(
-            model=config.model_name,
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": prompt},
-            ],
-            response_format={"type": "json_object"},
-            temperature=0,
-        )
-        result = json.loads(response.choices[0].message.content)
+        response = client.invoke(prompt, system_instruction=effective_prompt)
+        content = response.content
+        # Strip markdown fences if present
+        if content.startswith("```"):
+            content = content.split("\n", 1)[1].rsplit("```", 1)[0]
+        result = json.loads(content)
         decisions_raw = result.get("decisions", [])
     except (json.JSONDecodeError, KeyError, IndexError) as e:
         logger.error(f"Failed to parse LLM response: {e}")
@@ -479,12 +552,12 @@ def resolve(snapshot_path: Path | str, config_overrides: dict | None = None) -> 
     all_decisions: list[MergeDecision] = []
 
     if candidates:
-        client = _create_llm_client()
+        client = get_llm_deterministic()
         all_decisions = _evaluate_candidates(candidates, config, client)
 
         # Build merge groups with transitive confirmation
         llm_groups = _build_and_confirm_groups(
-            all_decisions, snapshot, config, client
+            all_decisions, snapshot.entities, config, client
         )
 
     # Combine auto-merge and LLM merge groups
@@ -529,6 +602,7 @@ def _evaluate_candidates(
     candidates: list[CandidatePair],
     config: EntityResolutionConfig,
     client,
+    system_prompt: str | None = None,
 ) -> list[MergeDecision]:
     """Evaluate all candidate pairs in batches via LLM."""
     all_decisions: list[MergeDecision] = []
@@ -539,7 +613,7 @@ def _evaluate_candidates(
 
     for i, batch in enumerate(batches, 1):
         print(f"  LLM batch {i}/{len(batches)} ({len(batch)} pairs)...")
-        decisions = _call_llm_batch(batch, config, client)
+        decisions = _call_llm_batch(batch, config, client, system_prompt)
         all_decisions.extend(decisions)
 
         merges = sum(1 for d in decisions if d.decision == "merge")
@@ -550,12 +624,21 @@ def _evaluate_candidates(
 
 def _build_and_confirm_groups(
     all_decisions: list[MergeDecision],
-    snapshot: EntitySnapshot,
+    entities: list[SnapshotEntity],
     config: EntityResolutionConfig,
     client,
+    system_prompt: str | None = None,
 ) -> list[dict[str, Any]]:
-    """Build merge groups, confirming any transitive gaps with additional LLM calls."""
-    entity_map = {e.element_id: e for e in snapshot.entities}
+    """Build merge groups, confirming any transitive gaps with additional LLM calls.
+
+    Args:
+        all_decisions: Decisions accumulated so far (will be extended in-place).
+        entities: The full list of entities (for entity lookup by element_id).
+        config: Resolution config.
+        client: LLM client.
+        system_prompt: Optional label-specific system prompt for LLM calls.
+    """
+    entity_map = {e.element_id: e for e in entities}
 
     # Track all evaluated pairs (both merge and no_merge) to avoid re-sending
     evaluated_pairs: set[tuple[str, str]] = set()
@@ -568,7 +651,7 @@ def _build_and_confirm_groups(
 
     for round_num in range(2):
         merge_groups = _build_merge_groups(
-            all_decisions, snapshot.entities, config.max_group_size
+            all_decisions, entities, config.max_group_size
         )
         needs_confirm = [
             g for g in merge_groups if g["status"] == "needs_confirmation"
@@ -602,7 +685,7 @@ def _build_and_confirm_groups(
             f"(round {round_num + 1})..."
         )
         additional_decisions = _evaluate_candidates(
-            additional_pairs, config, client
+            additional_pairs, config, client, system_prompt
         )
         all_decisions.extend(additional_decisions)
         for d in additional_decisions:
@@ -730,3 +813,229 @@ def latest_merge_plan() -> Path | None:
         return None
     files = sorted(LOG_DIR.glob("merge_plan_*.json"), reverse=True)
     return files[0] if files else None
+
+
+# ---------------------------------------------------------------------------
+# Per-label configuration for cleanse pipeline
+# ---------------------------------------------------------------------------
+
+# Default configs per entity label. Company uses the proven prefix-0.3 config.
+LABEL_CONFIGS: dict[str, dict[str, Any]] = {
+    "Company": {"pre_filter_strategy": "prefix", "pre_filter_threshold": 0.3},
+    "Executive": {"pre_filter_strategy": "honorific", "pre_filter_threshold": 0.5},
+    "Product": {"pre_filter_strategy": "fuzzy", "pre_filter_threshold": 0.6},
+    "RiskFactor": {"pre_filter_strategy": "fuzzy", "pre_filter_threshold": 0.6},
+    "FinancialMetric": {"pre_filter_strategy": "fuzzy", "pre_filter_threshold": 0.7},
+}
+
+EXECUTIVE_SYSTEM_PROMPT = """\
+You are an entity resolution expert for a knowledge graph built from SEC 10-K \
+financial filings.
+
+For each pair of entities, determine whether they refer to the same real-world \
+person (executive, officer, or board member).
+
+Rules:
+- Formal name variants refer to the same person: "Amy E. Hood" and "Ms. Hood" \
+→ same_entity: true (same last name, compatible context).
+- "Bradford L. Smith" and "Mr. Smith" → same_entity: true (same last name, \
+compatible context).
+- Matching titles/roles are a positive signal: if both entities hold the same \
+title (e.g., "Chief Financial Officer"), that strengthens a match.
+- Different roles alone do NOT make entities the same: "Executive Vice President" \
+and "CEO" are different entities unless their names match.
+- Generic role names without a personal name are not the same as named individuals: \
+"Executive Vice President" (no name) and "John Smith, EVP" are different.
+- When comparing an honorific-only name ("Ms. Hood") with a full name \
+("Amy E. Hood"), a matching last name is a strong positive signal. Check for \
+matching company context as confirmation.
+- When uncertain, return same_entity: false. It is better to keep duplicates \
+than to incorrectly merge distinct people.
+
+Return JSON: {"decisions": [{"pair_index": N, "same_entity": bool, \
+"confidence": float, "reasoning": "..."}]}"""
+
+PRODUCT_SYSTEM_PROMPT = """\
+You are an entity resolution expert for a knowledge graph built from SEC 10-K \
+financial filings.
+
+For each pair of entities, determine whether they refer to the same real-world \
+product or service offering.
+
+Rules:
+- Product family variants may be the same: "Azure" and "Microsoft Azure" → \
+same_entity: true (same product, one includes the company prefix).
+- Product with a qualifier is typically a different, more specific product: \
+"Azure" and "Azure AI" → same_entity: false (Azure AI is a specific sub-product \
+within the Azure family).
+- A company name is NOT the same as its product: "Microsoft" and "Microsoft Office" \
+→ same_entity: false (company vs product).
+- Identical product names with minor formatting differences are the same: \
+"iCloud" and "iCloud+" → same_entity: true if they refer to the same service.
+- Generic technology terms ("AI", "Cloud", "API") are NOT the same as named \
+products that include those terms.
+- Products from different companies are never the same entity even if they share \
+a name.
+- When uncertain, return same_entity: false. It is better to keep duplicates \
+than to incorrectly merge distinct products.
+
+Return JSON: {"decisions": [{"pair_index": N, "same_entity": bool, \
+"confidence": float, "reasoning": "..."}]}"""
+
+RISK_FACTOR_SYSTEM_PROMPT = """\
+You are an entity resolution expert for a knowledge graph built from SEC 10-K \
+financial filings.
+
+For each pair of entities, determine whether they refer to the same risk factor \
+or risk category.
+
+Rules:
+- Case-insensitive matches are strong positive signals: "COVID-19 pandemic" and \
+"COVID-19 Pandemic" → same_entity: true.
+- A risk factor and a more detailed version of the same risk are often the same: \
+"Competition" and "Intense Competition" → same_entity: true (same underlying risk).
+- "COVID-19" and "COVID-19 pandemic impact" → same_entity: true (same risk event).
+- Risk factors that describe fundamentally different categories are different: \
+"Competition" and "Cybersecurity" → same_entity: false.
+- Company-specific risk events vs generic risk categories should be compared \
+carefully: "2020 Zogg fire" is a specific event, not the same as "Wildfire Risk" \
+in general, unless context shows they refer to the same disclosure.
+- Semantic similarity matters more than exact string matching for risk factors. \
+Focus on whether two entries describe the same underlying risk.
+- When uncertain, return same_entity: false. It is better to keep duplicates \
+than to incorrectly merge distinct risk factors.
+
+Return JSON: {"decisions": [{"pair_index": N, "same_entity": bool, \
+"confidence": float, "reasoning": "..."}]}"""
+
+FINANCIAL_METRIC_SYSTEM_PROMPT = """\
+You are an entity resolution expert for a knowledge graph built from SEC 10-K \
+financial filings.
+
+For each pair of entities, determine whether they refer to the same financial \
+metric measurement.
+
+Rules:
+- Metric name variants that describe the same measure are the same: \
+"Revenue FY2023" and "Total Revenue FY2023" → same_entity: true.
+- "Net Income" and "Net Income (Loss)" → same_entity: true (same metric, \
+different formatting).
+- Different time periods are definitely different entities: "Revenue FY2023" and \
+"Revenue FY2022" → same_entity: false (different reporting periods).
+- Different metric types are different: "Revenue FY2023" and "Net Income FY2023" \
+→ same_entity: false.
+- Metrics with and without currency/unit qualifiers may be the same: \
+"Revenue $100B" and "Revenue" for the same period → same_entity: true if they \
+describe the same measurement.
+- Pay attention to the period/fiscal year property. If both entities have period \
+information and the periods differ, they are definitely different entities.
+- When uncertain, return same_entity: false. It is better to keep duplicates \
+than to incorrectly merge distinct metrics.
+
+Return JSON: {"decisions": [{"pair_index": N, "same_entity": bool, \
+"confidence": float, "reasoning": "..."}]}"""
+
+# Per-label system prompts for the LLM. Company uses the existing SYSTEM_PROMPT.
+LABEL_SYSTEM_PROMPTS: dict[str, str] = {
+    "Company": SYSTEM_PROMPT,
+    "Executive": EXECUTIVE_SYSTEM_PROMPT,
+    "Product": PRODUCT_SYSTEM_PROMPT,
+    "RiskFactor": RISK_FACTOR_SYSTEM_PROMPT,
+    "FinancialMetric": FINANCIAL_METRIC_SYSTEM_PROMPT,
+}
+
+
+def resolve_entities(
+    entities: list[SnapshotEntity],
+    label: str,
+    config_overrides: dict | None = None,
+) -> ResolutionResult:
+    """Run entity resolution on in-memory entities for a given label.
+
+    This is the core resolution logic, used by the cleanse pipeline.
+    It extracts the same algorithm as resolve() but works on in-memory
+    entities instead of snapshot files.
+
+    Args:
+        entities: List of entities to deduplicate.
+        label: Entity label (e.g., "Company", "Product").
+        config_overrides: Optional config overrides.
+
+    Returns:
+        ResolutionResult with decisions, merge groups, config used, and pair count.
+    """
+    # Build config: label defaults -> config_overrides
+    label_defaults = LABEL_CONFIGS.get(label, {})
+    merged_config = {**label_defaults, **(config_overrides or {})}
+    config = EntityResolutionConfig(**merged_config)
+
+    # Get label-specific system prompt
+    system_prompt = LABEL_SYSTEM_PROMPTS.get(label, SYSTEM_PROMPT)
+
+    print(
+        f"Config: pre_filter={config.pre_filter_strategy}, "
+        f"threshold={config.pre_filter_threshold}, "
+        f"batch_size={config.batch_size}, "
+        f"confidence={config.confidence_mode}"
+    )
+
+    # Step 1: Exact dedup — merge identical-name entities without LLM
+    unique_entities, auto_groups = _exact_dedup(entities)
+    exact_consumed = sum(len(g["consumed"]) for g in auto_groups)
+    print(
+        f"  Exact dedup: {len(entities)} entities -> "
+        f"{len(unique_entities)} unique names "
+        f"({exact_consumed} auto-merges in {len(auto_groups)} groups)"
+    )
+
+    # Step 2: Pre-filter on unique-name survivors only
+    pre_filter_fn = PRE_FILTERS.get(config.pre_filter_strategy)
+    if not pre_filter_fn:
+        raise ValueError(
+            f"Unknown pre-filter: {config.pre_filter_strategy}. "
+            f"Available: {list(PRE_FILTERS.keys())}"
+        )
+
+    candidates = pre_filter_fn(unique_entities, config.pre_filter_threshold)
+    print(f"  Pre-filter generated {len(candidates)} candidate pairs")
+
+    # Step 3: LLM evaluation
+    llm_groups: list[dict[str, Any]] = []
+    all_decisions: list[MergeDecision] = []
+
+    if candidates:
+        client = get_llm_deterministic()
+        all_decisions = _evaluate_candidates(
+            candidates, config, client, system_prompt
+        )
+
+        # Build merge groups with transitive confirmation
+        llm_groups = _build_and_confirm_groups(
+            all_decisions, entities, config, client, system_prompt
+        )
+
+    # Combine auto-merge and LLM merge groups
+    all_groups = auto_groups + llm_groups
+
+    # Summary
+    ready = [g for g in all_groups if g["status"] == "ready"]
+    flagged = [g for g in all_groups if g["status"] != "ready"]
+    llm_ready = [g for g in llm_groups if g["status"] == "ready"]
+
+    print(f"  Exact-name merges: {len(auto_groups)} groups ({exact_consumed} nodes)")
+    print(f"  LLM-confirmed merges: {len(llm_ready)} groups")
+    print(f"  Flagged for review: {len(flagged)} groups")
+
+    for g in llm_ready:
+        consumed_names = ", ".join(c["name"] for c in g["consumed"])
+        print(f"    MERGE: {g['survivor']['name']} <- {consumed_names}")
+    for g in flagged:
+        names = ", ".join(e["name"] for e in g["entities"])
+        print(f"    FLAG:  {names} ({g['reason']})")
+
+    return ResolutionResult(
+        decisions=all_decisions,
+        merge_groups=all_groups,
+        config=config.model_dump(),
+        candidate_pairs=len(candidates),
+    )

@@ -1,22 +1,12 @@
 # Financial Data Load Workshop
 
-Build a GraphRAG knowledge graph from SEC 10-K financial filings using Neo4j and the neo4j-graphrag-python library. Supports Azure AI Foundry or AWS Bedrock as the AI provider.
+Build a GraphRAG knowledge graph from SEC 10-K financial filings using Neo4j, AWS Bedrock, and the neo4j-graphrag-python library.
 
 ## Prerequisites
-
-**Required for all setups:**
 
 - Neo4j Aura instance (or local Neo4j database)
 - Python 3.12.x
 - [uv](https://docs.astral.sh/uv/) package manager
-
-**For Azure AI Foundry:**
-
-- Azure subscription with access to Azure AI Foundry
-- [Azure Developer CLI (azd)](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd)
-
-**For AWS Bedrock:**
-
 - AWS account with Bedrock model access enabled
 - AWS credentials configured (`~/.aws/credentials`, env vars, or IAM role)
 
@@ -31,11 +21,7 @@ cd financial_data_load
 ### 1. Install Dependencies
 
 ```bash
-# Bedrock users
 uv sync --prerelease=allow
-
-# Azure users (includes azure-identity)
-uv sync --prerelease=allow --extra azure
 ```
 
 ### 2. Configure Neo4j
@@ -48,45 +34,18 @@ NEO4J_USERNAME=neo4j
 NEO4J_PASSWORD=your-password
 ```
 
-### 3. Configure AI Provider
-
-Choose one of the two options below, then continue from step 4.
-
-#### Option A: Azure AI Foundry
-
-```bash
-# Login to Azure
-az login --use-device-code
-azd auth login --use-device-code
-
-# Deploy infrastructure (AI Services + model deployments)
-azd up
-
-# Sync Azure outputs to .env
-uv run python setup_env.py
-```
-
-This populates `.env` with the Azure endpoints and model names. Verify that your `.env` contains:
-
-```bash
-EMBEDDING_PROVIDER=azure
-AZURE_AI_PROJECT_ENDPOINT=https://...
-AZURE_AI_MODEL_NAME=gpt-4o
-AZURE_AI_EMBEDDING_NAME=text-embedding-3-small
-```
-
-#### Option B: AWS Bedrock
+### 3. Configure AWS Bedrock
 
 Add the following to your `.env`:
 
 ```bash
-EMBEDDING_PROVIDER=bedrock
 AWS_REGION=us-east-1
+MODEL_ID=us.anthropic.claude-sonnet-4-6
 ```
 
-This configures both the LLM and embeddings to use Bedrock. The LLM defaults to Claude Sonnet 4.5 and embeddings default to Titan Text Embeddings V2 (1024 dimensions). Both model IDs are optional — override with `MODEL_ID` and `EMBEDDING_MODEL_ID` if needed.
+The LLM uses the model specified by `MODEL_ID` (required). Embeddings default to Titan Text Embeddings V2 (1024 dimensions) — override with `EMBEDDING_MODEL_ID` if needed.
 
-AWS credentials are resolved by the standard boto3 credential chain (env vars, `~/.aws/credentials`, IAM role). See the [AI Providers](#ai-providers) section for the full provider comparison.
+AWS credentials are resolved by the standard boto3 credential chain (env vars, `~/.aws/credentials`, IAM role).
 
 ### 4. Test Connections
 
@@ -111,25 +70,23 @@ uv run python main.py backup
 
 The backup file is saved to `backups/` and contains the full database state after PDF processing. This is your checkpoint — you can always restore to this point without re-processing PDFs.
 
-### 6. Run Entity Resolution Pipeline
+### 6. Run Cleanse Pipeline
 
-Restore the database from backup, then run entity resolution and finalization. This is fast and can be repeated with different settings.
+Restore the database from backup, then cleanse (validate + deduplicate + normalize) and finalize. This is fast and can be repeated with different settings.
 
 ```bash
 # Restore database to post-PDF-processing state
+# (skip this on first run — your DB is already in the right state after step 5)
 uv run python main.py restore
 
-# Export entity snapshot for resolution
-uv run python main.py snapshot
+# Generate cleanse plan (validate + dedup all entity types — does not modify Neo4j)
+uv run python main.py cleanse
 
-# Run LLM entity resolution
-uv run python main.py resolve
+# Review the plan (optional)
+cat logs/cleanse_plan_*.json
 
-# Review the merge plan (optional)
-cat logs/merge_plan_*.json
-
-# Apply merges to Neo4j
-uv run python main.py apply-merges
+# Apply plan: removals → merges → normalize
+uv run python main.py apply-cleanse
 
 # Create constraints, indexes, asset managers
 uv run python main.py finalize
@@ -138,50 +95,42 @@ uv run python main.py finalize
 uv run python main.py verify
 ```
 
-**Testing different configurations:**
+The `cleanse` command generates a plan file covering all entity types (Company, Executive, Product, RiskFactor, FinancialMetric). It runs in two phases:
 
-The `resolve` command accepts CLI overrides so you can test different configs without editing `.env`. Each run writes a separate merge plan to `logs/`. The `compare` command scores all runs against ground truth.
+1. **Validation** — LLM checks each entity belongs to its label. Invalid entities are marked for removal.
+2. **Deduplication** — Per-label entity resolution with label-specific pre-filters and LLM prompts. Produces merge groups.
 
-```bash
-# Run with different pre-filter thresholds
-uv run python main.py resolve --strategy fuzzy --threshold 0.5
-uv run python main.py resolve --strategy fuzzy --threshold 0.7
-uv run python main.py resolve --strategy prefix --threshold 0.3
+The plan file is the review artifact. Nothing touches Neo4j until `apply-cleanse`.
 
-# Run with scored confidence mode
-uv run python main.py resolve --confidence scored --confidence-threshold 0.9
+The `apply-cleanse` command executes the plan in three steps:
+1. Remove invalid entities (DETACH DELETE)
+2. Merge duplicates (apoc.refactor.mergeNodes with property fill)
+3. Normalize descriptions (LLM rewrites messy text in place)
 
-# Compare all runs side by side with ground truth scoring
-uv run python main.py compare
-
-# Or run all 10 predefined configs at once (~25 min total)
-./run_all_configs.sh
-```
-
-`resolve` reads from the snapshot file and writes a merge plan — it never touches Neo4j. So you can run as many configs as you want without restoring between runs.
-
-To apply your chosen config and finish the pipeline:
-
-```bash
-uv run python main.py restore                                  # Reset to backup
-uv run python main.py apply-merges --plan logs/<chosen>.json   # Apply the winning plan
-uv run python main.py finalize                                 # Constraints, indexes, asset managers
-uv run python main.py verify                                   # Check results
-```
+You can skip normalization with `--skip-normalize` if you only want removals and merges.
 
 ### Entity Resolution Configuration
 
-Entity resolution parameters are configured via `.env` with the `ER_` prefix:
+Entity resolution parameters are configured via `.env` with the `ER_` prefix. These apply to all entity types during the cleanse dedup phase, with per-label defaults for pre-filter strategy and threshold:
 
 ```bash
-ER_PRE_FILTER_STRATEGY=fuzzy        # Pre-filter: "fuzzy" or "prefix"
+ER_PRE_FILTER_STRATEGY=fuzzy        # Pre-filter: "fuzzy", "prefix", or "honorific"
 ER_PRE_FILTER_THRESHOLD=0.6         # Similarity threshold for candidate pairs
 ER_BATCH_SIZE=10                     # Pairs per LLM batch
-ER_CONFIDENCE_MODE=binary            # "binary" or "confidence"
-ER_CONFIDENCE_THRESHOLD=0.8          # Auto-merge threshold (confidence mode only)
+ER_CONFIDENCE_MODE=binary            # "binary" or "scored"
+ER_CONFIDENCE_THRESHOLD=0.8          # Auto-merge threshold (scored mode only)
 ER_MAX_GROUP_SIZE=10                 # Max entities in a merge group
-ER_MODEL_NAME=gpt-4o                # LLM model for entity resolution
 ```
+
+Per-label defaults (used by the cleanse pipeline):
+
+| Label | Strategy | Threshold |
+|-------|----------|-----------|
+| Company | prefix | 0.3 |
+| Executive | honorific | 0.5 |
+| Product | fuzzy | 0.6 |
+| RiskFactor | fuzzy | 0.6 |
+| FinancialMetric | fuzzy | 0.7 |
 
 ### All Commands
 
@@ -191,14 +140,16 @@ ER_MODEL_NAME=gpt-4o                # LLM model for entity resolution
 | `main.py load [--limit N] [--files PDF ...] [--clear]` | Load CSV metadata + process PDFs |
 | `main.py backup` | Back up full database to `backups/` |
 | `main.py restore [--backup PATH]` | Restore database from backup |
-| `main.py snapshot` | Export entity snapshot to `snapshots/` |
-| `main.py resolve [--snapshot PATH] [--strategy ...] [--threshold ...]` | LLM entity resolution (outputs merge plan to `logs/`) |
-| `main.py compare` | Compare all resolution runs and score against ground truth |
-| `main.py apply-merges [--plan PATH]` | Apply merge plan to Neo4j |
+| `main.py cleanse [--phase validate\|dedup]` | Generate cleanse plan (does not modify Neo4j) |
+| `main.py apply-cleanse [--plan PATH] [--skip-normalize]` | Apply cleanse plan (removals, merges, normalize) |
 | `main.py finalize` | Constraints, indexes, asset managers, verify |
 | `main.py verify` | Counts + enrichment checks + end-to-end search validation |
 | `main.py clean` | Clear all data |
 | `main.py samples [--limit N]` | Run sample queries showcasing the graph |
+| `main.py snapshot` | Export Company entity snapshot (for standalone resolution testing) |
+| `main.py resolve [--snapshot PATH] [--strategy ...] [--threshold ...]` | LLM entity resolution on snapshot (Company only) |
+| `main.py compare` | Compare resolution runs, score against ground truth |
+| `main.py apply-merges [--plan PATH]` | Apply merge plan from resolve |
 
 ### 7. Run Workshop Solutions
 
@@ -228,7 +179,7 @@ These solutions build the knowledge graph — **WARNING: they will delete existi
 
 ### Retrievers (02_xx)
 
-GraphRAG patterns using neo4j-graphrag with Azure AI:
+GraphRAG patterns using neo4j-graphrag:
 
 | # | Solution | Description |
 |---|----------|-------------|
@@ -238,7 +189,7 @@ GraphRAG patterns using neo4j-graphrag with Azure AI:
 
 ### Agents (03_xx / 05_xx)
 
-Microsoft Agent Framework with Azure AI Foundry:
+Agent patterns:
 
 | # | Solution | Description |
 |---|----------|-------------|
@@ -277,59 +228,23 @@ Persistent agent memory using neo4j-agent-memory:
 | 19 | `07_03_memory_tools_agent.py` | Agent with explicit memory tools |
 | 20 | `07_04_reasoning_memory.py` | Reasoning memory traces and tool stats |
 
-## AI Providers
+## AI Provider
 
-`EMBEDDING_PROVIDER` controls both the embedding and LLM backends. Set it once and both follow.
+Uses `BedrockLLM` and `BedrockEmbeddings` from [neo4j-graphrag-python](https://github.com/neo4j/neo4j-graphrag-python). AWS credentials are resolved by the standard boto3 credential chain (env vars, `~/.aws/credentials`, IAM role).
 
-### Embeddings
+| Component | Default model | Override env var |
+|-----------|---------------|------------------|
+| LLM | (none — `MODEL_ID` required) | `MODEL_ID` |
+| Embeddings | amazon.titan-embed-text-v2:0 | `EMBEDDING_MODEL_ID` |
 
-| Provider | `EMBEDDING_PROVIDER` | Default model | Dimensions | Auth |
-|----------|---------------------|---------------|------------|------|
-| Azure AI Foundry | `azure` | text-embedding-3-small | 1536 | `az login` token |
-| OpenAI | `openai` | text-embedding-3-small | 1536 | `OPENAI_API_KEY` |
-| AWS Bedrock | `bedrock` | amazon.titan-embed-text-v2:0 | 1024 | AWS credential chain |
-
-### LLM
-
-| Provider | Default model | Override | Auth |
-|----------|---------------|----------|------|
-| Azure AI Foundry | gpt-4o | `AZURE_AI_MODEL_NAME` | `az login` token |
-| OpenAI | gpt-4o | `AZURE_AI_MODEL_NAME` | `OPENAI_API_KEY` |
-| AWS Bedrock | us.anthropic.claude-sonnet-4-5-20250929-v1:0 | `MODEL_ID` | AWS credential chain |
-
-### Mixed mode
-
-To use different providers for LLM and embeddings, set `LLM_PROVIDER` separately:
-
-```bash
-EMBEDDING_PROVIDER=bedrock    # embeddings via Titan v2
-LLM_PROVIDER=azure            # LLM via Azure AI Foundry
-```
-
-### AWS Bedrock details
-
-```bash
-EMBEDDING_PROVIDER=bedrock
-AWS_REGION=us-east-1
-# MODEL_ID=us.anthropic.claude-sonnet-4-5-20250929-v1:0       # optional
-# EMBEDDING_MODEL_ID=amazon.titan-embed-text-v2:0              # optional
-```
-
-The Bedrock provider uses `BedrockLLM` and `BedrockEmbeddings` from [neo4j-graphrag-python](https://github.com/neo4j/neo4j-graphrag-python). Both model IDs are optional — the defaults shown above are used when omitted. AWS credentials are resolved by the standard boto3 credential chain (env vars, `~/.aws/credentials`, IAM role).
+Embedding dimensions default to 1024 (Titan v2). Override with `EMBEDDING_DIMENSIONS` if using a different embedding model.
 
 **Why Titan v2 for embeddings instead of Nova?** Amazon Nova Multimodal Embeddings (`amazon.nova-2-multimodal-embeddings-v1:0`) uses an async-only API (`StartAsyncInvoke`) that writes results to S3. This is designed for batch workloads, not real-time per-chunk embedding. The `SimpleKGPipeline` calls `embed_query()` synchronously per chunk, which requires the standard `invoke_model` API that Titan v2 supports.
 
-### Dimension compatibility
-
-Embeddings from different providers have different dimensions (1536 for OpenAI/Azure, 1024 for Bedrock Titan v2). The vector index dimension is set automatically based on the configured provider. Database backups created with one provider's dimensions are not compatible with a different provider's vector index — you'll need to re-run `load` if you switch providers.
-
 ## Architecture
 
-- **Azure AI Foundry** — Model hosting (gpt-4o, text-embedding-3-small)
-- **Microsoft Agent Framework** — Agent creation and tool management
-- **agent-framework-neo4j** — Neo4j context providers for automatic context injection
+- **AWS Bedrock** — LLM (Claude) and embeddings (Titan v2)
 - **neo4j-graphrag-python** — Graph retrieval capabilities
-- **neo4j-agent-memory** — Persistent agent memory backed by Neo4j
 - **Neo4j** — Graph database with vector search
 
 ## File Structure
@@ -337,33 +252,30 @@ Embeddings from different providers have different dimensions (1536 for OpenAI/A
 ```
 financial_data_load/
 ├── pyproject.toml          # Dependencies (uv sync)
-├── main.py                 # CLI entry point (load, snapshot, resolve, apply-merges, finalize, etc.)
-├── azure.yaml              # azd deployment configuration (Azure only)
-├── setup_env.py            # Sync azd outputs to .env (Azure only)
-├── infra/                  # Azure AI Foundry infrastructure (Azure only)
-│   ├── main.bicep
-│   └── main.parameters.json
+├── main.py                 # CLI entry point (load, cleanse, apply-cleanse, finalize, etc.)
 ├── financial-data/         # SEC 10-K data files
 │   ├── Company_Filings.csv
 │   ├── Asset_Manager_Holdings.csv
 │   └── form10k-sample/     # PDF files (8 companies)
 ├── backups/               # Full database backups (JSON, git-ignored)
 ├── snapshots/              # Entity snapshots (JSON, git-ignored)
-├── logs/                   # Merge plans and processing logs
+├── logs/                   # Cleanse plans, merge plans, normalization logs
 ├── src/                    # Data loader modules
-│   ├── config.py           # Settings, auth, Neo4j connection
+│   ├── config.py           # Settings, Neo4j connection, Bedrock LLM/embedder factories
+│   ├── models.py           # Shared Pydantic models (entities, plans, decisions)
 │   ├── schema.py           # Graph schema, constraints, indexes
 │   ├── loader.py           # CSV loading, company/asset manager nodes
 │   ├── pipeline.py         # SimpleKGPipeline, PDF processing
+│   ├── cleanse.py          # Cleanse orchestrator (plan generation + execution)
+│   ├── validate.py         # LLM entity validation (marks invalid entities for removal)
+│   ├── entity_resolution.py # LLM-based entity resolution (dedup with per-label configs)
+│   ├── normalize.py        # LLM description normalization (cleans up text in place)
 │   ├── snapshot.py         # Entity snapshot export (Neo4j → JSON)
-│   ├── entity_resolution.py # LLM-based entity resolution
 │   ├── compare.py          # Compare resolution runs, ground truth scoring
 │   ├── backup.py           # Full database backup and restore
 │   ├── samples.py          # Sample queries
-│   └── embeddings/         # Modular embedding providers
-│       ├── __init__.py     # Provider router, get_embedder(), get_embedding_dimensions()
-│       ├── openai.py       # OpenAI (direct API key)
-│       ├── azure.py        # Azure AI Foundry (az login token)
+│   └── embeddings/         # Embedding provider
+│       ├── __init__.py     # get_embedder(), get_embedding_dimensions()
 │       └── bedrock.py      # AWS Bedrock (Titan v2 via neo4j-graphrag)
 └── solution_srcs/          # Workshop solution files
     ├── config.py           # Shared config for solutions
@@ -372,33 +284,17 @@ financial_data_load/
 
 ## Environment Variables
 
-Core variables present in every `.env`:
-
 ```bash
 # Neo4j Database Connection
 NEO4J_URI=neo4j+s://xxx.databases.neo4j.io
 NEO4J_USERNAME=neo4j
 NEO4J_PASSWORD=your-password
 
-# AI provider (required): azure, openai, or bedrock
-EMBEDDING_PROVIDER=azure
-# LLM_PROVIDER=azure  # optional, defaults to EMBEDDING_PROVIDER
-```
-
-**Azure AI Foundry** — populated automatically by `uv run python setup_env.py` after `azd up`:
-
-```bash
-AZURE_AI_PROJECT_ENDPOINT=https://...
-AZURE_AI_MODEL_NAME=gpt-4o
-AZURE_AI_EMBEDDING_NAME=text-embedding-3-small
-```
-
-**AWS Bedrock:**
-
-```bash
+# AWS Bedrock
 AWS_REGION=us-east-1
-# MODEL_ID=us.anthropic.claude-sonnet-4-5-20250929-v1:0  # optional
+MODEL_ID=us.anthropic.claude-sonnet-4-6
 # EMBEDDING_MODEL_ID=amazon.titan-embed-text-v2:0        # optional
+# EMBEDDING_DIMENSIONS=1024                               # optional
 ```
 
 ## Entity Resolution Experimentation Results
@@ -434,17 +330,12 @@ We tested 10 entity resolution configs across 4 groups against a ground truth of
 
 ```bash
 uv run python main.py restore
-uv run python main.py apply-merges --plan logs/merge_plan_20260313_180114.json
+uv run python main.py cleanse
+uv run python main.py apply-cleanse
 uv run python main.py finalize
 uv run python main.py verify
 ```
 
 ## Cleanup
 
-**Azure AI Foundry** — remove deployed resources and local azd state:
-
-```bash
-azd down --force --purge
-```
-
-**AWS Bedrock** — no infrastructure to tear down (uses on-demand API access).
+No infrastructure to tear down — Bedrock uses on-demand API access.

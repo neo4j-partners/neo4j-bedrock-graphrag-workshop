@@ -12,11 +12,12 @@ A hands-on workshop teaching Graph Retrieval-Augmented Generation (GraphRAG) pat
 | [Lab 1](Lab_1_Aura_Setup/README.md) | Neo4j Aura Setup | Subscribe via AWS Marketplace, restore backup, explore graph |
 | [Lab 2](Lab_2_Aura_Agents/README.md) | Aura Agents | Build a no-code AI agent using Neo4j Aura Agent platform |
 
-### Part 2: GraphRAG with Python (Labs 4-6)
+### Part 2: GraphRAG with Python (Labs 3-6)
 
 | Lab | Title | Description |
 |-----|-------|-------------|
-| [Lab 4](Lab_4_Intro_to_Bedrock_and_Agents/README.md) | Intro to Bedrock and Agents | SageMaker setup, LangGraph foundations, tool binding, ReAct pattern |
+| [Lab 3](Lab_3_Intro_to_Bedrock_and_Agents/README.md) | Intro to Bedrock and Agents | SageMaker setup, LangGraph foundations, tool binding, ReAct pattern, AgentCore deployment |
+| [Lab 4](Lab_4_MCP_Retrieval/README.md) | MCP-Based Retrieval | Vector search and graph-enriched retrieval through the Model Context Protocol |
 | [Lab 6](Lab_6_GraphRAG/README.md) | GraphRAG | Six notebooks: data loading, embeddings, vector retrieval, vector-cypher retrieval, fulltext search, hybrid search |
 
 ### Part 3: Advanced Agents (Labs 7-8)
@@ -29,13 +30,13 @@ A hands-on workshop teaching Graph Retrieval-Augmented Generation (GraphRAG) pat
 ## Prerequisites
 
 - AWS Account with Bedrock access (or workshop credentials via OneBlink)
-- Basic Python knowledge (for Labs 4-8)
+- Basic Python knowledge (for Labs 3-8)
 
 ## Quick Start
 
 ### Option 1: AWS SageMaker Studio (Recommended for workshops)
 
-Follow [Lab 4](Lab_4_Intro_to_Bedrock_and_Agents/README.md) to set up SageMaker Studio and clone the repository.
+Follow [Lab 3](Lab_3_Intro_to_Bedrock_and_Agents/README.md) to set up SageMaker Studio and clone the repository.
 
 ### Option 2: Local Development
 

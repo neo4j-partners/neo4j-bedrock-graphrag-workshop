@@ -103,8 +103,8 @@ Click **Download and continue** to save the credentials file, or copy each value
 
 You will need these credentials in:
 - Lab 2: Aura Agents configuration
-- Lab 4: Codespace environment setup
-- Labs 4-7: Jupyter notebook configuration
+- Lab 3: Codespace environment setup
+- Labs 3-7: Jupyter notebook configuration
 
 ## Verify Your Instance
 

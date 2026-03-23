@@ -1,21 +1,112 @@
-metric_id,company_id,metric_name,value,unit,fiscal_year
-FM001,C001,Revenue,394328,USD_millions,2024
-FM002,C001,Net Income,100913,USD_millions,2024
-FM003,C001,R&D Spending,29915,USD_millions,2024
-FM004,C001,Operating Margin,30.7,percent,2024
-FM005,C002,Revenue,245122,USD_millions,2024
-FM006,C002,Net Income,88136,USD_millions,2024
-FM007,C002,R&D Spending,27195,USD_millions,2024
-FM008,C002,Operating Margin,44.6,percent,2024
-FM009,C003,Revenue,79774,USD_millions,2024
-FM010,C003,Net Income,42597,USD_millions,2024
-FM011,C003,R&D Spending,10544,USD_millions,2024
-FM012,C003,Operating Margin,62.1,percent,2024
-FM013,C004,Revenue,339859,USD_millions,2024
-FM014,C004,Net Income,94264,USD_millions,2024
-FM015,C004,R&D Spending,45427,USD_millions,2024
-FM016,C004,Operating Margin,32.5,percent,2024
-FM017,C005,Revenue,620134,USD_millions,2024
-FM018,C005,Net Income,44419,USD_millions,2024
-FM019,C005,R&D Spending,85622,USD_millions,2024
-FM020,C005,Operating Margin,10.7,percent,2024
+metric_id,company_id,metric_name,value,period
+FM001,C001,Cash Provided by Financing Activities,"['$(6.3) billion', '$(9.7) billion', '6.3 billion and 9.7 billion']","['2021', '2022', '2021 and 2022']"
+FM002,C001,Cash Provided by Investing Activities,"['$(58.2) billion', '$(37.6) billion']","['2021', '2022']"
+FM003,C001,Cash Provided by Operating Activities,"['$(46.3) billion', '$(46.8) billion']","['2021', '2022']"
+FM004,C001,"Cash, Cash Equivalents, and Marketable Securities","['$(96.0) billion', '$(70.0) billion', '13.30 billion USD']","['2021', '2022', 'January 29, 2023']"
+FM005,C001,Foreign Currencies Held,"['$(22.7) billion', '$(18.3) billion']","['2021', '2022']"
+FM006,C001,Free Cash Flows,,
+FM007,C001,Non-GAAP free cash flows,,
+FM008,C003,Cash Dividend,$0.24 per share,"September 30, 2023"
+FM009,C003,Debt,"['106.6 billion', '520 million', '486 million', '718 million', '454 million', '1,814 million', '2,509 million', '9,805 million', '9,430 million', '8,945 million']","['September 30, 2023', '2023']"
+FM010,C003,Deemed Repatriation Tax Payable,$22.0 billion,"September 30, 2023"
+FM011,C003,Effective Tax Rate,"['14.7%', 'Lower than 21%']","['2023', 'Fiscal Year 2023']"
+FM012,C003,Gross Margin,"['169,148', '56.9%', '-7.5%', '-0.9%', '64.9%']","['2023', 'Fiscal Year 2023', '2022']"
+FM013,C003,Leases,15.8 billion,"September 30, 2023"
+FM014,C003,Liquidity and Capital Resources,148.3 billion,"September 30, 2023"
+FM015,C003,Manufacturing Purchase Obligations,"['53.1 billion', '$53.1 billion']","September 30, 2023"
+FM016,C003,Net Income,"['$97.0 billion', '1,800 million', '(102) million', '2,212 million', '124 million', '4,368 million', '2419', '3,371']","['2023', '2022', '2021', 'Fiscal Year 2023', '2015']"
+FM017,C003,Net Sales,"['$383.3 billion', '$394.3 billion', '383,285', '315,880']","['2023', '2022']"
+FM018,C003,Operating Expenses,"['54,847', '11,132 million', '11,132', '7,434', '$2,566,025', '$3,870,118', '23681']","['2023', 'Fiscal Year 2023', 'fiscal year 2023', 'fiscal year 2022', 'year ended April 30, 2023', 'year ended April 30, 2022', '2022']"
+FM019,C003,Other Purchase Obligations,$21.9 billion,"September 30, 2023"
+FM020,C003,Provision for Income Taxes,"16,741",2023
+FM021,C003,Segment Operating Performance - Americas,$162.560 billion,2023
+FM022,C003,Segment Operating Performance - Europe,$94.294 billion,2023
+FM023,C003,Segment Operating Performance - Greater China,$72.559 billion,2023
+FM024,C003,Segment Operating Performance - Japan,$24.257 billion,2023
+FM025,C003,Segment Operating Performance - Rest of Asia Pacific,$29.615 billion,2023
+FM026,C006,Acquisition Value,68.7 billion,"January 18, 2022"
+FM027,C006,Disability representation,,latest report
+FM028,C006,EEO-1 report,,latest report
+FM029,C006,Finance Lease Cost,"1,853","Year Ended June 30, 2023"
+FM030,C006,Legal Liabilities,$617 million,"As of June 30, 2023"
+FM031,C006,Operating Income,"['34,189', '37,884', '16,450', '3837', '$4.3 billion', '$3.3 billion']","['Year Ended June 30, 2023, Productivity and Business Processes', 'Year Ended June 30, 2023, Intelligent Cloud', 'Year Ended June 30, 2023, More Personal Computing', '2022', '2021', '2020']"
+FM032,C006,Operating Lease Cost,"2,875","Year Ended June 30, 2023"
+FM033,C006,Pay Equity Report,Racial and ethnic minority employees earn $1.008 for every $1.000 earned by white counterparts,2022
+FM034,C006,Pay Equity for Women Report,Women in the U.S. earn $1.007 for every $1.000 earned by men; women outside the U.S. earn $1.002 for every $1.000 earned by men,2022
+FM035,C006,Pay equity,,latest report
+FM036,C006,Revenue,"['69,274', '87,907', '54,734', '106,744', '26,974 million', '100%', '$75.0 billion']","['Year Ended June 30, 2023, Productivity and Business Processes', 'Year Ended June 30, 2023, Intelligent Cloud', 'Year Ended June 30, 2023, More Personal Computing', 'Year Ended June 30, 2023, United States', 'Fiscal Year 2023', '2023', '2022', 'Fiscal year ended December 31, 2015']"
+FM037,C006,Share Repurchase Program,$60.0 billion,"Year Ended June 30, 2023"
+FM038,C006,Shares Outstanding,7432,"Year Ended June 30, 2023"
+FM039,C006,Transaction Volumes,doubled,2020-2023
+FM040,C006,Unadjusted Median Pay Report,Total pay for women is 89.6% of total pay for men in the U.S.; 86.2% outside the U.S.,2023
+FM041,C006,Unadjusted Median Pay for Racial and Ethnic Minorities Report,Total pay for racial and ethnic minorities in the U.S. is 89.9% of total pay for white employees,2023
+FM042,C006,Unearned Revenue,"53,813","Year Ended June 30, 2023"
+FM043,C006,Unrecognized Compensation Costs,18.6 billion,"As of June 30, 2023"
+FM044,C006,gender representation,,latest report
+FM045,C006,racial and ethnic minority representation,,latest report
+FM046,C007,Automotive revenue fiscal year 2023,903 million,fiscal year 2023
+FM047,C007,Charge,$1.35 billion,fiscal year 2023
+FM048,C007,Compute & Networking Revenue,"['$15,068 million', '$11,046 million']","['2023', '2022']"
+FM049,C007,Environmental Impact Metrics,Metrics published for FY 2022 with expected updates in FY 2024.,Fiscal Year 2022
+FM050,C007,Graphics Revenue,"['$11,906 million', '$15,868 million']","['2023', '2022']"
+FM051,C007,Gross Margin,"['169,148', '56.9%', '-7.5%', '-0.9%', '64.9%']","['2023', 'Fiscal Year 2023', '2022']"
+FM052,C007,Income from Operations,"4,224 million",Fiscal Year 2023
+FM053,C007,Net Income,"['$97.0 billion', '1,800 million', '(102) million', '2,212 million', '124 million', '4,368 million', '2419', '3,371']","['2023', '2022', '2021', 'Fiscal Year 2023', '2015']"
+FM054,C007,Operating Expenses,"['54,847', '11,132 million', '11,132', '7,434', '$2,566,025', '$3,870,118', '23681']","['2023', 'Fiscal Year 2023', 'fiscal year 2023', 'fiscal year 2022', 'year ended April 30, 2023', 'year ended April 30, 2022', '2022']"
+FM055,C007,Operating Income Increase,$133 million,"['fiscal year 2024', '2024']"
+FM056,C007,Professional Visualization revenue fiscal year 2023,1.54 billion,fiscal year 2023
+FM057,C007,Revenue,"['69,274', '87,907', '54,734', '106,744', '26,974 million', '100%', '$75.0 billion']","['Year Ended June 30, 2023, Productivity and Business Processes', 'Year Ended June 30, 2023, Intelligent Cloud', 'Year Ended June 30, 2023, More Personal Computing', 'Year Ended June 30, 2023, United States', 'Fiscal Year 2023', '2023', '2022', 'Fiscal year ended December 31, 2015']"
+FM058,C007,Turnover rate,5.3%,fiscal year 2023
+FM059,C007,research and development investment,$37 billion,since inception
+FM060,C008,Accelerated amortization,"['6 million', '43 million']","['year ended December 31, 2022', 'year ended December 31, 2021']"
+FM061,C008,Accumulated Benefit Obligation,$38,"December 31, 2022"
+FM062,C008,Amortization and accretion expense,$477 million and $517 million,during 2021 and 2022
+FM063,C008,Annual contribution,$193 million,during 2021 and 2022
+FM064,C008,Average tenure,11 years,
+FM065,C008,Battery Storage Customers,"50,000",
+FM066,C008,California Net Operating Loss Carryforward,25.2 billion,"December 31, 2022"
+FM067,C008,Debt Reduction Goal,at least $2 billion by the end of 2026,2026
+FM068,C008,"Depreciation, Amortization, and Decommissioning",$453 million,2022
+FM069,C008,"Exposure December 31, 2021",570 million,2021-12-31
+FM070,C008,"Exposure December 31, 2022",814 million,2022-12-31
+FM071,C008,Financial Condition,,
+FM072,C008,Financial condition and results of operations,,Past and Future
+FM073,C008,First Mortgage Bonds,"['$1 billion', '$400 million', '$450 million', '$550 million', '$600 million', '$750 million']","['due 2024', 'due 2029', 'due 2032', 'due 2052', 'due June 8, 2025', 'due June 15, 2027', 'due June 15, 2032', 'due 2033', 'due 2053']"
+FM074,C008,GHG-free Electricity,95%,2022
+FM075,C008,Indebtedness,"PG&E Corporation $4.68 billion, Utility $45.6 billion","As of December 31, 2022"
+FM076,C008,Initial contribution,$4.8 billion,on the Emergence Date
+FM077,C008,Interconnected Private Solar Customers,"700,000",
+FM078,C008,Interest Expense,"['-1968', '$285 million', '1.8 billion and 2.4 billion', '262', '236']","['2023', '2022', '2021 and 2022', 'fiscal year 2023', 'fiscal year 2022']"
+FM079,C008,Interest Income,"['$140 million', '448 million and 989 million', '267', '29']","['2022', '2021 and 2022', 'fiscal year 2023', 'fiscal year 2022']"
+FM080,C008,Net Credit Exposure,"['162 million', '63 million']","['2022', '2021']"
+FM081,C008,Net Income,"['$97.0 billion', '1,800 million', '(102) million', '2,212 million', '124 million', '4,368 million', '2419', '3,371']","['2023', '2022', '2021', 'Fiscal Year 2023', '2015']"
+FM082,C008,Net Loss,"['(412) million', '(226) million', '$1,774,179', '$3,422,146']","['2022', '2021', 'year ended April 30, 2023', 'year ended April 30, 2022']"
+FM083,C008,Net Operating Loss Carryforwards,,Plan
+FM084,C008,Net cash provided by financing activities,"['6,879 million', '4,379 million']","['Year Ended December 31, 2022', 'Year Ended December 31, 2021']"
+FM085,C008,Net cash provided by operating activities,"['3,831 million', '2,448 million', '$18,659 million', '$22,376 million', '$26,024 million']","['Year Ended December 31, 2022', 'Year Ended December 31, 2021', '2013', '2014', '2015', '2013-2014', '2014-2015']"
+FM086,C008,Net cash used in investing activities,"['(10,069 million)', '(7,050 million)', '-$13,679 million', '-$21,055 million', '-$23,711 million']","['Year Ended December 31, 2022', 'Year Ended December 31, 2021', '2013', '2014', '2015']"
+FM087,C008,"Net change in cash, cash equivalents, and restricted cash","['641 million', '(223 million)']","['Year Ended December 31, 2022', 'Year Ended December 31, 2021']"
+FM088,C008,Non-GAAP Core Earnings,6.2 billion,following the Emergence Date
+FM089,C008,Other Postretirement Benefit Costs,$8,2022
+FM090,C008,Projected Benefit Obligation,"$1,038","December 31, 2022"
+FM091,C008,Rate of increase in compensation,44,2022
+FM092,C008,Receivables Securitization Program,Between 1 billion and 1.5 billion,not specified
+FM093,C008,Retirement eligibility,19%,
+FM094,C008,Return on plan assets,108,2022
+FM095,C008,Revolving Credit Facility,500 million,"December 31, 2022"
+FM096,C008,SB 901 regulatory asset,approximately $5.4 billion,"December 31, 2022"
+FM097,C008,U.S. Federal Net Operating Loss Carryforward,26.6 billion,"December 31, 2022"
+FM098,C008,Wildfire Fund allocation metric,64.2%,
+FM099,C008,Wildfire Fund receivables,175 million,2021 Dixie fire
+FM100,C008,assumed return on plan assets,6.1%,
+FM101,C008,discount rate,848 Aa-grade non-callable bonds,"December 31, 2022"
+FM102,C008,health care cost trend rate,6.5%,2023
+FM103,C008,net cash provided by financing activities,$2.5 billion increase,2022
+FM104,C008,net cash used in investing activities,$3.0 billion,2022
+FM105,C008,pension costs,$5,2022
+FM106,C008,regulatory assets,20.0 billion,"December 31, 2022"
+FM107,C008,regulatory liabilities,20.4 billion,"December 31, 2022"
+FM108,C008,ultimate trend rate,4.5%,2031 and beyond
+FM109,C009,U.S. ethnic diversity,54%,"as of December 31, 2022"
+FM110,C009,diverse workforce representation,56%,"as of December 31, 2022"
+FM111,C009,global gender diversity,44%,"as of December 31, 2022"

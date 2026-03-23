@@ -8,7 +8,7 @@ Before starting, make sure you have:
 - Completed **Lab 0** (AWS sign-in)
 - Completed **Lab 1** (Neo4j Aura setup)
 - Completed **Lab 2** (Built an Aura Agent with tools)
-- Completed **Lab 4** (SageMaker setup)
+- Completed **Lab 3** (SageMaker setup)
 
 ## Lab Overview
 

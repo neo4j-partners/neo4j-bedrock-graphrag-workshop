@@ -1,6 +1,10 @@
-company_id,name,ticker,sector,cik,fiscal_year_end
-C001,Apple Inc.,AAPL,Technology,0000320193,September
-C002,Microsoft Corporation,MSFT,Technology,0000789019,June
-C003,NVIDIA Corporation,NVDA,Technology,0001045810,January
-C004,Alphabet Inc.,GOOGL,Technology,0001652044,December
-C005,Amazon.com Inc.,AMZN,Consumer Discretionary,0001018724,December
+company_id,name,ticker,cik,cusip
+C001,"Amazon.com, Inc.",AMZN,1018724,23135106
+C002,"American International Group, Inc.",AIG,5272,26874784
+C003,Apple Inc.,AAPL,320193,37833950
+C004,Intel Corporation,INTC,50863,458140950
+C005,McDonald's Corporation,MCD,63908,580135101
+C006,Microsoft Corporation,MSFT,789019,594918954
+C007,NVIDIA Corporation,NVDA,1045810,067066G104
+C008,PG&E Corporation,PCG,75488,069331C908
+C009,"PayPal Holdings, Inc.",PYPL,1633917,1633917

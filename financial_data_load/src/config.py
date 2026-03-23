@@ -10,7 +10,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from neo4j import Driver, GraphDatabase
 from neo4j.exceptions import ServiceUnavailable
-from pydantic import Field, SecretStr, computed_field, model_validator
+from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Resolved once at import time -- stable regardless of cwd.
@@ -44,89 +44,24 @@ class Neo4jConfig(BaseSettings):
 class AgentConfig(BaseSettings):
     """LLM and embedding configuration loaded from .env.
 
-    Requires EMBEDDING_PROVIDER to select the embedding backend:
-    - openai: uses OPENAI_API_KEY
-    - azure: uses AZURE_AI_PROJECT_ENDPOINT (+ az login)
-    - bedrock: uses AWS credential chain
+    Uses AWS Bedrock for both LLM and embeddings.
     """
 
     model_config = SettingsConfigDict(env_prefix="", extra="ignore")
-
-    openai_api_key: str | None = Field(
-        default=None, validation_alias="OPENAI_API_KEY"
-    )
-    project_endpoint: str | None = Field(
-        default=None, validation_alias="AZURE_AI_PROJECT_ENDPOINT"
-    )
-    model_name: str = Field(
-        default="gpt-4o",
-        validation_alias="AZURE_AI_MODEL_NAME",
-    )
-    embedding_name: str = Field(
-        default="text-embedding-3-small",
-        validation_alias="AZURE_AI_EMBEDDING_NAME",
-    )
-
-    # --- Embedding provider settings (required) ---
-    embedding_provider: str = Field(
-        validation_alias="EMBEDDING_PROVIDER",
-    )
-    embedding_dimensions: int | None = Field(
-        default=None, validation_alias="EMBEDDING_DIMENSIONS",
-    )
-
-    # --- LLM provider (optional, defaults to EMBEDDING_PROVIDER) ---
-    llm_provider: str | None = Field(
-        default=None, validation_alias="LLM_PROVIDER",
-    )
-    llm_model_id: str | None = Field(
-        default=None, validation_alias="MODEL_ID",
-    )
 
     # --- AWS Bedrock settings ---
     aws_region: str | None = Field(
         default=None, validation_alias="AWS_REGION",
     )
+    llm_model_id: str | None = Field(
+        default=None, validation_alias="MODEL_ID",
+    )
     embedding_model_id: str | None = Field(
         default=None, validation_alias="EMBEDDING_MODEL_ID",
     )
-
-    @property
-    def resolved_llm_provider(self) -> str:
-        """LLM provider: explicit LLM_PROVIDER, or falls back to EMBEDDING_PROVIDER."""
-        return (self.llm_provider or self.embedding_provider).lower()
-
-    @computed_field
-    @property
-    def inference_endpoint(self) -> str | None:
-        """Get the model inference endpoint from project endpoint."""
-        if not self.project_endpoint:
-            return None
-        if "/api/projects/" in self.project_endpoint:
-            base = self.project_endpoint.split("/api/projects/")[0]
-            return f"{base}/models"
-        return self.project_endpoint
-
-    @property
-    def use_openai(self) -> bool:
-        """True when using OpenAI directly instead of Azure."""
-        return self.openai_api_key is not None
-
-
-# ---------------------------------------------------------------------------
-# Authentication
-# ---------------------------------------------------------------------------
-
-
-def get_azure_token() -> str:
-    """Get Azure token for cognitive services.
-
-    Delegates to the Azure embedding provider module.
-    Kept here for backward compatibility with code that imports it directly.
-    """
-    from .embeddings.azure import get_azure_token as _get_azure_token
-
-    return _get_azure_token()
+    embedding_dimensions: int | None = Field(
+        default=None, validation_alias="EMBEDDING_DIMENSIONS",
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -135,46 +70,40 @@ def get_azure_token() -> str:
 
 
 def get_llm():
-    """Get LLM for the resolved provider (bedrock, openai, or azure)."""
+    """Get a BedrockLLM instance. Requires MODEL_ID in .env."""
+    from neo4j_graphrag.llm import BedrockLLM
+
     config = AgentConfig()
-    provider = config.resolved_llm_provider
+    if not config.llm_model_id:
+        raise ValueError("MODEL_ID must be set in .env.")
+    kwargs: dict = {"model_id": config.llm_model_id}
+    if config.aws_region:
+        kwargs["region_name"] = config.aws_region
+    return BedrockLLM(**kwargs)
 
-    if provider == "bedrock":
-        from neo4j_graphrag.llm import BedrockLLM
 
-        kwargs: dict = {}
-        if config.aws_region:
-            kwargs["region_name"] = config.aws_region
-        if config.llm_model_id:
-            kwargs["model_id"] = config.llm_model_id
-        return BedrockLLM(**kwargs)
+def get_llm_deterministic():
+    """Get a BedrockLLM with temperature=0 for deterministic output.
 
-    from neo4j_graphrag.llm import OpenAILLM
+    Used by entity resolution, validation, and normalization phases
+    where reproducible results are important.
+    """
+    from neo4j_graphrag.llm import BedrockLLM
 
-    if provider == "openai":
-        if not config.openai_api_key:
-            raise ValueError(
-                "OpenAI LLM provider requires OPENAI_API_KEY to be set."
-            )
-        return OpenAILLM(
-            model_name=config.model_name,
-            api_key=config.openai_api_key,
-        )
-
-    # azure (default for non-bedrock when no OPENAI_API_KEY)
-    token = get_azure_token()
-    return OpenAILLM(
-        model_name=config.model_name,
-        base_url=config.inference_endpoint,
-        api_key=token,
-    )
+    config = AgentConfig()
+    if not config.llm_model_id:
+        raise ValueError("MODEL_ID must be set in .env.")
+    kwargs: dict = {
+        "model_id": config.llm_model_id,
+        "model_params": {"temperature": 0},
+    }
+    if config.aws_region:
+        kwargs["region_name"] = config.aws_region
+    return BedrockLLM(**kwargs)
 
 
 def get_embedder():
-    """Get embedder for the configured EMBEDDING_PROVIDER.
-
-    Delegates to src.embeddings which picks the right backend.
-    """
+    """Get a BedrockEmbeddings instance."""
     from .embeddings import get_embedder as _get_embedder
 
     return _get_embedder()

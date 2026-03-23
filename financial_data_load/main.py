@@ -7,20 +7,24 @@ Usage from financial_data_load directory:
         uv run python main.py load --clear           # Load metadata + process PDFs
         uv run python main.py backup                 # Back up database to JSON
 
-    Entity resolution pipeline (fast — restore and iterate):
+    Cleanse pipeline (fast — restore and iterate):
         uv run python main.py restore                # Restore database from backup
+        uv run python main.py cleanse                # Generate cleanse plan (validate + dedup)
+        uv run python main.py apply-cleanse          # Apply plan (removals, merges, normalize)
+        uv run python main.py finalize               # Constraints, indexes, asset managers
+
+    Legacy entity resolution (Company only):
         uv run python main.py snapshot               # Export entity snapshot
         uv run python main.py resolve                # LLM entity resolution
         uv run python main.py compare                # Compare runs, score ground truth
         uv run python main.py apply-merges           # Apply merge plan
-        uv run python main.py finalize               # Constraints, indexes, asset managers
 
     Model A/B comparison:
         uv run python main.py export-model gpt-4o    # Snapshot graph tagged by model
         uv run python main.py compare-models         # Compare last two model snapshots
 
     Other commands:
-        uv run python main.py test                   # Test Neo4j and Azure connections
+        uv run python main.py test                   # Test Neo4j and Bedrock connections
         uv run python main.py verify                 # Print node/relationship counts
         uv run python main.py clean                  # Clear all data
         uv run python main.py samples [--limit N]    # Run sample queries
@@ -106,7 +110,7 @@ def cmd_load(args):
 
     elapsed = time.monotonic() - start
     print(f"\nPDF processing done in {_fmt_elapsed(elapsed)}.")
-    print("Next step: backup (then snapshot → resolve → apply-merges → finalize)")
+    print("Next step: backup (then restore → cleanse → apply-cleanse → finalize)")
 
 
 def cmd_backup(args):
@@ -234,6 +238,33 @@ def cmd_compare_models(args):
         print(f"  B: {path_b.name}")
 
     compare_snapshots(path_a, path_b)
+
+
+def cmd_cleanse(args):
+    """Generate a cleanse plan: validate + deduplicate all entity types."""
+    from src.config import connect
+    from src.cleanse import cleanse
+
+    with connect() as driver:
+        cleanse(driver, phase=args.phase)
+
+
+def cmd_apply_cleanse(args):
+    """Apply a cleanse plan: removals, merges, normalize."""
+    from src.config import connect
+    from src.cleanse import apply_cleanse, latest_cleanse_plan
+
+    if args.plan:
+        plan_path = Path(args.plan)
+    else:
+        plan_path = latest_cleanse_plan()
+        if not plan_path:
+            print("No cleanse plan found. Run 'uv run python main.py cleanse' first.")
+            return
+
+    print(f"Using cleanse plan: {plan_path}")
+    with connect() as driver:
+        apply_cleanse(driver, plan_path, skip_normalize=args.skip_normalize)
 
 
 def cmd_finalize(args):
@@ -567,6 +598,26 @@ def main():
     p_compare_models.add_argument(
         "--b", help="Second snapshot filename (default: latest)")
     p_compare_models.set_defaults(func=cmd_compare_models)
+
+    # cleanse
+    p_cleanse = subparsers.add_parser(
+        "cleanse",
+        help="Generate cleanse plan (validate + dedup all entity types, does not modify Neo4j)")
+    p_cleanse.add_argument(
+        "--phase", choices=["validate", "dedup"],
+        help="Run only this phase (default: both)")
+    p_cleanse.set_defaults(func=cmd_cleanse)
+
+    # apply-cleanse
+    p_apply_cleanse = subparsers.add_parser(
+        "apply-cleanse",
+        help="Apply cleanse plan (removals, merges, normalize)")
+    p_apply_cleanse.add_argument(
+        "--plan", help="Path to cleanse plan file (default: latest)")
+    p_apply_cleanse.add_argument(
+        "--skip-normalize", action="store_true",
+        help="Skip the normalization phase")
+    p_apply_cleanse.set_defaults(func=cmd_apply_cleanse)
 
     # finalize
     p_finalize = subparsers.add_parser(

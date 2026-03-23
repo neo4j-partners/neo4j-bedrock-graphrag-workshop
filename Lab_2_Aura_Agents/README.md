@@ -149,4 +149,4 @@ These same patterns are implemented programmatically in Labs 6 and 7 using Pytho
 
 **This completes Part 1 (No-Code Track) of the workshop.**
 
-To continue with the coding labs, proceed to [Lab 4 - Intro to Bedrock and Agents](../Lab_4_Intro_to_Bedrock_and_Agents) to set up your development environment in Amazon SageMaker and learn how AI agents work with LangGraph.
+To continue with the coding labs, proceed to [Lab 3 - Intro to Bedrock and Agents](../Lab_3_Intro_to_Bedrock_and_Agents) to set up your development environment in Amazon SageMaker and learn how AI agents work with LangGraph.

@@ -22,9 +22,9 @@ In the AWS Console, navigate to **Amazon Bedrock > Model access** and enable:
 
 This is a manual console step and cannot be scripted.
 
-### 2. Set Up AgentCore IAM & Resources (Lab 4 Deployment)
+### 2. Set Up AgentCore IAM & Resources (Lab 3 Deployment)
 
-The `setup_agentcore.sh` script creates the IAM roles, S3 bucket, and permissions needed for Lab 4's AgentCore deployment notebook. Run it once per account:
+The `setup_agentcore.sh` script creates the IAM roles, S3 bucket, and permissions needed for Lab 3's AgentCore deployment notebook. Run it once per account:
 
 ```bash
 cd setup
@@ -50,11 +50,11 @@ Ensure the following fields are set in `CONFIG.txt` before distributing to parti
 | `NEO4J_URI` | Lab 1 — Aura instance creation | Labs 2, 6, 7, 8 |
 | `NEO4J_USERNAME` | Lab 1 — Aura instance creation | Labs 2, 6, 7, 8 |
 | `NEO4J_PASSWORD` | Lab 1 — Aura instance creation | Labs 2, 6, 7, 8 |
-| `MODEL_ID` | Pre-configured default | Labs 4, 6, 7 |
-| `EMBEDDING_MODEL_ID` | Pre-configured default | Lab 6 |
-| `REGION` | Pre-configured default | Labs 4, 6, 7 |
-| `MCP_GATEWAY_URL` | MCP server deployment | Lab 4 (MCP notebook) |
-| `MCP_ACCESS_TOKEN` | MCP server deployment | Lab 4 (MCP notebook) |
+| `MODEL_ID` | Pre-configured default | Labs 3, 4, 6, 7 |
+| `EMBEDDING_MODEL_ID` | Pre-configured default | Labs 4, 6 |
+| `REGION` | Pre-configured default | Labs 3, 4, 6, 7 |
+| `MCP_GATEWAY_URL` | MCP server deployment | Labs 4, 7 |
+| `MCP_ACCESS_TOKEN` | MCP server deployment | Labs 4, 7 |
 | `NEO4J_CLIENT_ID` | Lab 8 — Aura Agent setup | Lab 8 |
 | `NEO4J_CLIENT_SECRET` | Lab 8 — Aura Agent setup | Lab 8 |
 | `NEO4J_AGENT_ENDPOINT` | Lab 8 — Aura Agent setup | Lab 8 |

@@ -9,7 +9,7 @@ This is a hands-on workshop teaching GraphRAG (Graph Retrieval-Augmented Generat
 ## Workshop Structure
 
 - **Part 1 (Labs 0-2)**: No-code exploration using Neo4j Aura console and Aura Agents visual builder
-- **Part 2 (Labs 4-6)**: Python-based GraphRAG with LangGraph and neo4j-graphrag library
+- **Part 2 (Labs 3-6)**: Python-based GraphRAG with LangGraph and neo4j-graphrag library
 - **Part 3 (Labs 7-8)**: Advanced MCP (Model Context Protocol) agents and Aura Agents API
 
 ## Key Configuration
@@ -27,8 +27,8 @@ REGION=us-east-1
 
 ## Lab Code Patterns
 
-### Lab 4 - Basic LangGraph Agent
-Location: `Lab_4_Intro_to_Bedrock_and_Agents/basic_langgraph_agent.ipynb`
+### Lab 3 - Basic LangGraph Agent + AgentCore Deployment
+Location: `Lab_3_Intro_to_Bedrock_and_Agents/basic_langgraph_agent.ipynb`
 
 Uses `ChatBedrockConverse` from langchain-aws with the ReAct pattern:
 ```python
@@ -41,6 +41,25 @@ For cross-region inference profiles (MODEL_ID starting with `us.` or `global.`),
 ```python
 if MODEL_ID.startswith("us.anthropic."):
     BASE_MODEL_ID = MODEL_ID.replace("us.anthropic.", "anthropic.")
+```
+
+Includes AgentCore deployment at the end using `bedrock-agentcore-starter-toolkit` and `direct_code_deploy`.
+
+### Lab 4 - MCP-Based Retrieval
+Location: `Lab_4_MCP_Retrieval/`
+
+Three notebooks covering vector search, graph-enriched retrieval, and hybrid search through the Neo4j MCP server:
+- `01_vector_search_mcp.ipynb`: Semantic vector search via MCP using Bedrock Titan embeddings
+- `02_graph_enriched_search_mcp.ipynb`: Vector search with graph traversal for enriched context (document, chunks, entities)
+- `03_fulltext_hybrid_search_mcp.ipynb`: Fulltext keyword search and agent-driven hybrid search with `@tool` wrappers
+
+MCP connection pattern (notebooks 01-02 use inline setup; notebook 03 uses `lib/mcp_utils.py`):
+```python
+from langchain_mcp_adapters.client import MultiServerMCPClient
+from langgraph.prebuilt import create_react_agent
+# Or via lib utilities:
+from lib.mcp_utils import MCPConnection
+from lib.data_utils import get_embedding
 ```
 
 ### Lab 6 - GraphRAG
