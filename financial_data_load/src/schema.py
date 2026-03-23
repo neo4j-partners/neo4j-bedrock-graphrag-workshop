@@ -100,12 +100,19 @@ def create_fulltext_indexes(driver: Driver) -> None:
         print(f"  [OK] Fulltext index: {name}")
 
 
-def create_embedding_indexes(driver: Driver, dimensions: int = 1536) -> None:
+def create_embedding_indexes(driver: Driver, dimensions: int | None = None) -> None:
     """Create vector and fulltext indexes for Chunk embeddings.
+
+    If *dimensions* is not provided, reads it from EMBEDDING_DIMENSIONS
+    (or falls back to a provider-specific default via src.embeddings).
 
     Imports neo4j_graphrag lazily so that other commands don't require it.
     """
     from neo4j_graphrag.indexes import create_vector_index
+
+    if dimensions is None:
+        from .embeddings import get_embedding_dimensions
+        dimensions = get_embedding_dimensions()
 
     try:
         create_vector_index(
@@ -116,7 +123,7 @@ def create_embedding_indexes(driver: Driver, dimensions: int = 1536) -> None:
             dimensions=dimensions,
             similarity_fn="cosine",
         )
-        print("  [OK] Vector index: chunkEmbeddings")
+        print(f"  [OK] Vector index: chunkEmbeddings ({dimensions} dims)")
     except Exception as e:
         print(f"  [WARN] Vector index: {e}")
 

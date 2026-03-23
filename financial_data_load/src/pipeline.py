@@ -95,13 +95,17 @@ def process_all_pdfs(
     log_file = _setup_logging()
     logger.info(f"Logging to: {log_file}")
 
-    print("Initializing Azure AI Foundry LLM and Embedder...")
+    from .embeddings import _resolve_provider
+
+    print("Initializing LLM and Embedder...")
     llm = get_llm()
     embedder = get_embedder()
     agent_config = AgentConfig()
+    provider = _resolve_provider()
     print(f"  Model: {agent_config.model_name}")
-    print(f"  Embedder: {agent_config.embedding_name}")
-    print(f"  Endpoint: {agent_config.inference_endpoint}")
+    print(f"  Embedder: {agent_config.embedding_name} (provider: {provider})")
+    if agent_config.inference_endpoint:
+        print(f"  Endpoint: {agent_config.inference_endpoint}")
 
     schema = build_extraction_schema()
 

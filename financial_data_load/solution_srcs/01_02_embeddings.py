@@ -105,6 +105,10 @@ def store_chunks_with_embeddings(driver, doc_path: str, chunk_data: list[dict]) 
 
 def create_index(driver) -> None:
     """Create vector index for similarity search."""
+    from src.embeddings import get_embedding_dimensions
+
+    dimensions = get_embedding_dimensions()
+
     # Drop existing index
     try:
         with driver.session() as session:
@@ -118,7 +122,7 @@ def create_index(driver) -> None:
         name=INDEX_NAME,
         label="Chunk",
         embedding_property="embedding",
-        dimensions=1536,
+        dimensions=dimensions,
         similarity_fn="cosine"
     )
 

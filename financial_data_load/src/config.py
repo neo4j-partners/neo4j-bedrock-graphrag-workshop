@@ -42,11 +42,12 @@ class Neo4jConfig(BaseSettings):
 
 
 class AgentConfig(BaseSettings):
-    """LLM configuration loaded from .env.
+    """LLM and embedding configuration loaded from .env.
 
-    Supports two providers (auto-detected from environment):
-    - OpenAI directly: set OPENAI_API_KEY
-    - Azure AI Foundry: set AZURE_AI_PROJECT_ENDPOINT (uses az login)
+    Requires EMBEDDING_PROVIDER to select the embedding backend:
+    - openai: uses OPENAI_API_KEY
+    - azure: uses AZURE_AI_PROJECT_ENDPOINT (+ az login)
+    - bedrock: uses AWS credential chain
     """
 
     model_config = SettingsConfigDict(env_prefix="", extra="ignore")
@@ -66,15 +67,13 @@ class AgentConfig(BaseSettings):
         validation_alias="AZURE_AI_EMBEDDING_NAME",
     )
 
-    @model_validator(mode="after")
-    def _check_provider(self) -> AgentConfig:
-        if not self.openai_api_key and not self.project_endpoint:
-            raise ValueError(
-                "No LLM provider configured. Set one of:\n"
-                "  - OPENAI_API_KEY (for OpenAI directly)\n"
-                "  - AZURE_AI_PROJECT_ENDPOINT (for Azure AI Foundry)"
-            )
-        return self
+    # --- Embedding provider settings (required) ---
+    embedding_provider: str = Field(
+        validation_alias="EMBEDDING_PROVIDER",
+    )
+    embedding_dimensions: int | None = Field(
+        default=None, validation_alias="EMBEDDING_DIMENSIONS",
+    )
 
     @computed_field
     @property
@@ -101,28 +100,17 @@ class AgentConfig(BaseSettings):
 def get_azure_token() -> str:
     """Get Azure token for cognitive services.
 
-    Tries AzureCliCredential first (for Dev Containers after ``az login``),
-    then falls back to DefaultAzureCredential for other environments.
+    Delegates to the Azure embedding provider module.
+    Kept here for backward compatibility with code that imports it directly.
     """
-    from azure.identity import AzureCliCredential, DefaultAzureCredential
+    from .embeddings.azure import get_azure_token as _get_azure_token
 
-    scope = "https://cognitiveservices.azure.com/.default"
+    return _get_azure_token()
 
-    try:
-        credential = AzureCliCredential()
-        return credential.get_token(scope).token
-    except Exception:
-        pass
 
-    try:
-        credential = DefaultAzureCredential()
-        return credential.get_token(scope).token
-    except Exception as e:
-        raise RuntimeError(
-            "Azure authentication failed. Please run:\n"
-            "  az login --use-device-code\n"
-            f"Original error: {e}"
-        ) from e
+# ---------------------------------------------------------------------------
+# LLM and embedder factories
+# ---------------------------------------------------------------------------
 
 
 def get_llm():
@@ -146,23 +134,13 @@ def get_llm():
 
 
 def get_embedder():
-    """Get embedder configured from environment (OpenAI or Azure AI Foundry)."""
-    from neo4j_graphrag.embeddings import OpenAIEmbeddings
+    """Get embedder for the configured EMBEDDING_PROVIDER.
 
-    config = AgentConfig()
+    Delegates to src.embeddings which picks the right backend.
+    """
+    from .embeddings import get_embedder as _get_embedder
 
-    if config.use_openai:
-        return OpenAIEmbeddings(
-            model=config.embedding_name,
-            api_key=config.openai_api_key,
-        )
-
-    token = get_azure_token()
-    return OpenAIEmbeddings(
-        model=config.embedding_name,
-        base_url=config.inference_endpoint,
-        api_key=token,
-    )
+    return _get_embedder()
 
 
 # ---------------------------------------------------------------------------

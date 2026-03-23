@@ -8,23 +8,23 @@ A hands-on workshop teaching Graph Retrieval-Augmented Generation (GraphRAG) pat
 
 | Lab | Title | Description |
 |-----|-------|-------------|
-| [Lab 0](Lab_0_Sign_In/) | Sign In | AWS Console sign-in and Bedrock access verification |
-| [Lab 1](Lab_1_Aura_Setup/) | Neo4j Aura Setup | Subscribe via AWS Marketplace, restore backup, explore graph |
-| [Lab 2](Lab_2_Aura_Agents/) | Aura Agents | Build a no-code AI agent using Neo4j Aura Agent platform |
+| [Lab 0](Lab_0_Sign_In/README.md) | Sign In | AWS Console sign-in and Bedrock access verification |
+| [Lab 1](Lab_1_Aura_Setup/README.md) | Neo4j Aura Setup | Subscribe via AWS Marketplace, restore backup, explore graph |
+| [Lab 2](Lab_2_Aura_Agents/README.md) | Aura Agents | Build a no-code AI agent using Neo4j Aura Agent platform |
 
 ### Part 2: GraphRAG with Python (Labs 4-6)
 
 | Lab | Title | Description |
 |-----|-------|-------------|
-| [Lab 4](Lab_4_Intro_to_Bedrock_and_Agents/) | Intro to Bedrock and Agents | SageMaker setup, LangGraph foundations, tool binding, ReAct pattern |
-| [Lab 6](Lab_6_GraphRAG/) | GraphRAG | Six notebooks: data loading, embeddings, vector retrieval, vector-cypher retrieval, fulltext search, hybrid search |
+| [Lab 4](Lab_4_Intro_to_Bedrock_and_Agents/README.md) | Intro to Bedrock and Agents | SageMaker setup, LangGraph foundations, tool binding, ReAct pattern |
+| [Lab 6](Lab_6_GraphRAG/README.md) | GraphRAG | Six notebooks: data loading, embeddings, vector retrieval, vector-cypher retrieval, fulltext search, hybrid search |
 
 ### Part 3: Advanced Agents (Labs 7-8)
 
 | Lab | Title | Description |
 |-----|-------|-------------|
-| [Lab 7](Lab_7_Neo4j_MCP_Agent/) | Neo4j MCP Agent | Connect AI agents to Neo4j via the Model Context Protocol (LangGraph and Strands implementations) |
-| [Lab 8](Lab_8_Aura_Agents_API/) | Aura Agents API | Call the Lab 2 agent programmatically with OAuth2 authentication and async batch queries |
+| [Lab 7](Lab_7_Neo4j_MCP_Agent/README.md) | Neo4j MCP Agent | Connect AI agents to Neo4j via the Model Context Protocol (LangGraph and Strands implementations) |
+| [Lab 8](Lab_8_Aura_Agents_API/README.md) | Aura Agents API | Call the Lab 2 agent programmatically with OAuth2 authentication and async batch queries |
 
 ## Prerequisites
 
@@ -48,7 +48,7 @@ cp CONFIG.txt CONFIG.txt.local
 # Edit CONFIG.txt with your Neo4j and AWS credentials
 ```
 
-Start with [Lab 0](Lab_0_Sign_In/) for AWS setup instructions.
+Start with [Lab 0](Lab_0_Sign_In/README.md) for AWS setup instructions.
 
 ## Configuration
 
