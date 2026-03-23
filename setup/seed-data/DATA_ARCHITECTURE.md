@@ -116,11 +116,11 @@ RETURN partner.name
 
 | Entity | Count |
 |---|---|
-| Company | 9 |
+| Company | 76 (9 filing + 67 mentioned) |
 | Product | 274 |
 | RiskFactor | 203 |
 | AssetManager | 15 |
-| **Total Nodes** | **~501** |
+| **Total Nodes** | **~568** |
 
 | Relationship | Count |
 |---|---|

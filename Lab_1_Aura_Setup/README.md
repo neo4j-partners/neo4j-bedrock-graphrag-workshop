@@ -44,7 +44,7 @@ FOR (m:AssetManager) REQUIRE m.managerId IS UNIQUE;
 
 ### Step 2: Load Nodes
 
-Each statement reads a CSV file from S3 and creates (or updates) the corresponding nodes.
+Each statement reads a CSV file and creates (or updates) the corresponding nodes: Companies, Products, Risk Factors, and Asset Managers.
 
 ```cypher
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/companies.csv' AS row
@@ -67,7 +67,7 @@ SET m.name = row.name;
 
 ### Step 3: Load Relationships
 
-These statements read junction CSVs and create relationships between the nodes loaded above.
+Creates relationships between nodes: OFFERS (Company→Product), FACES_RISK (Company→RiskFactor), OWNS (AssetManager→Company), COMPETES_WITH and PARTNERS_WITH (Company→Company). The last two use MERGE on the target company name since competitors and partners may be companies mentioned in filings that aren't in the primary dataset.
 
 ```cypher
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/company_products.csv' AS row
@@ -121,7 +121,7 @@ You should see approximately:
 | Label | Count |
 |---|---|
 | AssetManager | 15 |
-| Company | ~60 |
+| Company | 76 |
 | Product | 274 |
 | RiskFactor | 203 |
 
@@ -132,6 +132,60 @@ You should see approximately:
 > ```cypher
 > MATCH (c:Company) WHERE c.companyId IS NOT NULL RETURN c.name, c.ticker ORDER BY c.name;
 > ```
+
+### Step 6: Try Some Queries
+
+Now that the graph is loaded, try these queries to explore the data.
+
+**What products does NVIDIA offer?**
+
+```cypher
+MATCH (c:Company {ticker: 'NVDA'})-[:OFFERS]->(p:Product)
+RETURN p.name ORDER BY p.name LIMIT 10;
+```
+
+**Which risk factors are shared across multiple companies?**
+
+```cypher
+MATCH (c:Company)-[:FACES_RISK]->(r:RiskFactor)
+WITH r, collect(c.ticker) AS companies, count(c) AS cnt
+WHERE cnt > 1
+RETURN r.name, companies, cnt
+ORDER BY cnt DESC LIMIT 5;
+```
+
+**Who are the top asset managers by number of holdings?**
+
+```cypher
+MATCH (am:AssetManager)-[o:OWNS]->(c:Company)
+WITH am, count(c) AS holdings, sum(o.shares) AS total_shares
+RETURN am.name, holdings, total_shares
+ORDER BY holdings DESC LIMIT 5;
+```
+
+**Who does Microsoft compete with?**
+
+```cypher
+MATCH (c:Company {ticker: 'MSFT'})-[:COMPETES_WITH]->(comp)
+RETURN comp.name ORDER BY comp.name;
+```
+
+**Which risk factors expose an asset manager's portfolio across multiple companies?**
+
+```cypher
+MATCH (am:AssetManager)-[:OWNS]->(c:Company)-[:FACES_RISK]->(r:RiskFactor)
+WITH am, r, count(DISTINCT c) AS exposed
+WHERE exposed > 1
+RETURN am.name, r.name, exposed
+ORDER BY exposed DESC, am.name LIMIT 5;
+```
+
+**Who are NVIDIA's supply chain partners?**
+
+```cypher
+MATCH (c:Company {ticker: 'NVDA'})-[:PARTNERS_WITH]->(p)
+RETURN p.name ORDER BY p.name;
+```
 
 ## Part 3: Explore the Knowledge Graph
 
