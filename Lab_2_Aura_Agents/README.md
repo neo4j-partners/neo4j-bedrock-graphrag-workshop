@@ -1,6 +1,6 @@
 # Lab 2: Aura Agents
 
-In this lab, you will build an AI-powered agent using Neo4j Aura Agent. The agent will help users analyze SEC 10-K filings by combining semantic search, graph traversal, and natural language queries - all without writing any code.
+Neo4j Aura Agents combine semantic search, graph traversal, and natural language queries into a single conversational interface. In this lab, you will use the "Create with AI" workflow to build an agent that analyzes SEC 10-K filings. Neo4j inspects your knowledge graph schema and automatically generates the tools the agent needs, so there is no code to write and no Cypher templates to configure manually.
 
 ## Prerequisites
 
@@ -9,23 +9,36 @@ In this lab, you will build an AI-powered agent using Neo4j Aura Agent. The agen
 
 The pre-built backup you restored in Lab 1 already contains the complete knowledge graph with embeddings, so you can start building agents immediately.
 
-## Step 1: Create the SEC Filings Agent
+## Step 1: Navigate to Agents
 
 1. Go to [console.neo4j.io](https://console.neo4j.io)
 2. Select **Agents** in the left-hand menu
-3. Click on **Create Agent**
+3. Click **Create with AI**
 
-![Aura Agents](images/aura_agents.png)
+The "Create with AI" option lets Neo4j analyze your graph schema and generate a fully configured agent with recommended tools.
 
-## Step 2: Configure Agent Details
+![Create Agent](images/1_Create_Agent.png)
 
-Configure your new agent with the following settings:
+## Step 2: Connect Your Neo4j Instance
 
-**Agent Name:** `sec-filings-analyst`
+Select the Neo4j instance you provisioned in Lab 1. The instance should show a **RUNNING** status.
 
-**Description:** An AI-powered financial analyst that helps users explore SEC 10-K filings, analyze company risk factors, investigate asset manager ownership patterns, and discover relationships across the knowledge graph.
+![Connect Instance](images/2_connect_instance.png)
 
-**System Instructions:**
+## Step 3: Configure AI Settings
+
+The "Create with AI" dialog needs three pieces of configuration: the embedding provider, the embedding model, and a prompt describing what the agent should do.
+
+![Create with AI Settings](images/3_create_ai_setting.png)
+
+Configure the following settings:
+
+- **Instance:** Your Lab 1 instance (pre-selected from Step 2)
+- Check **This instance contains vector embeddings**
+- **Embedding provider:** `OpenAI`
+- **Embedding model:** `text-embedding-3-small`
+
+**Prompt:**
 ```
 You are an expert financial analyst assistant specializing in SEC 10-K filings analysis.
 You help users understand:
@@ -38,205 +51,102 @@ Always provide specific examples from the knowledge graph when answering questio
 Ground your responses in the actual data from SEC filings.
 ```
 
-![Agent Configuration](images/agent_config.png)
+Click **Create**. Neo4j will analyze the graph schema and generate the agent along with its tools.
 
-## Step 3: Add Cypher Template Tools
+## Step 4: Review the Generated Tools
 
-Click **Add Tool** and select **Cypher Template** for each of the following tools:
+After creation, the agent appears with a full set of auto-generated tools. Neo4j derived these from the node labels, relationship types, and indexes in your knowledge graph.
 
-### Tool 1: Get Company Overview
+![Agent Tools](images/4_AgentTools.png)
 
-**Tool Name:** `get_company_overview`
+The generated tools fall into three categories:
 
-**Description:** Get comprehensive overview of a company including their SEC filing, risk factors, and major institutional owners.
+| Tool Type | Generated Tools |
+|-----------|----------------|
+| **Cypher Templates** | Company Details, Company Risk Factors, Companies Owned by Asset Manager, Company Financial Metrics, Company Products Offered, Documents by Company Identifier, Company Executives |
+| **Similarity Search** | Search Chunks |
+| **Text2Cypher** | Natural Language to Cypher Tool |
 
-**Parameters:** `company_name` (string) - The company name to look up (e.g., "APPLE INC", "NVIDIA CORPORATION")
+Each Cypher Template tool maps to a specific traversal pattern in the graph. The Similarity Search tool uses the `chunkEmbeddings` vector index to find semantically relevant filing passages. The Text2Cypher tool translates arbitrary natural language questions into Cypher queries for ad-hoc exploration.
 
-**Cypher Query:**
-```cypher
-MATCH (c:Company {name: $company_name})
-OPTIONAL MATCH (c)-[:FILED]->(d:Document)
-OPTIONAL MATCH (c)-[:FACES_RISK]->(r:RiskFactor)
-OPTIONAL MATCH (am:AssetManager)-[:OWNS]->(c)
-WITH c, d,
-     collect(DISTINCT r.name)[0..10] AS risks,
-     collect(DISTINCT am.managerName)[0..10] AS owners
-RETURN
-    c.name AS company,
-    c.ticker AS ticker,
-    d.path AS filing_path,
-    risks AS top_risk_factors,
-    owners AS major_asset_managers
-```
-
-![Add Cypher Template Tool](images/add_cypher_template.png)
-
-### Tool 2: Find Shared Risks Between Companies
-
-**Tool Name:** `find_shared_risks`
-
-**Description:** Find risk factors that two companies have in common from their SEC filings.
-
-**Parameters:**
-- `company1` (string) - First company name
-- `company2` (string) - Second company name
-
-**Cypher Query:**
-```cypher
-MATCH (c1:Company)-[:FACES_RISK]->(r:RiskFactor)<-[:FACES_RISK]-(c2:Company)
-WHERE c1.name = $company1 AND c2.name = $company2
-WITH c1, c2, collect(DISTINCT r.name) AS shared_risks
-RETURN
-    c1.name AS company_1,
-    c2.name AS company_2,
-    shared_risks,
-    size(shared_risks) AS num_shared_risks
-```
-
-![Find Shared Risks Tool](images/shared_risks_tool.png)
-
-## Step 4: Add Similarity Search Tool
-
-Click **Add Tool** and select **Similarity Search** to configure a semantic search tool using the existing vector index:
-
-**Tool Name:** `search_filing_content`
-
-**Description:** Search SEC filing content semantically to find relevant passages about specific topics, risks, or business information.
-
-**Configuration:**
-| Setting | Value |
-|---------|-------|
-| **Embedding provider** | `openai` |
-| **Embedding model** | `text-embedding-ada-002` |
-| **Vector Index** | `chunkEmbeddings` |
-| **Return Properties** | `text` |
-| **Top K** | 5 |
-
-![Similarity Search Tool](images/similarity_search.png)
-
-## Step 5: Add Text2Cypher Tool
-
-Click **Add Tool** and select **Text2Cypher** to enable natural language to Cypher translation:
-
-**Tool Name:** `query_database`
-
-**Description:** Query the SEC 10-K filings knowledge graph using natural language. This tool translates user questions into Cypher queries to retrieve precise data about companies, their risk factors from SEC filings, institutional ownership by asset managers, financial metrics, products mentioned in filings, and the relationships between these entities. Use this for ad-hoc questions that require flexible data exploration beyond the pre-defined Cypher templates.
-
-![Text2Cypher Tool](images/text2cypher.png)
-
-## Step 6: Test the Agent
+## Step 5: Test the Agent
 
 Test your agent with the sample questions below. After each test, observe:
 1. Which tool the agent selected and why
 2. The context retrieved from the knowledge graph
 3. How the agent synthesized the response
-4. Tool explanations showing the reasoning process
 
 ### Cypher Template Questions
 
-Try asking: **"Tell me about Apple's SEC filing and their major investors"**
+Try asking: **"Tell me about Apple Inc. including their risk factors, products, and major institutional investors"**
 
-The agent recognizes this matches the `get_company_overview` template and executes the pre-defined Cypher query with "APPLE INC" as the parameter.
+The agent recognizes this as a company lookup, selects the appropriate Cypher Template tool, and executes a graph traversal to retrieve Apple's filing details, risk factors, and institutional owners.
 
-![Apple Query](images/apple_query.png)
+![Apple Query Agent](images/5_apple_query_agent.png)
 
-We can see the agent's reasoning for selecting the `get_company_overview` tool and how it synthesized the response into a readable format:
+The reasoning panel shows the agent's decision process: it identified the question as a company overview request and selected the `get_company_overview` tool with `"APPLE INC"` as the parameter.
 
-![Apple Reasoning](images/apple_reasoning.png)
-
-Other Cypher template questions to try:
-- "What risks do Apple and Microsoft share?" - Uses the `find_shared_risks` template to compare risk factors between two companies.
+Other Cypher Template questions to try:
+- "What risks do Apple Inc. and Microsoft Corporation share?" - Compares risk factor nodes connected to both companies.
+- "Which companies does BlackRock Inc. own shares in?" - Traverses the OWNS relationships from the AssetManager node.
+- "What products does NVIDIA Corporation offer?" - Retrieves Product nodes linked to NVIDIA, returning GPU architectures, platforms, and software services.
+- "Who are the executives at NVIDIA Corporation?" - Traverses HAS_EXECUTIVE relationships to list leadership names and titles.
+- "Show me the documents filed by Apple Inc." - Uses the Documents by Company Identifier tool to retrieve SEC filing metadata.
 
 ### Semantic Search Questions
 
 Try asking: **"What do the filings say about AI and machine learning?"**
 
-The agent uses the similarity search tool to find semantically relevant passages from SEC filings, then synthesizes insights from Microsoft and NVIDIA's discussions of AI.
-
-![AI/ML Query](images/ai_ml_query.png)
+The agent uses the Similarity Search tool to find semantically relevant passages from SEC filings, then synthesizes insights across multiple companies' discussions of AI.
 
 Other semantic search questions to try:
 - "Find content about supply chain risks" - Searches for passages discussing supply chain challenges and dependencies.
 - "What do companies say about climate change?" - Finds relevant environmental risk disclosures across filings.
+- "Find content about cybersecurity risks and data breaches" - Searches for passages about cyberattacks, ransomware, and data protection across filings.
 
 ### Text2Cypher Questions
 
-Try asking: **"Which company has the most risk factors?"**
+Try asking: **"How many products does NVIDIA Corporation mention?"**
 
-The agent translates this natural language question into a Cypher query that counts risk factors per company and returns the highest.
-
-![Risk Factors Query](images/risk_factors.png)
+The agent translates this natural language question into a Cypher query that counts Product nodes linked to NVIDIA and returns the result.
 
 Other Text2Cypher questions to try:
-- "How many products does NVIDIA mention?" - Generates a query to count Product nodes linked to NVIDIA.
-- "What executives are mentioned by Apple?" - Creates a query to find Executive nodes associated with Apple.
+- "What executives does NVIDIA Corporation have?" - Generates a query to find Executive nodes and their titles associated with NVIDIA.
 
-## Step 7: (Optional) Deploy to API
+## Step 6: (Optional) Deploy to API
 
 Deploy your agent to a production endpoint:
 1. Click **Deploy** in the Aura Agent console
 2. Copy the authenticated API endpoint
 3. Use the endpoint in your applications
 
+## Step 7: (Optional) Connect as an MCP Server
+
+You can connect your Aura Agent to MCP-compatible clients like Claude Code, Claude Desktop, VS Code, or Cursor. This gives the client direct access to all the agent tools you just tested, without writing any code.
+
+See the full setup guide: **[MCP Server Setup](mcp_setup.md)**
+
+The quick version:
+
+1. **Enable External access and MCP server** on your agent (see [Configure](images/6_option_mcp_setup.png))
+2. **Copy the MCP server endpoint URL** from the agent menu (see [Copy Endpoint](images/7_option_mcp.png))
+3. **Get your API credentials** from Account Settings → API Keys
+4. **Configure your client** using the `.env.example` and `.mcp.json.template` files in this directory
+
 ## Summary
 
-You have now built an Aura Agent that combines three powerful retrieval patterns:
+The "Create with AI" workflow generated an agent with three retrieval patterns, each suited to different question types:
 
 | Tool Type | Purpose | Best For |
 |-----------|---------|----------|
-| **Cypher Templates** | Controlled, precise queries | Specific lookups, comparisons |
-| **Similarity Search** | Semantic retrieval | Finding relevant content by meaning |
-| **Text2Cypher** | Flexible natural language | Ad-hoc questions about the data |
+| **Cypher Templates** | Controlled, precise graph traversals | Specific lookups, comparisons |
+| **Similarity Search** | Semantic retrieval over filing text | Finding relevant content by meaning |
+| **Text2Cypher** | Flexible natural language to Cypher | Ad-hoc questions about the data |
 
-These same patterns are implemented programmatically in Lab 6 using Python and the Neo4j GraphRAG package.
+These same patterns are implemented programmatically in Labs 6 and 7 using Python and the Neo4j GraphRAG package.
 
 ## Next Steps
 
 **This completes Part 1 (No-Code Track) of the workshop.**
 
 To continue with the coding labs, proceed to [Lab 4 - Intro to Bedrock and Agents](../Lab_4_Intro_to_Bedrock_and_Agents) to set up your development environment in Amazon SageMaker and learn how AI agents work with LangGraph.
-
-## Future Tools
-
-These additional Cypher template tools can be added to extend the agent's capabilities:
-
-### Get Asset Manager Portfolio
-
-**Tool Name:** `get_manager_portfolio`
-
-**Description:** Get all companies owned by a specific asset manager and their associated risk factors.
-
-**Parameters:** `manager_name` (string) - The asset manager name (e.g., "BlackRock Inc.", "Berkshire Hathaway Inc")
-
-**Cypher Query:**
-```cypher
-MATCH (am:AssetManager {managerName: $manager_name})-[o:OWNS]->(c:Company)
-OPTIONAL MATCH (c)-[:FACES_RISK]->(r:RiskFactor)
-WITH am, c, o, collect(DISTINCT r.name)[0..5] AS company_risks
-RETURN
-    am.managerName AS asset_manager,
-    collect({
-        company: c.name,
-        ticker: c.ticker,
-        position_status: o.position_status,
-        key_risks: company_risks
-    }) AS portfolio
-```
-
-### List All Companies
-
-**Tool Name:** `list_companies`
-
-**Description:** List all companies in the knowledge graph with their risk factor counts.
-
-**Parameters:** None
-
-**Cypher Query:**
-```cypher
-MATCH (c:Company)
-OPTIONAL MATCH (c)-[:FACES_RISK]->(r:RiskFactor)
-WITH c, count(r) AS risk_count
-RETURN c.name AS company, c.ticker AS ticker, risk_count
-ORDER BY risk_count DESC
-LIMIT 20
-```
