@@ -140,4 +140,4 @@ Your Neo4j Aura database is now ready to use!
 
 ## Next Steps
 
-Return to the [main lab instructions](README.md) to continue with Part 2: Restoring the backup.
+Return to the [main lab instructions](README.md) to continue with Part 2: Loading the knowledge graph.

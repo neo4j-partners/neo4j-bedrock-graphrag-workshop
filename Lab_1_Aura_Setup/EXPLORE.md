@@ -96,18 +96,18 @@ This makes it easy to visually identify:
 
 Try these patterns to explore more of the knowledge graph:
 
-### Find Document Structure
+### Explore Company Products
 ```
-Company — FILED → Document — FROM_DOCUMENT ← Chunk
+Company — OFFERS → Product
 ```
-Shows how SEC filings are split into text chunks for processing.
+Reveals products and services mentioned in filings.
 
-### Explore Company Details
+### Explore Competitive Landscape
 ```
-Company — OFFERS_PRODUCT → Product
-Company — HAS_EXECUTIVE → Executive
+Company — COMPETES_WITH → Company
+Company — PARTNERS_WITH → Company
 ```
-Reveals products and leadership mentioned in filings.
+Shows competitive and partnership relationships between companies.
 
 ### Compare Risk Factors
 Click on a specific RiskFactor node and expand to see which companies share that risk.

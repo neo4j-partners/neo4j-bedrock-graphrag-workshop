@@ -363,10 +363,12 @@ SOLUTIONS = [
     ("solution_srcs.02_01_vector_retriever", "Vector Retriever", False, "main"),
     ("solution_srcs.02_02_vector_cypher_retriever", "Vector Cypher Retriever", False, "main"),
     ("solution_srcs.02_03_text2cypher_retriever", "Text2Cypher Retriever", False, "main"),
+    ("solution_srcs.03_01_basic_langgraph_agent", "Basic LangGraph Agent (Lab 3)", False, "main"),
+    ("solution_srcs.04_01_vector_search_mcp", "Vector Search via MCP (Lab 4)", True, "main"),
+    ("solution_srcs.04_02_graph_enriched_search_mcp", "Graph-Enriched Search via MCP (Lab 4)", True, "main"),
+    ("solution_srcs.04_03_fulltext_hybrid_search_mcp", "Fulltext & Hybrid Search via MCP (Lab 4)", True, "main"),
     ("solution_srcs.05_01_simple_agent", "Simple Agent", True, "run_agent"),
     ("solution_srcs.05_02_context_provider", "Context Provider Intro", True, "run_agent"),
-    ("solution_srcs.03_02_vector_graph_agent", "Vector Graph Agent", True, "run_agent"),
-    ("solution_srcs.03_03_text2cypher_agent", "Text2Cypher Agent", True, "run_agent"),
     ("solution_srcs.05_01_fulltext_search", "Fulltext Search", False, "main"),
     ("solution_srcs.05_02_hybrid_search", "Hybrid Search", False, "main"),
     ("solution_srcs.06_01_fulltext_context_provider", "Fulltext Context Provider", True, "run_agent"),
@@ -381,8 +383,6 @@ SOLUTIONS = [
 AGENT_QUERIES = {
     "solution_srcs.05_01_simple_agent": "Summarise the schema of the graph database.",
     "solution_srcs.05_02_context_provider": "Hello, what is the square root of 9?",
-    "solution_srcs.03_02_vector_graph_agent": "What risk factors are mentioned in Apple's financial documents?",
-    "solution_srcs.03_03_text2cypher_agent": "What stock has Microsoft issued?",
     "solution_srcs.06_01_fulltext_context_provider": "What products does Microsoft offer?",
     "solution_srcs.06_02_vector_context_provider": "What are the main business activities of tech companies?",
     "solution_srcs.06_03_graph_enriched_provider": "What are Apple's main products and what risks does the company face?",
@@ -405,24 +405,27 @@ def _print_solutions_menu():
     print("  5. Vector Retriever")
     print("  6. Vector Cypher Retriever")
     print("  7. Text2Cypher Retriever")
-    print("\nFoundry Agents (Lab 6):")
-    print("  8. Simple Agent")
-    print("  9. Context Provider Intro")
-    print("\nAdvanced Agents (Lab 9):")
-    print(" 10. Vector Graph Agent")
-    print(" 11. Text2Cypher Agent")
+    print("\nLab 3 - Basic Agent:")
+    print("  8. Basic LangGraph Agent")
+    print("\nLab 4 - MCP Retrieval:")
+    print("  9. Vector Search via MCP")
+    print(" 10. Graph-Enriched Search via MCP")
+    print(" 11. Fulltext & Hybrid Search via MCP")
+    print("\nAgents:")
+    print(" 12. Simple Agent")
+    print(" 13. Context Provider Intro")
     print("\nSearch:")
-    print(" 12. Fulltext Search")
-    print(" 13. Hybrid Search")
-    print("\nContext Providers (Lab 7):")
-    print(" 14. Fulltext Context Provider")
-    print(" 15. Vector Context Provider")
-    print(" 16. Graph-Enriched Provider")
-    print("\nAgent Memory (Lab 8):")
-    print(" 17. Memory Context Provider")
-    print(" 18. Entity Extraction Pipeline")
-    print(" 19. Memory Tools Agent")
-    print(" 20. Reasoning Memory")
+    print(" 14. Fulltext Search")
+    print(" 15. Hybrid Search")
+    print("\nContext Providers:")
+    print(" 16. Fulltext Context Provider")
+    print(" 17. Vector Context Provider")
+    print(" 18. Graph-Enriched Provider")
+    print("\nAgent Memory:")
+    print(" 19. Memory Context Provider")
+    print(" 20. Entity Extraction Pipeline")
+    print(" 21. Memory Tools Agent")
+    print(" 22. Reasoning Memory")
     print("\n  A. Run all (from option 4 onwards)")
     print("  0. Exit")
     print("=" * 50)

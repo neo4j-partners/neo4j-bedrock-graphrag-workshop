@@ -33,6 +33,7 @@ WITH node, score, company,
 OPTIONAL MATCH (company)-[:OFFERS]->(product:Product)
 WITH node, score, company, risks,
      collect(DISTINCT product.name)[0..5] AS products
+WHERE score IS NOT NULL
 RETURN
     node.text AS text,
     score,
@@ -40,7 +41,6 @@ RETURN
     company.ticker AS ticker,
     risks,
     products
-WHERE score IS NOT NULL
 ORDER BY score DESC
 """
 
