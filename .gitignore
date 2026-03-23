@@ -105,6 +105,13 @@ logs/
 *.swp
 *~
 
+# Azure
+.azure/
+
+# Snapshots
+model_snapshots/
+snapshots/
+
 # Secrets and credentials
 *.pem
 *.key

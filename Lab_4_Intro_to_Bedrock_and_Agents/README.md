@@ -79,14 +79,18 @@ Key concepts:
 ### Step 8: Clone the Git Repository
 
 1. With the `labs` folder open, click on the **Git icon** in the left sidebar (it looks like a diamond/branch symbol)
-2. Click **Clone a Repository** button
-3. In the "Clone Git Repository" dialog, enter the repository URL:
+2. If a **Clone a Repository** button is visible, click it and enter the repository URL:
    ```
    https://github.com/neo4j-partners/lab-neo4j-aws.git
    ```
-4. Leave "Open README files" checked and click **Clone** to download the lab materials
-
-![Clone Git Repository](images/09_clone_git_repository.png)
+   If the clone button is not available, open a terminal instead:
+   1. In the JupyterLab Launcher, click **Terminal** under the **Other** section
+   2. Run these commands to clone the repository into your labs folder:
+      ```bash
+      cd labs
+      git clone https://github.com/neo4j-partners/lab-neo4j-aws.git
+      ```
+3. Once the clone completes, click the **file browser icon** (folder icon) in the left sidebar to navigate into the `labs/lab-neo4j-aws` directory
 
 ## Introduction to Agents
 
@@ -119,7 +123,7 @@ This pattern allows the agent to reason about what tools to use, execute them, o
    - Test the agent with sample queries
    - Ask questions about sample SEC financial filing data
 
-This confirms that LangGraph and Bedrock are working correctly before you add Neo4j and MCP in Lab 5.
+This confirms that LangGraph and Bedrock are working correctly before you add Neo4j and MCP in Lab 6.
 
 ## Key Code Patterns
 
@@ -155,4 +159,4 @@ agent = graph.compile()
 
 ## Next Steps
 
-Continue to [Lab 5 - GraphRAG with Neo4j](../Lab_5_GraphRAG) to learn how to build GraphRAG pipelines using the neo4j-graphrag library with Amazon Titan embeddings.
+Continue to [Lab 6 - GraphRAG with Neo4j](../Lab_6_GraphRAG) to learn how to build GraphRAG pipelines using the neo4j-graphrag library with Amazon Titan embeddings.

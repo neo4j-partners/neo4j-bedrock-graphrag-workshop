@@ -1,4 +1,4 @@
-# Lab 5 - Consolidated GraphRAG
+# Lab 6 - Consolidated GraphRAG
 
 Build a complete GraphRAG pipeline over SEC 10-K financial filing data using Neo4j and Amazon Bedrock. This lab walks through six notebooks that progress from loading raw text into a knowledge graph to running hybrid retrieval queries that combine vector similarity, keyword matching, and graph traversal.
 
@@ -42,4 +42,4 @@ Each retriever fits a different query shape. The right choice depends on whether
 
 ## Next Steps
 
-After completing this lab, continue to [Lab 6](../Lab_6_Neo4j_MCP_Agent/) to build MCP agents that use these retrieval patterns as tools.
+After completing this lab, continue to [Lab 7](../Lab_7_Neo4j_MCP_Agent/) to build MCP agents that use these retrieval patterns as tools.

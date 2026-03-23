@@ -6,9 +6,9 @@ The `lab-neo4j-aws` workshop (financial/SEC domain) and the `neo4j-aws-manufactu
 
 The manufacturing workshop has three properties the financial workshop lacks:
 
-1. **A complete lab progression.** Manufacturing covers no-code agents, a LangGraph foundations lab, consolidated GraphRAG, MCP integration, and Aura Agents API across seven labs with clean numbering (0-2, 4-7). The financial workshop jumps from Lab 3 to Lab 6, has no Bedrock/Agents intro lab, no MCP lab, and no API integration lab. Participants who complete the financial workshop leave without exposure to MCP or programmatic agent access.
+1. **A complete lab progression.** Manufacturing covers no-code agents, a LangGraph foundations lab, consolidated GraphRAG, MCP integration, and Aura Agents API across seven labs with clean numbering (0-2, 4-8). The financial workshop jumps from Lab 3 to Lab 6, has no Bedrock/Agents intro lab, no MCP lab, and no API integration lab. Participants who complete the financial workshop leave without exposure to MCP or programmatic agent access.
 
-2. **Consolidated GraphRAG content.** Manufacturing teaches data loading, embeddings, vector retrieval, vector-cypher retrieval, fulltext search, and hybrid search in a single lab (Lab 5) with six progressive notebooks and a shared `data_utils.py` utilities module. The financial workshop scatters this across four separate labs (6, 7, 8, 9) with duplicated setup code and no shared utilities.
+2. **Consolidated GraphRAG content.** Manufacturing teaches data loading, embeddings, vector retrieval, vector-cypher retrieval, fulltext search, and hybrid search in a single lab (Lab 6) with six progressive notebooks and a shared `data_utils.py` utilities module. The financial workshop scatters this across four separate labs (6, 7, 8, 9) with duplicated setup code and no shared utilities.
 
 3. **Operational infrastructure.** Manufacturing ships with a `setup/` directory containing CLI validation tools (populate, verify, test-queries), a `TransformedData/` directory with documented CSV data and an Excalidraw data model diagram, a `CONFIG.txt` template, and a `CLAUDE.md` for Claude Code users. The financial workshop has none of these.
 
@@ -28,13 +28,13 @@ Restructure `lab-neo4j-aws` to match the manufacturing workshop's lab numbering,
 | Lab 1 | Existing Lab 1 | Neo4j Aura setup and backup restore |
 | Lab 2 | Existing Lab 2 | No-code Aura Agents (Cypher templates, similarity search, Text2Cypher) |
 | Lab 4 | **New** | Intro to Bedrock and Agents (LangGraph foundations, tool binding, ReAct pattern) |
-| Lab 5 | Existing Labs 6, 7, 9 consolidated | GraphRAG: six notebooks (data loading, embeddings, vector retriever, vector-cypher retriever, fulltext search, hybrid search) |
-| Lab 6 | **New** | Neo4j MCP Agent (LangGraph and Strands implementations, schema-first querying) |
-| Lab 7 | **New** | Aura Agents API (OAuth2 flow, REST client, async batch queries) |
+| Lab 6 | Existing Labs 6, 7, 9 consolidated | GraphRAG: six notebooks (data loading, embeddings, vector retriever, vector-cypher retriever, fulltext search, hybrid search) |
+| Lab 7 | **New** | Neo4j MCP Agent (LangGraph and Strands implementations, schema-first querying) |
+| Lab 8 | **New** | Aura Agents API (OAuth2 flow, REST client, async batch queries) |
 
-Lab 3 (Bedrock Setup) merges into Lab 4's prerequisites section rather than standing alone. Existing Lab 8 (Strands agents) is not a separate lab; the agent patterns move into Lab 6 as the Strands MCP implementation.
+Lab 3 (Bedrock Setup) merges into Lab 4's prerequisites section rather than standing alone. Existing Lab 8 (Strands agents) is not a separate lab; the agent patterns move into Lab 7 as the Strands MCP implementation.
 
-**Shared utilities module.** Create `data_utils.py` at the root or Lab 5 level, consolidating Neo4j connection management, Bedrock client initialization, CSV loading, and text splitting from `config.py` into a Pydantic-based module matching the manufacturing pattern (`Neo4jConfig`, `BedrockConfig`, `Neo4jConnection`). Remove `config.py`.
+**Shared utilities module.** Create `data_utils.py` at the root or Lab 6 level, consolidating Neo4j connection management, Bedrock client initialization, CSV loading, and text splitting from `config.py` into a Pydantic-based module matching the manufacturing pattern (`Neo4jConfig`, `BedrockConfig`, `Neo4jConnection`). Remove `config.py`.
 
 **Data and documentation directory.** Create `TransformedData/` with the SEC financial CSVs (companies, products, risk factors, financial metrics, executives, asset managers, and relationship junction tables), a `DATA_ARCHITECTURE.md` documenting the graph schema, and an Excalidraw data model diagram.
 
@@ -45,7 +45,7 @@ Lab 3 (Bedrock Setup) merges into Lab 4's prerequisites section rather than stan
 
 **Configuration files.** Add `CLAUDE.md` with project-specific instructions for Claude Code users. Add slides directories to each lab.
 
-**Cleanup.** Remove `new-workshops/` entirely. Its solution scripts are superseded by the consolidated Lab 5 notebooks and the `setup/solutions_bedrock/` validator. Remove `infra/cdk/` monitoring stack (CloudWatch dashboard/logs that are not used in workshops) but keep the Bedrock IAM stack.
+**Cleanup.** Remove `new-workshops/` entirely. Its solution scripts are superseded by the consolidated Lab 6 notebooks and the `setup/solutions_bedrock/` validator. Remove `infra/cdk/` monitoring stack (CloudWatch dashboard/logs that are not used in workshops) but keep the Bedrock IAM stack.
 
 ### How this solves the problem
 
@@ -55,7 +55,7 @@ Participants follow the same progression regardless of which domain workshop the
 
 - Seven labs with consistent numbering across both workshops
 - Three new labs (Bedrock intro, MCP agent, Aura Agents API) added to the financial domain
-- Four existing labs (6, 7, 8, 9) consolidated into one (Lab 5) with six notebooks
+- Four existing labs (6, 7, 8, 9) consolidated into one (Lab 6) with six notebooks
 - One lab removed as standalone (Lab 3, merged into Lab 4 prerequisites)
 - One directory removed (`new-workshops/`)
 - Shared `data_utils.py` replacing `config.py`
@@ -65,10 +65,10 @@ Participants follow the same progression regardless of which domain workshop the
 
 ### Lab structure
 
-- Labs numbered 0, 1, 2, 4, 5, 6, 7 matching the manufacturing workshop. No Lab 3.
+- Labs numbered 0, 1, 2, 4, 6, 7, 8 matching the manufacturing workshop. No Lab 3.
 - Each lab directory contains a `README.md` with objectives, prerequisites, and step-by-step instructions.
 - Each lab directory contains a `slides/` subdirectory for presentation materials.
-- Labs 0-2 require no coding. Labs 4-7 use Jupyter notebooks.
+- Labs 0-2 require no coding. Labs 4-8 use Jupyter notebooks.
 
 ### Lab 4: Intro to Bedrock and Agents
 
@@ -78,7 +78,7 @@ Participants follow the same progression regardless of which domain workshop the
 - Uses ChatBedrockConverse with inference profiles.
 - Includes the Bedrock model access verification currently in Lab 3.
 
-### Lab 5: GraphRAG
+### Lab 6: GraphRAG
 
 - Six notebooks in sequence: `01_data_loading`, `02_embeddings`, `03_vector_retriever`, `04_vector_cypher_retriever`, `05_fulltext_search`, `06_hybrid_search`.
 - All notebooks import from a shared `data_utils.py` module.
@@ -87,14 +87,14 @@ Participants follow the same progression regardless of which domain workshop the
 - Each retriever notebook includes a retriever selection guide comparing when to use each pattern.
 - `data_utils.py` uses Pydantic settings for `Neo4jConfig` and `BedrockConfig`.
 
-### Lab 6: Neo4j MCP Agent
+### Lab 7: Neo4j MCP Agent
 
 - README explains MCP concepts (transport, tool discovery, schema-first querying).
 - Two notebook implementations: one with LangGraph, one with Strands Agents SDK.
 - Uses Neo4j MCP Server tools (`get-schema`, `read-cypher`).
 - Documents the AWS deployment architecture (AgentCore Gateway, Secrets Manager).
 
-### Lab 7: Aura Agents API
+### Lab 8: Aura Agents API
 
 - Covers OAuth2 client credentials flow against `api.neo4j.io`.
 - Builds a typed Python client with Pydantic response models.
@@ -121,24 +121,24 @@ Participants follow the same progression regardless of which domain workshop the
 
 - [x] Inventory all notebooks, code, and data across existing Labs 3, 6, 7, 8, 9
 - [x] Map each notebook's content to the target lab structure
-- [x] Identify SEC-domain adaptations needed for new labs (4, 6, 7) based on manufacturing originals
+- [x] Identify SEC-domain adaptations needed for new labs (4, 7, 8) based on manufacturing originals
 - [x] Document the financial graph schema for `DATA_ARCHITECTURE.md`
 
 **Mapping (completed):**
 
 | Existing | Target | Content |
 |----------|--------|---------|
-| Lab 6/01_data_loading | Lab 5/01_data_loading | Document→Chunk graph creation |
-| Lab 6/02_embeddings | Lab 5/02_embeddings | Titan V2 embeddings + vector index |
-| Lab 7/01_vector_retriever | Lab 5/03_vector_retriever | VectorRetriever + GraphRAG |
-| Lab 7/02_vector_cypher_retriever | Lab 5/04_vector_cypher_retriever | Graph-enhanced retrieval |
-| Lab 9/01_fulltext_search | Lab 5/05_fulltext_search | Fulltext indexes + operators |
-| Lab 9/02_hybrid_search | Lab 5/06_hybrid_search | HybridRetriever + alpha tuning |
+| Lab 6/01_data_loading | Lab 6/01_data_loading | Document→Chunk graph creation |
+| Lab 6/02_embeddings | Lab 6/02_embeddings | Titan V2 embeddings + vector index |
+| Lab 7/01_vector_retriever | Lab 6/03_vector_retriever | VectorRetriever + GraphRAG |
+| Lab 7/02_vector_cypher_retriever | Lab 6/04_vector_cypher_retriever | Graph-enhanced retrieval |
+| Lab 9/01_fulltext_search | Lab 6/05_fulltext_search | Fulltext indexes + operators |
+| Lab 9/02_hybrid_search | Lab 6/06_hybrid_search | HybridRetriever + alpha tuning |
 | Lab 6/03_entity_extraction | Dropped (uses SimpleKGPipeline, not in scope) |
 | Lab 6/04_full_dataset | Dropped (pre-built graph loaded in Lab 1) |
 | Lab 6/05_advanced_queries | Dropped (advanced queries, optional) |
-| Lab 7/03_text2cypher | Lab 6 MCP agent (schema-first Text2Cypher via MCP) |
-| Lab 8/01-03_agents | Lab 6 (Strands agent patterns move to MCP notebook) |
+| Lab 7/03_text2cypher | Lab 7 MCP agent (schema-first Text2Cypher via MCP) |
+| Lab 8/01-03_agents | Lab 7 (Strands agent patterns move to MCP notebook) |
 | Lab 3 Bedrock setup | Lab 4 prerequisites section |
 
 ### Phase 2: Implementation
@@ -154,14 +154,14 @@ Participants follow the same progression regardless of which domain workshop the
   - README.md with SageMaker setup instructions
   - basic_langgraph_agent.ipynb (23 cells)
   - load_sample_data.py + sample_financial_data.txt
-- [x] Consolidate Labs 6, 7, 9 into new Lab 5 with six notebooks importing `data_utils.py`
+- [x] Consolidate Labs 6, 7, 9 into new Lab 6 with six notebooks importing `data_utils.py`
   - 01_data_loading through 06_hybrid_search (6 notebooks)
   - financial_data.txt, src/pyproject.toml, README.md
-- [x] Build Lab 6 (MCP Agent) adapted from manufacturing, with LangGraph and Strands notebooks querying financial data
+- [x] Build Lab 7 (MCP Agent) adapted from manufacturing, with LangGraph and Strands notebooks querying financial data
   - neo4j_langgraph_mcp_agent.ipynb (21 cells)
   - neo4j_strands_mcp_agent.ipynb (18 cells)
   - README.md with MCP architecture and deployment docs
-- [x] Build Lab 7 (Aura Agents API) adapted from manufacturing, invoking the financial domain agent from Lab 2
+- [x] Build Lab 8 (Aura Agents API) adapted from manufacturing, invoking the financial domain agent from Lab 2
   - aura_agent_client.ipynb (34 cells) with AuraAgentClient class
   - README.md with OAuth2 flow and credentials guide
 - [x] Create `setup/populate/` CLI for financial knowledge graph loading
@@ -173,7 +173,7 @@ Participants follow the same progression regardless of which domain workshop the
 - [x] Add `CONFIG.txt`, `CLAUDE.md`, and `slides/` directories
   - CONFIG.txt with all env vars grouped by lab
   - CLAUDE.md with repo overview and code patterns
-  - slides/ in Labs 0, 1, 2, 4, 5, 6, 7
+  - slides/ in Labs 0, 1, 2, 4, 6, 7, 8
 - [x] Remove `new-workshops/`, `config.py`, `setup_env.py`, and old lab directories
   - Removed: new-workshops/, Lab_3_Bedrock_Setup/, Lab_6_Knowledge_Graph/,
     Lab_7_Retrievers/, Lab_8_Agents/, Lab_9_Hybrid_Search/, config.py, setup_env.py
@@ -212,9 +212,9 @@ The following images are referenced in documentation but do not exist yet. These
 ### Phase 3: Verification
 
 - [ ] Run `setup/populate/` against a fresh Aura instance and verify node/relationship counts
-- [ ] Execute all six Lab 5 notebooks end-to-end
-- [ ] Execute both Lab 6 notebooks (LangGraph and Strands MCP agents)
-- [ ] Execute Lab 7 notebook against a running Aura Agent
+- [ ] Execute all six Lab 6 notebooks end-to-end
+- [ ] Execute both Lab 7 notebooks (LangGraph and Strands MCP agents)
+- [ ] Execute Lab 8 notebook against a running Aura Agent
 - [ ] Run `setup/solutions_bedrock/` validation suite
 - [ ] Verify no references to removed files or old lab numbers remain
 - [ ] Walk through Labs 0-2 README instructions manually

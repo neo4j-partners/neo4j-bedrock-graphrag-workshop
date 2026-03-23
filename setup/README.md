@@ -26,7 +26,7 @@ uv run populate-financial-db samples     # Run sample Cypher queries
 
 ### solutions_bedrock -- Validate GraphRAG Retrievers
 
-Runs a 6-phase validation of the Lab 5 GraphRAG pipeline: data loading, embeddings, vector retriever, vector-cypher retriever, fulltext search, and hybrid search.
+Runs a 6-phase validation of the Lab 6 GraphRAG pipeline: data loading, embeddings, vector retriever, vector-cypher retriever, fulltext search, and hybrid search.
 
 ```bash
 cd setup/solutions_bedrock

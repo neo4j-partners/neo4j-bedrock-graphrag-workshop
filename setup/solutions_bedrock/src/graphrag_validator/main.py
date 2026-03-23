@@ -1,5 +1,5 @@
 """
-Typer CLI for validating the Lab 5 GraphRAG pipeline.
+Typer CLI for validating the Lab 6 GraphRAG pipeline.
 
 Commands:
     test   Run 6-phase validation (data loading, embeddings, vector,

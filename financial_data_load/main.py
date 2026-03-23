@@ -312,10 +312,10 @@ def cmd_samples(args):
 # Module prefixes align with workshop labs:
 #   01_xx = Lab 8 (Building a Knowledge Graph)
 #   02_xx = Lab 10 (Advanced Retrievers)
-#   03_xx = Lab 5 + Lab 9 (Foundry Agents + Advanced Agents)
+#   03_xx = Lab 6 + Lab 9 (Foundry Agents + Advanced Agents)
 #   05_xx = Lab 11 (Hybrid Search)
-#   06_xx = Lab 6 (Context Providers)
-#   07_xx = Lab 7 (Agent Memory)
+#   06_xx = Lab 7 (Context Providers)
+#   07_xx = Lab 8 (Agent Memory)
 SOLUTIONS = [
     ("solution_srcs.01_01_data_loading", "Data Loading Fundamentals", False, "main"),
     ("solution_srcs.01_02_embeddings", "Embeddings", True, "main"),
@@ -366,7 +366,7 @@ def _print_solutions_menu():
     print("  5. Vector Retriever")
     print("  6. Vector Cypher Retriever")
     print("  7. Text2Cypher Retriever")
-    print("\nFoundry Agents (Lab 5):")
+    print("\nFoundry Agents (Lab 6):")
     print("  8. Simple Agent")
     print("  9. Context Provider Intro")
     print("\nAdvanced Agents (Lab 9):")
@@ -375,11 +375,11 @@ def _print_solutions_menu():
     print("\nSearch:")
     print(" 12. Fulltext Search")
     print(" 13. Hybrid Search")
-    print("\nContext Providers (Lab 6):")
+    print("\nContext Providers (Lab 7):")
     print(" 14. Fulltext Context Provider")
     print(" 15. Vector Context Provider")
     print(" 16. Graph-Enriched Provider")
-    print("\nAgent Memory (Lab 7):")
+    print("\nAgent Memory (Lab 8):")
     print(" 17. Memory Context Provider")
     print(" 18. Entity Extraction Pipeline")
     print(" 19. Memory Tools Agent")

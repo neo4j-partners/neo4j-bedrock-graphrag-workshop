@@ -188,7 +188,7 @@ You have now built an Aura Agent that combines three powerful retrieval patterns
 | **Similarity Search** | Semantic retrieval | Finding relevant content by meaning |
 | **Text2Cypher** | Flexible natural language | Ad-hoc questions about the data |
 
-These same patterns are implemented programmatically in Lab 5 using Python and the Neo4j GraphRAG package.
+These same patterns are implemented programmatically in Lab 6 using Python and the Neo4j GraphRAG package.
 
 ## Next Steps
 

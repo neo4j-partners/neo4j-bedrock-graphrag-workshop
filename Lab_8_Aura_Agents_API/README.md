@@ -1,4 +1,4 @@
-# Lab 7 - Aura Agents API
+# Lab 8 - Aura Agents API
 
 In this lab, you'll call the Neo4j Aura Agent you built in Lab 2 programmatically using Python. The same agent that answers questions about SEC 10-K filings through the Aura console becomes accessible via REST API, enabling integration into applications, data pipelines, and automated workflows.
 

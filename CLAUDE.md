@@ -9,8 +9,8 @@ This is a hands-on workshop teaching GraphRAG (Graph Retrieval-Augmented Generat
 ## Workshop Structure
 
 - **Part 1 (Labs 0-2)**: No-code exploration using Neo4j Aura console and Aura Agents visual builder
-- **Part 2 (Labs 4-5)**: Python-based GraphRAG with LangGraph and neo4j-graphrag library
-- **Part 3 (Labs 6-7)**: Advanced MCP (Model Context Protocol) agents and Aura Agents API
+- **Part 2 (Labs 4-6)**: Python-based GraphRAG with LangGraph and neo4j-graphrag library
+- **Part 3 (Labs 7-8)**: Advanced MCP (Model Context Protocol) agents and Aura Agents API
 
 ## Key Configuration
 
@@ -43,8 +43,8 @@ if MODEL_ID.startswith("us.anthropic."):
     BASE_MODEL_ID = MODEL_ID.replace("us.anthropic.", "anthropic.")
 ```
 
-### Lab 5 - GraphRAG
-Location: `Lab_5_GraphRAG/`
+### Lab 6 - GraphRAG
+Location: `Lab_6_GraphRAG/`
 
 Six notebooks covering data loading, embeddings, vector retrieval, graph-enhanced retrieval, full-text search, and hybrid search.
 
@@ -72,8 +72,8 @@ Graph structure for SEC financial data:
 (:Company) -[:FILED]-> (:Document) <-[:FROM_DOCUMENT]- (:Chunk) -[:NEXT_CHUNK]-> (:Chunk)
 ```
 
-### Lab 6 - MCP Agent
-Location: `Lab_6_Neo4j_MCP_Agent/`
+### Lab 7 - MCP Agent
+Location: `Lab_7_Neo4j_MCP_Agent/`
 
 Two implementations:
 - `neo4j_langgraph_mcp_agent.ipynb`: LangGraph + langchain-mcp-adapters
@@ -85,8 +85,8 @@ from mcp.client.streamable_http import streamablehttp_client
 from langchain_mcp_adapters.tools import load_mcp_tools
 ```
 
-### Lab 7 - Aura Agents API
-Location: `Lab_7_Aura_Agents_API/aura_agent_client.ipynb`
+### Lab 8 - Aura Agents API
+Location: `Lab_8_Aura_Agents_API/aura_agent_client.ipynb`
 
 Contains `AuraAgentClient` class for OAuth2 authentication and agent invocation:
 - Token URL: `https://api.neo4j.io/oauth/token`
@@ -118,7 +118,7 @@ The notebooks are designed for AWS SageMaker Studio but work locally with:
 
 ## Dependencies
 
-Lab 5 uses `pyproject.toml` at `Lab_5_GraphRAG/src/pyproject.toml`:
+Lab 6 uses `pyproject.toml` at `Lab_6_GraphRAG/src/pyproject.toml`:
 - Python 3.11+
 - neo4j-graphrag[bedrock] (from neo4j-partners fork)
 - python-dotenv, pydantic-settings, nest-asyncio

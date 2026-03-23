@@ -1,4 +1,4 @@
-# Lab 6 - Neo4j MCP Agent
+# Lab 7 - Neo4j MCP Agent
 
 Connect AI agents to your Neo4j knowledge graph using the Model Context Protocol (MCP). Instead of writing Cypher queries by hand, you will ask natural language questions and let an AI agent query the SEC financial data for you.
 
@@ -107,4 +107,4 @@ Once your agent is running, try these questions about the SEC financial data:
 
 ## Next Steps
 
-After completing this lab, continue to [Lab 7 - Aura Agents API](../Lab_7_Aura_Agents_API/) to interact with Neo4j Aura Agents through a REST API.
+After completing this lab, continue to [Lab 8 - Aura Agents API](../Lab_8_Aura_Agents_API/) to interact with Neo4j Aura Agents through a REST API.

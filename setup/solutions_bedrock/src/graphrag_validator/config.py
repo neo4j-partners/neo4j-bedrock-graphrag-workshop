@@ -1,5 +1,5 @@
 """
-Configuration for the graphrag-validator CLI (Lab 5 validation).
+Configuration for the graphrag-validator CLI (Lab 6 validation).
 
 Loads settings from environment variables with fallback to CONFIG.txt
 at the repository root.

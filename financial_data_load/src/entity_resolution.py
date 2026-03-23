@@ -40,7 +40,7 @@ class EntityResolutionConfig(BaseSettings):
     confidence_mode: str = "binary"
     confidence_threshold: float = 0.8
     max_group_size: int = 10
-    model_name: str = "gpt-4o"
+    model_name: str = "gpt-4.1-mini"
 
 
 # ---------------------------------------------------------------------------
