@@ -9,7 +9,6 @@ Run with: uv run python main.py solutions <N>
 """
 
 import asyncio
-import json
 import os
 import sys
 
@@ -91,12 +90,12 @@ async def run():
         top_k = int(top_k)
 
         return await mcp_conn.execute_query(f"""
-            CALL db.index.vector.queryNodes('chunkEmbeddings', {top_k}, {json.dumps(embedding)})
+            CALL db.index.vector.queryNodes('chunkEmbeddings', {top_k}, $query_vector)
             YIELD node, score
             WITH node {{.*, embedding: null}} AS node, score
             RETURN node.text AS text, score
             ORDER BY score DESC
-        """)
+        """, params={"query_vector": embedding})
 
     agent = Agent(
         model=bedrock_model,

@@ -3,108 +3,56 @@ Graph-Enriched Search via MCP
 
 This solution demonstrates vector search enriched with graph context
 (documents, neighboring chunks, entities) through the Neo4j MCP server
-using the Strands Agents SDK.
+using @tool wrappers that encapsulate embedding generation and Cypher
+execution, keeping embeddings off the LLM context window.
 
 Run with: uv run python main.py solutions <N>
 """
 
-import json
+import asyncio
 import os
+import sys
 
-import boto3
+import nest_asyncio
 from dotenv import load_dotenv
-from mcp.client.streamable_http import streamablehttp_client
-from strands import Agent
+from strands import Agent, tool
 from strands.models import BedrockModel
-from strands.tools.mcp import MCPClient
+
+nest_asyncio.apply()
+
+# Add financial_data_load to sys.path so local lib imports work
+FINANCIAL_DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, FINANCIAL_DATA_DIR)
+
+from lib.data_utils import get_embedding  # noqa: E402
+from lib.mcp_utils import MCPConnection  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # 1. Configuration
 # ---------------------------------------------------------------------------
 
-# Load .env from financial_data_load directory (same as config.py)
 _env_path = os.path.join(os.path.dirname(__file__), "..", ".env")
 load_dotenv(_env_path)
 
 MODEL_ID = os.getenv("MODEL_ID", "us.anthropic.claude-sonnet-4-6")
 REGION = os.getenv("AWS_REGION", os.getenv("REGION", "us-east-1"))
-MCP_GATEWAY_URL = os.getenv("MCP_GATEWAY_URL")
-MCP_ACCESS_TOKEN = os.getenv("MCP_ACCESS_TOKEN")
-
-# ---------------------------------------------------------------------------
-# 2. Embedding Helper
-# ---------------------------------------------------------------------------
-
-NOVA_MODEL_ID = "amazon.nova-2-multimodal-embeddings-v1:0"
-EMBEDDING_DIMENSIONS = 1024
-
-bedrock_runtime = boto3.client("bedrock-runtime", region_name=REGION)
-
-
-def get_embedding(text: str) -> list[float]:
-    """Generate an embedding vector for the given text using Bedrock Nova."""
-    request_body = {
-        "taskType": "SINGLE_EMBEDDING",
-        "singleEmbeddingParams": {
-            "embeddingPurpose": "GENERIC_INDEX",
-            "embeddingDimension": EMBEDDING_DIMENSIONS,
-            "text": {
-                "truncationMode": "END",
-                "value": text,
-            },
-        },
-    }
-    response = bedrock_runtime.invoke_model(
-        modelId=NOVA_MODEL_ID,
-        body=json.dumps(request_body),
-    )
-    result = json.loads(response["body"].read())
-    return result["embeddings"][0]["embedding"]
 
 
 # ---------------------------------------------------------------------------
-# 3. System Prompts
+# 2. System Prompts
 # ---------------------------------------------------------------------------
 
-VECTOR_ONLY_PROMPT = """You are a retrieval assistant that performs vector search against a Neo4j database.
+VECTOR_ONLY_PROMPT = """You are a retrieval assistant that performs semantic vector search against a Neo4j database containing SEC 10-K filing data.
 
-When given a query embedding, use this Cypher to find similar chunks:
+You have a vector_search tool that finds semantically similar text chunks. Call it with a natural language query and an optional top_k parameter.
 
-CALL db.index.vector.queryNodes('chunkEmbeddings', $top_k, $embedding)
-YIELD node, score
-WITH node {.*, embedding: null} AS node, score
-RETURN node.text AS text, score
-ORDER BY score DESC
-
-Return the chunk text and similarity score. Use the exact embedding provided."""
+For each result, show the similarity score and a preview of the chunk text."""
 
 GRAPH_ENRICHED_PROMPT = """You are a retrieval assistant that performs graph-enriched vector search against a Neo4j database containing SEC 10-K filing data.
 
-When given a query embedding, use this Cypher to find similar chunks WITH graph context:
+You have a graph_enriched_search tool that finds similar chunks and enriches them with the source document name and neighboring chunk text for additional context.
 
-CALL db.index.vector.queryNodes('chunkEmbeddings', $top_k, $embedding)
-YIELD node, score
-MATCH (node)-[:FROM_DOCUMENT]->(doc:Document)
-OPTIONAL MATCH (node)-[:NEXT_CHUNK]->(next:Chunk)
-OPTIONAL MATCH (prev:Chunk)-[:NEXT_CHUNK]->(node)
-WITH node, doc, score,
-     CASE WHEN prev IS NOT NULL THEN prev.text ELSE '' END AS prev_text,
-     CASE WHEN next IS NOT NULL THEN next.text ELSE '' END AS next_text
-WITH node {.*, embedding: null} AS node, doc, score, prev_text, next_text
-RETURN node.text AS text,
-       score,
-       doc.name AS document,
-       prev_text AS previous_chunk,
-       next_text AS next_chunk
-ORDER BY score DESC
-
-This query:
-1. Finds the most similar chunks via vector search
-2. Traverses FROM_DOCUMENT to get the source document name
-3. Follows NEXT_CHUNK relationships to get neighboring chunk text
-4. Returns the enriched context alongside each match
-
-Use the exact embedding provided. For each result, show:
+For each result, show:
 - Similarity score
 - Source document name
 - The matched chunk text
@@ -112,35 +60,9 @@ Use the exact embedding provided. For each result, show:
 
 ENTITY_ENRICHED_PROMPT = """You are a retrieval assistant that performs entity-enriched vector search against a Neo4j database containing SEC 10-K filing data.
 
-When given a query embedding, use this Cypher to find similar chunks WITH entity context:
+You have an entity_enriched_search tool that finds similar chunks and enriches them with connected companies, products, and risk factors from the knowledge graph.
 
-CALL db.index.vector.queryNodes('chunkEmbeddings', $top_k, $embedding)
-YIELD node, score
-MATCH (node)-[:FROM_DOCUMENT]->(doc:Document)
-OPTIONAL MATCH (doc)<-[:FILED]-(company:Company)
-OPTIONAL MATCH (company)-[:FACES_RISK]->(risk:RiskFactor)
-WITH node, doc, score,
-     collect(DISTINCT company.name) AS companies,
-     collect(DISTINCT risk.name)[0..5] AS risks
-OPTIONAL MATCH (product:Product)-[:FROM_CHUNK]->(node)
-WITH node, doc, score, companies, risks,
-     collect(DISTINCT product.name)[0..5] AS products
-WITH node {.*, embedding: null} AS node, doc, score, companies, risks, products
-RETURN node.text AS text,
-       score,
-       doc.name AS document,
-       companies,
-       risks,
-       products
-ORDER BY score DESC
-
-This query:
-1. Finds the most similar chunks via vector search
-2. Traverses FROM_DOCUMENT to get the source document
-3. Follows FILED to find the company that filed the document
-4. Follows FACES_RISK from companies to find their risk factors
-
-Use the exact embedding provided. For each result, show:
+For each result, show:
 - Similarity score
 - Source document name
 - The matched chunk text
@@ -148,168 +70,187 @@ Use the exact embedding provided. For each result, show:
 
 QA_PROMPT = """You are a financial analysis assistant with access to a Neo4j knowledge graph containing SEC 10-K filing data.
 
-You have MCP tools to execute Cypher queries. Use entity-enriched vector search to answer questions:
-
-CALL db.index.vector.queryNodes('chunkEmbeddings', $top_k, $embedding)
-YIELD node, score
-MATCH (node)-[:FROM_DOCUMENT]->(doc:Document)
-OPTIONAL MATCH (doc)<-[:FILED]-(company:Company)
-OPTIONAL MATCH (company)-[:FACES_RISK]->(risk:RiskFactor)
-WITH node, doc, score,
-     collect(DISTINCT company.name) AS companies,
-     collect(DISTINCT risk.name)[0..5] AS risks
-OPTIONAL MATCH (product:Product)-[:FROM_CHUNK]->(node)
-WITH node, doc, score, companies, risks,
-     collect(DISTINCT product.name)[0..5] AS products
-WITH node {.*, embedding: null} AS node, doc, score, companies, risks, products
-RETURN node.text AS text, score, doc.name AS document,
-       companies, risks, products
-ORDER BY score DESC
+You have an entity_enriched_search tool that searches for relevant chunks enriched with companies, products, and risk factors.
 
 After retrieving results, synthesize a clear answer based on the retrieved context.
-Include the companies, products, and risk factors found. Cite the source documents.
-Use the exact embedding provided."""
+Include the companies, products, and risk factors found. Cite the source documents."""
 
 
 # ---------------------------------------------------------------------------
-# 4. Initialize Model and MCP Client
-# ---------------------------------------------------------------------------
-
-bedrock_model = BedrockModel(
-    model_id=MODEL_ID,
-    region_name=REGION,
-    temperature=0,
-)
-
-mcp_client = MCPClient(
-    lambda: streamablehttp_client(
-        url=MCP_GATEWAY_URL,
-        headers={"Authorization": f"Bearer {MCP_ACCESS_TOKEN}"},
-    )
-)
-
-
-# ---------------------------------------------------------------------------
-# 5. Compare Search Helper
+# 3. Main
 # ---------------------------------------------------------------------------
 
 
-def compare_search(query: str, top_k: int = 3):
-    """Run the same query through all three agents and display results."""
-    embedding = get_embedding(query)
+async def run():
+    """Run graph-enriched search demo."""
+    print(f"Model:     {MODEL_ID}")
+    print(f"Region:    {REGION}")
 
-    message = (
-        f"Run a vector search for the following query. Use top_k={top_k}.\n\n"
-        f"Query: {query}\n\n"
-        f"Embedding (use this exact array in the Cypher query):\n{json.dumps(embedding)}"
+    bedrock_model = BedrockModel(
+        model_id=MODEL_ID,
+        region_name=REGION,
+        temperature=0,
     )
 
-    print(f'Query: "{query}"')
-    print("=" * 60)
+    mcp_conn = await MCPConnection.create(_env_path)
+    print("MCP connection established.\n")
 
-    with mcp_client:
-        tools = mcp_client.list_tools_sync()
+    # -- Search tools (embeddings stay on the data plane) --
 
-        # Vector-only search
+    @tool
+    async def vector_search(query: str, top_k: int = 3) -> str:
+        """Search for semantically similar chunks using vector embeddings.
+        Use this for semantic queries about SEC 10-K filing data."""
+        embedding = get_embedding(query)
+        top_k = int(top_k)
+
+        return await mcp_conn.execute_query(f"""
+            CALL db.index.vector.queryNodes('chunkEmbeddings', {top_k}, $query_vector)
+            YIELD node, score
+            WITH node {{.*, embedding: null}} AS node, score
+            RETURN node.text AS text, score
+            ORDER BY score DESC
+        """, params={"query_vector": embedding})
+
+    @tool
+    async def graph_enriched_search(query: str, top_k: int = 3) -> str:
+        """Search for similar chunks enriched with document and neighboring chunk context.
+        Returns chunk text, source document, and text from adjacent chunks."""
+        embedding = get_embedding(query)
+        top_k = int(top_k)
+
+        return await mcp_conn.execute_query(f"""
+            CALL db.index.vector.queryNodes('chunkEmbeddings', {top_k}, $query_vector)
+            YIELD node, score
+            MATCH (node)-[:FROM_DOCUMENT]->(doc:Document)
+            OPTIONAL MATCH (node)-[:NEXT_CHUNK]->(next:Chunk)
+            OPTIONAL MATCH (prev:Chunk)-[:NEXT_CHUNK]->(node)
+            WITH node, doc, score,
+                 CASE WHEN prev IS NOT NULL THEN prev.text ELSE '' END AS prev_text,
+                 CASE WHEN next IS NOT NULL THEN next.text ELSE '' END AS next_text
+            WITH node {{.*, embedding: null}} AS node, doc, score, prev_text, next_text
+            RETURN node.text AS text, score, doc.name AS document,
+                   prev_text AS previous_chunk, next_text AS next_chunk
+            ORDER BY score DESC
+        """, params={"query_vector": embedding})
+
+    @tool
+    async def entity_enriched_search(query: str, top_k: int = 3) -> str:
+        """Search for similar chunks enriched with companies, products, and risk factors.
+        Returns chunk text, source document, and connected entities."""
+        embedding = get_embedding(query)
+        top_k = int(top_k)
+
+        return await mcp_conn.execute_query(f"""
+            CALL db.index.vector.queryNodes('chunkEmbeddings', {top_k}, $query_vector)
+            YIELD node, score
+            MATCH (node)-[:FROM_DOCUMENT]->(doc:Document)
+            OPTIONAL MATCH (doc)<-[:FILED]-(company:Company)
+            OPTIONAL MATCH (company)-[:FACES_RISK]->(risk:RiskFactor)
+            WITH node, doc, score,
+                 collect(DISTINCT company.name) AS companies,
+                 collect(DISTINCT risk.name)[0..5] AS risks
+            OPTIONAL MATCH (product:Product)-[:FROM_CHUNK]->(node)
+            WITH node, doc, score, companies, risks,
+                 collect(DISTINCT product.name)[0..5] AS products
+            WITH node {{.*, embedding: null}} AS node, doc, score, companies, risks, products
+            RETURN node.text AS text, score, doc.name AS document,
+                   companies, risks, products
+            ORDER BY score DESC
+        """, params={"query_vector": embedding})
+
+    # -- Compare: run the same query through all three search levels --
+
+    async def compare_search(query: str, top_k: int = 3):
+        """Run the same query through all three agents and display results."""
+        print(f'Query: "{query}"')
+        print("=" * 60)
+
         print("\n--- VECTOR-ONLY RESULTS ---\n")
         vector_agent = Agent(
             model=bedrock_model,
             system_prompt=VECTOR_ONLY_PROMPT,
-            tools=tools,
+            tools=[vector_search],
         )
-        print(vector_agent(message))
+        print(await vector_agent.invoke_async(
+            f"Search for: {query}\nUse top_k={top_k}."
+        ))
 
-        # Graph-enriched search
         print("\n\n--- GRAPH-ENRICHED RESULTS ---\n")
         graph_agent = Agent(
             model=bedrock_model,
             system_prompt=GRAPH_ENRICHED_PROMPT,
-            tools=tools,
+            tools=[graph_enriched_search],
         )
-        print(graph_agent(message))
+        print(await graph_agent.invoke_async(
+            f"Search for: {query}\nUse top_k={top_k}."
+        ))
 
-        # Entity-enriched search
         print("\n\n--- ENTITY-ENRICHED RESULTS ---\n")
         entity_agent = Agent(
             model=bedrock_model,
             system_prompt=ENTITY_ENRICHED_PROMPT,
-            tools=tools,
+            tools=[entity_enriched_search],
         )
-        print(entity_agent(message))
+        print(await entity_agent.invoke_async(
+            f"Search for: {query}\nUse top_k={top_k}."
+        ))
 
+    # -- Q&A --
 
-# ---------------------------------------------------------------------------
-# 6. Q&A Helper
-# ---------------------------------------------------------------------------
+    async def ask(query: str, top_k: int = 5):
+        """Ask a question using entity-enriched vector search for context."""
+        print(f'Question: "{query}"')
+        print("-" * 60)
 
-
-def ask(query: str, top_k: int = 5):
-    """Ask a question using graph-enriched vector search for context."""
-    embedding = get_embedding(query)
-
-    message = (
-        f"Answer this question using graph-enriched vector search with top_k={top_k}.\n\n"
-        f"Question: {query}\n\n"
-        f"Embedding:\n{json.dumps(embedding)}"
-    )
-
-    print(f'Question: "{query}"')
-    print("-" * 60)
-
-    with mcp_client:
-        tools = mcp_client.list_tools_sync()
         qa_agent = Agent(
             model=bedrock_model,
             system_prompt=QA_PROMPT,
-            tools=tools,
+            tools=[entity_enriched_search],
         )
-        response = qa_agent(message)
+        response = await qa_agent.invoke_async(
+            f"Answer this question using entity-enriched search with top_k={top_k}.\n\n"
+            f"Question: {query}"
+        )
         print(f"\n{response}")
         return response
 
+    # --- Run searches ---
 
-# ---------------------------------------------------------------------------
-# 7. Main
-# ---------------------------------------------------------------------------
-
-
-def main():
-    """Run graph-enriched search demo."""
-    print(f"Model:     {MODEL_ID}")
-    print(f"Region:    {REGION}")
-    print()
-
-    # Compare: risk factors query
     print("=" * 60)
     print("COMPARISON 1: Risk factors")
     print("=" * 60)
-    compare_search(
+    await compare_search(
         "What are the key risk factors mentioned in Apple's 10-K filing?"
     )
 
     print("\n")
 
-    # Compare: financial performance query
     print("=" * 60)
     print("COMPARISON 2: Financial performance")
     print("=" * 60)
-    compare_search("What financial metrics indicate company performance?")
+    await compare_search("What financial metrics indicate company performance?")
 
     print("\n")
 
-    # Q&A: risk factors
     print("=" * 60)
     print("Q&A 1: Apple risk factors")
     print("=" * 60)
-    ask("What are the key risk factors mentioned in Apple's 10-K filing?")
+    await ask("What are the key risk factors mentioned in Apple's 10-K filing?")
 
     print("\n")
 
-    # Q&A: cybersecurity risks
     print("=" * 60)
     print("Q&A 2: Cybersecurity risks")
     print("=" * 60)
-    ask("Which companies face cybersecurity-related risks?")
+    await ask("Which companies face cybersecurity-related risks?")
+
+    await mcp_conn.close()
+
+
+def main():
+    """Entry point."""
+    asyncio.run(run())
 
 
 if __name__ == "__main__":

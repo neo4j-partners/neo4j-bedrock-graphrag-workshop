@@ -1,5 +1,6 @@
 * xref:index.adoc[Home]
 * xref:aws-services.adoc[AWS GenAI Services]
+* xref:neo4j-platform.adoc[Graph Intelligence Platform]
 * xref:configuration.adoc[Configuration Reference]
 * Part 1: No-Code Track
 ** xref:lab0.adoc[Lab 0: Sign In to AWS]

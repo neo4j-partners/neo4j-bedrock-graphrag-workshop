@@ -30,11 +30,15 @@ Before diving into the retrieval strategies, here is how the data in this lab wa
 
 This lab starts with step 4 (vector search) and builds toward step 6 (graph-enriched search). The chunking, embedding, and graph construction have already been done for you.
 
+The graph you explored in Lab 1 — companies, products, risk factors, asset managers — is the structured layer. The documents and chunks described above are the unstructured layer, added on top. The `FILED` relationship bridges them: `(Company)-[:FILED]->(Document)`. When graph-enriched search traverses from a chunk to its source document to the company that filed it, it crosses from unstructured text into the structured entities you already know. That traversal chain, `(Chunk)-[:FROM_DOCUMENT]->(Document)<-[:FILED]-(Company)`, is what makes graph-enriched search possible.
+
 NOTE: xref:lab5.adoc[Lab 5] covers building the data pipeline from scratch, including chunking trade-offs and embedding generation.
 
 == Three Retrieval Strategies
 
-The three notebooks progress through retrieval strategies that build on each other. Each strategy returns more context than the previous one. Vector search returns chunk text. Graph-enriched search returns chunk text plus connected entities and document metadata. Hybrid search returns results from both keyword and semantic matching, giving the agent the broadest possible context to reason over.
+The three notebooks use the **Cypher Templates** pattern from Neo4j's https://graphrag.com/reference/[GraphRAG Patterns Catalog] — the same pattern you saw in xref:lab2.adoc[Lab 2]'s Aura Agents, now implemented in code. The Cypher queries are pre-written inside `@tool` functions and system prompts; the agent selects which query to run but never writes Cypher itself. xref:lab6.adoc[Lab 6] takes the next step with the Text2Cypher pattern, where the agent discovers the schema and writes its own queries from scratch.
+
+Each notebook returns more context than the previous one. Vector search returns chunk text. Graph-enriched search returns chunk text plus connected entities and document metadata. Hybrid search returns results from both keyword and semantic matching, giving the agent the broadest possible context to reason over.
 
 === Vector Search
 

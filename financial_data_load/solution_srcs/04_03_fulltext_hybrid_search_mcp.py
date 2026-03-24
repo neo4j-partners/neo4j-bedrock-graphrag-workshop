@@ -9,7 +9,6 @@ Run with: uv run python main.py solutions <N>
 """
 
 import asyncio
-import json
 import os
 import sys
 
@@ -194,13 +193,13 @@ async def main():
         top_k = int(top_k)
 
         return await mcp_conn.execute_query(f"""
-            CALL db.index.vector.queryNodes('chunkEmbeddings', {top_k}, {json.dumps(embedding)})
+            CALL db.index.vector.queryNodes('chunkEmbeddings', {top_k}, $query_vector)
             YIELD node, score
             MATCH (node)-[:FROM_DOCUMENT]->(doc:Document)
             WITH node {{.*, embedding: null}} AS node, score, doc
             RETURN node.text AS text, score, doc.name AS document
             ORDER BY score DESC
-        """)
+        """, params={"query_vector": embedding})
 
     @tool
     async def fulltext_search_tool(term: str, limit: int = 5) -> str:

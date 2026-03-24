@@ -22,7 +22,7 @@ class MCPConnection:
 
     Wraps a raw MCP ClientSession over Streamable HTTP transport.
     Provides execute_query() for running Cypher directly through the
-    MCP execute-query tool.
+    MCP read-cypher tool.
 
     Usage::
 
@@ -70,17 +70,19 @@ class MCPConnection:
 
         # Discover the read-cypher tool name (may be prefixed by gateway)
         self._query_tool = next(
-            (n for n in tool_names if "read-cypher" in n),
-            next((n for n in tool_names if "execute-query" in n), None),
+            (n for n in tool_names if "read-cypher" in n), None
         )
         assert self._query_tool, (
             f"No query tool found among: {tool_names}. "
-            "Expected a tool containing 'read-cypher' or 'execute-query'."
+            "Expected a tool containing 'read-cypher'."
         )
 
-    async def execute_query(self, cypher: str) -> str:
+    async def execute_query(self, cypher: str, params: dict | None = None) -> str:
         """Execute a Cypher query via the MCP read-cypher tool."""
-        result = await self._session.call_tool(self._query_tool, {"query": cypher})
+        arguments = {"query": cypher}
+        if params:
+            arguments["params"] = params
+        result = await self._session.call_tool(self._query_tool, arguments)
         if result.content:
             return result.content[0].text
         return ""
