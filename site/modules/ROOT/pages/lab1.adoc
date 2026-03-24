@@ -2,7 +2,7 @@
 
 This is Lab 1 of the workshop. The graph database you provision here is the foundation for everything that follows: the agents in Lab 2 query it through a no-code interface, Labs 3-4 build retrieval pipelines against it, Lab 5 adds embeddings and GraphRAG retrieval, and Lab 6 connects MCP agents. Getting Aura running and understanding what the graph contains is the starting point.
 
-TIP: Ready to start? Jump to the xref:lab1-instructions.adoc[Lab 1 Instructions] for step-by-step setup.
+TIP: Ready to start? Jump to xref:lab1-instructions.adoc[Aura Setup] for step-by-step instructions.
 
 .**At a Glance**
 
@@ -132,4 +132,4 @@ The Aura console provides three tools you will use throughout the workshop.
 
 == Next Steps
 
-Continue to xref:lab1-instructions.adoc[Lab 1 Instructions] to sign up for Neo4j Aura, load the knowledge graph, and run sample queries. See xref:lab1-explore.adoc[Explore the Graph] for visual exploration with Neo4j Explore.
+Continue to xref:lab1-instructions.adoc[Aura Setup] to sign up for Neo4j Aura and create your database instance, then xref:lab1-load.adoc[Load the Knowledge Graph] to populate it with SEC financial data. See xref:lab1-explore.adoc[Explore the Graph] for visual exploration with Neo4j Explore.

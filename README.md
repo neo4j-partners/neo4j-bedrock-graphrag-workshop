@@ -11,7 +11,7 @@ A hands-on workshop teaching Graph Retrieval-Augmented Generation (GraphRAG) pat
 | Lab | Title | Description |
 |-----|-------|-------------|
 | [Lab 0](Lab_0_Sign_In/README.md) | Sign In | AWS Console sign-in and Bedrock access verification |
-| [Lab 1](Lab_1_Aura_Setup/README.md) | Neo4j Aura Setup | Subscribe via AWS Marketplace, restore backup, explore graph |
+| [Lab 1](Lab_1_Aura_Setup/README.md) | Neo4j Aura Setup | Sign up for Neo4j Aura, load knowledge graph via Cypher, explore graph |
 | [Lab 2](Lab_2_Aura_Agents/README.md) | Aura Agents | Build a no-code AI agent using Neo4j Aura Agent platform |
 
 ### Part 2: GraphRAG with Python (Labs 3-6)
@@ -71,7 +71,7 @@ See `CONFIG.txt` for all available settings grouped by lab.
 
 | Component | Technology |
 |-----------|------------|
-| **Knowledge Graph** | Neo4j Aura (via AWS Marketplace) |
+| **Knowledge Graph** | Neo4j Aura |
 | **Foundation Models** | Amazon Bedrock (Claude Sonnet) |
 | **Embeddings** | Amazon Nova Multimodal Embeddings |
 | **Agent Frameworks** | LangGraph, Strands Agents SDK |

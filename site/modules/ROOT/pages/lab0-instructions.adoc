@@ -73,4 +73,4 @@ NOTE: If this is your first time using Bedrock, you may need to request access t
 
 == Next Steps
 
-Continue to xref:lab1.adoc[Lab 1: Neo4j Aura Setup] to set up your Neo4j database through the AWS Marketplace.
+Continue to xref:lab1.adoc[Lab 1: Neo4j Aura Setup] to set up your Neo4j database.

@@ -26,11 +26,9 @@ If you're completing this lab independently or your organizer has instructed you
 - Follow the [Neo4j Aura Free Trial Signup](Aura_Free_Trial.md) guide to create your own account
 - This option provides a 14-day free trial with an automatically created instance
 
----
+## Part 2: Create Your Database Instance
 
-### Create Your Database Instance
-
-> **Note:** If you signed up using the **Free Trial** option (Option B), your instance was already created during the signup process. You can skip ahead to [Part 2: Load the Knowledge Graph](#part-2-load-the-knowledge-graph).
+> **Note:** If you signed up using the **Free Trial** option (Option B), your instance was already created during the signup process. You can skip ahead to [Part 3: Load the Knowledge Graph](#part-3-load-the-knowledge-graph).
 
 1. After logging in, click on **Instances** in the left sidebar under "Data services", then click the **Create instance** button.
 
@@ -57,7 +55,7 @@ If you're completing this lab independently or your organizer has instructed you
 > **CRITICAL:** The password is only shown once and will not be available after you close this dialog. Download the credentials file and store it somewhere safe. You will need these credentials in later labs to connect your applications to Neo4j.
 
 
-## Part 2: Load the Knowledge Graph
+## Part 3: Load the Knowledge Graph
 
 After your Aura instance is running, open **Query** from the left sidebar in the [Aura Console](https://console.neo4j.io) and run the following Cypher statements in order.
 
@@ -227,7 +225,7 @@ MATCH (c:Company {ticker: 'NVDA'})-[:PARTNERS_WITH]->(p)
 RETURN p.name ORDER BY p.name;
 ```
 
-## Part 3: Explore the Knowledge Graph
+## Part 4: Explore the Knowledge Graph
 
 Follow [EXPLORE.md](EXPLORE.md) to:
 

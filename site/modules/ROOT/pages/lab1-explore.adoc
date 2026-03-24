@@ -2,7 +2,7 @@
 
 Use Neo4j Explore to visually navigate and analyze your knowledge graph. You will search for patterns, visualize relationships, and apply graph algorithms to gain insights from the SEC financial data.
 
-TIP: For setup and data loading, see xref:lab1-instructions.adoc[Lab 1 Instructions].
+TIP: For setup, see xref:lab1-instructions.adoc[Aura Setup]. For data loading, see xref:lab1-load.adoc[Load the Knowledge Graph].
 
 == Access the Aura Console
 
@@ -112,4 +112,4 @@ Click on a specific RiskFactor node and expand to see which companies share that
 
 == Next Steps
 
-Return to the xref:lab1-instructions.adoc[Lab 1 Instructions] to continue, or proceed to Lab 2 to build an AI agent using this knowledge graph.
+Proceed to Lab 2 to build an AI agent using this knowledge graph.

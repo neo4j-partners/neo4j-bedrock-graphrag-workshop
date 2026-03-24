@@ -1,6 +1,6 @@
 = Lab 1 Instructions: Neo4j Aura Setup
 
-Follow these steps to sign up for Neo4j Aura, load the SEC financial knowledge graph, and run sample queries.
+Follow these steps to sign up for Neo4j Aura and create your database instance.
 
 TIP: For concepts and background, see xref:lab1.adoc[Lab 1: Concepts and Reference].
 
@@ -45,7 +45,7 @@ image::lab1-free-trial-region.png[Free trial region selection]
 +
 image::lab1-free-trial-credentials.png[Free trial credentials]
 
-NOTE: If you signed up using the Free Trial option, your instance was already created during signup. Skip ahead to <<Part 2: Load the Knowledge Graph>>.
+NOTE: If you signed up using the Free Trial option, your instance was already created during signup. Skip ahead to xref:lab1-load.adoc[Load the Knowledge Graph].
 
 === Create Your Database Instance
 
@@ -79,182 +79,6 @@ Click **Download and continue** to save the credentials file. You will need thes
 * Lab 2: Aura Agents configuration
 * Labs 3-6: `CONFIG.txt` for notebook configuration
 
-== Part 2: Load the Knowledge Graph
-
-Open **Query** from the left sidebar in the https://console.neo4j.io[Aura Console] and run the following Cypher statements in order.
-
-=== Step 1: Create Constraints
-
-These ensure each node has a unique identifier and speed up MERGE lookups during loading.
-
-[source,cypher]
-----
-CREATE CONSTRAINT company_id IF NOT EXISTS
-FOR (c:Company) REQUIRE c.companyId IS UNIQUE;
-
-CREATE CONSTRAINT company_name IF NOT EXISTS
-FOR (c:Company) REQUIRE c.name IS UNIQUE;
-
-CREATE CONSTRAINT product_id IF NOT EXISTS
-FOR (p:Product) REQUIRE p.productId IS UNIQUE;
-
-CREATE CONSTRAINT risk_id IF NOT EXISTS
-FOR (r:RiskFactor) REQUIRE r.riskId IS UNIQUE;
-
-CREATE CONSTRAINT manager_id IF NOT EXISTS
-FOR (m:AssetManager) REQUIRE m.managerId IS UNIQUE;
-----
-
-=== Step 2: Load Nodes
-
-Each statement reads a CSV file and creates the corresponding nodes.
-
-[source,cypher]
-----
-LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/companies.csv' AS row
-MERGE (c:Company {companyId: row.company_id})
-SET c.name = row.name, c.ticker = row.ticker,
-    c.cik = row.cik, c.cusip = row.cusip;
-
-LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/products.csv' AS row
-MERGE (p:Product {productId: row.product_id})
-SET p.name = row.name, p.description = row.description;
-
-LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/risk_factors.csv' AS row
-MERGE (r:RiskFactor {riskId: row.risk_id})
-SET r.name = row.name, r.description = row.description;
-
-LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/asset_managers.csv' AS row
-MERGE (m:AssetManager {managerId: row.manager_id})
-SET m.name = row.name;
-----
-
-=== Step 3: Load Relationships
-
-Creates relationships between nodes. The last two use MERGE on the target company name since competitors and partners may be companies mentioned in filings that are not in the primary dataset.
-
-[source,cypher]
-----
-LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/company_products.csv' AS row
-MATCH (c:Company {companyId: row.company_id})
-MATCH (p:Product {productId: row.product_id})
-MERGE (c)-[:OFFERS]->(p);
-
-LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/company_risk_factors.csv' AS row
-MATCH (c:Company {companyId: row.company_id})
-MATCH (r:RiskFactor {riskId: row.risk_id})
-MERGE (c)-[:FACES_RISK]->(r);
-
-LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/asset_manager_companies.csv' AS row
-MATCH (m:AssetManager {managerId: row.manager_id})
-MATCH (c:Company {companyId: row.company_id})
-MERGE (m)-[:OWNS {shares: toInteger(row.shares)}]->(c);
-
-LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/company_competitors.csv' AS row
-MATCH (a:Company {companyId: row.source_company_id})
-MERGE (b:Company {name: row.target_company_name})
-MERGE (a)-[:COMPETES_WITH]->(b);
-
-LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/company_partners.csv' AS row
-MATCH (a:Company {companyId: row.source_company_id})
-MERGE (b:Company {name: row.target_company_name})
-MERGE (a)-[:PARTNERS_WITH]->(b);
-----
-
-=== Step 4: Create Fulltext Index
-
-Enables keyword search across entity names and descriptions.
-
-[source,cypher]
-----
-CREATE FULLTEXT INDEX search_entities IF NOT EXISTS
-FOR (n:Company|Product|RiskFactor)
-ON EACH [n.name, n.description];
-----
-
-=== Step 5: Verify the Load
-
-[source,cypher]
-----
-MATCH (n)
-WITH labels(n)[0] AS label, count(n) AS count
-RETURN label, count ORDER BY label
-----
-
-Expected counts:
-
-[cols="1,1"]
-|===
-| Label | Count
-
-| AssetManager | 15
-| Company | ~76
-| Product | 274
-| RiskFactor | 203
-|===
-
-NOTE: The Company count is higher than the number of companies in the seed CSV because COMPETES_WITH and PARTNERS_WITH relationships reference companies mentioned in filings (e.g., Google, Samsung, OpenAI) that are not themselves in the seed data. The original seed companies have a `companyId` property; the additional companies created by competitor and partner relationships do not.
-
-== Part 3: Sample Queries
-
-Now that the graph is loaded, try these queries to explore the data.
-
-**What products does NVIDIA offer?**
-
-[source,cypher]
-----
-MATCH (c:Company {ticker: 'NVDA'})-[:OFFERS]->(p:Product)
-RETURN p.name ORDER BY p.name LIMIT 10
-----
-
-**Which risk factors are shared across multiple companies?**
-
-[source,cypher]
-----
-MATCH (c:Company)-[:FACES_RISK]->(r:RiskFactor)
-WITH r, collect(c.ticker) AS companies, count(c) AS cnt
-WHERE cnt > 1
-RETURN r.name, companies, cnt
-ORDER BY cnt DESC LIMIT 5
-----
-
-**Who are the top asset managers by number of holdings?**
-
-[source,cypher]
-----
-MATCH (am:AssetManager)-[o:OWNS]->(c:Company)
-WITH am, count(c) AS holdings, sum(o.shares) AS total_shares
-RETURN am.name, holdings, total_shares
-ORDER BY holdings DESC LIMIT 5
-----
-
-**Who does Microsoft compete with?**
-
-[source,cypher]
-----
-MATCH (c:Company {ticker: 'MSFT'})-[:COMPETES_WITH]->(comp)
-RETURN comp.name ORDER BY comp.name
-----
-
-**Which risk factors expose an asset manager's portfolio across multiple companies?**
-
-[source,cypher]
-----
-MATCH (am:AssetManager)-[:OWNS]->(c:Company)-[:FACES_RISK]->(r:RiskFactor)
-WITH am, r, count(DISTINCT c) AS exposed
-WHERE exposed > 1
-RETURN am.name, r.name, exposed
-ORDER BY exposed DESC, am.name LIMIT 5
-----
-
-**Who are NVIDIA's supply chain partners?**
-
-[source,cypher]
-----
-MATCH (c:Company {ticker: 'NVDA'})-[:PARTNERS_WITH]->(p)
-RETURN p.name ORDER BY p.name
-----
-
 == Next Steps
 
-Continue to xref:lab1-explore.adoc[Explore the Knowledge Graph] to use Neo4j Explore for visual analysis, or proceed to Lab 2 to build an AI agent using the Aura Agent platform.
+Continue to xref:lab1-load.adoc[Load the Knowledge Graph] to populate your database with SEC financial data.
