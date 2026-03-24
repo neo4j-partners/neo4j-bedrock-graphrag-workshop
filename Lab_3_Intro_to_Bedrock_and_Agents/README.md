@@ -1,6 +1,6 @@
 # Lab 3 - Building AI Agents with Amazon Bedrock and SageMaker
 
-This lab introduces you to building AI agents using Amazon Bedrock within SageMaker Studio notebooks. You'll learn how LangGraph orchestrates LLM interactions and tool usage through a hands-on example, then deploy your agent to Amazon Bedrock AgentCore Runtime.
+This lab sets up your SageMaker development environment and walks through building a basic AI agent with LangGraph and Amazon Bedrock, then deploys it to AgentCore Runtime.
 
 ## What You'll Learn
 
@@ -10,15 +10,6 @@ This lab introduces you to building AI agents using Amazon Bedrock within SageMa
 - The ReAct pattern: reasoning and acting in a loop
 - How to package and deploy an agent to AgentCore Runtime
 - How to invoke a deployed agent via CLI and boto3
-
-## Amazon Bedrock Overview
-
-Amazon Bedrock provides access to foundation models from Anthropic, Meta, and others through a unified API. In this lab, we use Claude via cross-region inference profiles, which route requests to available capacity across AWS regions.
-
-Key concepts:
-- **Model ID**: Identifies the specific model (e.g., `us.anthropic.claude-sonnet-4-5-20250929-v1:0`)
-- **Inference Profile**: Enables cross-region routing for better availability
-- **ChatBedrockConverse**: LangChain's interface to Bedrock's Converse API
 
 ## SageMaker Studio Setup
 
@@ -94,30 +85,6 @@ Key concepts:
       ```
 3. Once the clone completes, click the **file browser icon** (folder icon) in the left sidebar to navigate into the `labs/lab-neo4j-aws` directory
 
-## Introduction to Agents
-
-In this section, we'll run the notebook [basic_langgraph_agent.ipynb](basic_langgraph_agent.ipynb) which demonstrates how to build a basic AI agent using LangGraph and Amazon Bedrock, then deploy it to AgentCore Runtime. This hands-on example shows the fundamental concepts of agent architecture: how an LLM can reason about problems, decide which tools to use, and iterate until it reaches a solution — and how to make that agent available as a managed service.
-
-AI agents extend beyond simple chat interactions by giving LLMs the ability to take actions. Instead of just generating text responses, agents can call functions (tools), observe the results, and continue reasoning. This creates a loop where the model can break down complex tasks into steps and execute them autonomously.
-
-### LangGraph Agent Architecture
-
-The notebook demonstrates a minimal ReAct-style agent with two nodes:
-
-```
-START -> agent -> (tools -> agent) | END
-```
-
-1. **Agent Node**: Calls the LLM with the current message history
-2. **Tools Node**: Executes any tool calls the LLM requests
-3. **Conditional Edge**: Routes back to tools if the LLM made tool calls, otherwise ends
-
-This pattern allows the agent to reason about what tools to use, execute them, observe results, and continue until it has a final answer.
-
-### AgentCore Deployment
-
-After testing the agent locally, the notebook walks through deploying it to Amazon Bedrock AgentCore Runtime using `direct_code_deploy`. The deployed agent can be invoked via the `agentcore` CLI or programmatically with boto3.
-
 ## Run the Agent Notebook
 
 1. Open [basic_langgraph_agent.ipynb](basic_langgraph_agent.ipynb) in this lab folder
@@ -130,38 +97,6 @@ After testing the agent locally, the notebook walks through deploying it to Amaz
    - Ask questions about sample SEC financial filing data
    - Package and deploy the agent to AgentCore Runtime
    - Invoke the deployed agent via CLI and boto3
-
-## Key Code Patterns
-
-### Defining Tools
-
-```python
-@tool
-def get_current_time() -> str:
-    """Get the current date and time."""
-    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-```
-
-The `@tool` decorator converts a Python function into a tool the LLM can call. The docstring becomes the tool description.
-
-### Binding Tools to the LLM
-
-```python
-llm = ChatBedrockConverse(model=MODEL_ID, region_name=REGION)
-llm_with_tools = llm.bind_tools(tools)
-```
-
-### Building the Graph
-
-```python
-graph = StateGraph(MessagesState)
-graph.add_node("agent", call_model)
-graph.add_node("tools", ToolNode(tools))
-graph.add_edge(START, "agent")
-graph.add_conditional_edges("agent", should_continue)
-graph.add_edge("tools", "agent")
-agent = graph.compile()
-```
 
 ## Next Steps
 

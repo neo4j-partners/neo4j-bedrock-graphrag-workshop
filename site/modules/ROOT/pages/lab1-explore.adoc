@@ -67,10 +67,7 @@ image::lab1-gds-panel.png[Graph Data Science]
 == Apply Degree Centrality Algorithm
 
 1. Click **Add algorithm**
-2. Select **Degree Centrality** from the dropdown
-
-This algorithm measures the number of incoming and outgoing relationships for each node, identifying the most connected nodes in the graph.
-
+2. Select **Degree Centrality** from the dropdown — this measures the number of incoming and outgoing relationships for each node, identifying the most connected nodes in the graph
 3. Click **Apply algorithm** to run the analysis
 
 image::lab1-apply-centrality.png[Apply Centrality]

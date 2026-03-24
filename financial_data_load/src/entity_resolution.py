@@ -824,8 +824,8 @@ LABEL_CONFIGS: dict[str, dict[str, Any]] = {
     "Company": {"pre_filter_strategy": "prefix", "pre_filter_threshold": 0.3},
     "Executive": {"pre_filter_strategy": "honorific", "pre_filter_threshold": 0.5},
     "Product": {"pre_filter_strategy": "fuzzy", "pre_filter_threshold": 0.6},
-    "RiskFactor": {"pre_filter_strategy": "fuzzy", "pre_filter_threshold": 0.6},
-    "FinancialMetric": {"pre_filter_strategy": "fuzzy", "pre_filter_threshold": 0.7},
+    "RiskFactor": {"pre_filter_strategy": "fuzzy", "pre_filter_threshold": 0.85},
+    "FinancialMetric": {"pre_filter_strategy": "fuzzy", "pre_filter_threshold": 0.85},
 }
 
 EXECUTIVE_SYSTEM_PROMPT = """\

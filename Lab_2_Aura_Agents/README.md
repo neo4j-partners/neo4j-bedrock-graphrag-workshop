@@ -1,6 +1,6 @@
 # Lab 2: Aura Agents
 
-Neo4j Aura Agents combine semantic search, graph traversal, and natural language queries into a single conversational interface. In this lab, you will use the "Create with AI" workflow to build an agent that analyzes SEC 10-K filings. Neo4j inspects your knowledge graph schema and automatically generates the tools the agent needs, so there is no code to write and no Cypher templates to configure manually.
+In this lab, you will use Neo4j's "Create with AI" workflow to build a no-code agent that analyzes SEC 10-K filings.
 
 ## Prerequisites
 
@@ -67,8 +67,6 @@ The generated tools fall into three categories:
 | **Similarity Search** | Search Chunks |
 | **Text2Cypher** | Natural Language to Cypher Tool |
 
-Each Cypher Template tool maps to a specific traversal pattern in the graph. The Similarity Search tool uses the `chunkEmbeddings` vector index to find semantically relevant filing passages. The Text2Cypher tool translates arbitrary natural language questions into Cypher queries for ad-hoc exploration.
-
 ## Step 5: Test the Agent
 
 Test your agent with the sample questions below. After each test, observe:
@@ -132,18 +130,6 @@ The quick version:
 2. **Copy the MCP server endpoint URL** from the agent menu (see [Copy Endpoint](images/7_option_mcp.png))
 3. **Get your API credentials** from Account Settings → API Keys
 4. **Configure your client** using the `.env.example` and `.mcp.json.template` files in this directory
-
-## Summary
-
-The "Create with AI" workflow generated an agent with three retrieval patterns, each suited to different question types:
-
-| Tool Type | Purpose | Best For |
-|-----------|---------|----------|
-| **Cypher Templates** | Controlled, precise graph traversals | Specific lookups, comparisons |
-| **Similarity Search** | Semantic retrieval over filing text | Finding relevant content by meaning |
-| **Text2Cypher** | Flexible natural language to Cypher | Ad-hoc questions about the data |
-
-These same patterns are implemented programmatically in Labs 6 and 7 using Python and the Neo4j GraphRAG package.
 
 ## Next Steps
 

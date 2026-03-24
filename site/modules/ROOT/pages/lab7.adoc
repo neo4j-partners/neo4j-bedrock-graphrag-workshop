@@ -1,0 +1,116 @@
+= Lab 7: Neo4j MCP Agent
+
+Lab 4 used MCP as a retrieval mechanism, executing pre-written Cypher queries through an MCP server. This lab goes further: the agent discovers the graph schema through MCP, writes its own Cypher queries, and executes them without any pre-written query templates. The agent has full autonomy over how it interacts with the knowledge graph, making this the most capable agent pattern in the workshop.
+
+TIP: Ready to start? Jump to the xref:lab7-instructions.adoc[Lab 7 Instructions] for step-by-step setup.
+
+.**At a Glance**
+
+* **Model Context Protocol (MCP)** is an open standard that lets AI agents discover and interact with external tools and data sources through a uniform interface
+* **Neo4j MCP Server** exposes two tools: schema retrieval and read-only Cypher execution
+* **Schema-first approach**: the agent retrieves the graph schema before writing any query, producing more accurate Cypher
+* **Full autonomy**: unlike Lab 4, the agent writes its own Cypher rather than executing pre-written queries
+* **Two framework options**: LangGraph (full-featured, multi-step workflows) and Strands (lightweight, AWS-native)
+
+== Model Context Protocol (MCP)
+
+The Model Context Protocol is an open standard that defines how AI agents discover and interact with external tools and data sources. It provides a uniform interface: any MCP-compatible agent connects to any MCP-compatible server without custom integration code.
+
+=== Three-Component Architecture
+
+MCP defines a three-component architecture:
+
+----
+AI Agent  <-->  MCP Server  <-->  Data Source
+(Client)       (Protocol)        (Neo4j, APIs, etc.)
+----
+
+**AI Agent (Client)**: The LLM-powered application that needs to access external data. It discovers available tools by asking the MCP server what operations are supported.
+
+**MCP Server**: A lightweight service that exposes data source operations as tools. It translates between the MCP protocol and the data source's native API.
+
+**Data Source**: The underlying system (Neo4j, a REST API, a file system, etc.) that holds the data.
+
+=== Transport Options
+
+MCP supports multiple transport mechanisms:
+
+[cols="1,2,2"]
+|===
+| Transport | Description | Use Case
+
+| **stdio**
+| Standard input/output streams
+| Local development, CLI tools
+
+| **Streamable HTTP**
+| HTTP-based streaming protocol
+| Cloud deployments, remote servers
+|===
+
+This lab uses Streamable HTTP to connect to an MCP Gateway running on AWS.
+
+=== Neo4j MCP Server Tools
+
+The Neo4j MCP Server exposes two primary tools:
+
+[cols="1,3"]
+|===
+| Tool | Description
+
+| **get-neo4j-schema**
+| Returns the graph schema: node labels, relationship types, and properties
+
+| **read-neo4j-cypher**
+| Executes a read-only Cypher query and returns results
+|===
+
+The agent discovers these tools automatically through the MCP protocol. It does not need to know about them in advance.
+
+== AWS Deployment Architecture
+
+The MCP infrastructure is pre-deployed on AWS:
+
+----
+Agent (Notebook)  -->  AgentCore Gateway (HTTPS)  -->  Neo4j MCP Server (Container)  -->  Secrets Manager  -->  Neo4j Aura
+----
+
+**Agent (Notebook)**: Your Jupyter notebook running a LangGraph or Strands agent. It connects to the gateway using a URL and access token from `CONFIG.txt`.
+
+**AgentCore Gateway**: An AWS-managed HTTPS endpoint that authenticates requests and routes them to the MCP server.
+
+**Neo4j MCP Server**: A containerized service that implements the MCP protocol and translates tool calls into Neo4j operations.
+
+**Secrets Manager**: Stores the Neo4j Aura connection credentials securely. The MCP server retrieves them at runtime.
+
+**Neo4j Aura**: Your graph database containing SEC financial data.
+
+You do not need to set up any of this infrastructure. The gateway URL and access token are provided in `CONFIG.txt`.
+
+== Schema-First Approach
+
+Both notebooks instruct the agent to follow a schema-first pattern:
+
+1. **Retrieve the schema** before writing any Cypher query. The agent calls `get-neo4j-schema` to learn what node labels, relationship types, and properties exist in the database.
+2. **Write a Cypher query** based on the actual schema. This prevents the agent from guessing at property names or relationship types that do not exist.
+3. **Execute the query** using `read-neo4j-cypher` and return the results.
+
+This approach produces more accurate queries because the agent works with the real structure of the data rather than assumptions. Without the schema step, the LLM might generate Cypher that references labels or properties that do not exist, leading to empty results or errors. By grounding the query in the actual schema, the agent avoids those failure modes.
+
+== Lab 4 vs Lab 7
+
+Lab 4 used MCP to execute pre-written Cypher queries. The retrieval logic was defined in advance, and MCP served as the transport layer between the agent and Neo4j. The agent selected which query to run, but did not write the queries itself.
+
+Lab 7 removes that constraint. The agent inspects the schema, reasons about the question, writes its own Cypher, and executes it. This gives the agent full autonomy over how it queries the graph. The trade-off is that the agent's Cypher quality depends on the LLM's ability to reason about graph structures, which is why the schema-first approach is important.
+
+== Two Framework Options
+
+This lab provides two notebook implementations. Both connect to the same MCP server and produce the same results. Choose the one that fits your interest.
+
+**LangGraph** is the full-featured option. It uses LangChain MCP adapters to load tools from the MCP server and provides fine-grained control over the agent loop. LangGraph is better suited for complex, multi-step workflows where you need to customize how the agent reasons, retries, or chains operations.
+
+**Strands** is the lightweight option. It is an AWS-native SDK with built-in MCP support and a simpler API. Strands requires fewer lines of code to set up and is a good fit when you want a straightforward agent without the overhead of the LangChain ecosystem.
+
+== Next Steps
+
+Continue to xref:lab7-instructions.adoc[Lab 7 Instructions] to run the notebooks and query the knowledge graph through MCP. After completing this lab, proceed to xref:lab8.adoc[Lab 8: Aura Agents API] to interact with Neo4j Aura Agents through a REST API.

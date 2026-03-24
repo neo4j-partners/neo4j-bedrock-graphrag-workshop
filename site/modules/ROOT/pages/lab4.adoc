@@ -1,0 +1,81 @@
+= Lab 4: MCP Retrieval
+
+In Lab 3 you built an agent that calls simple tools. Now you connect an agent to your knowledge graph. This lab introduces MCP (Model Context Protocol) as the bridge between an AI agent and Neo4j, and walks through three retrieval strategies that grow in sophistication.
+
+TIP: Ready to start? Jump to the xref:lab4-instructions.adoc[Lab 4 Instructions] for step-by-step notebook walkthroughs.
+
+.**At a Glance**
+
+* **MCP retrieval** — an AI agent uses MCP tools to execute Cypher queries against Neo4j, instead of connecting with a driver and calling retriever classes directly
+* **Vector search** — embed a query and find semantically similar chunks
+* **Graph-enriched search** — follow relationships from matched chunks to connected entities like documents, companies, products, and risk factors
+* **Hybrid search** — combine keyword-based fulltext search with vector similarity for broader recall
+
+== What Is MCP Retrieval?
+
+Instead of connecting to Neo4j with a driver and using retriever classes directly, an AI agent uses MCP tools to execute Cypher queries against the database. The agent sends Cypher through an `execute-query` tool exposed by the Neo4j MCP Server. The server handles the connection, runs the query, and returns structured results that the agent can reason over.
+
+MCP (Model Context Protocol) is an open standard for agent-to-tool communication. It defines how an agent discovers available tools, calls them with structured inputs, and receives structured outputs. In this lab you use it as a transport layer for Cypher queries. For a deeper look at how MCP works and how to build full MCP agents, see xref:lab7.adoc[Lab 7].
+
+== Three Retrieval Strategies
+
+The three notebooks progress through retrieval strategies that build on each other.
+
+=== Vector Search
+
+Notebook 01 introduces the basic pattern. You embed a natural-language query using Bedrock Nova, pass the embedding to the agent, and let the agent execute vector search Cypher through MCP. The vector index (`chunkEmbeddings`) finds the chunks whose embeddings are most similar to the query embedding.
+
+=== Graph-Enriched Search
+
+Notebook 02 extends vector search by adding graph traversal. After finding semantically similar chunks, the agent follows relationships to pull in document metadata, neighboring chunks (via NEXT_CHUNK), and connected entities — companies, products, and risk factors. This context enrichment gives the agent more information to work with when generating answers.
+
+=== Hybrid Search
+
+Notebook 03 introduces an alternative search method: fulltext keyword search using Lucene operators against the `search_chunks` and `search_entities` indexes. It then combines both approaches for agent-driven hybrid search using custom `@tool` wrappers that encapsulate embedding generation.
+
+== How the Notebooks Connect
+
+Notebook 01 introduces the basic pattern: embed a query, pass the embedding to the agent, and let the agent execute vector search Cypher through MCP. Notebook 02 extends this by adding graph traversal that pulls in document metadata, neighboring chunks, and connected entities. Notebook 03 introduces fulltext keyword search as an alternative and then combines both approaches, giving the agent the ability to choose the right retrieval strategy for a given question.
+
+== MCP vs Direct Library
+
+All three notebooks use the same underlying Neo4j indexes and graph structure as Lab 6. The difference is in how the search is executed.
+
+[cols="1,2,2"]
+|===
+| Aspect | Lab 4 (MCP) | Lab 6 (Library)
+
+| **Connection**
+| MCP server via AgentCore Gateway
+| Direct Neo4j driver
+
+| **Query execution**
+| Agent calls `execute-query` MCP tool
+| Retriever class methods
+
+| **Embedding**
+| Client-side (Bedrock Nova), passed to agent or wrapped in `@tool`
+| Retriever calls embedder internally
+
+| **Hybrid search**
+| Agent runs both queries and combines results
+| `HybridRetriever` handles score normalization and alpha tuning
+
+| **Graph traversal**
+| Cypher in agent prompt
+| `retrieval_query` parameter on retriever classes
+|===
+
+== What Is Covered Here vs Lab 6
+
+This lab focuses on MCP-based retrieval: using an agent to execute search queries through MCP tools. For the following topics, see xref:lab6.adoc[Lab 6]:
+
+* **Direct driver connections** — `neo4j.GraphDatabase.driver()` for direct access
+* **neo4j-graphrag retriever classes** — `VectorRetriever`, `VectorCypherRetriever`, `HybridRetriever`, `HybridCypherRetriever`
+* **Programmatic alpha tuning** — `HybridRetriever.search(alpha=0.5)` with automatic score normalization
+* **GraphRAG pipeline** — `GraphRAG(llm=llm, retriever=retriever).search()` for end-to-end RAG
+* **Data loading and embedding generation** — building the graph from scratch
+
+== Next Steps
+
+Continue to xref:lab4-instructions.adoc[Lab 4 Instructions] to work through the notebooks. After completing this lab, proceed to xref:lab6.adoc[Lab 6: GraphRAG] for direct library-based retrieval, or to xref:lab7.adoc[Lab 7: MCP Agent] to build full MCP agents.

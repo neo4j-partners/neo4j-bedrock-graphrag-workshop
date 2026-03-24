@@ -1,0 +1,137 @@
+= Lab 3: Bedrock and Agents
+
+The no-code track showed what a GraphRAG agent can do. Now you shift to building agents with code. This lab introduces the foundational pieces: Amazon Bedrock for LLM access, LangGraph for agent orchestration, and the ReAct pattern that drives every agent in the remaining labs.
+
+TIP: Ready to start? Jump to the xref:lab3-instructions.adoc[Lab 3 Instructions] for step-by-step setup.
+
+.**At a Glance**
+
+* **Amazon Bedrock** provides managed access to foundation models through a unified API — no infrastructure to manage
+* **LangGraph** builds agents as directed graphs with nodes, edges, and shared state
+* **The ReAct pattern** (reason, act, observe) lets an LLM call tools and iterate until it reaches an answer
+* **Tools** are Python functions the LLM can invoke at runtime using the `@tool` decorator
+* **AgentCore Runtime** packages and deploys agents as managed AWS services
+
+== Amazon Bedrock
+
+Amazon Bedrock provides access to foundation models from Anthropic, Meta, and others through a unified API. You select a model by its Model ID, invoke it through the Converse API, and Bedrock handles the infrastructure.
+
+Key concepts:
+
+* **Model ID** identifies the specific model, for example `us.anthropic.claude-sonnet-4-5-20250929-v1:0`
+* **Cross-region inference profiles** route requests to available capacity across AWS regions for better availability. Model IDs that begin with `us.` or `global.` use inference profiles.
+* **ChatBedrockConverse** is LangChain's interface to the Bedrock Converse API. It wraps model invocation, tool binding, and response parsing into a single class.
+
+.Cross-region inference profile handling
+[%collapsible]
+====
+When using a cross-region inference profile, some LangChain components require a `base_model_id` that identifies the underlying model. The notebook derives this automatically:
+
+[source,python]
+----
+if MODEL_ID.startswith("us.anthropic."):
+    BASE_MODEL_ID = MODEL_ID.replace("us.anthropic.", "anthropic.")
+----
+====
+
+== AI Agents
+
+AI agents extend LLMs beyond chat by giving them tools. Instead of just generating text, an agent can call functions, observe the results, and continue reasoning. This creates a loop where the model breaks down complex tasks into steps and executes them autonomously.
+
+In this lab the agent has two simple tools — one that returns the current time and one that adds numbers. The architecture is the same regardless of what the tools do: the agent decides which tool to call, the framework executes it, and the result feeds back into the next reasoning step. Labs 4 through 7 replace these simple tools with graph queries, vector search, and MCP server connections.
+
+== LangGraph Agent Architecture
+
+LangGraph models agents as directed graphs. Nodes are functions that process state. Edges define the flow between them. The agent in this lab uses a minimal two-node ReAct pattern:
+
+----
+START -> agent -> (tools -> agent) | END
+----
+
+* **Agent Node** calls the LLM with the current message history. The LLM decides whether to call a tool or produce a final answer.
+* **Tools Node** executes any tool calls the LLM requested and appends the results to the message history.
+* **Conditional Edge** inspects the LLM's response. If it contains tool calls, the edge routes back to the Tools Node. If not, the edge routes to END.
+
+.How state flows through the graph
+[%collapsible]
+====
+LangGraph maintains a `MessagesState` object — a list of messages that accumulates as the agent runs. Each node reads the current messages, performs its work, and appends new messages to the state. The Agent Node appends the LLM response (which may include tool call requests). The Tools Node appends the tool results. This shared state is what allows the agent to reason across multiple turns.
+====
+
+== The ReAct Pattern
+
+ReAct stands for Reason + Act. The loop works as follows:
+
+1. **Reason** — The LLM examines the question and the current state, then decides what to do next.
+2. **Act** — The LLM issues a tool call (or produces a final answer if no tool is needed).
+3. **Observe** — The tool executes and the result is appended to the message history.
+4. **Repeat** — The LLM sees the tool result and decides whether to call another tool or finish.
+
+This loop is the foundation for every agent in the workshop. Labs 4 and 6 add retrieval tools (vector search, graph traversal). Lab 7 connects tools through the Model Context Protocol. The orchestration pattern stays the same.
+
+== AgentCore Deployment
+
+After testing the agent locally, the notebook walks through deploying it to Amazon Bedrock AgentCore Runtime. AgentCore packages the agent code using `direct_code_deploy` — no Docker required — and runs it as a managed service.
+
+The deployment process:
+
+1. Create a self-contained directory with the agent code (`agent.py`) and dependencies (`pyproject.toml`)
+2. Generate a `.bedrock_agentcore.yaml` configuration specifying the entrypoint, runtime, and AWS settings
+3. Run `agentcore deploy` to package and upload
+4. Invoke the deployed agent via the `agentcore` CLI or programmatically with boto3
+
+.Invocation via boto3
+[%collapsible]
+====
+Once deployed, agents are invoked through the `bedrock-agentcore` boto3 client using the agent's ARN:
+
+[source,python]
+----
+client = boto3.client("bedrock-agentcore", region_name=REGION)
+response = client.invoke_agent_runtime(
+    agentRuntimeArn=AGENT_ARN,
+    runtimeSessionId=str(uuid.uuid4()),
+    payload=json.dumps({"prompt": prompt}).encode(),
+    qualifier="DEFAULT",
+)
+----
+====
+
+== Key Code Patterns
+
+Three patterns from this lab appear throughout the remaining labs.
+
+**Defining tools with the `@tool` decorator.** The decorator converts a Python function into a tool the LLM can call. The docstring becomes the tool description that the LLM reads when deciding which tool to use.
+
+[source,python]
+----
+@tool
+def get_current_time() -> str:
+    """Get the current date and time."""
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+----
+
+**Binding tools to the LLM.** `bind_tools` attaches the tool definitions to the model so it knows what actions are available.
+
+[source,python]
+----
+llm = ChatBedrockConverse(model=MODEL_ID, region_name=REGION)
+llm_with_tools = llm.bind_tools(tools)
+----
+
+**Building the agent graph.** The `StateGraph` wires together nodes and edges into the ReAct loop.
+
+[source,python]
+----
+graph = StateGraph(MessagesState)
+graph.add_node("agent", call_model)
+graph.add_node("tools", ToolNode(tools))
+graph.add_edge(START, "agent")
+graph.add_conditional_edges("agent", should_continue)
+graph.add_edge("tools", "agent")
+agent = graph.compile()
+----
+
+== Next Steps
+
+Continue to xref:lab3-instructions.adoc[Lab 3 Instructions] to set up SageMaker Studio and run the agent notebook, or proceed to xref:lab4.adoc[Lab 4: MCP-Based Retrieval] to connect agents to the Neo4j knowledge graph.

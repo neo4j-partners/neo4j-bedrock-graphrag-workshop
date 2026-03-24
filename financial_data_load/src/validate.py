@@ -62,7 +62,7 @@ VALIDATION_PROMPTS: dict[str, str] = {
 def validate_entities(
     snapshots: dict[str, list[SnapshotEntity]],
 ) -> list[RemovalDecision]:
-    """Validate all entity types. Returns list of RemovalDecision.
+    """Validate all entity types in parallel. Returns list of RemovalDecision.
 
     Args:
         snapshots: Dict mapping label -> list of SnapshotEntity.
@@ -70,17 +70,33 @@ def validate_entities(
     Returns:
         List of RemovalDecision for entities that should be removed.
     """
-    removals: list[RemovalDecision] = []
+    from concurrent.futures import ThreadPoolExecutor, as_completed
 
-    for label, prompt in VALIDATION_PROMPTS.items():
+    def _run_label(label: str, prompt: str) -> tuple[str, list[RemovalDecision]]:
         entities = snapshots.get(label, [])
         if not entities:
-            continue
-
+            return label, []
         print(f"  Validating {label} ({len(entities)} entities)...")
         label_removals = _validate_entity_type(entities, label, prompt)
-        removals.extend(label_removals)
-        print(f"    {len(label_removals)} marked for removal")
+        print(f"  {label}: {len(label_removals)} marked for removal")
+        return label, label_removals
+
+    removals: list[RemovalDecision] = []
+
+    tasks = {
+        label: prompt
+        for label, prompt in VALIDATION_PROMPTS.items()
+        if snapshots.get(label)
+    }
+
+    with ThreadPoolExecutor(max_workers=len(tasks)) as pool:
+        futures = {
+            pool.submit(_run_label, label, prompt): label
+            for label, prompt in tasks.items()
+        }
+        for future in as_completed(futures):
+            label, label_removals = future.result()
+            removals.extend(label_removals)
 
     return removals
 

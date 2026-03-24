@@ -1,0 +1,75 @@
+= Lab 8: Aura Agents API
+
+In Lab 2 you built an agent through the Aura console. This final lab closes the loop by calling that same agent programmatically, showing how a no-code agent becomes a production API endpoint.
+
+TIP: Ready to start? Jump to the xref:lab8-instructions.adoc[Lab 8 Instructions] for step-by-step setup.
+
+.**At a Glance**
+
+* **Aura Agents API** turns the agent you built in Lab 2 into a REST endpoint callable from any application
+* **OAuth2 client credentials** provide machine-to-machine authentication with automatic token caching
+* **Pydantic response models** give type-safe parsing of agent responses in Python
+* **Async batch queries** let you send multiple questions concurrently for better throughput
+
+== From Console to API
+
+The visual console is good for testing and iteration. The API makes the same agent accessible from code -- applications, data pipelines, automated workflows. Same agent, same tools, different access pattern.
+
+In Lab 2, you configured tools (Cypher templates, vector search, text-to-Cypher), tested questions, and refined the agent's behavior through a visual interface. The agent you built there already has a REST endpoint. This lab shows how to call it.
+
+== Integration Use Cases
+
+The API opens four categories of integration:
+
+* **Application Integration**: Embed the agent in web apps, mobile apps, or microservices. A financial dashboard could surface agent-generated insights alongside charts and tables.
+* **Automation**: Include agent calls in data pipelines and workflows. Scheduled jobs can query the agent for risk summaries or portfolio analysis and feed results downstream.
+* **Batch Processing**: Ask multiple questions programmatically with async requests. Process a list of companies or risk factors without manual interaction.
+* **Custom UIs**: Build your own chat interfaces backed by the agent. Control the presentation layer while the agent handles retrieval and reasoning.
+
+== Authentication Flow
+
+The API uses OAuth2 client credentials flow for machine-to-machine access. There is no user login involved -- the client authenticates directly with a client ID and secret.
+
+----
+1. Request Token
+   POST https://api.neo4j.io/oauth/token
+   - Basic Auth: client_id:client_secret
+   - Body: grant_type=client_credentials
+   → Response: { access_token, expires_in: 3600 }
+
+2. Invoke Agent
+   POST {agent_endpoint}/invoke
+   - Authorization: Bearer {access_token}
+   - Body: { input: "your question" }
+   → Response: { content, status, usage }
+----
+
+Tokens are cached for 1 hour and automatically refreshed on 401 responses. The Python client in the notebook handles this transparently -- you authenticate once, and subsequent calls reuse the cached token until it expires.
+
+== Key Concepts
+
+[cols="1,3"]
+|===
+| Concept | Description
+
+| **OAuth2 Client Credentials**
+| Authentication flow for machine-to-machine API access. The client exchanges a client ID and secret for an access token without any user interaction.
+
+| **Bearer Token**
+| Access token included in the `Authorization` header of each API request. The server validates it to authorize the call.
+
+| **Token Caching**
+| Reusing tokens until they expire (1 hour). Avoids unnecessary token requests and reduces latency on repeated calls.
+
+| **Pydantic Models**
+| Type-safe data validation for API responses. Defines the expected response structure so parsing errors surface immediately rather than downstream.
+
+| **Async/Await**
+| Python pattern for concurrent, non-blocking operations. Enables sending multiple agent requests in parallel for batch processing scenarios.
+|===
+
+== Next Steps
+
+This completes all labs in the workshop. Across Labs 0 through 8, you have provisioned a graph database, loaded a knowledge graph from SEC financial filings, built a no-code agent, explored vector search and graph-enriched retrieval, constructed GraphRAG pipelines with the neo4j-graphrag library, connected MCP agents to Neo4j, and called an Aura Agent programmatically via REST API.
+
+Continue to xref:lab8-instructions.adoc[Lab 8 Instructions] to set up your API credentials and run the notebook.

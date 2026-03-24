@@ -119,7 +119,11 @@ financial_data_load/backups/
 financial_data_load/snapshots/
 financial_data_load/model_snapshots/
 
+# Node
+node_modules/
+
 # Secrets and credentials
+CONFIG.txt
 *.pem
 *.key
 credentials.json

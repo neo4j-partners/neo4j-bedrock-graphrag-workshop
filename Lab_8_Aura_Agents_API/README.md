@@ -1,6 +1,6 @@
 # Lab 8 - Aura Agents API
 
-In this lab, you'll call the Neo4j Aura Agent you built in Lab 2 programmatically using Python. The same agent that answers questions about SEC 10-K filings through the Aura console becomes accessible via REST API, enabling integration into applications, data pipelines, and automated workflows.
+Call the Neo4j Aura Agent you built in Lab 2 programmatically using Python and REST API.
 
 ## Prerequisites
 
@@ -9,20 +9,6 @@ Before starting, make sure you have:
 - Completed **Lab 1** (Neo4j Aura setup)
 - Completed **Lab 2** (Built an Aura Agent with tools)
 - Completed **Lab 3** (SageMaker setup)
-
-## Lab Overview
-
-In Lab 2, you built a GraphRAG agent using Neo4j's visual agent builder. That agent can:
-- Answer questions about SEC 10-K filings, risk factors, and company data
-- Use Cypher template tools to query company overviews and shared risk factors
-- Perform semantic similarity searches across filing content
-- Generate Cypher queries from natural language
-
-Now you'll call that same agent via a REST API, enabling:
-- **Application Integration**: Embed the agent in web apps, mobile apps, or microservices
-- **Automation**: Include agent calls in data pipelines and workflows
-- **Batch Processing**: Ask multiple questions programmatically
-- **Custom UIs**: Build your own chat interfaces
 
 ## What You'll Learn
 
@@ -57,26 +43,6 @@ Now you'll call that same agent via a REST API, enabling:
 Your agent must have **External** visibility to be called via API:
 1. Open your agent's settings
 2. Ensure **External endpoint** is enabled
-
-## Authentication Flow
-
-The client handles authentication automatically:
-
-```
-1. Request Token
-   POST https://api.neo4j.io/oauth/token
-   - Basic Auth: client_id:client_secret
-   - Body: grant_type=client_credentials
-   → Response: { access_token, expires_in: 3600 }
-
-2. Invoke Agent
-   POST {agent_endpoint}/invoke
-   - Authorization: Bearer {access_token}
-   - Body: { input: "your question" }
-   → Response: { content, status, usage }
-```
-
-Tokens are cached for 1 hour and automatically refreshed when expired.
 
 ## Lab Notebook
 
@@ -144,16 +110,6 @@ Try these questions with your agent (same as Lab 2):
 **Structured Queries:**
 - "Which company has the most risk factors?"
 - "What asset managers own stakes in technology companies?"
-
-## Key Concepts
-
-| Concept | Description |
-|---------|-------------|
-| **OAuth2 Client Credentials** | Authentication flow for machine-to-machine API access |
-| **Bearer Token** | Access token included in API request headers |
-| **Token Caching** | Reusing tokens until they expire (1 hour) |
-| **Pydantic Models** | Type-safe data validation for API responses |
-| **Async/Await** | Python pattern for concurrent, non-blocking operations |
 
 ## Next Steps
 

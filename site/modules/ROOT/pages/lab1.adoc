@@ -19,7 +19,7 @@ A graph database models data as nodes and relationships. Nodes represent entitie
 The notation follows a visual convention. Parentheses denote nodes, brackets denote relationships:
 
 ----
-(:Company {name, ticker})-[:FACES_RISK {severity}]->(:RiskFactor)
+(:Company {name, ticker})-[:FACES_RISK]->(:RiskFactor)
 ----
 
 Each Company node carries properties like name and ticker. Each FACES_RISK relationship carries details like severity. The relationship is directional, typed, and stored as a first-class element alongside the nodes it connects.

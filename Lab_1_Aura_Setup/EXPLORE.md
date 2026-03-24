@@ -67,6 +67,8 @@ The visualization shows which filing companies compete with which other companie
 
 ## Step 6: Apply Degree Centrality
 
+> **Note:** This requires Graph Analytics to be enabled on your Aura instance. In the Aura Console, go to your instance settings and under **Graph Analytics**, select **Plugin**. If it's not enabled, you'll see a 403 error when applying an algorithm.
+
 With the competitive landscape still on the canvas, open the **Graph Data Science** panel by clicking the connected-nodes icon on the left toolbar.
 
 ![Graph Data Science](images/gds_panel.png)

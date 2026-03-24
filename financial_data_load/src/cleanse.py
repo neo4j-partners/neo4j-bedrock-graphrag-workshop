@@ -79,12 +79,23 @@ def _snapshot_entities(driver: Driver, label: str) -> list[SnapshotEntity]:
 # ---------------------------------------------------------------------------
 
 
-def cleanse(driver: Driver, phase: str | None = None) -> Path:
+def cleanse(
+    driver: Driver,
+    phase: str | None = None,
+    base_plan: Path | None = None,
+    skip_labels: list[str] | None = None,
+    only_labels: list[str] | None = None,
+) -> Path:
     """Generate a cleanse plan. Does not modify Neo4j.
 
     Args:
         driver: Neo4j driver.
         phase: Run only this phase ("validate" or "dedup"). Default: both.
+        base_plan: Path to an existing plan to build on. Carries forward
+            removals and dedup_sections from that plan so you can run
+            phases incrementally.
+        skip_labels: Entity labels to skip during dedup (e.g. ["RiskFactor"]).
+        only_labels: If set, only dedup these labels (e.g. ["RiskFactor"]).
 
     Returns:
         Path to the cleanse plan JSON file.
@@ -98,6 +109,12 @@ def cleanse(driver: Driver, phase: str | None = None) -> Path:
         LOG_DIR / f"cleanse_plan_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
     )
 
+    # Load base plan if provided
+    base: CleansePlan | None = None
+    if base_plan:
+        print(f"Loading base plan: {base_plan}")
+        base = CleansePlan.model_validate_json(base_plan.read_text())
+
     # Snapshot all entity types
     print("Snapshotting entities...")
     snapshots: dict[str, list[SnapshotEntity]] = {}
@@ -108,10 +125,15 @@ def cleanse(driver: Driver, phase: str | None = None) -> Path:
         entity_counts[label] = len(entities)
         print(f"  {label}: {len(entities)} entities")
 
-    # Mutable state that gets saved incrementally
-    removals: list[RemovalDecision] = []
-    dedup_sections: dict[str, DedupSection] = {}
-    ground_truth = None
+    # Mutable state that gets saved incrementally — seed from base plan
+    removals: list[RemovalDecision] = list(base.removals) if base else []
+    dedup_sections: dict[str, DedupSection] = dict(base.dedup_sections) if base else {}
+    ground_truth = base.ground_truth if base else None
+
+    if base and removals:
+        print(f"  Carried forward {len(removals)} removals from base plan")
+    if base and dedup_sections:
+        print(f"  Carried forward dedup for: {', '.join(dedup_sections.keys())}")
 
     def _save_plan() -> None:
         """Write current plan state to disk."""
@@ -143,10 +165,20 @@ def cleanse(driver: Driver, phase: str | None = None) -> Path:
         if before != after:
             print(f"  {label}: {before} -> {after} after validation")
 
+    # Determine which labels to dedup
+    dedup_labels = list(ENTITY_LABELS)
+    if only_labels:
+        dedup_labels = [l for l in dedup_labels if l in only_labels]
+    elif skip_labels:
+        dedup_labels = [l for l in dedup_labels if l not in skip_labels]
+
     # Phase 2: Deduplication
     if phase is None or phase == "dedup":
         print("\n--- Phase 2: Deduplication ---")
-        for label in ENTITY_LABELS:
+        skipped = set(ENTITY_LABELS) - set(dedup_labels)
+        if skipped:
+            print(f"  Skipping: {', '.join(sorted(skipped))}")
+        for label in dedup_labels:
             entities = snapshots[label]
             if not entities:
                 continue

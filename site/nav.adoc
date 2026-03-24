@@ -1,7 +1,21 @@
 * xref:index.adoc[Home]
-* Labs
+* Part 1: No-Code Track
 ** xref:lab0.adoc[Lab 0: Sign In to AWS]
 *** xref:lab0-instructions.adoc[Instructions]
 ** xref:lab1.adoc[Lab 1: Neo4j Aura Setup]
 *** xref:lab1-instructions.adoc[Instructions]
 *** xref:lab1-explore.adoc[Explore the Graph]
+** xref:lab2.adoc[Lab 2: Aura Agents]
+*** xref:lab2-instructions.adoc[Instructions]
+* Part 2: GraphRAG with Python
+** xref:lab3.adoc[Lab 3: Bedrock & Agents]
+*** xref:lab3-instructions.adoc[Instructions]
+** xref:lab4.adoc[Lab 4: MCP Retrieval]
+*** xref:lab4-instructions.adoc[Instructions]
+** xref:lab6.adoc[Lab 6: GraphRAG]
+*** xref:lab6-instructions.adoc[Instructions]
+* Part 3: Advanced Agents
+** xref:lab7.adoc[Lab 7: MCP Agent]
+*** xref:lab7-instructions.adoc[Instructions]
+** xref:lab8.adoc[Lab 8: Aura Agents API]
+*** xref:lab8-instructions.adoc[Instructions]

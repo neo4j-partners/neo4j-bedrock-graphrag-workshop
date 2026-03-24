@@ -1,0 +1,78 @@
+= Lab 6: GraphRAG
+
+Lab 4 showed retrieval through MCP where an agent executes Cypher remotely. This lab takes the direct approach: connect to Neo4j with a Python driver and use the neo4j-graphrag library's retriever classes. You will build the full pipeline from raw text to hybrid retrieval.
+
+TIP: Ready to start? Jump to the xref:lab6-instructions.adoc[Lab 6 Instructions] for the notebook walkthrough.
+
+.**At a Glance**
+
+* Six notebooks progress from loading raw text into a knowledge graph to running hybrid retrieval queries
+* The neo4j-graphrag library provides four retriever classes, each suited to a different query shape
+* Vector similarity, keyword matching, and graph traversal combine into a single retrieval pipeline
+* The `alpha` parameter lets you tune the balance between semantic and keyword search
+
+== The Pipeline
+
+The six notebooks form a single arc: create the graph, generate embeddings, then layer increasingly sophisticated retrieval strategies on top. Notebooks 01 and 02 build the data foundation. Notebooks 03 through 06 each demonstrate a different retriever that queries the same graph.
+
+----
+01 Data Loading → 02 Embeddings → 03 Vector → 04 Vector+Cypher → 05 Fulltext → 06 Hybrid
+----
+
+By the end, you will have built four different retriever configurations and understand when each one applies.
+
+== How the Notebooks Connect
+
+Notebooks 01 and 02 build the foundation. Notebook 01 loads SEC filing text as Document and Chunk nodes linked by `FROM_DOCUMENT` and `NEXT_CHUNK` relationships. Notebook 02 generates vector embeddings on every Chunk node and creates a `chunkEmbeddings` vector index.
+
+Every notebook from 03 onward queries that same graph using a different retrieval strategy. Notebook 03 introduces the simplest retriever: pure vector similarity. Notebook 04 adds graph traversal to pull in surrounding context. Notebook 05 steps back from vectors entirely to show keyword-based fulltext search. Notebook 06 combines both approaches and shows how the `alpha` parameter controls the balance.
+
+== Four Retrievers Explained
+
+**VectorRetriever** performs pure semantic similarity search. It finds chunks whose embeddings are closest to the query embedding. This retriever works best for open-ended questions where meaning matters more than exact wording, such as "What are the main risk factors?"
+
+**VectorCypherRetriever** uses the "chunk as anchor" concept. Vector search finds the starting point, then a Cypher `retrieval_query` traverses from matched chunks to related entities: documents, neighboring chunks, companies, and products. This retriever works best when you need filing context alongside the answer, such as "What risks does Apple face and what document are they from?"
+
+**HybridRetriever** combines vector similarity with fulltext keyword search. The `alpha` parameter controls the balance: `0.0` is pure keyword, `1.0` is pure vector, and `0.5` is balanced. This retriever works best for queries with specific terms like tickers or CIK numbers that vector search may rank lower.
+
+**HybridCypherRetriever** combines all three approaches in a single query: vector similarity, keyword matching, and graph traversal. This retriever provides the best overall coverage when you need semantic understanding, exact term matching, and graph context together.
+
+== Retriever Selection Guide
+
+Each retriever fits a different query shape. The right choice depends on whether the query contains specific terms, needs graph context, or is purely semantic.
+
+[cols="2,2,3"]
+|===
+| Scenario | Retriever | Why
+
+| Simple semantic Q&A ("What are the main risk factors?")
+| `VectorRetriever`
+| Finds chunks by meaning without requiring exact keyword matches
+
+| Need company or filing context ("What risks does Apple face and what document are they from?")
+| `VectorCypherRetriever`
+| Traverses from matched chunks to related Document nodes, neighboring chunks, and entity relationships
+
+| Specific terms, tickers, or CIK numbers ("AAPL", "CIK 0000320193")
+| `HybridRetriever`
+| Fulltext component catches exact terms that vector search may rank lower
+
+| Best overall coverage
+| `HybridCypherRetriever`
+| Combines vector similarity, keyword matching, and graph traversal in a single query
+|===
+
+== Alpha Tuning
+
+The `HybridRetriever` and `HybridCypherRetriever` accept an `alpha` parameter that controls the weight between vector similarity and keyword matching. A value of `1.0` uses only vector similarity. A value of `0.0` uses only keyword search. Values in between blend the two scores.
+
+[source,python]
+----
+retriever.search(query, alpha=0.5)
+----
+
+Start with `alpha=0.5` for a balanced blend, then adjust based on your query patterns. Push toward `1.0` when queries are conversational and toward `0.0` when queries contain specific identifiers like tickers or filing numbers.
+
+== Next Steps
+
+Continue to xref:lab6-instructions.adoc[Lab 6 Instructions] for the notebook walkthrough, or proceed to xref:lab7.adoc[Lab 7: MCP Agent] to build agents that use these retrieval patterns as tools.

@@ -1,0 +1,131 @@
+= Lab 8 Instructions: Aura Agents API
+
+Follow these steps to call the Aura Agent you built in Lab 2 programmatically using a Python REST client.
+
+TIP: For concepts and background, see xref:lab8.adoc[Lab 8: Aura Agents API].
+
+== What You'll Learn
+
+* **OAuth2 Authentication**: How to authenticate with the Neo4j API using client credentials
+* **REST API Invocation**: How to call your Aura Agent's endpoint
+* **Pydantic Response Models**: How to parse responses into type-safe Python objects
+* **Token Management**: How to cache and refresh access tokens automatically
+* **Async Batch Queries**: How to make concurrent requests for better performance
+
+== Prerequisites
+
+* Completed **Lab 0** (AWS sign-in)
+* Completed **Lab 1** (Neo4j Aura setup)
+* Completed **Lab 2** (Built an Aura Agent with tools)
+* Completed **Lab 3** (SageMaker setup)
+
+== Getting Your API Credentials
+
+=== Step 1: Get Your API Key
+
+1. Log in to the https://console.neo4j.io[Neo4j Aura Console]
+2. Click your **profile icon** in the top right corner
+3. Go to **Settings**
+4. Select the **API keys** tab
+5. Click **Create API Key**
+6. Copy and save both the **Client ID** and **Client Secret**
+
+IMPORTANT: The Client Secret is only shown once. Save it securely.
+
+=== Step 2: Get Your Agent Endpoint
+
+1. In the Aura Console, navigate to your agent
+2. Click on your agent to open its details
+3. Click the **Copy endpoint** button
+4. The URL will look like: `https://api.neo4j.io/v2beta1/organizations/.../projects/.../agents/.../invoke`
+
+=== Step 3: Enable External Access
+
+Your agent must have **External** visibility to be called via API:
+
+1. Open your agent's settings
+2. Ensure **External endpoint** is enabled
+
+== Lab Notebook
+
+This lab contains one notebook: `aura_agent_client.ipynb`. It walks through building a complete Python client for the Aura Agents API, covering OAuth2 authentication, type-safe response parsing with Pydantic, token caching, and concurrent async requests.
+
+== Getting Started
+
+1. Open the notebook: `aura_agent_client.ipynb`
+2. Ensure your credentials are set in `CONFIG.txt`:
++
+[cols="1,2"]
+|===
+| Setting | Value
+
+| **NEO4J_CLIENT_ID**
+| Your API key Client ID
+
+| **NEO4J_CLIENT_SECRET**
+| Your API key Client Secret
+
+| **NEO4J_AGENT_ENDPOINT**
+| Your agent's endpoint URL
+|===
++
+3. Run through the notebook cells in order
+
+== Example Usage
+
+After completing the notebook, you can call your agent like this:
+
+[source,python]
+----
+# Create client
+client = AuraAgentClient(
+    client_id="your-client-id",
+    client_secret="your-client-secret",
+    endpoint_url="https://api.neo4j.io/.../invoke"
+)
+
+# Ask a question
+response = client.invoke("What risk factors does Apple face according to their 10-K filing?")
+print(response.text)
+
+# View agent reasoning
+print(response.thinking)
+
+# Check tool usage
+for tool in response.tool_uses:
+    print(f"Used tool: {tool.type}")
+----
+
+== Sample Questions
+
+Try these questions with your agent:
+
+**Company Analysis:**
+
+* "What companies are in the database and what products do they offer?"
+* "Tell me about Apple's SEC filing and their major investors"
+
+**Risk Analysis:**
+
+* "What risk factors does Apple face according to their 10-K filing?"
+* "What risks do Apple and Microsoft share?"
+
+**Semantic Search:**
+
+* "What do the filings say about supply chain risks and mitigation strategies?"
+* "What do companies say about AI and machine learning?"
+
+**Structured Queries:**
+
+* "Which company has the most risk factors?"
+* "What asset managers own stakes in technology companies?"
+
+== Resources
+
+* https://neo4j.com/developer/genai-ecosystem/aura-agent/[Neo4j Aura Agents Documentation]
+* https://neo4j.com/docs/aura/platform/api/authentication/[Neo4j API Authentication]
+* https://neo4j.com/blog/genai/build-context-aware-graphrag-agent/[Build a GraphRAG Agent in Minutes]
+
+== Next Steps
+
+Congratulations! You have completed all labs in the workshop. You now have hands-on experience with building no-code AI agents, constructing GraphRAG pipelines, connecting LLM agents to Neo4j via the Model Context Protocol, and calling Aura Agents programmatically via REST API.

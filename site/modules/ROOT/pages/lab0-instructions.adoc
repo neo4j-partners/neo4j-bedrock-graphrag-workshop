@@ -40,9 +40,6 @@ Once validated, you will receive your AWS credentials. **Save this information**
 
 1. Open the AWS Console at https://console.aws.amazon.com/[console.aws.amazon.com]
 2. Enter your Account ID (or account alias) and click **Next**
-
-image::lab0-aws-signin.png[AWS Sign In]
-
 3. Enter your IAM username and password, then click **Sign in**
 
 image::lab0-aws-console-home.png[AWS Console Home]

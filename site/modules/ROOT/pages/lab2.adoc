@@ -1,0 +1,79 @@
+= Lab 2: Aura Agents
+
+This is Lab 2 of the workshop. You have a running knowledge graph from Lab 1 loaded with SEC 10-K filing data. Before writing any code, you will see what an AI agent can do with this graph through Neo4j's no-code platform: Aura Agents.
+
+TIP: Ready to start? Jump to the xref:lab2-instructions.adoc[Lab 2 Instructions] for step-by-step setup.
+
+.**At a Glance**
+
+* **Aura Agents** combine semantic search, graph traversal, and natural language queries in one conversational interface
+* **"Create with AI"** analyzes your graph schema and auto-generates tools — no Cypher to write manually
+* **Three retrieval patterns**: Cypher Templates (deterministic traversals), Similarity Search (semantic vector retrieval), and Text2Cypher (ad-hoc natural language queries)
+* **Optional deployment** as a REST API endpoint or MCP server for integration with external clients
+
+== What Are Aura Agents?
+
+Aura Agents is Neo4j's no-code platform for building conversational AI interfaces grounded in graph data. Rather than writing retrieval logic by hand, you describe a use case in natural language and the platform generates an agent with tools tailored to your graph's schema. The agent then uses those tools to answer questions by combining graph traversals, vector similarity search, and dynamically generated Cypher queries.
+
+The "Create with AI" workflow inspects the node labels, relationship types, and indexes in your knowledge graph and produces a fully configured agent. For the SEC financial dataset, this means the agent automatically understands how to look up company details, traverse ownership chains, compare risk factors, and search filing text — all without manual configuration.
+
+== Three Retrieval Patterns
+
+The generated agent uses three categories of tools, each suited to different question types.
+
+=== Cypher Templates
+
+Cypher Templates are pre-built graph traversal patterns mapped to specific questions. Each template targets a known pattern in the graph — company details, risk factors, ownership relationships — and executes a precise, deterministic Cypher query. Because the query structure is fixed, results are predictable and fast.
+
+.Example
+[%collapsible]
+====
+"What products does NVIDIA Corporation offer?" triggers a template that traverses `(Company)-[:OFFERS]->(Product)` and returns the product list. No query generation is needed — the template maps directly to the graph pattern.
+====
+
+=== Similarity Search
+
+Similarity Search performs semantic retrieval over embedded filing text using the `chunkEmbeddings` vector index. Given a question, the agent generates an embedding and finds the most relevant passages by meaning rather than keyword matching. This is how the agent handles open-ended questions about topics discussed across filings.
+
+.Example
+[%collapsible]
+====
+"What do the filings say about AI and machine learning?" searches the vector index for passages semantically related to AI, returning relevant excerpts from multiple companies' 10-K filings.
+====
+
+=== Text2Cypher
+
+Text2Cypher translates arbitrary natural language questions into Cypher queries at runtime. This is the most flexible retrieval pattern — it can answer questions the template authors did not anticipate — but it is also the least deterministic, since the generated query depends on the LLM's interpretation.
+
+.Example
+[%collapsible]
+====
+"How many products does NVIDIA Corporation mention?" generates a Cypher query like `MATCH (c:Company {name: 'NVIDIA Corporation'})-[:OFFERS]->(p:Product) RETURN count(p)` and executes it against the graph.
+====
+
+== Tool Type Comparison
+
+[cols="1,2,2"]
+|===
+| Tool Type | Purpose | Best For
+
+| **Cypher Templates**
+| Controlled, precise graph traversals
+| Specific lookups, comparisons
+
+| **Similarity Search**
+| Semantic retrieval over filing text
+| Finding relevant content by meaning
+
+| **Text2Cypher**
+| Flexible natural language to Cypher
+| Ad-hoc questions about the data
+|===
+
+== Connection to Later Labs
+
+Labs 6 and 7 implement these same three retrieval patterns programmatically using Python and the neo4j-graphrag library. The no-code agent you build here provides a reference point: when you write vector search, graph-enriched retrieval, and text-to-Cypher pipelines in code, you will already understand how each pattern behaves and what kinds of questions it handles well.
+
+== Next Steps
+
+Continue to xref:lab2-instructions.adoc[Lab 2 Instructions] to create your Aura Agent, or proceed to xref:lab3.adoc[Lab 3: Intro to Bedrock and Agents] to begin the coding labs.
