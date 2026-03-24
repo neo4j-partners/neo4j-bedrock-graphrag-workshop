@@ -4,6 +4,11 @@ Follow these steps to sign in to your AWS account and verify Bedrock access.
 
 TIP: For concepts and background, see xref:lab0.adoc[Lab 0: Concepts and Reference].
 
+There are two setup paths depending on your situation:
+
+* <<Option A: Workshop Event (OneBlink)>> — for instructor-led workshop participants with an event code
+* <<Option B: Using Your Own AWS Account>> — for self-paced learners using a personal or company AWS account
+
 == Prerequisites
 
 * For **Workshop Event**: An event code from your instructor and the email you registered with

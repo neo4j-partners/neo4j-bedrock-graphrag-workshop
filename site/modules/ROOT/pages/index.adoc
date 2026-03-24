@@ -4,19 +4,19 @@
 
 This workshop teaches you to build Graph Retrieval-Augmented Generation (GraphRAG) pipelines using Neo4j Aura and Amazon Bedrock. You will work with SEC 10-K financial filing data — companies, products, risk factors, and institutional ownership — progressing from no-code tools to building custom AI agents.
 
-== Graph Intelligence Meets AWS AI
+== Graph Intelligence Meets Generative AI on AWS
 
 Neo4j Aura is the Graph Intelligence Platform. It makes connections between entities explicit and traversable. Amazon Bedrock provides managed access to foundation models for generation and embedding. Together they form a complete GraphRAG stack: Neo4j handles topology and retrieval, Bedrock handles reasoning and generation.
 
 The integration covers four patterns: vector search over embedded chunks stored in Neo4j, graph-enriched retrieval that follows relationships from matched chunks to connected entities, text-to-Cypher generation that translates natural language into graph queries, and agent orchestration that routes questions to the right retrieval strategy.
 
-=== Neo4j Aura: Topology and Retrieval
+=== Neo4j: Graph Intelligence Platform
 
-Neo4j stores the SEC financial knowledge graph — companies, their products, risk factors, competitors, partners, and institutional owners — as nodes and relationships. Built-in vector indexes store embeddings alongside graph data, enabling semantic similarity search without a separate vector store. Cypher queries combine vector search with graph traversal in a single operation. See xref:lab1.adoc[Lab 1] for graph setup and Cypher basics.
+Neo4j is the world's leading Graph Intelligence Platform — AI-ready data by design. Neo4j AuraDB, the fully managed graph database as a service, stores data as nodes and relationships with built-in vector indexes that keep embeddings alongside graph data. This design enables GraphRAG: retrieval that combines semantic similarity search with graph traversal in a single query. Neo4j Aura Agent provides a no-code path to build, test, and deploy AI agents directly from AuraDB knowledge graphs. In this workshop, Neo4j stores the SEC financial knowledge graph and serves as the retrieval layer for all agent queries. See xref:lab1.adoc[Lab 1] for graph setup and Cypher basics.
 
-=== Amazon Bedrock: Reasoning and Generation
+=== Generative AI on AWS
 
-Amazon Bedrock provides the AI backbone. Claude models handle reasoning, tool selection, and response generation. Amazon Nova Multimodal Embeddings generate the vectors stored in Neo4j's vector indexes. The Strands Agents SDK provides agent orchestration that connects to Neo4j through MCP (Model Context Protocol).
+AWS provides the most comprehensive set of generative AI tools and services for building applications at production scale. Amazon Bedrock is the end-to-end platform for building generative AI applications and agents, providing unified API access to foundation models — Anthropic Claude for reasoning and generation, Amazon Nova for embeddings. Amazon Bedrock AgentCore is the agentic platform for building, deploying, and operating agents securely at scale without infrastructure management. Amazon SageMaker AI is the managed service for building, training, and deploying ML and foundation models, including the JupyterLab notebook environment used throughout this workshop. See xref:aws-services.adoc[AWS GenAI Services] for detailed coverage of each service.
 
 == From Knowledge Graph to Agents
 

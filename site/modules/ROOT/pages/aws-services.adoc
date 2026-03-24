@@ -4,126 +4,23 @@ Building a GraphRAG agent requires three capabilities: access to foundation mode
 
 .**At a Glance**
 
-* **Amazon Bedrock** — unified API access to Claude (reasoning and generation) and Nova (embeddings), with the Converse API handling tool use for agent architectures
-* **Amazon Bedrock AgentCore** — serverless agent hosting that packages notebook code into isolated microVMs without Docker, supporting LangGraph, Strands, and MCP servers
+* **Amazon Bedrock** — unified API access to foundation models for reasoning (Claude) and embeddings (Nova), with cross-region routing for throughput
+* **Amazon Bedrock AgentCore** — serverless agent hosting that packages agent code into isolated microVMs, supporting multiple frameworks and protocols
 * **Amazon SageMaker Studio** — JupyterLab notebook environment with managed compute, where you develop and test agents before deploying them
 
 == Amazon Bedrock
 
-Every agent in this workshop sends its reasoning through Bedrock and receives its embeddings from Bedrock. The service provides a single API endpoint that routes to different model providers, so agent code specifies a Model ID and Bedrock handles the rest. The workshop uses two model families for two distinct purposes.
+Amazon Bedrock provides a single API endpoint for accessing foundation models from multiple providers. Agent code specifies a model ID and Bedrock handles hosting, scaling, and routing. The workshop uses two model families for two distinct purposes.
 
-**Anthropic Claude** handles reasoning. When an agent receives a question, Claude decides which tools to call, interprets the results, and generates the final answer. The workshop uses Claude via cross-region inference profiles, which route requests across AWS regions for higher throughput. The model ID `us.anthropic.claude-sonnet-4-5-20250929-v1:0` specifies a US geographic profile: requests stay within US regions but can route to whichever has capacity.
+**Anthropic Claude** handles reasoning. When an agent receives a question, Claude decides which tools to call, interprets the results, and generates the final answer.
 
-**Amazon Nova Multimodal Embeddings** handles vector representation. It converts text chunks from SEC 10-K filings into 1024-dimensional vectors stored in Neo4j's vector index. When a user asks a question, Nova embeds the query into the same vector space, and Neo4j finds the chunks with the most similar embeddings. Nova supports text, image, and video input, though this workshop uses text only.
+**Amazon Nova Multimodal Embeddings** handles vector representation. It converts text chunks from SEC 10-K filings into 1024-dimensional vectors stored in Neo4j's vector index. When a user asks a question, Nova embeds the query into the same vector space, and Neo4j finds the chunks with the most similar embeddings.
 
-=== The Converse API
-
-The Converse API is the interface through which every agent in this workshop talks to Claude. It provides a consistent message-based protocol that works across model providers, so agent code does not change when the underlying model does.
-
-For agent architectures, the critical capability is tool use. Tool definitions go into the `toolConfig` field of a Converse request. The model examines the available tools, decides whether to call one, and returns a `toolUse` content block specifying which tool and what arguments. The agent framework executes the tool, appends the result as a `toolResult` message, and calls Converse again. This loop continues until the model produces a final text response instead of a tool call.
-
-[source,python]
-----
-# Strands wraps the Converse API in BedrockModel
-from strands.models import BedrockModel
-bedrock_model = BedrockModel(model_id=MODEL_ID, region_name=REGION)
-----
-
-The Strands SDK's `BedrockModel` wraps the Converse API, handling serialization of tool definitions, parsing of tool call responses, and the message history that maintains conversation context.
-
-.How tool use flows through the Converse API
-[%collapsible]
-====
-A single agent turn works as follows:
-
-1. The agent sends the user's question plus tool definitions to Converse
-2. Claude returns a `toolUse` block: `{"name": "search_graph", "input": {"query": "NVIDIA risk factors"}}`
-3. The agent framework executes the tool and gets results
-4. The agent sends the tool result back to Converse as a `toolResult` message
-5. Claude sees the result and either calls another tool or produces a final answer
-
-The framework (LangGraph or Strands) manages this loop automatically. The Converse API provides the protocol; the framework provides the orchestration.
-====
-
-=== Cross-Region Inference
-
-Cross-region inference profiles route model requests across AWS regions to maximize throughput. Bedrock offers two profile types:
-
-[cols="1,2,2"]
-|===
-| | Geographic | Global
-
-| **Routing**
-| Within a geographic boundary (US, EU, APAC)
-| Any supported AWS commercial region worldwide
-
-| **Throughput**
-| Higher than single-region
-| Highest available
-
-| **Cost**
-| Standard pricing
-| Approximately 10% savings
-
-| **Data residency**
-| Stays within the geographic boundary
-| No geographic restriction
-|===
-
-The workshop uses geographic profiles with the `us.` prefix, which means requests stay within US regions. All data transmitted during cross-region operations remains on the AWS network, encrypted in transit. There is no additional routing cost for cross-region inference; pricing is based on the region from which you call the inference profile.
-
-.Model IDs in the workshop
-[%collapsible]
-====
-The `us.` prefix on a model ID indicates a US geographic cross-region inference profile. Some LangChain components need the base model ID (without the prefix) for internal routing:
-
-[source,python]
-----
-MODEL_ID = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
-
-# Derive base model ID for LangChain components that need it
-if MODEL_ID.startswith("us.anthropic."):
-    BASE_MODEL_ID = MODEL_ID.replace("us.anthropic.", "anthropic.")
-----
-
-The embedding model (`amazon.nova-2-multimodal-embeddings-v1:0`) does not use a cross-region prefix because it is invoked directly through the `bedrock-runtime` endpoint rather than through inference profiles.
-====
-
-=== Model Access
-
-Bedrock requires explicit model access grants before any notebook can invoke a model. Both Claude and Nova must be enabled through the Bedrock console. See xref:lab0-instructions.adoc[Lab 0 Instructions] for the steps.
+Bedrock uses cross-region inference to route requests across AWS regions for higher throughput. The workshop uses geographic profiles scoped to US regions, so requests can route to whichever region has capacity while data stays within the US boundary. All data remains on the AWS network, encrypted in transit.
 
 == Amazon Bedrock AgentCore
 
-The gap between agent code running in a notebook cell and agent code running as a callable service is mostly infrastructure: containerization, networking, session management, IAM. AgentCore closes that gap. It packages agent code into isolated microVMs and exposes them through an API, without requiring Docker, Kubernetes, or custom infrastructure.
-
-=== How Deployment Works
-
-The workshop uses `direct_code_deploy` from the AgentCore Starter Toolkit, which handles packaging and containerization internally:
-
-1. Create a directory containing the agent code (`agent.py`) and a `pyproject.toml` listing dependencies
-2. Generate a `.bedrock_agentcore.yaml` configuration specifying the entrypoint, runtime settings, and the IAM execution role
-3. Run `agentcore deploy` — the toolkit packages the code, uploads it to S3, and creates the runtime environment
-4. Invoke the deployed agent through the `agentcore` CLI or programmatically with boto3
-
-.Invoking a deployed agent
-[%collapsible]
-====
-Once deployed, agents are invoked through the `bedrock-agentcore` boto3 client:
-
-[source,python]
-----
-client = boto3.client("bedrock-agentcore", region_name=REGION)
-response = client.invoke_agent_runtime(
-    agentRuntimeArn=AGENT_ARN,
-    runtimeSessionId=str(uuid.uuid4()),
-    payload=json.dumps({"prompt": prompt}).encode(),
-    qualifier="DEFAULT",
-)
-----
-
-Each invocation creates an isolated session. The agent processes the request and returns results through the same API.
-====
+AgentCore bridges the gap between agent code running in a notebook and agent code running as a callable service. It packages agent code into isolated microVMs and exposes them through an API, without requiring Docker, Kubernetes, or custom infrastructure. You write your agent, point the AgentCore toolkit at it, and it handles containerization, networking, and session management.
 
 === Session Isolation
 
@@ -137,23 +34,7 @@ AgentCore is framework agnostic. It works with LangGraph, Strands Agents SDK, Cr
 
 SageMaker Studio is where agent code gets written and tested before deployment. It runs JupyterLab in managed compute instances with pre-configured AWS credentials, eliminating local environment setup as a prerequisite for the workshop.
 
-=== Domain, Space, and Application
-
-SageMaker Studio organizes resources in a three-level hierarchy:
-
-* A **domain** is the top-level container. It defines the IAM execution role, network configuration, and storage defaults. The workshop creates one domain per participant using the "Set up for single user" quick setup.
-* A **space** manages compute and storage for a single application instance. Each space gets its own Amazon EBS volume, isolated from other spaces. The workshop uses a Quick Start space with an `ml.t3.medium` instance (2 vCPU, 4 GiB RAM), sufficient because the notebooks call Bedrock APIs rather than running models locally.
-* An **application** is the running JupyterLab environment within a space. Once the space is running, JupyterLab opens, the workshop repository gets cloned, and notebooks run against the Bedrock and Neo4j APIs.
-
-.Why ml.t3.medium is sufficient
-[%collapsible]
-====
-The workshop notebooks are API-calling code, not model training or inference workloads. Each notebook sends prompts to Bedrock, receives responses, and processes the text. The heaviest local computation is embedding generation, which also happens on Bedrock. A `ml.t3.medium` instance provides enough CPU and memory to run the Python agent frameworks, manage MCP connections, and handle Neo4j driver operations. Larger instances would increase cost without improving performance for this workload pattern.
-====
-
-=== Execution Role
-
-When SageMaker creates a domain, it provisions an IAM execution role (`AmazonSageMaker-ExecutionRole-*`) that notebooks assume automatically. This role determines what AWS services the notebook code can access. The default role includes permissions for common SageMaker operations. For this workshop, the `setup_agentcore.sh` script adds an inline policy granting AgentCore API access, IAM role management (scoped to AgentCore roles), and S3 access for code deployment.
+SageMaker Studio organizes resources into domains, spaces, and applications. The workshop creates a domain per participant, launches a space with a small compute instance, and opens JupyterLab where notebooks run against the Bedrock and Neo4j APIs. Since the notebooks call cloud APIs rather than running models locally, a lightweight instance is sufficient.
 
 == How the Services Connect
 

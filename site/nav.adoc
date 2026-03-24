@@ -1,13 +1,13 @@
 * xref:index.adoc[Home]
 * xref:aws-services.adoc[AWS GenAI Services]
 * xref:configuration.adoc[Configuration Reference]
-* xref:sample-queries.adoc[Sample Queries]
 * Part 1: No-Code Track
 ** xref:lab0.adoc[Lab 0: Sign In to AWS]
 *** xref:lab0-instructions.adoc[Instructions]
 ** xref:lab1.adoc[Lab 1: Neo4j Aura Setup]
 *** xref:lab1-instructions.adoc[Instructions]
 *** xref:lab1-explore.adoc[Explore the Graph]
+*** xref:sample-queries.adoc[Sample Cypher Queries]
 ** xref:lab2.adoc[Lab 2: Aura Agents]
 *** xref:lab2-instructions.adoc[Instructions]
 * Part 2: GraphRAG with Python
