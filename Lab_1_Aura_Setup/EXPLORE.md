@@ -65,6 +65,8 @@ This creates the pattern: `Company — COMPETES_WITH → Company`
 
 The visualization shows which filing companies compete with which other companies. You'll see Microsoft with the most competitor edges, followed by NVIDIA and PG&E. The outer ring of smaller nodes are mentioned companies (Google, Oracle, Samsung, etc.) that appear in filings but aren't filing companies themselves.
 
+![Company Competes With](images/Company_Competes.png)
+
 ## Step 6: Apply Degree Centrality
 
 > **Note:** This requires Graph Analytics to be enabled on your Aura instance. In the Aura Console, go to your instance settings and under **Graph Analytics**, select **Plugin**. If it's not enabled, you'll see a 403 error when applying an algorithm.
@@ -89,7 +91,7 @@ After the algorithm completes, click **Size nodes based on scores** to visually 
 
 Microsoft will dominate the visualization (24 competitor edges), making it immediately obvious which filing company operates in the most competitive markets. Mentioned companies like Google and Oracle will be small since they only have a single incoming edge.
 
-![Centrality Results](images/centrality_results.png)
+![Centrality Results](images/Centrality_Company.png)
 
 ## Additional Exploration Ideas
 
