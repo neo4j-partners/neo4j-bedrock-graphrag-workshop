@@ -85,8 +85,8 @@ def search_with_graph_traversal(driver: Driver, company_name: str) -> None:
     """Search company and traverse to related entities."""
     print(f"\n=== Graph Traversal: '{company_name}' ===")
     with driver.session() as session:
-        # Traverse from Company to Documents via chunks
-        # Path: (Company)-[:FROM_CHUNK]->(Chunk)-[:FROM_DOCUMENT]->(Document)
+        # Traverse from Company to Documents via FILED
+        # Path: (Company)-[:FILED]->(Document)<-[:FROM_DOCUMENT]-(Chunk)
         result = session.run(
             """
             CALL db.index.fulltext.queryNodes('search_entities', $term)
@@ -95,7 +95,7 @@ def search_with_graph_traversal(driver: Driver, company_name: str) -> None:
             WITH node AS company, score
             LIMIT 1
 
-            OPTIONAL MATCH (company)-[:FROM_CHUNK]->(chunk:Chunk)-[:FROM_DOCUMENT]->(doc:Document)
+            OPTIONAL MATCH (company)-[:FILED]->(doc:Document)
             WITH company, score, collect(DISTINCT doc.path)[0..10] AS documents
 
             OPTIONAL MATCH (company)-[:FACES_RISK]->(risk:RiskFactor)
@@ -123,8 +123,8 @@ def hybrid_search(driver: Driver, keyword: str) -> None:
     """Hybrid search combining fulltext with graph patterns."""
     print(f"\n=== Hybrid Search: '{keyword}' ===")
     with driver.session() as session:
-        # Find company by keyword, then get chunks where it was mentioned
-        # Path: (Company)-[:FROM_CHUNK]->(Chunk)
+        # Find company by keyword, then get chunks from its documents
+        # Path: (Company)-[:FILED]->(Document)<-[:FROM_DOCUMENT]-(Chunk)
         result = session.run(
             """
             CALL db.index.fulltext.queryNodes('search_entities', $keyword)
@@ -133,7 +133,7 @@ def hybrid_search(driver: Driver, keyword: str) -> None:
             WITH entity, keyword_score
             LIMIT 1
 
-            MATCH (entity)-[:FROM_CHUNK]->(chunk:Chunk)
+            MATCH (entity)-[:FILED]->(doc:Document)<-[:FROM_DOCUMENT]-(chunk:Chunk)
             WHERE chunk.text IS NOT NULL
 
             RETURN entity.name AS company,

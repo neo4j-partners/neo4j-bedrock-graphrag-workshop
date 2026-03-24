@@ -1,21 +1,17 @@
 """
-Basic LangGraph Agent
+Basic Strands Agent
 
-This solution demonstrates a ReAct-style agent using LangGraph
-and ChatBedrockConverse with simple tool use.
+This solution demonstrates a ReAct-style agent using the Strands Agents SDK
+with BedrockModel and simple tool use.
 
 Run with: uv run python main.py solutions <N>
 """
 
-from typing import Literal
 from datetime import datetime
 from pathlib import Path
 
-from langchain_aws import ChatBedrockConverse
-from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_core.tools import tool
-from langgraph.graph import StateGraph, MessagesState, START, END
-from langgraph.prebuilt import ToolNode
+from strands import Agent, tool
+from strands.models import BedrockModel
 
 from config import BedrockConfig
 
@@ -28,16 +24,7 @@ config = BedrockConfig()
 MODEL_ID = config.model_id
 REGION = config.region
 
-# Derive BASE_MODEL_ID for cross-region inference profiles
-if MODEL_ID.startswith("us.anthropic."):
-    BASE_MODEL_ID = MODEL_ID.replace("us.anthropic.", "anthropic.")
-elif MODEL_ID.startswith("global.anthropic."):
-    BASE_MODEL_ID = MODEL_ID.replace("global.anthropic.", "anthropic.")
-else:
-    BASE_MODEL_ID = None
-
 print(f"Model:          {MODEL_ID}")
-print(f"Base Model:     {BASE_MODEL_ID}")
 print(f"Region:         {REGION}")
 
 
@@ -58,68 +45,30 @@ def add_numbers(a: int, b: int) -> int:
 
 
 tools = [get_current_time, add_numbers]
-print(f"Defined {len(tools)} tools: {[t.name for t in tools]}")
+print(f"Defined {len(tools)} tools: get_current_time, add_numbers")
 
 
 # ---------------------------------------------------------------------------
-# 3. Initialize the LLM
+# 3. Initialize the Agent
 # ---------------------------------------------------------------------------
 
-llm_kwargs = {
-    "model": MODEL_ID,
-    "region_name": REGION,
-    "temperature": 0,
-}
+bedrock_model = BedrockModel(
+    model_id=MODEL_ID,
+    region_name=REGION,
+    temperature=0,
+)
 
-if BASE_MODEL_ID:
-    llm_kwargs["base_model_id"] = BASE_MODEL_ID
+agent = Agent(
+    model=bedrock_model,
+    system_prompt="You are a helpful assistant. Use tools when needed.",
+    tools=tools,
+)
 
-llm = ChatBedrockConverse(**llm_kwargs)
-
-# Bind tools to the LLM
-llm_with_tools = llm.bind_tools(tools)
-
-print(f"LLM initialized with {MODEL_ID}!")
+print("Agent initialized!")
 
 
 # ---------------------------------------------------------------------------
-# 4. Build the LangGraph Agent
-# ---------------------------------------------------------------------------
-
-def should_continue(state: MessagesState) -> Literal["tools", "__end__"]:
-    """Determine whether to continue to tools or end."""
-    last_message = state["messages"][-1]
-    if last_message.tool_calls:
-        return "tools"
-    return END
-
-
-def call_model(state: MessagesState):
-    """Call the LLM."""
-    response = llm_with_tools.invoke(state["messages"])
-    return {"messages": [response]}
-
-
-# Build the graph
-graph = StateGraph(MessagesState)
-
-# Add nodes
-graph.add_node("agent", call_model)
-graph.add_node("tools", ToolNode(tools))
-
-# Add edges
-graph.add_edge(START, "agent")
-graph.add_conditional_edges("agent", should_continue)
-graph.add_edge("tools", "agent")
-
-# Compile
-agent = graph.compile()
-
-print("Agent graph compiled successfully!")
-
-
-# ---------------------------------------------------------------------------
-# 5. Run the Agent
+# 4. Run the Agent
 # ---------------------------------------------------------------------------
 
 def run_agent(question: str):
@@ -127,20 +76,13 @@ def run_agent(question: str):
     print(f"Question: {question}")
     print("-" * 50)
 
-    result = agent.invoke({
-        "messages": [
-            SystemMessage(content="You are a helpful assistant. Use tools when needed."),
-            HumanMessage(content=question),
-        ]
-    })
-
-    final_message = result["messages"][-1]
-    print(f"\nResponse:\n{final_message.content}")
-    return result
+    response = agent(question)
+    print(f"\nResponse:\n{response}")
+    return response
 
 
 # ---------------------------------------------------------------------------
-# 6. Query with Sample Financial Data
+# 5. Query with Sample Financial Data
 # ---------------------------------------------------------------------------
 
 def load_financial_data() -> str:
@@ -165,7 +107,7 @@ Question: {question}"""
 
 
 # ---------------------------------------------------------------------------
-# 7. Main
+# 6. Main
 # ---------------------------------------------------------------------------
 
 def main():

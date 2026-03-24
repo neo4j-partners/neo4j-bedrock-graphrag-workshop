@@ -6,7 +6,6 @@ pairwise entity comparison. Operates on snapshot files for iterative testing.
 
 from __future__ import annotations
 
-import json
 import logging
 from datetime import datetime
 from collections import defaultdict
@@ -271,7 +270,9 @@ SYSTEM_PROMPT = """\
 You are an entity resolution expert for a knowledge graph built from SEC 10-K \
 financial filings.
 
-For each pair of entities, determine whether they refer to the same real-world entity.
+For each pair of entities, determine whether they refer to the same real-world \
+entity. Use the entity_resolution_decisions tool to record your decisions — \
+you MUST provide a decision for every pair.
 
 Rules:
 - "Apple Inc." and "Apple" (same company) → same_entity: true
@@ -281,10 +282,7 @@ Rules:
 - Generic names like "Competitor", "Our business", "Banks" should NOT match \
 named entities.
 - When uncertain, return same_entity: false. It is better to keep duplicates \
-than to incorrectly merge distinct entities.
-
-Return JSON: {"decisions": [{"pair_index": N, "same_entity": bool, \
-"confidence": float, "reasoning": "..."}]}"""
+than to incorrectly merge distinct entities."""
 
 
 def _format_entity(entity: SnapshotEntity) -> str:
@@ -320,41 +318,105 @@ def _build_batch_prompt(pairs: list[CandidatePair]) -> str:
     return "\n".join(lines)
 
 
+def _build_resolution_tool():
+    """Build a Tool for structured entity resolution output."""
+    from neo4j_graphrag.tool import (
+        Tool, ObjectParameter, ArrayParameter,
+        StringParameter, NumberParameter, BooleanParameter,
+    )
+
+    decision_schema = ObjectParameter(
+        description="A single entity resolution decision",
+        properties={
+            "pair_index": NumberParameter(description="1-based index of the pair"),
+            "same_entity": BooleanParameter(
+                description="Whether the two entities refer to the same real-world entity"
+            ),
+            "confidence": NumberParameter(
+                description="Confidence score from 0.0 to 1.0"
+            ),
+            "reasoning": StringParameter(
+                description="Brief explanation for the decision"
+            ),
+        },
+        required_properties=["pair_index", "same_entity", "confidence", "reasoning"],
+        additional_properties=False,
+    )
+
+    parameters = ObjectParameter(
+        description="Entity resolution decisions for a batch of candidate pairs",
+        properties={
+            "decisions": ArrayParameter(
+                description="List of resolution decisions, one per pair",
+                items=decision_schema,
+            ),
+        },
+        required_properties=["decisions"],
+        additional_properties=False,
+    )
+
+    class ResolutionTool(Tool):
+        pass
+
+    return ResolutionTool(
+        name="entity_resolution_decisions",
+        description=(
+            "Record entity resolution decisions for each candidate pair. "
+            "You MUST provide a decision for every pair in the batch."
+        ),
+        parameters=parameters,
+        execute_func=lambda **kwargs: kwargs,
+    )
+
+
+# Module-level singleton — built once, reused across batches
+_RESOLUTION_TOOL = _build_resolution_tool()
+
+
 def _call_llm_batch(
     pairs: list[CandidatePair],
     config: EntityResolutionConfig,
     client,
     system_prompt: str | None = None,
+    max_retries: int = 3,
 ) -> list[MergeDecision]:
-    """Send a batch of candidate pairs to the LLM and parse decisions."""
+    """Send a batch of candidate pairs to the LLM via tool calling."""
     prompt = _build_batch_prompt(pairs)
     effective_prompt = system_prompt or SYSTEM_PROMPT
 
-    try:
-        response = client.invoke(prompt, system_instruction=effective_prompt)
-        content = response.content
-        # Strip markdown fences if present
-        if content.startswith("```"):
-            content = content.split("\n", 1)[1].rsplit("```", 1)[0]
-        result = json.loads(content)
-        decisions_raw = result.get("decisions", [])
-    except (json.JSONDecodeError, KeyError, IndexError) as e:
-        logger.error(f"Failed to parse LLM response: {e}")
-        return []
-    except Exception as e:
-        logger.error(f"LLM call failed: {e}")
+    decisions_raw = None
+    for attempt in range(1, max_retries + 1):
+        try:
+            response = client.invoke_with_tools(
+                prompt,
+                tools=[_RESOLUTION_TOOL],
+                system_instruction=effective_prompt,
+                tool_choice="entity_resolution_decisions",
+            )
+            if not response.tool_calls:
+                logger.error(
+                    f"LLM returned no tool calls (attempt {attempt}/{max_retries})"
+                )
+                continue
+            decisions_raw = response.tool_calls[0].arguments.get("decisions", [])
+            break
+        except Exception as e:
+            logger.error(f"LLM call failed (attempt {attempt}/{max_retries}): {e}")
+
+    if decisions_raw is None:
+        logger.error(f"All {max_retries} attempts failed for batch of {len(pairs)} pairs")
         return []
 
     decisions = []
     for d in decisions_raw:
-        idx = d.get("pair_index", 0) - 1
+        idx = int(d.get("pair_index", 0)) - 1
         if idx < 0 or idx >= len(pairs):
             logger.warning(f"LLM returned invalid pair_index: {d.get('pair_index')}")
             continue
 
         pair = pairs[idx]
         same_entity = d.get("same_entity", False)
-        confidence = d.get("confidence", 1.0 if same_entity else 0.0)
+        confidence = float(d.get("confidence", 1.0 if same_entity else 0.0))
 
         # Apply confidence mode
         if config.confidence_mode == "scored":
@@ -617,7 +679,27 @@ def _evaluate_candidates(
         all_decisions.extend(decisions)
 
         merges = sum(1 for d in decisions if d.decision == "merge")
-        print(f"    -> {merges} merge, {len(decisions) - merges} no_merge")
+        evaluated = len(decisions)
+        skipped = len(batch) - evaluated
+        status = f"    -> {merges} merge, {evaluated - merges} no_merge"
+        if skipped:
+            status += f", {skipped} unevaluated"
+        print(status)
+
+    # Report unevaluated candidates
+    evaluated_pairs = {
+        (d.entity_a_element_id, d.entity_b_element_id) for d in all_decisions
+    }
+    unevaluated = [
+        c for c in candidates
+        if (c.entity_a.element_id, c.entity_b.element_id) not in evaluated_pairs
+    ]
+    if unevaluated:
+        print(f"  WARNING: {len(unevaluated)} candidate pairs were never evaluated:")
+        for c in unevaluated[:10]:
+            print(f"    - {c.entity_a.name!r} / {c.entity_b.name!r}")
+        if len(unevaluated) > 10:
+            print(f"    ... and {len(unevaluated) - 10} more")
 
     return all_decisions
 
@@ -833,7 +915,9 @@ You are an entity resolution expert for a knowledge graph built from SEC 10-K \
 financial filings.
 
 For each pair of entities, determine whether they refer to the same real-world \
-person (executive, officer, or board member).
+person (executive, officer, or board member). Use the \
+entity_resolution_decisions tool to record your decisions — you MUST provide \
+a decision for every pair.
 
 Rules:
 - Formal name variants refer to the same person: "Amy E. Hood" and "Ms. Hood" \
@@ -850,17 +934,15 @@ and "CEO" are different entities unless their names match.
 ("Amy E. Hood"), a matching last name is a strong positive signal. Check for \
 matching company context as confirmation.
 - When uncertain, return same_entity: false. It is better to keep duplicates \
-than to incorrectly merge distinct people.
-
-Return JSON: {"decisions": [{"pair_index": N, "same_entity": bool, \
-"confidence": float, "reasoning": "..."}]}"""
+than to incorrectly merge distinct people."""
 
 PRODUCT_SYSTEM_PROMPT = """\
 You are an entity resolution expert for a knowledge graph built from SEC 10-K \
 financial filings.
 
 For each pair of entities, determine whether they refer to the same real-world \
-product or service offering.
+product or service offering. Use the entity_resolution_decisions tool to record \
+your decisions — you MUST provide a decision for every pair.
 
 Rules:
 - Product family variants may be the same: "Azure" and "Microsoft Azure" → \
@@ -877,17 +959,15 @@ products that include those terms.
 - Products from different companies are never the same entity even if they share \
 a name.
 - When uncertain, return same_entity: false. It is better to keep duplicates \
-than to incorrectly merge distinct products.
-
-Return JSON: {"decisions": [{"pair_index": N, "same_entity": bool, \
-"confidence": float, "reasoning": "..."}]}"""
+than to incorrectly merge distinct products."""
 
 RISK_FACTOR_SYSTEM_PROMPT = """\
 You are an entity resolution expert for a knowledge graph built from SEC 10-K \
 financial filings.
 
 For each pair of entities, determine whether they refer to the same risk factor \
-or risk category.
+or risk category. Use the entity_resolution_decisions tool to record your \
+decisions — you MUST provide a decision for every pair.
 
 Rules:
 - Case-insensitive matches are strong positive signals: "COVID-19 pandemic" and \
@@ -903,17 +983,15 @@ in general, unless context shows they refer to the same disclosure.
 - Semantic similarity matters more than exact string matching for risk factors. \
 Focus on whether two entries describe the same underlying risk.
 - When uncertain, return same_entity: false. It is better to keep duplicates \
-than to incorrectly merge distinct risk factors.
-
-Return JSON: {"decisions": [{"pair_index": N, "same_entity": bool, \
-"confidence": float, "reasoning": "..."}]}"""
+than to incorrectly merge distinct risk factors."""
 
 FINANCIAL_METRIC_SYSTEM_PROMPT = """\
 You are an entity resolution expert for a knowledge graph built from SEC 10-K \
 financial filings.
 
 For each pair of entities, determine whether they refer to the same financial \
-metric measurement.
+metric measurement. Use the entity_resolution_decisions tool to record your \
+decisions — you MUST provide a decision for every pair.
 
 Rules:
 - Metric name variants that describe the same measure are the same: \
@@ -930,10 +1008,7 @@ describe the same measurement.
 - Pay attention to the period/fiscal year property. If both entities have period \
 information and the periods differ, they are definitely different entities.
 - When uncertain, return same_entity: false. It is better to keep duplicates \
-than to incorrectly merge distinct metrics.
-
-Return JSON: {"decisions": [{"pair_index": N, "same_entity": bool, \
-"confidence": float, "reasoning": "..."}]}"""
+than to incorrectly merge distinct metrics."""
 
 # Per-label system prompts for the LLM. Company uses the existing SYSTEM_PROMPT.
 LABEL_SYSTEM_PROMPTS: dict[str, str] = {

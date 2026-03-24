@@ -6,10 +6,10 @@ TIP: Ready to start? Jump to the xref:lab6-instructions.adoc[Lab 6 Instructions]
 
 .**At a Glance**
 
-* Six notebooks progress from loading raw text into a knowledge graph to running hybrid retrieval queries
-* The neo4j-graphrag library provides four retriever classes, each suited to a different query shape
-* Vector similarity, keyword matching, and graph traversal combine into a single retrieval pipeline
-* The `alpha` parameter lets you tune the balance between semantic and keyword search
+* **Six notebooks** — progress from loading raw text into a knowledge graph to running hybrid retrieval queries
+* **neo4j-graphrag library** — four retriever classes, each suited to a different query shape
+* **Retrieval pipeline** — vector similarity, keyword matching, and graph traversal combine into a single pipeline
+* **Alpha tuning** — the `alpha` parameter controls the balance between semantic and keyword search
 
 == Embeddings and Vector Search
 

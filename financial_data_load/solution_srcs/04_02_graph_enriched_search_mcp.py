@@ -2,24 +2,21 @@
 Graph-Enriched Search via MCP
 
 This solution demonstrates vector search enriched with graph context
-(documents, neighboring chunks, entities) through the Neo4j MCP server.
+(documents, neighboring chunks, entities) through the Neo4j MCP server
+using the Strands Agents SDK.
 
 Run with: uv run python main.py solutions <N>
 """
 
-import asyncio
 import json
 import os
 
 import boto3
-import nest_asyncio
 from dotenv import load_dotenv
-from langchain_aws import ChatBedrockConverse
-from langchain_core.messages import HumanMessage
-from langchain_mcp_adapters.client import MultiServerMCPClient
-from langgraph.prebuilt import create_react_agent
-
-nest_asyncio.apply()
+from mcp.client.streamable_http import streamablehttp_client
+from strands import Agent
+from strands.models import BedrockModel
+from strands.tools.mcp import MCPClient
 
 # ---------------------------------------------------------------------------
 # 1. Configuration
@@ -33,14 +30,6 @@ MODEL_ID = os.getenv("MODEL_ID")
 REGION = os.getenv("REGION", "us-east-1")
 MCP_GATEWAY_URL = os.getenv("MCP_GATEWAY_URL")
 MCP_ACCESS_TOKEN = os.getenv("MCP_ACCESS_TOKEN")
-
-# Derive BASE_MODEL_ID for cross-region inference profiles
-if MODEL_ID and MODEL_ID.startswith("us.anthropic."):
-    BASE_MODEL_ID = MODEL_ID.replace("us.anthropic.", "anthropic.")
-elif MODEL_ID and MODEL_ID.startswith("global.anthropic."):
-    BASE_MODEL_ID = MODEL_ID.replace("global.anthropic.", "anthropic.")
-else:
-    BASE_MODEL_ID = None
 
 # ---------------------------------------------------------------------------
 # 2. Embedding Helper
@@ -126,12 +115,13 @@ When given a query embedding, use this Cypher to find similar chunks WITH entity
 CALL db.index.vector.queryNodes('chunkEmbeddings', $top_k, $embedding)
 YIELD node, score
 MATCH (node)-[:FROM_DOCUMENT]->(doc:Document)
-OPTIONAL MATCH (company:Company)-[:FROM_CHUNK]->(node)
+OPTIONAL MATCH (doc)<-[:FILED]-(company:Company)
 OPTIONAL MATCH (company)-[:FACES_RISK]->(risk:RiskFactor)
-OPTIONAL MATCH (product:Product)-[:FROM_CHUNK]->(node)
 WITH node, doc, score,
      collect(DISTINCT company.name) AS companies,
-     collect(DISTINCT risk.name)[0..5] AS risks,
+     collect(DISTINCT risk.name)[0..5] AS risks
+OPTIONAL MATCH (product:Product)-[:FROM_CHUNK]->(node)
+WITH node, doc, score, companies, risks,
      collect(DISTINCT product.name)[0..5] AS products
 RETURN node.text AS text,
        score,
@@ -144,7 +134,7 @@ ORDER BY score DESC
 This query:
 1. Finds the most similar chunks via vector search
 2. Traverses FROM_DOCUMENT to get the source document
-3. Follows FROM_CHUNK to find companies and products mentioned in the chunk
+3. Follows FILED to find the company that filed the document
 4. Follows FACES_RISK from companies to find their risk factors
 
 Use the exact embedding provided. For each result, show:
@@ -160,7 +150,7 @@ You have MCP tools to execute Cypher queries. Use entity-enriched vector search 
 CALL db.index.vector.queryNodes('chunkEmbeddings', $top_k, $embedding)
 YIELD node, score
 MATCH (node)-[:FROM_DOCUMENT]->(doc:Document)
-OPTIONAL MATCH (company:Company)-[:FROM_CHUNK]->(node)
+OPTIONAL MATCH (doc)<-[:FILED]-(company:Company)
 OPTIONAL MATCH (company)-[:FACES_RISK]->(risk:RiskFactor)
 OPTIONAL MATCH (product:Product)-[:FROM_CHUNK]->(node)
 WITH node, doc, score,
@@ -177,137 +167,108 @@ Use the exact embedding provided."""
 
 
 # ---------------------------------------------------------------------------
-# 4. Compare Search Helper
+# 4. Initialize Model and MCP Client
+# ---------------------------------------------------------------------------
+
+bedrock_model = BedrockModel(
+    model_id=MODEL_ID,
+    region_name=REGION,
+    temperature=0,
+)
+
+mcp_client = MCPClient(
+    lambda: streamablehttp_client(
+        url=MCP_GATEWAY_URL,
+        headers={"Authorization": f"Bearer {MCP_ACCESS_TOKEN}"},
+    )
+)
+
+
+# ---------------------------------------------------------------------------
+# 5. Compare Search Helper
 # ---------------------------------------------------------------------------
 
 
-async def compare_search(query: str, top_k: int = 3):
+def compare_search(query: str, top_k: int = 3):
     """Run the same query through all three agents and display results."""
-    # Initialize LLM
-    llm_kwargs = {
-        "model": MODEL_ID,
-        "region_name": REGION,
-        "temperature": 0,
-    }
-    if BASE_MODEL_ID:
-        llm_kwargs["base_model_id"] = BASE_MODEL_ID
+    embedding = get_embedding(query)
 
-    llm = ChatBedrockConverse(**llm_kwargs)
+    message = (
+        f"Run a vector search for the following query. Use top_k={top_k}.\n\n"
+        f"Query: {query}\n\n"
+        f"Embedding (use this exact array in the Cypher query):\n{json.dumps(embedding)}"
+    )
 
-    # Connect to MCP server
-    async with MultiServerMCPClient(
-        {
-            "neo4j": {
-                "transport": "streamable_http",
-                "url": MCP_GATEWAY_URL,
-                "headers": {
-                    "Authorization": f"Bearer {MCP_ACCESS_TOKEN}",
-                },
-            }
-        }
-    ) as mcp_client:
-        tools = await mcp_client.get_tools()
-        print(f"MCP tools: {[t.name for t in tools]}")
+    print(f'Query: "{query}"')
+    print("=" * 60)
 
-        # Create all three agents
-        vector_agent = create_react_agent(llm, tools, prompt=VECTOR_ONLY_PROMPT)
-        graph_agent = create_react_agent(llm, tools, prompt=GRAPH_ENRICHED_PROMPT)
-        entity_agent = create_react_agent(llm, tools, prompt=ENTITY_ENRICHED_PROMPT)
-
-        embedding = get_embedding(query)
-
-        message = (
-            f"Run a vector search for the following query. Use top_k={top_k}.\n\n"
-            f"Query: {query}\n\n"
-            f"Embedding (use this exact array in the Cypher query):\n{json.dumps(embedding)}"
-        )
-
-        print(f'Query: "{query}"')
-        print("=" * 60)
+    with mcp_client:
+        tools = mcp_client.list_tools_sync()
 
         # Vector-only search
         print("\n--- VECTOR-ONLY RESULTS ---\n")
-        vector_result = await vector_agent.ainvoke(
-            {"messages": [HumanMessage(content=message)]}
+        vector_agent = Agent(
+            model=bedrock_model,
+            system_prompt=VECTOR_ONLY_PROMPT,
+            tools=tools,
         )
-        print(vector_result["messages"][-1].content)
+        print(vector_agent(message))
 
         # Graph-enriched search
         print("\n\n--- GRAPH-ENRICHED RESULTS ---\n")
-        graph_result = await graph_agent.ainvoke(
-            {"messages": [HumanMessage(content=message)]}
+        graph_agent = Agent(
+            model=bedrock_model,
+            system_prompt=GRAPH_ENRICHED_PROMPT,
+            tools=tools,
         )
-        print(graph_result["messages"][-1].content)
+        print(graph_agent(message))
 
         # Entity-enriched search
         print("\n\n--- ENTITY-ENRICHED RESULTS ---\n")
-        entity_result = await entity_agent.ainvoke(
-            {"messages": [HumanMessage(content=message)]}
+        entity_agent = Agent(
+            model=bedrock_model,
+            system_prompt=ENTITY_ENRICHED_PROMPT,
+            tools=tools,
         )
-        print(entity_result["messages"][-1].content)
-
-    return vector_result, graph_result, entity_result
+        print(entity_agent(message))
 
 
 # ---------------------------------------------------------------------------
-# 5. Q&A Helper
+# 6. Q&A Helper
 # ---------------------------------------------------------------------------
 
 
-async def ask(query: str, top_k: int = 5):
+def ask(query: str, top_k: int = 5):
     """Ask a question using graph-enriched vector search for context."""
-    # Initialize LLM
-    llm_kwargs = {
-        "model": MODEL_ID,
-        "region_name": REGION,
-        "temperature": 0,
-    }
-    if BASE_MODEL_ID:
-        llm_kwargs["base_model_id"] = BASE_MODEL_ID
+    embedding = get_embedding(query)
 
-    llm = ChatBedrockConverse(**llm_kwargs)
+    message = (
+        f"Answer this question using graph-enriched vector search with top_k={top_k}.\n\n"
+        f"Question: {query}\n\n"
+        f"Embedding:\n{json.dumps(embedding)}"
+    )
 
-    # Connect to MCP server
-    async with MultiServerMCPClient(
-        {
-            "neo4j": {
-                "transport": "streamable_http",
-                "url": MCP_GATEWAY_URL,
-                "headers": {
-                    "Authorization": f"Bearer {MCP_ACCESS_TOKEN}",
-                },
-            }
-        }
-    ) as mcp_client:
-        tools = await mcp_client.get_tools()
+    print(f'Question: "{query}"')
+    print("-" * 60)
 
-        qa_agent = create_react_agent(llm, tools, prompt=QA_PROMPT)
-
-        embedding = get_embedding(query)
-
-        message = (
-            f"Answer this question using graph-enriched vector search with top_k={top_k}.\n\n"
-            f"Question: {query}\n\n"
-            f"Embedding:\n{json.dumps(embedding)}"
+    with mcp_client:
+        tools = mcp_client.list_tools_sync()
+        qa_agent = Agent(
+            model=bedrock_model,
+            system_prompt=QA_PROMPT,
+            tools=tools,
         )
-
-        print(f'Question: "{query}"')
-        print("-" * 60)
-
-        result = await qa_agent.ainvoke(
-            {"messages": [HumanMessage(content=message)]}
-        )
-        print(f"\n{result['messages'][-1].content}")
-
-    return result
+        response = qa_agent(message)
+        print(f"\n{response}")
+        return response
 
 
 # ---------------------------------------------------------------------------
-# 6. Main
+# 7. Main
 # ---------------------------------------------------------------------------
 
 
-async def main():
+def main():
     """Run graph-enriched search demo."""
     print(f"Model:     {MODEL_ID}")
     print(f"Region:    {REGION}")
@@ -317,7 +278,7 @@ async def main():
     print("=" * 60)
     print("COMPARISON 1: Risk factors")
     print("=" * 60)
-    await compare_search(
+    compare_search(
         "What are the key risk factors mentioned in Apple's 10-K filing?"
     )
 
@@ -327,7 +288,7 @@ async def main():
     print("=" * 60)
     print("COMPARISON 2: Financial performance")
     print("=" * 60)
-    await compare_search("What financial metrics indicate company performance?")
+    compare_search("What financial metrics indicate company performance?")
 
     print("\n")
 
@@ -335,7 +296,7 @@ async def main():
     print("=" * 60)
     print("Q&A 1: Apple risk factors")
     print("=" * 60)
-    await ask("What are the key risk factors mentioned in Apple's 10-K filing?")
+    ask("What are the key risk factors mentioned in Apple's 10-K filing?")
 
     print("\n")
 
@@ -343,8 +304,8 @@ async def main():
     print("=" * 60)
     print("Q&A 2: Cybersecurity risks")
     print("=" * 60)
-    await ask("Which companies face cybersecurity-related risks?")
+    ask("Which companies face cybersecurity-related risks?")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

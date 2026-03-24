@@ -1,0 +1,133 @@
+= Configuration Reference
+
+All workshop notebooks read credentials and settings from a single `CONFIG.txt` file at the repository root. The file uses dotenv format (key=value pairs, one per line). Notebooks load it with `python-dotenv` at startup.
+
+== File Location
+
+----
+lab-neo4j-aws/
+  CONFIG.txt          <-- credentials file (gitignored)
+  Lab_3_.../
+    01_basic_strands_agent.ipynb   <-- reads ../CONFIG.txt
+  Lab_6_.../
+    src/
+      01_data_loading.ipynb        <-- reads ../../CONFIG.txt
+----
+
+Each notebook resolves the path relative to its own location. Lab 6 notebooks are one level deeper (`Lab_6_GraphRAG/src/`), so they use `../../CONFIG.txt`.
+
+== Fields
+
+[cols="2,3,2,2"]
+|===
+| Field | Description | Source | Required By
+
+| `NEO4J_URI`
+| Connection URI for your Neo4j Aura instance (e.g., `neo4j+s://xxx.databases.neo4j.io`)
+| xref:lab1.adoc[Lab 1] — shown once during Aura instance creation
+| Labs 3, 4, 6, 7
+
+| `NEO4J_USERNAME`
+| Neo4j database username (default: `neo4j`)
+| xref:lab1.adoc[Lab 1] — Aura instance creation
+| Labs 3, 4, 6, 7
+
+| `NEO4J_PASSWORD`
+| Neo4j database password
+| xref:lab1.adoc[Lab 1] — shown once during Aura instance creation
+| Labs 3, 4, 6, 7
+
+| `MODEL_ID`
+| Bedrock model ID for the reasoning LLM
+| Pre-configured default: `us.anthropic.claude-sonnet-4-5-20250929-v1:0`
+| Labs 3, 4, 6, 7
+
+| `REGION`
+| AWS region for Bedrock API calls
+| Pre-configured default: `us-east-1`
+| Labs 3, 4, 6, 7
+
+| `MCP_GATEWAY_URL`
+| AgentCore Gateway URL for the Neo4j MCP Server
+| Provided by workshop admin or MCP server deployment
+| Labs 4, 7
+
+| `MCP_ACCESS_TOKEN`
+| Authentication token for the MCP Gateway
+| Provided by workshop admin or MCP server deployment
+| Labs 4, 7
+
+| `NEO4J_CLIENT_ID`
+| OAuth2 client ID for the Aura Agents API
+| Lab 8 — Aura Agent API credential setup
+| Lab 8
+
+| `NEO4J_CLIENT_SECRET`
+| OAuth2 client secret for the Aura Agents API
+| Lab 8 — Aura Agent API credential setup
+| Lab 8
+
+| `NEO4J_AGENT_ENDPOINT`
+| Aura Agents API endpoint URL
+| Lab 8 — Aura Agent deployment
+| Lab 8
+|===
+
+== Example File
+
+[source]
+----
+# Neo4j Aura Database (fill in after Lab 1)
+NEO4J_URI=neo4j+s://xxxxxxxx.databases.neo4j.io
+NEO4J_USERNAME=neo4j
+NEO4J_PASSWORD=your_password_here
+
+# MCP Gateway (Labs 4 and 7)
+MCP_GATEWAY_URL=your-gateway-url-here
+MCP_ACCESS_TOKEN=your-access-token-here
+
+# AWS Bedrock Settings (pre-configured defaults)
+MODEL_ID=us.anthropic.claude-sonnet-4-5-20250929-v1:0
+REGION=us-east-1
+
+# Aura Agent API (Lab 8)
+NEO4J_CLIENT_ID=your-client-id-here
+NEO4J_CLIENT_SECRET=your-client-secret-here
+NEO4J_AGENT_ENDPOINT=your-agent-endpoint-here
+----
+
+== How Notebooks Load Configuration
+
+Every notebook uses `python-dotenv` to load `CONFIG.txt` as environment variables, then reads specific keys:
+
+[source,python]
+----
+from dotenv import load_dotenv
+import os
+
+load_dotenv("../CONFIG.txt")
+
+NEO4J_URI = os.getenv("NEO4J_URI")
+NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
+MODEL_ID = os.getenv("MODEL_ID")
+REGION = os.getenv("REGION")
+----
+
+Lab 6 notebooks use `pydantic-settings` through the shared `lib/data_utils.py` module, which defines `Neo4jConfig` and `BedrockConfig` classes that read from `CONFIG.txt` with validation.
+
+== Model ID Notes
+
+The default `MODEL_ID` uses a cross-region inference profile (the `us.` prefix). This routes requests across US regions for higher throughput with no additional cost. For details on cross-region inference, see xref:aws-services.adoc[AWS GenAI Services].
+
+Alternative model IDs are listed in `CONFIG.txt` as comments but are not tested with all notebooks:
+
+[source]
+----
+# Alternative Models (uncomment to use - not tested)
+# MODEL_ID=anthropic.claude-3-5-sonnet-20241022-v2:0
+# MODEL_ID=global.anthropic.claude-sonnet-4-5-20250929-v1:0
+----
+
+== Security
+
+`CONFIG.txt` is listed in `.gitignore` and should never be committed to version control. It contains database passwords and API tokens. For workshop events, the admin distributes credentials through a secure channel. For independent use, participants fill in their own credentials after completing xref:lab1.adoc[Lab 1].

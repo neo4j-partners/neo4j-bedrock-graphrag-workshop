@@ -45,8 +45,8 @@ RETRIEVAL_QUERY = """
 // Get document from chunk
 MATCH (node)-[:FROM_DOCUMENT]->(doc:Document)
 
-// Find companies mentioned in this chunk
-OPTIONAL MATCH (company:Company)-[:FROM_CHUNK]->(node)
+// Find the company that filed this document
+OPTIONAL MATCH (doc)<-[:FILED]-(company:Company)
 
 // Get risk factors for context (if company found)
 OPTIONAL MATCH (company)-[:FACES_RISK]->(risk:RiskFactor)

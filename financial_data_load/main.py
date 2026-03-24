@@ -287,11 +287,79 @@ def cmd_normalize(args):
         normalize_entities(driver)
 
 
+def cmd_fix_companies(args):
+    """Merge known company name variants that dedup missed."""
+    from src.config import connect
+
+    # (survivor_name, consumed_name) — survivor keeps its name
+    MERGE_PAIRS = [
+        ("Apple Inc.", "Apple"),
+        ("Microsoft Corporation", "Microsoft"),
+        ("NVIDIA Corporation", "NVIDIA"),
+        ("Amazon.com, Inc.", "Amazon"),
+        ("Amazon.com, Inc.", "Amazon.com"),
+        ("Alphabet Inc.", "Alphabet"),
+        ("Google Inc.", "Google"),
+    ]
+
+    with connect() as driver:
+        ok = 0
+        skip = 0
+        fail = 0
+        for survivor_name, consumed_name in MERGE_PAIRS:
+            try:
+                result, _, _ = driver.execute_query(
+                    "MATCH (s:Company {name: $sname}) "
+                    "MATCH (c:Company {name: $cname}) "
+                    "RETURN elementId(s) AS sid, elementId(c) AS cid, "
+                    "properties(s) AS sp, properties(c) AS cp",
+                    sname=survivor_name,
+                    cname=consumed_name,
+                )
+                if not result:
+                    print(f"  [SKIP] {consumed_name} -> {survivor_name} (not found)")
+                    skip += 1
+                    continue
+
+                sid = result[0]["sid"]
+                cid = result[0]["cid"]
+                sp = result[0]["sp"]
+                cp = result[0]["cp"]
+
+                fill_props = {
+                    k: v for k, v in cp.items()
+                    if v and not sp.get(k) and not k.startswith("__")
+                }
+
+                driver.execute_query(
+                    """
+                    MATCH (survivor) WHERE elementId(survivor) = $survivor_id
+                    MATCH (consumed) WHERE elementId(consumed) = $consumed_id
+                    CALL apoc.refactor.mergeNodes([survivor, consumed],
+                         {properties: 'discard', mergeRels: true})
+                    YIELD node
+                    SET node += $fill_props
+                    RETURN node.name AS name
+                    """,
+                    survivor_id=sid,
+                    consumed_id=cid,
+                    fill_props=fill_props,
+                )
+                print(f"  [OK] {consumed_name} -> {survivor_name}")
+                ok += 1
+            except Exception as e:
+                print(f"  [FAIL] {consumed_name} -> {survivor_name}: {e}")
+                fail += 1
+
+        print(f"\nMerged: {ok}, Skipped: {skip}, Failed: {fail}")
+
+
 def cmd_finalize(args):
     """Run post-resolution steps: constraints → indexes → asset managers → verify."""
     from src.config import connect
     from src.loader import (
-        load_asset_managers, create_asset_manager_relationships, verify,
+        load_asset_managers, create_asset_manager_relationships,
+        link_to_existing_graph, verify,
     )
     from src.schema import (
         create_all_constraints, create_fulltext_indexes,
@@ -314,6 +382,9 @@ def cmd_finalize(args):
             print()
             holdings = load_asset_managers(ASSET_MANAGER_CSV)
             create_asset_manager_relationships(driver, holdings)
+
+        print("\nLinking documents to companies...")
+        link_to_existing_graph(driver)
 
         verify(driver)
         validate_enrichment(driver)
@@ -378,7 +449,7 @@ SOLUTIONS = [
     ("solution_srcs.02_01_vector_retriever", "Vector Retriever", False, "main"),
     ("solution_srcs.02_02_vector_cypher_retriever", "Vector Cypher Retriever", False, "main"),
     ("solution_srcs.02_03_text2cypher_retriever", "Text2Cypher Retriever", False, "main"),
-    ("solution_srcs.03_01_basic_langgraph_agent", "Basic LangGraph Agent (Lab 3)", False, "main"),
+    ("solution_srcs.03_01_basic_strands_agent", "Basic Strands Agent (Lab 3)", False, "main"),
     ("solution_srcs.04_01_vector_search_mcp", "Vector Search via MCP (Lab 4)", True, "main"),
     ("solution_srcs.04_02_graph_enriched_search_mcp", "Graph-Enriched Search via MCP (Lab 4)", True, "main"),
     ("solution_srcs.04_03_fulltext_hybrid_search_mcp", "Fulltext & Hybrid Search via MCP (Lab 4)", True, "main"),
@@ -652,6 +723,11 @@ def main():
     p_normalize = subparsers.add_parser(
         "normalize", help="Run normalization standalone (rewrite descriptions/fields via LLM)")
     p_normalize.set_defaults(func=cmd_normalize)
+
+    # fix-companies
+    p_fix_companies = subparsers.add_parser(
+        "fix-companies", help="Merge known company name variants that dedup missed")
+    p_fix_companies.set_defaults(func=cmd_fix_companies)
 
     # finalize
     p_finalize = subparsers.add_parser(

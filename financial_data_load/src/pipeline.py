@@ -245,7 +245,8 @@ def verify_searches(driver: Driver) -> None:
     # Retrieval query for vector + entity search: traverses from chunk to
     # company and its risk factors, returning enriched context.
     entity_retrieval_query = """
-    MATCH (node)<-[:FROM_CHUNK]-(company:Company)-[:FACES_RISK]->(risk:RiskFactor)
+    MATCH (node)-[:FROM_DOCUMENT]->(doc:Document)<-[:FILED]-(company:Company)
+    OPTIONAL MATCH (company)-[:FACES_RISK]->(risk:RiskFactor)
     WITH node, company, collect(DISTINCT risk.name)[0..5] AS risks
     RETURN company.name AS company, risks, node.text AS context
     """
@@ -473,5 +474,21 @@ def validate_enrichment(driver: Driver) -> None:
         r = rows[0]
         print(f"\n  Provenance: {r['entities']} entities -> {r['chunks']} chunks -> {r['docs']} documents")
 
-    # 5. Entity resolution verification
+    # 5. Cross-link verification (Company -[:FILED]-> Document)
+    rows, _, _ = driver.execute_query("""
+        MATCH (c:Company)-[:FILED]->(d:Document)
+        RETURN count(DISTINCT c) AS companies, count(DISTINCT d) AS docs
+    """)
+    if rows:
+        r = rows[0]
+        print(f"\n  Cross-links: {r['companies']} companies -> {r['docs']} documents (FILED)")
+
+    unlinked, _, _ = driver.execute_query("""
+        MATCH (d:Document) WHERE NOT ()-[:FILED]->(d)
+        RETURN count(d) AS count
+    """)
+    if unlinked and unlinked[0]["count"] > 0:
+        print(f"  [WARN] {unlinked[0]['count']} Documents have no FILED relationship")
+
+    # 6. Entity resolution verification
     _verify_entity_resolution(driver)

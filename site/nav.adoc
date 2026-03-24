@@ -1,4 +1,6 @@
 * xref:index.adoc[Home]
+* xref:aws-services.adoc[AWS GenAI Services]
+* xref:configuration.adoc[Configuration Reference]
 * xref:sample-queries.adoc[Sample Queries]
 * Part 1: No-Code Track
 ** xref:lab0.adoc[Lab 0: Sign In to AWS]
@@ -18,3 +20,4 @@
 * Part 3: Advanced Agents
 ** xref:lab7.adoc[Lab 7: MCP Agent]
 *** xref:lab7-instructions.adoc[Instructions]
+* xref:admin-setup.adoc[Admin Setup]

@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "GraphRAG knowledge graph from SEC 10-K filings using Neo4j"
 requires-python = ">=3.12"
 dependencies = [
-    "neo4j-graphrag[bedrock] @ git+https://github.com/neo4j-partners/neo4j-graphrag-python.git@bedrock-embeddings",
+    "neo4j-graphrag[bedrock] @ file:///Users/ryanknight/projects/neo4j-graphrag-python",
     "python-dotenv>=1.0.0",
     "pydantic-settings>=2.0.0",
     "rapidfuzz>=3.0.0",

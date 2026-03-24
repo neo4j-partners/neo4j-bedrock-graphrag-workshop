@@ -6,11 +6,11 @@ TIP: Ready to start? Jump to the xref:lab1-instructions.adoc[Lab 1 Instructions]
 
 .**At a Glance**
 
-* **Graph databases** store data as nodes and relationships — connections are explicit and traversable, not hidden in foreign keys and joins
-* **Cypher** is Neo4j's pattern-matching query language — queries read like the graph patterns they match
-* **The SEC Financial Knowledge Graph** has four entity types: Company, Product, RiskFactor, and AssetManager
-* **Neo4j Aura** is the managed cloud graph database, with built-in vector search, Graph Data Science, and Aura Agents
-* **Aura developer tools**: Query (Cypher editor), Explore (visual graph canvas), and Dashboards (low-code visualization)
+* **Graph databases** — store data as nodes and relationships, where connections are explicit and traversable rather than hidden in foreign keys and joins
+* **Cypher** — Neo4j's pattern-matching query language, where queries read like the graph patterns they match
+* **The SEC Financial Knowledge Graph** — four entity types (Company, Product, RiskFactor, AssetManager) connected by typed relationships
+* **Neo4j Aura** — managed cloud graph database with built-in vector search, Graph Data Science, and Aura Agents
+* **Aura developer tools** — Query (Cypher editor), Explore (visual graph canvas), and Dashboards (low-code visualization)
 
 == Graph Databases
 

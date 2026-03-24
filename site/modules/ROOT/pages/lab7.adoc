@@ -6,11 +6,11 @@ TIP: Ready to start? Jump to the xref:lab7-instructions.adoc[Lab 7 Instructions]
 
 .**At a Glance**
 
-* **Model Context Protocol (MCP)** is an open standard that lets AI agents discover and interact with external tools and data sources through a uniform interface
-* **Neo4j MCP Server** exposes two tools: schema retrieval and read-only Cypher execution
-* **Schema-first approach**: the agent retrieves the graph schema before writing any query, producing more accurate Cypher
-* **Full autonomy**: unlike Lab 4, the agent writes its own Cypher rather than executing pre-written queries
-* **Two framework options**: LangGraph (full-featured, multi-step workflows) and Strands (lightweight, AWS-native)
+* **Model Context Protocol (MCP)** — an open standard that lets AI agents discover and interact with external tools and data sources through a uniform interface
+* **Neo4j MCP Server** — exposes two tools: schema retrieval and read-only Cypher execution
+* **Schema-first approach** — the agent retrieves the graph schema before writing any query, producing more accurate Cypher
+* **Full autonomy** — unlike Lab 4, the agent writes its own Cypher rather than executing pre-written queries
+* **Two framework options** — LangGraph (full-featured, multi-step workflows) and Strands (lightweight, AWS-native)
 
 == Model Context Protocol (MCP)
 

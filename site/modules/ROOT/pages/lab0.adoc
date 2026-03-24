@@ -6,10 +6,10 @@ TIP: Ready to start? Jump to the xref:lab0-instructions.adoc[Lab 0 Instructions]
 
 .**At a Glance**
 
-* **AWS Console** access is required for all labs — either through workshop-provided OneBlink credentials or your own account
-* **Amazon Bedrock** provides foundation model access for Claude (generation) and Nova (embeddings)
-* **US East (N. Virginia)** is the recommended region for the widest Bedrock model availability
-* Model access must be explicitly enabled for Claude and Nova in the Bedrock console
+* **AWS Console** — access is required for all labs, either through workshop-provided OneBlink credentials or your own account
+* **Amazon Bedrock** — foundation model access for Claude (generation) and Nova (embeddings)
+* **US East (N. Virginia)** — the recommended region for the widest Bedrock model availability
+* **Model access** — must be explicitly enabled for Claude and Nova in the Bedrock console
 
 == Workshop Credentials (OneBlink)
 

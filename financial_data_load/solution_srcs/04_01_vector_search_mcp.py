@@ -2,24 +2,20 @@
 Vector Search via MCP
 
 This solution demonstrates semantic vector search through the Neo4j
-MCP server using Bedrock Nova embeddings.
+MCP server using Bedrock Nova embeddings and the Strands Agents SDK.
 
 Run with: uv run python main.py solutions <N>
 """
 
-import asyncio
 import json
 import os
 
 import boto3
-import nest_asyncio
 from dotenv import load_dotenv
-from langchain_aws import ChatBedrockConverse
-from langchain_core.messages import HumanMessage
-from langchain_mcp_adapters.client import MultiServerMCPClient
-from langgraph.prebuilt import create_react_agent
-
-nest_asyncio.apply()
+from mcp.client.streamable_http import streamablehttp_client
+from strands import Agent
+from strands.models import BedrockModel
+from strands.tools.mcp import MCPClient
 
 # ---------------------------------------------------------------------------
 # 1. Configuration
@@ -33,14 +29,6 @@ MODEL_ID = os.getenv("MODEL_ID")
 REGION = os.getenv("REGION", "us-east-1")
 MCP_GATEWAY_URL = os.getenv("MCP_GATEWAY_URL")
 MCP_ACCESS_TOKEN = os.getenv("MCP_ACCESS_TOKEN")
-
-# Derive BASE_MODEL_ID for cross-region inference profiles
-if MODEL_ID and MODEL_ID.startswith("us.anthropic."):
-    BASE_MODEL_ID = MODEL_ID.replace("us.anthropic.", "anthropic.")
-elif MODEL_ID and MODEL_ID.startswith("global.anthropic."):
-    BASE_MODEL_ID = MODEL_ID.replace("global.anthropic.", "anthropic.")
-else:
-    BASE_MODEL_ID = None
 
 # ---------------------------------------------------------------------------
 # 2. Embedding Helper
@@ -106,8 +94,21 @@ For each result, show:
 # 4. Vector Search Helper
 # ---------------------------------------------------------------------------
 
+bedrock_model = BedrockModel(
+    model_id=MODEL_ID,
+    region_name=REGION,
+    temperature=0,
+)
 
-async def vector_search(agent, query: str, top_k: int = 5):
+mcp_client = MCPClient(
+    lambda: streamablehttp_client(
+        url=MCP_GATEWAY_URL,
+        headers={"Authorization": f"Bearer {MCP_ACCESS_TOKEN}"},
+    )
+)
+
+
+def vector_search(query: str, top_k: int = 5):
     """Embed a query and run vector search through the MCP agent."""
     print(f'Query: "{query}"')
     print(f"Top K: {top_k}")
@@ -123,11 +124,19 @@ async def vector_search(agent, query: str, top_k: int = 5):
         f"Embedding (use this exact array in the Cypher query):\n{json.dumps(embedding)}"
     )
 
-    result = await agent.ainvoke({"messages": [HumanMessage(content=message)]})
+    with mcp_client:
+        tools = mcp_client.list_tools_sync()
+        print(f"  MCP tools: {[t.tool_name for t in tools]}")
 
-    response = result["messages"][-1].content
-    print(f"\n{response}")
-    return result
+        agent = Agent(
+            model=bedrock_model,
+            system_prompt=VECTOR_SEARCH_PROMPT,
+            tools=tools,
+        )
+
+        response = agent(message)
+        print(f"\n{response}")
+        return response
 
 
 # ---------------------------------------------------------------------------
@@ -135,7 +144,7 @@ async def vector_search(agent, query: str, top_k: int = 5):
 # ---------------------------------------------------------------------------
 
 
-async def main():
+def main():
     """Run vector search demo."""
     print(f"Model:     {MODEL_ID}")
     print(f"Region:    {REGION}")
@@ -158,60 +167,29 @@ async def main():
     print(f"\nEmbedding dimensions: {len(test_embedding)}")
     print(f"First 5 values: {test_embedding[:5]}")
 
-    # Initialize LLM
-    llm_kwargs = {
-        "model": MODEL_ID,
-        "region_name": REGION,
-        "temperature": 0,
-    }
-    if BASE_MODEL_ID:
-        llm_kwargs["base_model_id"] = BASE_MODEL_ID
+    print(f"\nModel: {MODEL_ID}")
+    print("MCP client created.\n")
 
-    llm = ChatBedrockConverse(**llm_kwargs)
+    # --- Run vector searches ---
 
-    # Connect to MCP server
-    async with MultiServerMCPClient(
-        {
-            "neo4j": {
-                "transport": "streamable_http",
-                "url": MCP_GATEWAY_URL,
-                "headers": {
-                    "Authorization": f"Bearer {MCP_ACCESS_TOKEN}",
-                },
-            }
-        }
-    ) as mcp_client:
-        tools = await mcp_client.get_tools()
-        print(f"\nMCP tools discovered: {[t.name for t in tools]}")
+    # Search for product-related information
+    print("=" * 60)
+    vector_search("What are Apple's main products?", top_k=5)
 
-        # Create the agent
-        agent = create_react_agent(llm, tools, prompt=VECTOR_SEARCH_PROMPT)
-        print("Agent ready!\n")
+    # Search for risk factor information
+    print("\n" + "=" * 60)
+    vector_search(
+        "What are the key risk factors mentioned in SEC filings?",
+        top_k=5,
+    )
 
-        # --- Run vector searches ---
-
-        # Search for product-related information
-        print("=" * 60)
-        result = await vector_search(
-            agent, "What are Apple's main products?", top_k=5
-        )
-
-        # Search for risk factor information
-        print("\n" + "=" * 60)
-        result = await vector_search(
-            agent,
-            "What are the key risk factors mentioned in SEC filings?",
-            top_k=5,
-        )
-
-        # Compare top_k values — fewer results for a focused search
-        print("\n" + "=" * 60)
-        result = await vector_search(
-            agent,
-            "What financial metrics indicate company performance?",
-            top_k=3,
-        )
+    # Compare top_k values — fewer results for a focused search
+    print("\n" + "=" * 60)
+    vector_search(
+        "What financial metrics indicate company performance?",
+        top_k=3,
+    )
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

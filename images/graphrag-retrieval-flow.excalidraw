@@ -918,13 +918,13 @@
       "updated": 1774314319703,
       "link": null,
       "locked": false,
-      "text": "LLM Response\nNova generates answer",
+      "text": "LLM Response\nClaude generates answer",
       "fontSize": 14,
       "fontFamily": 5,
       "textAlign": "center",
       "verticalAlign": "middle",
       "containerId": "box-llm-response",
-      "originalText": "LLM Response\nNova generates answer",
+      "originalText": "LLM Response\nClaude generates answer",
       "autoResize": true,
       "lineHeight": 1.25
     }

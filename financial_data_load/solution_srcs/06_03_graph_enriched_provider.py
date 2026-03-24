@@ -26,7 +26,8 @@ from config import get_agent_config
 
 # Graph-enriched retrieval query
 RETRIEVAL_QUERY: Final[str] = """
-OPTIONAL MATCH (company:Company)-[:FROM_CHUNK]->(node)
+MATCH (node)-[:FROM_DOCUMENT]->(doc:Document)
+OPTIONAL MATCH (doc)<-[:FILED]-(company:Company)
 OPTIONAL MATCH (company)-[:FACES_RISK]->(risk:RiskFactor)
 WITH node, score, company,
      collect(DISTINCT risk.name)[0..5] AS risks

@@ -129,6 +129,39 @@ def create_asset_manager_relationships(
 
 
 # ---------------------------------------------------------------------------
+# Cross-links (structured ↔ unstructured)
+# ---------------------------------------------------------------------------
+
+
+def link_to_existing_graph(driver: Driver) -> None:
+    """Create cross-links between seed-data Company nodes and pipeline-created Documents.
+
+    Connects the structured layer (Company nodes from CSV) to the unstructured
+    layer (Document/Chunk nodes from PDF processing) via FILED relationships.
+    Must run after both create_company_nodes() and process_all_pdfs().
+    """
+    # Company -[:FILED]-> Document (via normalized name)
+    result, _, _ = driver.execute_query("""
+        MATCH (c:Company) WHERE c.name IS NOT NULL
+        MATCH (d:Document) WHERE d.name IS NOT NULL AND c.name = d.name
+        MERGE (c)-[:FILED]->(d)
+        RETURN count(*) AS count
+    """)
+    print(f"  [OK] {result[0]['count']} Company -[:FILED]-> Document")
+
+    # Fallback: match on CIK for unlinked Documents
+    result, _, _ = driver.execute_query("""
+        MATCH (c:Company) WHERE c.cik IS NOT NULL
+        MATCH (d:Document) WHERE d.cik IS NOT NULL AND c.cik = d.cik
+          AND NOT (c)-[:FILED]->(d)
+        MERGE (c)-[:FILED]->(d)
+        RETURN count(*) AS count
+    """)
+    if result[0]["count"]:
+        print(f"  [OK] {result[0]['count']} additional FILED (CIK fallback)")
+
+
+# ---------------------------------------------------------------------------
 # Clear and verify
 # ---------------------------------------------------------------------------
 

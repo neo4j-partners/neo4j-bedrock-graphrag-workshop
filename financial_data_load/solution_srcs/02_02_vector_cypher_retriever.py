@@ -18,10 +18,11 @@ from neo4j_graphrag.retrievers import VectorCypherRetriever
 from config import get_embedder, get_llm, get_neo4j_driver
 
 # Retrieval query 1: Company + Risk context
-# Traverses from chunk to companies mentioned in that chunk, then to their risks
+# Traverses from chunk to document to company via FILED, then to their risks
 # Uses explicit grouping with WITH clause for modern Cypher compliance
 COMPANY_RISK_QUERY: Final[str] = """
-MATCH (node)<-[:FROM_CHUNK]-(company:Company)-[:FACES_RISK]->(risk:RiskFactor)
+MATCH (node)-[:FROM_DOCUMENT]->(doc:Document)<-[:FILED]-(company:Company)
+OPTIONAL MATCH (company)-[:FACES_RISK]->(risk:RiskFactor)
 WITH node, company, collect(DISTINCT risk.name)[0..20] AS risks
 RETURN company.name AS company, risks, node.text AS context
 """
@@ -31,7 +32,7 @@ RETURN company.name AS company, risks, node.text AS context
 # This ensures top_k controls the final result count, not just vector search nodes.
 # Relationship direction: (AssetManager)-[:OWNS]->(Company)
 ASSET_MANAGER_QUERY: Final[str] = """
-MATCH (node)<-[:FROM_CHUNK]-(company:Company)
+MATCH (node)-[:FROM_DOCUMENT]->(doc:Document)<-[:FILED]-(company:Company)
 WITH node, company, COLLECT {
   MATCH (manager:AssetManager)-[:OWNS]->(company)
   RETURN manager.managerName
@@ -45,8 +46,7 @@ RETURN company.name AS company, managers AS AssetManagersWithSharesInCompany, no
 # Uses explicit grouping with WITH clause for modern Cypher compliance.
 # Uses slice notation [0..10] on collect() to limit array sizes per row.
 SHARED_RISKS_QUERY: Final[str] = """
-WITH node
-MATCH (node)<-[:FROM_CHUNK]-(c1:Company)
+MATCH (node)-[:FROM_DOCUMENT]->(doc:Document)<-[:FILED]-(c1:Company)
 MATCH (c1)-[:FACES_RISK]->(risk:RiskFactor)<-[:FACES_RISK]-(c2:Company)
 WHERE c1 <> c2
 WITH c1.name AS source_company, c2.name AS related, risk.name AS shared_risk

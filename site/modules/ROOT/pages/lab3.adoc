@@ -6,29 +6,35 @@ TIP: Ready to start? Jump to the xref:lab3-instructions.adoc[Lab 3 Instructions]
 
 .**At a Glance**
 
-* **Amazon Bedrock** provides managed access to foundation models through a unified API — no infrastructure to manage
-* **LangGraph** builds agents as directed graphs with nodes, edges, and shared state
-* **The ReAct pattern** (reason, act, observe) lets an LLM call tools and iterate until it reaches an answer
-* **Tools** are Python functions the LLM can invoke at runtime using the `@tool` decorator
-* **AgentCore Runtime** packages and deploys agents as managed AWS services
+* **Amazon Bedrock** — managed access to foundation models through a unified API, no infrastructure to manage
+* **LangGraph** — builds agents as directed graphs with nodes, edges, and shared state
+* **The ReAct pattern** — reason, act, observe, repeat until the LLM reaches an answer
+* **Tools** — Python functions the LLM can invoke at runtime using the `@tool` decorator
+* **AgentCore Runtime** — packages and deploys agents as managed AWS services
 
 == Amazon Bedrock
 
-Amazon Bedrock provides access to foundation models from Anthropic, Meta, and others through a unified API. You select a model by its Model ID, invoke it through the Converse API, and Bedrock handles the infrastructure.
+This lab uses Bedrock for two distinct purposes: Claude handles reasoning and tool selection, Nova generates embeddings for vector search in later labs. For a full overview of how Bedrock fits into the workshop architecture, including the Converse API tool use protocol and cross-region inference, see xref:aws-services.adoc[AWS GenAI Services].
 
-Key concepts:
-
-* **Model ID** identifies the specific model, for example `us.anthropic.claude-sonnet-4-5-20250929-v1:0`
-* **Cross-region inference profiles** route requests to available capacity across AWS regions for better availability. Model IDs that begin with `us.` or `global.` use inference profiles.
-* **ChatBedrockConverse** is LangChain's interface to the Bedrock Converse API. It wraps model invocation, tool binding, and response parsing into a single class.
-
-.Cross-region inference profile handling
-[%collapsible]
-====
-When using a cross-region inference profile, some LangChain components require a `base_model_id` that identifies the underlying model. The notebook derives this automatically:
+The code pattern that matters for this lab is the Converse API's tool use loop. Tool definitions go into the request. Claude examines them, decides whether to call one, and returns a `toolUse` content block. The framework executes the tool, appends the result, and calls Converse again. LangChain's `ChatBedrockConverse` wraps this protocol:
 
 [source,python]
 ----
+llm = ChatBedrockConverse(model=MODEL_ID, region_name=REGION)
+llm_with_tools = llm.bind_tools(tools)
+----
+
+The Strands SDK's `BedrockModel` provides the same underlying behavior through a simpler interface.
+
+.Cross-region inference profile handling in code
+[%collapsible]
+====
+The workshop uses a cross-region inference profile (the `us.` prefix on the Model ID), which routes requests across US AWS regions for higher throughput with no additional routing cost. Some LangChain components require a `base_model_id` without the prefix. The notebook derives this automatically:
+
+[source,python]
+----
+MODEL_ID = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
+
 if MODEL_ID.startswith("us.anthropic."):
     BASE_MODEL_ID = MODEL_ID.replace("us.anthropic.", "anthropic.")
 ----
@@ -36,9 +42,7 @@ if MODEL_ID.startswith("us.anthropic."):
 
 == AI Agents
 
-AI agents extend LLMs beyond chat by giving them tools. Instead of just generating text, an agent can call functions, observe the results, and continue reasoning. This creates a loop where the model breaks down complex tasks into steps and executes them autonomously.
-
-In this lab the agent has two simple tools — one that returns the current time and one that adds numbers. The architecture is the same regardless of what the tools do: the agent decides which tool to call, the framework executes it, and the result feeds back into the next reasoning step. Labs 4 through 7 replace these simple tools with graph queries, vector search, and MCP server connections.
+The agent in this lab has two simple tools: one that returns the current time and one that adds numbers. The architecture is the same regardless of what the tools do. The agent decides which tool to call, the framework executes it, and the result feeds back into the next reasoning step. This creates a loop where the model breaks down complex tasks into steps and executes them autonomously. Labs 4 through 7 replace these simple tools with graph queries, vector search, and MCP server connections.
 
 == LangGraph Agent Architecture
 
@@ -81,14 +85,30 @@ This loop is the foundation for every agent in the workshop. Labs 4 and 6 add re
 
 == AgentCore Deployment
 
-After testing the agent locally, the notebook walks through deploying it to Amazon Bedrock AgentCore Runtime. AgentCore packages the agent code using `direct_code_deploy` — no Docker required — and runs it as a managed service.
+After testing the agent locally, the notebook walks through deploying it to Amazon Bedrock AgentCore Runtime. AgentCore provides a serverless hosting environment that runs each agent session in an isolated microVM. For the full service overview, see xref:aws-services.adoc#_amazon_bedrock_agentcore[AgentCore in AWS GenAI Services].
 
-The deployment process:
+The deployment uses `direct_code_deploy` from the AgentCore Starter Toolkit, which packages agent code without requiring a Dockerfile:
 
 1. Create a self-contained directory with the agent code (`agent.py`) and dependencies (`pyproject.toml`)
-2. Generate a `.bedrock_agentcore.yaml` configuration specifying the entrypoint, runtime, and AWS settings
-3. Run `agentcore deploy` to package and upload
+2. Generate a `.bedrock_agentcore.yaml` configuration specifying the entrypoint, runtime, and the IAM execution role
+3. Run `agentcore deploy` — the toolkit packages the code, uploads it to S3, and creates the runtime environment
 4. Invoke the deployed agent via the `agentcore` CLI or programmatically with boto3
+
+NOTE: The AgentCore deployment requires IAM resources that the workshop admin creates before the workshop. See xref:admin-setup.adoc[Admin Setup] for the `setup_agentcore.sh` script that provisions the execution role, S3 bucket, and SageMaker permissions.
+
+.What happens during `agentcore deploy`
+[%collapsible]
+====
+The Starter Toolkit handles several steps internally:
+
+1. Reads the `.bedrock_agentcore.yaml` configuration for the entrypoint and runtime settings
+2. Packages the agent directory (code + `pyproject.toml`) into a deployable artifact
+3. Uploads the artifact to the S3 bucket (`bedrock-agentcore-codebuild-sources-\{account}-\{region}`)
+4. Creates the AgentCore Runtime resource, which provisions a microVM environment
+5. Returns the agent's ARN for invocation
+
+The deployed agent runs with the IAM execution role specified in the configuration. This role grants Bedrock model invocation, CloudWatch logging, and X-Ray tracing permissions.
+====
 
 .Invocation via boto3
 [%collapsible]
@@ -105,6 +125,8 @@ response = client.invoke_agent_runtime(
     qualifier="DEFAULT",
 )
 ----
+
+Each invocation creates an isolated session in a dedicated microVM. The agent processes the request using the same Converse API it used in the notebook, but now running on managed infrastructure.
 ====
 
 == Key Code Patterns

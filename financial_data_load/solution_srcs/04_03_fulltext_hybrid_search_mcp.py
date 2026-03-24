@@ -2,7 +2,8 @@
 Fulltext and Hybrid Search via MCP
 
 This solution demonstrates fulltext keyword search and agent-driven hybrid
-search with custom @tool wrappers through the Neo4j MCP server.
+search with custom @tool wrappers through the Neo4j MCP server using
+the Strands Agents SDK.
 
 Run with: uv run python main.py solutions <N>
 """
@@ -14,10 +15,10 @@ import sys
 
 import nest_asyncio
 from dotenv import load_dotenv
-from langchain_aws import ChatBedrockConverse
-from langchain_core.messages import HumanMessage
-from langchain_core.tools import tool
-from langgraph.prebuilt import create_react_agent
+from mcp.client.streamable_http import streamablehttp_client
+from strands import Agent, tool
+from strands.models import BedrockModel
+from strands.tools.mcp import MCPClient
 
 nest_asyncio.apply()
 
@@ -25,7 +26,7 @@ nest_asyncio.apply()
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 sys.path.insert(0, PROJECT_ROOT)
 
-from lib.data_utils import get_embedding, BedrockConfig  # noqa: E402
+from lib.data_utils import get_embedding  # noqa: E402
 from lib.mcp_utils import MCPConnection  # noqa: E402
 
 
@@ -62,7 +63,7 @@ When given a search term, use this Cypher to find keyword matches WITH entity co
 CALL db.index.fulltext.queryNodes('search_chunks', $search_term)
 YIELD node, score
 MATCH (node)-[:FROM_DOCUMENT]->(doc:Document)
-OPTIONAL MATCH (company:Company)-[:FROM_CHUNK]->(node)
+OPTIONAL MATCH (doc)<-[:FILED]-(company:Company)
 OPTIONAL MATCH (product:Product)-[:FROM_CHUNK]->(node)
 WITH node, doc, score,
      collect(DISTINCT company.name) AS companies,
@@ -92,33 +93,6 @@ For the best results, always run both searches and compare what each found."""
 
 
 # =============================================================================
-# Helper Functions
-# =============================================================================
-
-def show_tool_calls(result):
-    """Display raw tool call inputs and outputs from an agent run."""
-    for msg in result['messages']:
-        # Tool call requests (from the agent)
-        if hasattr(msg, 'tool_calls') and msg.tool_calls:
-            for call in msg.tool_calls:
-                print(f"\n{'=' * 60}")
-                print(f"TOOL CALL: {call['name']}")
-                args = call.get('args', {})
-                for key, value in args.items():
-                    val_str = str(value)
-                    if len(val_str) > 200:
-                        print(f"  {key}: {val_str[:200]}... [{len(val_str)} chars]")
-                    else:
-                        print(f"  {key}: {val_str}")
-
-        # Tool responses (from Neo4j via MCP)
-        if hasattr(msg, 'name') and msg.name:
-            content = str(msg.content)
-            print(f"\nRESPONSE ({msg.name}):")
-            print(f"  {content[:500]}{'...' if len(content) > 500 else ''}")
-
-
-# =============================================================================
 # Main
 # =============================================================================
 
@@ -130,22 +104,21 @@ async def main():
     load_dotenv(config_path)
     MODEL_ID = os.getenv('MODEL_ID')
     REGION = os.getenv('REGION', 'us-east-1')
+    MCP_GATEWAY_URL = os.getenv('MCP_GATEWAY_URL')
+    MCP_ACCESS_TOKEN = os.getenv('MCP_ACCESS_TOKEN')
 
-    if MODEL_ID and MODEL_ID.startswith('us.anthropic.'):
-        BASE_MODEL_ID = MODEL_ID.replace('us.anthropic.', 'anthropic.')
-    elif MODEL_ID and MODEL_ID.startswith('global.anthropic.'):
-        BASE_MODEL_ID = MODEL_ID.replace('global.anthropic.', 'anthropic.')
-    else:
-        BASE_MODEL_ID = None
+    bedrock_model = BedrockModel(
+        model_id=MODEL_ID,
+        region_name=REGION,
+        temperature=0,
+    )
 
-    # Initialize LLM
-    llm_kwargs = {'model': MODEL_ID, 'region_name': REGION, 'temperature': 0}
-    if BASE_MODEL_ID:
-        llm_kwargs['base_model_id'] = BASE_MODEL_ID
-    llm = ChatBedrockConverse(**llm_kwargs)
-
-    # Connect to MCP server
-    mcp = await MCPConnection.create(config_path)
+    mcp_client = MCPClient(
+        lambda: streamablehttp_client(
+            url=MCP_GATEWAY_URL,
+            headers={"Authorization": f"Bearer {MCP_ACCESS_TOKEN}"},
+        )
+    )
 
     # Test embedding function
     test_emb = get_embedding('test')
@@ -154,68 +127,72 @@ async def main():
     print('Setup complete!')
 
     # -------------------------------------------------------------------------
-    # 2. Fulltext Search Agent
+    # 2. Basic Fulltext Search
     # -------------------------------------------------------------------------
-    fulltext_agent = create_react_agent(llm, mcp.get_tools(), prompt=FULLTEXT_PROMPT)
-    print('Fulltext agent ready!')
-
-    # -------------------------------------------------------------------------
-    # 3. Basic Fulltext Search
-    # -------------------------------------------------------------------------
-    async def fulltext_search(term: str, limit: int = 5):
+    def fulltext_search(term: str, limit: int = 5):
         """Run a fulltext keyword search through the MCP agent."""
         print(f'Search term: "{term}"')
         print('-' * 60)
 
-        message = f"Search for chunks containing '{term}'. Use limit={limit}."
-        result = await fulltext_agent.ainvoke({'messages': [HumanMessage(content=message)]})
-        print(result['messages'][-1].content)
-        return result
+        with mcp_client:
+            tools = mcp_client.list_tools_sync()
+            agent = Agent(
+                model=bedrock_model,
+                system_prompt=FULLTEXT_PROMPT,
+                tools=tools,
+            )
+            response = agent(f"Search for chunks containing '{term}'. Use limit={limit}.")
+            print(response)
+            return response
 
-    result = await fulltext_search('revenue')
+    fulltext_search('revenue')
 
     # -------------------------------------------------------------------------
-    # 4. Search Operators
+    # 3. Search Operators
     # -------------------------------------------------------------------------
     # Fuzzy search — handles typos
-    result = await fulltext_search('revnue~', limit=3)
+    fulltext_search('revnue~', limit=3)
 
     # Wildcard search — prefix matching
-    result = await fulltext_search('risk*', limit=3)
+    fulltext_search('risk*', limit=3)
 
     # Boolean AND — both terms must appear
-    result = await fulltext_search('revenue AND growth', limit=3)
+    fulltext_search('revenue AND growth', limit=3)
 
     # -------------------------------------------------------------------------
-    # 5. Fulltext + Graph Traversal
+    # 4. Fulltext + Graph Traversal
     # -------------------------------------------------------------------------
-    fulltext_graph_agent = create_react_agent(llm, mcp.get_tools(), prompt=FULLTEXT_GRAPH_PROMPT)
-    print('Fulltext + graph agent ready!')
-
-    async def fulltext_graph_search(term: str, limit: int = 5):
+    def fulltext_graph_search(term: str, limit: int = 5):
         """Run fulltext search with graph traversal."""
         print(f'Search term: "{term}" (with graph context)')
         print('-' * 60)
 
-        message = f"Search for chunks containing '{term}' with graph context. Use limit={limit}."
-        result = await fulltext_graph_agent.ainvoke({'messages': [HumanMessage(content=message)]})
-        print(result['messages'][-1].content)
-        return result
+        with mcp_client:
+            tools = mcp_client.list_tools_sync()
+            agent = Agent(
+                model=bedrock_model,
+                system_prompt=FULLTEXT_GRAPH_PROMPT,
+                tools=tools,
+            )
+            response = agent(f"Search for chunks containing '{term}' with graph context. Use limit={limit}.")
+            print(response)
+            return response
 
-    result = await fulltext_graph_search('iPhone')
+    fulltext_graph_search('iPhone')
 
     # -------------------------------------------------------------------------
-    # 7. Agent-Driven Hybrid Search with @tool Wrappers
+    # 5. Agent-Driven Hybrid Search with @tool Wrappers
     # -------------------------------------------------------------------------
+    mcp_conn = await MCPConnection.create(config_path)
+
     @tool
     async def vector_search(query: str, top_k: int = 5) -> str:
         """Search for semantically similar chunks using vector embeddings.
         Use this for conceptual or semantic queries where exact words may differ."""
-        # Step 1: Embed the query
         embedding = get_embedding(query)
+        top_k = int(top_k)
 
-        # Step 2: Vector search via MCP
-        return await mcp.execute_query(f"""
+        return await mcp_conn.execute_query(f"""
             CALL db.index.vector.queryNodes('chunkEmbeddings', {top_k}, {json.dumps(embedding)})
             YIELD node, score
             MATCH (node)-[:FROM_DOCUMENT]->(doc:Document)
@@ -228,8 +205,11 @@ async def main():
         """Search for chunks containing specific keywords.
         Use this for exact terms, company names, tickers, or partial matches.
         Supports operators: fuzzy (term~), wildcard (term*), AND, NOT."""
-        return await mcp.execute_query(f"""
-            CALL db.index.fulltext.queryNodes('search_chunks', '{term}')
+        safe_term = term.replace("\\", "\\\\").replace("'", "\\'")
+        limit = int(limit)
+
+        return await mcp_conn.execute_query(f"""
+            CALL db.index.fulltext.queryNodes('search_chunks', '{safe_term}')
             YIELD node, score
             MATCH (node)-[:FROM_DOCUMENT]->(doc:Document)
             RETURN node.text AS text, score, doc.name AS document
@@ -237,37 +217,40 @@ async def main():
             LIMIT {limit}
         """)
 
-    print(f'Custom tools created:')
-    print(f'  - vector_search: {vector_search.description}')
-    print(f'  - fulltext_search_tool: {fulltext_search_tool.description}')
+    print('Custom tools created:')
+    print('  - vector_search')
+    print('  - fulltext_search_tool')
 
     # Agent gets ONLY the custom tools — never sees raw embeddings or MCP tools
-    hybrid_agent = create_react_agent(llm, [vector_search, fulltext_search_tool], prompt=HYBRID_PROMPT)
+    hybrid_agent = Agent(
+        model=bedrock_model,
+        system_prompt=HYBRID_PROMPT,
+        tools=[vector_search, fulltext_search_tool],
+    )
     print('Hybrid agent ready!')
 
     # -------------------------------------------------------------------------
-    # Hybrid Search
+    # 6. Hybrid Search
     # -------------------------------------------------------------------------
     async def hybrid_search(query: str):
         """Run hybrid search using both vector and fulltext tools."""
         print(f'Question: "{query}"')
         print('=' * 60)
 
-        message = f"Answer this question using BOTH vector search and fulltext search: {query}"
-        result = await hybrid_agent.ainvoke({'messages': [HumanMessage(content=message)]})
-        print(f'\n{result["messages"][-1].content}')
-        return result
+        response = await hybrid_agent.invoke_async(
+            f"Answer this question using BOTH vector search and fulltext search: {query}"
+        )
+        print(f'\n{response}')
+        return response
 
-    result = await hybrid_search("What are Apple's key risk factors?")
+    await hybrid_search("What are Apple's key risk factors?")
 
-    result = await hybrid_search('Which companies face cybersecurity-related risks?')
+    await hybrid_search('Which companies face cybersecurity-related risks?')
 
-    # -------------------------------------------------------------------------
-    # 9. Inspecting Tool Calls
-    # -------------------------------------------------------------------------
-    result = await hybrid_search('What products does Apple offer?')
-    print('\n\n=== RAW TOOL CALLS ===')
-    show_tool_calls(result)
+    await hybrid_search('What products does Apple offer?')
+
+    # Cleanup
+    await mcp_conn.close()
 
 
 if __name__ == '__main__':

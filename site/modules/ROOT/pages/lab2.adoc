@@ -6,10 +6,10 @@ TIP: Ready to start? Jump to the xref:lab2-instructions.adoc[Lab 2 Instructions]
 
 .**At a Glance**
 
-* **Aura Agents** combine semantic search, graph traversal, and natural language queries in one conversational interface
-* **"Create with AI"** analyzes your graph schema and auto-generates tools — no Cypher to write manually
-* **Three retrieval patterns**: Cypher Templates (deterministic traversals), Similarity Search (semantic vector retrieval), and Text2Cypher (ad-hoc natural language queries)
-* **Optional deployment** as a REST API endpoint or MCP server for integration with external clients
+* **Aura Agents** — combine semantic search, graph traversal, and natural language queries in one conversational interface
+* **"Create with AI"** — analyzes your graph schema and auto-generates tools with no Cypher to write manually
+* **Three retrieval patterns** — Cypher Templates (deterministic traversals), Similarity Search (semantic vector retrieval), and Text2Cypher (ad-hoc natural language queries)
+* **Optional deployment** — expose the agent as a REST API endpoint or MCP server for integration with external clients
 
 == What Are Aura Agents?
 
