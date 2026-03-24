@@ -528,7 +528,7 @@ def _print_solutions_menu():
     print("  7. Text2Cypher Retriever")
     print("\nLab 3 - Basic Agent:")
     print("  8. Basic Strands Agent")
-    print("\nLab 4 - MCP Retrieval:")
+    print("\nLab 4 - Graph-Enriched Search:")
     print("  9. Vector Search via MCP")
     print(" 10. Graph-Enriched Search via MCP")
     print(" 11. Fulltext & Hybrid Search via MCP")

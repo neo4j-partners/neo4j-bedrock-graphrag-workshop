@@ -6,17 +6,16 @@ TIP: For concepts and background, see xref:lab4.adoc[Lab 4: Graph-Enriched Searc
 
 == What You'll Learn
 
-* **Vector Search via MCP**: Embed queries and execute semantic search through an MCP agent
-* **Graph-Enriched Retrieval**: Follow relationships from matched chunks to documents, companies, and risk factors
+* **Vector Search**: Embed queries and find semantically similar chunks using Bedrock Nova embeddings
+* **Graph-Enriched Search**: Follow relationships from matched chunks to documents, companies, products, and risk factors
 * **Hybrid Search**: Combine fulltext keyword search with vector similarity using custom `@tool` wrappers
 
 == Prerequisites
 
-* Completed **Lab 1** (Neo4j Aura instance created and running)
-* `CONFIG.txt` at the project root filled in with Neo4j credentials, `MCP_GATEWAY_URL`, and `MCP_ACCESS_TOKEN`
+* `CONFIG.txt` at the project root filled in with `MCP_GATEWAY_URL` and `MCP_ACCESS_TOKEN`
 * A running environment (SageMaker Studio or GitHub Codespace)
 
-NOTE: The Neo4j MCP Server used in this lab connects to a database that has been pre-loaded with Document and Chunk nodes, vector embeddings, and fulltext indexes. The workshop admin set this up before the workshop using the data loading pipeline. You do not need to load this data yourself — the MCP Server's database is ready to query.
+NOTE: This lab connects to Neo4j through a pre-deployed MCP server. The database, embeddings, and indexes are already set up by the workshop admin. You do not need to complete Lab 1 or load data yourself — everything is ready to query.
 
 == Notebooks
 
@@ -25,15 +24,15 @@ NOTE: The Neo4j MCP Server used in this lab connects to a database that has been
 | Notebook | Title | What You Build
 
 | `01_vector_search_mcp.ipynb`
-| Vector Search via MCP
-| Semantic vector search with Bedrock Nova embeddings through an MCP agent
+| Vector Search
+| Semantic vector search with Bedrock Nova embeddings — the foundation for graph-enriched retrieval
 
 | `02_graph_enriched_search_mcp.ipynb`
-| Graph-Enriched Search via MCP
+| Graph-Enriched Search
 | Vector search enriched with document metadata, neighboring chunks, and entity traversal (companies, products, risk factors)
 
 | `03_fulltext_hybrid_search_mcp.ipynb`
-| Fulltext and Hybrid Search via MCP
+| Fulltext and Hybrid Search
 | Keyword search with Lucene operators and agent-driven hybrid search combining vector and fulltext via custom `@tool` wrappers
 |===
 

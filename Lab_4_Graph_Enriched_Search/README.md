@@ -12,10 +12,10 @@ Run three notebooks that explore graph-enriched search — retrieval strategies 
 
 Before starting this lab, make sure you have:
 
-- Completed **Lab 1** (Neo4j Aura instance created and running)
-- Data loaded into Neo4j with embeddings, entity nodes, and fulltext indexes (from the data loading pipeline)
-- Filled in your credentials in `CONFIG.txt` at the project root, including `MCP_GATEWAY_URL` and `MCP_ACCESS_TOKEN`
+- `CONFIG.txt` at the project root filled in with `MCP_GATEWAY_URL` and `MCP_ACCESS_TOKEN`
 - A running environment (SageMaker Studio or GitHub Codespace)
+
+> **Note:** This lab connects to Neo4j through a pre-deployed MCP server. The database, embeddings, and indexes are already set up by the workshop admin — you do not need to complete Lab 1 or load data yourself.
 
 ## Notebooks
 

@@ -11,6 +11,9 @@ downloads/
 eggs/
 .eggs/
 lib/
+!Lab_4_Graph_Enriched_Search/lib/
+!Lab_6_GraphRAG/lib/
+!financial_data_load/lib/
 lib64/
 parts/
 sdist/
