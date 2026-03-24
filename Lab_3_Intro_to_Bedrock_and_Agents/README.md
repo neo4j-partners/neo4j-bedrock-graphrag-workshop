@@ -140,4 +140,4 @@ As an alternative to invoking the agent via CLI or boto3 in the notebook, you ca
 
 ## Next Steps
 
-Continue to [Lab 4 - MCP-Based Retrieval](../Lab_4_MCP_Retrieval) to learn how to connect an agent to a Neo4j knowledge graph through the Model Context Protocol (MCP) and perform semantic vector search and graph-enriched retrieval.
+Continue to [Lab 4 - Graph-Enriched Search](../Lab_4_Graph_Enriched_Search) to search a Neo4j knowledge graph with vector, graph-enriched, and hybrid retrieval strategies.

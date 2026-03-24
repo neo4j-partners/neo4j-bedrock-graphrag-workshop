@@ -23,8 +23,8 @@ Location: `Lab_3_Intro_to_Bedrock_and_Agents/01_basic_strands_agent.ipynb`
 
 Uses `strands.Agent` with `strands.models.BedrockModel` and `@tool` decorator. Defines simple tools (get_current_time, add_numbers), creates an agent, tests it with queries including sample SEC filing data. Ends with packaging and deploying the agent to AgentCore Runtime via `bedrock-agentcore-starter-toolkit` using `direct_code_deploy`.
 
-### Lab 4 - MCP-Based Retrieval
-Location: `Lab_4_MCP_Retrieval/`
+### Lab 4 - Graph-Enriched Search
+Location: `Lab_4_Graph_Enriched_Search/`
 
 Three notebooks using Strands Agents SDK with MCP to search a Neo4j knowledge graph:
 - `01_vector_search_mcp.ipynb`: Semantic vector search via `strands.tools.mcp.MCPClient` using Bedrock Nova embeddings

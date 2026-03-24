@@ -19,7 +19,7 @@ A hands-on workshop teaching Graph Retrieval-Augmented Generation (GraphRAG) pat
 | Lab | Title | Description |
 |-----|-------|-------------|
 | [Lab 3](Lab_3_Intro_to_Bedrock_and_Agents/README.md) | Intro to Bedrock and Agents | SageMaker setup, LangGraph foundations, tool binding, ReAct pattern, AgentCore deployment |
-| [Lab 4](Lab_4_MCP_Retrieval/README.md) | MCP-Based Retrieval | Vector search and graph-enriched retrieval through the Model Context Protocol |
+| [Lab 4](Lab_4_Graph_Enriched_Search/README.md) | Graph-Enriched Search | Vector, graph-enriched, and hybrid retrieval over a knowledge graph |
 | [Lab 6](Lab_6_GraphRAG/README.md) | GraphRAG | Six notebooks: data loading, embeddings, vector retrieval, vector-cypher retrieval, fulltext search, hybrid search |
 
 ### Part 3: Advanced Agents (Labs 7-8)
