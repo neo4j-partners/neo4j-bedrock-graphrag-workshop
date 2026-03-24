@@ -98,6 +98,46 @@ This lab sets up your SageMaker development environment and walks through buildi
    - Package and deploy the agent to AgentCore Runtime
    - Invoke the deployed agent via CLI and boto3
 
+## Explore AgentCore in the Console
+
+After deploying the agent from the notebook, you can view and test it directly in the AWS console.
+
+### Step 1: Navigate to AgentCore
+
+1. In the AWS console search bar, type `agentcore`
+2. Select **Amazon Bedrock AgentCore** from the results
+
+![Search for AgentCore](images/020_Agent_Core.png)
+
+### Step 2: View Your Deployed Agent
+
+1. In the left sidebar under **Build**, click **Runtime**
+2. You'll see the **basic_strands_agent** listed under Runtime resources with a **Ready** status
+
+![AgentCore Runtime showing deployed agent](images/021_Basic_Agent.png)
+
+### Step 3: Review Versions and Observability
+
+1. Click on the agent name to view its details
+2. The **Versions** section shows a snapshot created with each deployment, letting you track changes and roll back if needed
+3. The **Observability** section displays runtime metrics — invocation count, errors, latency, and memory consumption
+
+![Versions and Observability metrics](images/022_Versions_Observability.png)
+
+### Step 4: Test in the Agent Sandbox
+
+As an alternative to invoking the agent via CLI or boto3 in the notebook, you can test it interactively in the console.
+
+1. In the left sidebar under **Test**, click **Agent sandbox**
+2. Select **basic_strands_agent** as the Runtime agent and **DEFAULT** as the Endpoint
+3. Enter a JSON payload in the Input field, for example:
+   ```json
+   {"prompt": "What time is it and what is 42 + 17?"}
+   ```
+4. Click **Run** to invoke the agent and see the response in the Output section
+
+![Agent Sandbox for interactive testing](images/023_Test_In_Sandbox.png)
+
 ## Next Steps
 
 Continue to [Lab 4 - MCP-Based Retrieval](../Lab_4_MCP_Retrieval) to learn how to connect an agent to a Neo4j knowledge graph through the Model Context Protocol (MCP) and perform semantic vector search and graph-enriched retrieval.

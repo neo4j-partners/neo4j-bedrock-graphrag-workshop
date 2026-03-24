@@ -136,7 +136,11 @@ def process_all_pdfs(
         for r in failed:
             print(f"  - {r.pdf_path.name}: {r.error}")
 
-    _write_summary(results, log_file)
+    # Find log file from the root logger's file handler (set up by main.py)
+    for h in logging.getLogger().handlers:
+        if isinstance(h, logging.FileHandler):
+            _write_summary(results, Path(h.baseFilename))
+            break
     return results
 
 

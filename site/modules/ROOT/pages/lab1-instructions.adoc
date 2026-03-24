@@ -1,70 +1,71 @@
 = Lab 1 Instructions: Neo4j Aura Setup
 
-Follow these steps to subscribe to Neo4j Aura through AWS Marketplace, load the SEC financial knowledge graph, and run sample queries.
+Follow these steps to sign up for Neo4j Aura, load the SEC financial knowledge graph, and run sample queries.
 
 TIP: For concepts and background, see xref:lab1.adoc[Lab 1: Concepts and Reference].
 
 == Prerequisites
 
-* Completed **Lab 0** (AWS sign-in)
-* Access to AWS Console
-* AWS Marketplace purchasing permissions
+* Completed **Lab 0** (environment setup)
+* For **Workshop SSO Login**: Access to OneBlink credentials page (provided by your organizer)
+* For **Free Trial Signup**: A valid email address
 
-== Part 1: Subscribe to Neo4j Aura via AWS Marketplace
+== Part 1: Neo4j Aura Signup
 
-=== Access the AWS Marketplace
+There are two signup options for this lab. **Follow the signup process provided by your workshop organizer.**
 
-Log in to the AWS Console at https://console.aws.amazon.com[console.aws.amazon.com]. In the search bar, type **marketplace** and select **AWS Marketplace Subscriptions**.
+=== Option A: Workshop SSO Login (Recommended for organized workshops)
 
-=== Find Neo4j Aura
+If your organizer has provided OneBlink credentials, use the SSO login process:
 
-Click **Discover products**. In the search bar, type **neo4j aura** and press Enter. From the results, select **Neo4j AuraDB Professional (Pay-As-You-Go)**.
+1. Navigate to the OneBlink credentials page to retrieve your SSO login information (Org ID, Email, Password)
++
+image::lab1-oneblink-credentials.png[OneBlink credentials page]
+2. Go to https://console-preview.neo4j.io/[console-preview.neo4j.io]
+3. Click **Continue with Organization SSO**
++
+image::lab1-continue-sso.png[Continue with Organization SSO]
+4. Enter the **Org ID** from your OneBlink credentials, then click **Continue with OneBlink SSO**
++
+image::lab1-oneblink-sso.png[Continue with OneBlink SSO]
+5. Enter your **Email** and **Password** from the OneBlink credentials page
 
-=== Subscribe
+=== Option B: Free Trial Signup (For self-paced learning)
 
-Review the product details and pricing. Click **Continue to Subscribe**, then **Accept Terms** to create your subscription. Wait 1-2 minutes for processing.
+If you are completing this lab independently or your organizer has instructed you to create a free trial:
 
-=== Set Up Your Account
+1. Navigate to https://console-preview.neo4j.io/[console-preview.neo4j.io]
+2. Click **Don't have an account? Sign up**
+3. Follow the sign-up process to create your Neo4j Aura account
+4. When prompted, select **AWS** as the cloud provider and **US East (N. Virginia)** as the region
++
+image::lab1-free-trial-region.png[Free trial region selection]
+5. Click **Start 14-day free trial**
+6. **Save your credentials immediately** — click **Download to continue**. The password is only shown once.
++
+image::lab1-free-trial-credentials.png[Free trial credentials]
 
-After the subscription is active, click **Set Up Your Account** to connect to Neo4j Aura.
+NOTE: If you signed up using the Free Trial option, your instance was already created during signup. Skip ahead to <<Part 2: Load the Knowledge Graph>>.
 
-IMPORTANT: Create a new account using your email address. Do not use social login (Google, Microsoft) for workshop accounts, as this ensures proper linking with your AWS Marketplace subscription.
+=== Create Your Database Instance
 
-image::lab1-signup-aura.png[Sign Up for Neo4j Aura]
-
-=== Select the Marketplace Organization
-
-Once logged into Neo4j Aura:
-
-1. Click on the organization dropdown in the top navigation
-2. Select the **Marketplace Organization** linked to your AWS subscription
-
-This ensures usage is billed through your AWS account.
-
-=== Create an Instance
-
-1. Navigate to **Instances** in the left sidebar
-2. Click **Create instance**
-
+1. After logging in, click on **Instances** in the left sidebar under "Data services", then click **Create instance**
++
 image::lab1-create-instance.png[Create Instance]
-
-Configure with these settings:
-
+2. Configure your new instance:
++
 [cols="1,2"]
 |===
 | Setting | Value
 
 | **Tier** | Professional
-| **Instance name** | Choose a descriptive name (e.g., "Neo4j-AWS-Workshop")
-| **Cloud provider** | AWS
-| **Region** | US East (N. Virginia)
-| **Memory & CPU** | 4GB Memory / 1 CPU
-| **Graph Analytics** | Plugin (enables graph algorithms)
-| **Vector-optimized** | Enabled
+| **Instance name** | A unique name based on your name (e.g., `ryans-lab-instance`)
+| **Sizing** | 4 GB RAM / 1 CPU
+| **Vector-optimized** | Enabled (under Additional settings)
 |===
 
-Click **Create** to provision your instance.
-
+3. Click **Create** to provision your database instance
++
 image::lab1-configure-instance.png[Configure Instance]
 
 === Save Your Credentials
@@ -77,12 +78,6 @@ Click **Download and continue** to save the credentials file. You will need thes
 
 * Lab 2: Aura Agents configuration
 * Labs 3-6: `CONFIG.txt` for notebook configuration
-
-=== Verify Your Instance
-
-Wait 2-3 minutes for your instance to start. You should see a green **Running** status.
-
-image::lab1-instance-running.png[Instance Running]
 
 == Part 2: Load the Knowledge Graph
 

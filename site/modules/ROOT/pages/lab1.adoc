@@ -106,7 +106,7 @@ The Document and Chunk layer connects structured entities to unstructured filing
 
 == Neo4j Aura
 
-Neo4j Aura is a fully managed cloud graph database service available through the AWS Marketplace. It provides the Neo4j graph engine without the operational overhead: automatic backups, high availability, and deployment on AWS. Each participant provisions their own Aura instance to hold the SEC financial knowledge graph.
+Neo4j Aura is a fully managed cloud graph database service. It provides the Neo4j graph engine without the operational overhead: automatic backups, high availability, and deployment on AWS, GCP, or Azure. Each participant provisions their own Aura instance to hold the SEC financial knowledge graph.
 
 .Vector search, Graph Data Science, and AI capabilities
 [%collapsible]
@@ -132,4 +132,4 @@ The Aura console provides three tools you will use throughout the workshop.
 
 == Next Steps
 
-Continue to xref:lab1-instructions.adoc[Lab 1 Instructions] to subscribe to Neo4j Aura through AWS Marketplace, load the knowledge graph, and run sample queries. See xref:lab1-explore.adoc[Explore the Graph] for visual exploration with Neo4j Explore.
+Continue to xref:lab1-instructions.adoc[Lab 1 Instructions] to sign up for Neo4j Aura, load the knowledge graph, and run sample queries. See xref:lab1-explore.adoc[Explore the Graph] for visual exploration with Neo4j Explore.
