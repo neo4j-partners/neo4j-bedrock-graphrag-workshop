@@ -10,16 +10,15 @@
 """Utilities for data loading, Neo4j operations, and AWS Bedrock AI services."""
 
 import asyncio
-import json
 from pathlib import Path
 
-import boto3
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
 from neo4j_graphrag.embeddings import BedrockNovaEmbeddings
 from neo4j_graphrag.experimental.components.text_splitters.fixed_size_splitter import FixedSizeSplitter
 from neo4j_graphrag.llm import BedrockLLM
-from pydantic import BaseModel, Field
+from neo4j_graphrag.schema import get_schema as _lib_get_schema
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Load configuration from financial_data_load/.env
@@ -62,7 +61,6 @@ def get_embedder() -> BedrockNovaEmbeddings:
     """Get embedder using AWS Bedrock Nova Multimodal Embeddings.
 
     Returns a BedrockNovaEmbeddings object for use with neo4j-graphrag retrievers.
-    For raw float arrays (e.g., for Cypher queries), use get_embedding() instead.
     """
     config = BedrockConfig()
 
@@ -82,46 +80,18 @@ def get_llm() -> BedrockLLM:
     )
 
 
-class _NovaEmbedding(BaseModel):
-    embedding: list[float]
-
-
-class _NovaEmbeddingResponse(BaseModel):
-    embeddings: list[_NovaEmbedding]
-
-
-_bedrock_client = None
+_embedder = None
 
 
 def get_embedding(text: str) -> list[float]:
     """Generate an embedding vector for text using Bedrock Nova.
 
     Returns the raw float array for use in Cypher vector search queries.
-    Unlike get_embedder(), this returns floats directly rather than a
-    BedrockNovaEmbeddings object.
     """
-    global _bedrock_client
-    config = BedrockConfig()
-    if _bedrock_client is None:
-        _bedrock_client = boto3.client("bedrock-runtime", region_name=config.region)
-    request_body = {
-        "taskType": "SINGLE_EMBEDDING",
-        "singleEmbeddingParams": {
-            "embeddingPurpose": "GENERIC_INDEX",
-            "embeddingDimension": config.embedding_dimensions,
-            "text": {
-                "truncationMode": "END",
-                "value": text,
-            },
-        },
-    }
-    response = _bedrock_client.invoke_model(
-        modelId="amazon.nova-2-multimodal-embeddings-v1:0",
-        body=json.dumps(request_body),
-    )
-    result = json.loads(response["body"].read())
-    parsed = _NovaEmbeddingResponse.model_validate(result)
-    return parsed.embeddings[0].embedding
+    global _embedder
+    if _embedder is None:
+        _embedder = get_embedder()
+    return _embedder.embed_query(text)
 
 
 def get_schema(driver) -> str:
@@ -133,38 +103,7 @@ def get_schema(driver) -> str:
     Returns:
         String representation of the database schema.
     """
-    with driver.session() as session:
-        node_result = session.run(
-            """
-            CALL db.schema.nodeTypeProperties()
-            YIELD nodeType, propertyName, propertyTypes
-            WITH nodeType, collect({property: propertyName, types: propertyTypes}) as properties
-            RETURN nodeType, properties
-            """
-        )
-        nodes = {record["nodeType"]: record["properties"] for record in node_result}
-
-        rel_result = session.run(
-            """
-            CALL db.schema.relTypeProperties()
-            YIELD relType, propertyName, propertyTypes
-            WITH relType, collect({property: propertyName, types: propertyTypes}) as properties
-            RETURN relType, properties
-            """
-        )
-        relationships = {record["relType"]: record["properties"] for record in rel_result}
-
-    schema_parts = ["Node Labels and Properties:"]
-    for node_type, props in nodes.items():
-        prop_str = ", ".join([f"{p['property']}: {p['types']}" for p in props if p["property"]])
-        schema_parts.append(f"  {node_type}: {prop_str if prop_str else 'no properties'}")
-
-    schema_parts.append("\nRelationship Types and Properties:")
-    for rel_type, props in relationships.items():
-        prop_str = ", ".join([f"{p['property']}: {p['types']}" for p in props if p["property"]])
-        schema_parts.append(f"  {rel_type}: {prop_str if prop_str else 'no properties'}")
-
-    return "\n".join(schema_parts)
+    return _lib_get_schema(driver, sanitize=True)
 
 
 # =============================================================================

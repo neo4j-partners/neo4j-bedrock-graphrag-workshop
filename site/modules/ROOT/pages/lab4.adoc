@@ -6,9 +6,9 @@ TIP: Ready to start? Jump to the xref:lab4-instructions.adoc[Lab 4 Instructions]
 
 .**At a Glance**
 
-* **Graph-enriched search** — follow relationships from matched chunks to connected entities like documents, companies, products, and risk factors
-* **Vector search** — embed a query and find semantically similar chunks
-* **Hybrid search** — combine keyword-based fulltext search with vector similarity for broader recall
+* **Vector search** — find text passages whose meaning is closest to your question, even when the exact words differ
+* **Graph-enriched search** — after finding matching passages, follow graph relationships to pull in the companies, products, and risk factors connected to them
+* **Hybrid search** — combine keyword matching with semantic similarity for broader recall
 
 image::lab4-mcp-retrieval-architecture.png[Graph-Enriched Search Architecture,700]
 
@@ -42,7 +42,7 @@ Each notebook returns more context than the previous one. Vector search returns 
 
 === Vector Search
 
-Notebook 01 introduces the basic pattern. You embed a natural-language query using Bedrock Nova, pass the embedding to the agent, and let the agent execute vector search Cypher. The vector index (`chunkEmbeddings`) finds the chunks whose embeddings are most similar to the query embedding. The results are isolated chunks ranked by similarity — no graph context yet.
+Notebook 01 introduces the basic pattern. A custom `@tool` function embeds the natural-language query using Bedrock Nova and executes the vector search Cypher through MCP. The vector index (`chunkEmbeddings`) finds the chunks whose embeddings are most similar to the query embedding. The results are isolated chunks ranked by similarity — no graph context yet.
 
 === Graph-Enriched Search
 
@@ -62,7 +62,7 @@ NOTE: This lab uses the https://github.com/neo4j/mcp[Neo4j MCP Server], an offic
 
 == The @tool Pattern
 
-All three strategies share the same underlying flow. The agent receives a natural-language question, decides which search to run, and calls a custom tool function. That tool function handles the mechanical work the LLM should never see: generating the embedding, building the Cypher query, and sending it to Neo4j through the MCP connection. The results come back as text that the agent can reason over and present to the user.
+Notebooks 01 and 03 wrap embedding generation and Cypher execution inside custom `@tool` functions. The agent receives a natural-language question, decides which search to run, and calls a tool function. That function handles the mechanical work the LLM should never see: generating the embedding, building the Cypher query, and sending it to Neo4j through the MCP connection. The results come back as text that the agent can reason over and present to the user.
 
 The important design choice is where the embedding lives. A 1024-dimensional vector is roughly 8–10KB of floating-point numbers. If that array passes through the LLM's context window, it wastes tokens on data the model cannot interpret, doubles the payload (once in the message, once in the tool call), and risks the model silently truncating or rounding values. Wrapping embedding generation inside a `@tool` function keeps the vector on the data plane. The agent calls `vector_search_tool("supply chain risks")` and receives chunk text and scores. It never touches the float array.
 

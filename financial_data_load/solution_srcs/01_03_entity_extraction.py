@@ -177,7 +177,7 @@ async def main():
         llm = get_llm()
         embedder = get_embedder()
         print(f"LLM: {llm.model_name}")
-        print(f"Embedder: {embedder.model}")
+        print(f"Embedder: {embedder.model_id}")
 
         # Create pipeline
         print("\nCreating SimpleKGPipeline...")

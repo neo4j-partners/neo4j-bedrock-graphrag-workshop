@@ -8,7 +8,6 @@ the Strands Agents SDK.
 Run with: uv run python main.py solutions <N>
 """
 
-import asyncio
 import os
 import sys
 
@@ -21,12 +20,11 @@ from strands.tools.mcp import MCPClient
 
 nest_asyncio.apply()
 
-# Add project root to sys.path so lib imports work
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-sys.path.insert(0, PROJECT_ROOT)
+# Add financial_data_load to sys.path so lib imports work
+FINANCIAL_DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, FINANCIAL_DATA_DIR)
 
 from lib.data_utils import get_embedding  # noqa: E402
-from lib.mcp_utils import MCPConnection  # noqa: E402
 
 
 # =============================================================================
@@ -96,7 +94,7 @@ For the best results, always run both searches and compare what each found."""
 # Main
 # =============================================================================
 
-async def main():
+def main():
     # -------------------------------------------------------------------------
     # 1. Configuration and Setup
     # -------------------------------------------------------------------------
@@ -126,133 +124,148 @@ async def main():
     print(f'Embedding: {len(test_emb)} dimensions')
     print('Setup complete!')
 
-    # -------------------------------------------------------------------------
-    # 2. Basic Fulltext Search
-    # -------------------------------------------------------------------------
-    def fulltext_search(term: str, limit: int = 5):
-        """Run a fulltext keyword search through the MCP agent."""
-        print(f'Search term: "{term}"')
-        print('-' * 60)
+    with mcp_client:
+        # Discover tools once for the entire session
+        mcp_tools = mcp_client.list_tools_sync()
+        tool_names = [t.tool_name for t in mcp_tools]
+        print(f"MCP tools discovered: {tool_names}")
 
-        with mcp_client:
-            tools = mcp_client.list_tools_sync()
+        cypher_tool = next(
+            (n for n in tool_names if "read-cypher" in n),
+            next((n for n in tool_names if "execute-query" in n), None),
+        )
+        assert cypher_tool, f"No Cypher query tool found among: {tool_names}"
+
+        # ---------------------------------------------------------------------
+        # 2. Basic Fulltext Search (agent uses raw MCP tools)
+        # ---------------------------------------------------------------------
+        def fulltext_search(term: str, limit: int = 5):
+            """Run a fulltext keyword search through the MCP agent."""
+            print(f'Search term: "{term}"')
+            print('-' * 60)
+
             agent = Agent(
                 model=bedrock_model,
                 system_prompt=FULLTEXT_PROMPT,
-                tools=tools,
+                tools=mcp_tools,
             )
             response = agent(f"Search for chunks containing '{term}'. Use limit={limit}.")
             print(response)
             return response
 
-    fulltext_search('revenue')
+        fulltext_search('revenue')
 
-    # -------------------------------------------------------------------------
-    # 3. Search Operators
-    # -------------------------------------------------------------------------
-    # Fuzzy search — handles typos
-    fulltext_search('revnue~', limit=3)
+        # ---------------------------------------------------------------------
+        # 3. Search Operators
+        # ---------------------------------------------------------------------
+        # Fuzzy search — handles typos
+        fulltext_search('revnue~', limit=3)
 
-    # Wildcard search — prefix matching
-    fulltext_search('risk*', limit=3)
+        # Wildcard search — prefix matching
+        fulltext_search('risk*', limit=3)
 
-    # Boolean AND — both terms must appear
-    fulltext_search('revenue AND growth', limit=3)
+        # Boolean AND — both terms must appear
+        fulltext_search('revenue AND growth', limit=3)
 
-    # -------------------------------------------------------------------------
-    # 4. Fulltext + Graph Traversal
-    # -------------------------------------------------------------------------
-    def fulltext_graph_search(term: str, limit: int = 5):
-        """Run fulltext search with graph traversal."""
-        print(f'Search term: "{term}" (with graph context)')
-        print('-' * 60)
+        # ---------------------------------------------------------------------
+        # 4. Fulltext + Graph Traversal
+        # ---------------------------------------------------------------------
+        def fulltext_graph_search(term: str, limit: int = 5):
+            """Run fulltext search with graph traversal."""
+            print(f'Search term: "{term}" (with graph context)')
+            print('-' * 60)
 
-        with mcp_client:
-            tools = mcp_client.list_tools_sync()
             agent = Agent(
                 model=bedrock_model,
                 system_prompt=FULLTEXT_GRAPH_PROMPT,
-                tools=tools,
+                tools=mcp_tools,
             )
             response = agent(f"Search for chunks containing '{term}' with graph context. Use limit={limit}.")
             print(response)
             return response
 
-    fulltext_graph_search('iPhone')
+        fulltext_graph_search('iPhone')
 
-    # -------------------------------------------------------------------------
-    # 5. Agent-Driven Hybrid Search with @tool Wrappers
-    # -------------------------------------------------------------------------
-    mcp_conn = await MCPConnection.create(env_path)
+        # ---------------------------------------------------------------------
+        # 5. Agent-Driven Hybrid Search with @tool Wrappers
+        # ---------------------------------------------------------------------
+        @tool
+        def vector_search(query: str, top_k: int = 5) -> str:
+            """Search for semantically similar chunks using vector embeddings.
+            Use this for conceptual or semantic queries where exact words may differ."""
+            embedding = get_embedding(query)
+            top_k = int(top_k)
 
-    @tool
-    async def vector_search(query: str, top_k: int = 5) -> str:
-        """Search for semantically similar chunks using vector embeddings.
-        Use this for conceptual or semantic queries where exact words may differ."""
-        embedding = get_embedding(query)
-        top_k = int(top_k)
+            cypher = f"""
+                CALL db.index.vector.queryNodes('chunkEmbeddings', {top_k}, $query_vector)
+                YIELD node, score
+                MATCH (node)-[:FROM_DOCUMENT]->(doc:Document)
+                WITH node {{.*, embedding: null}} AS node, score, doc
+                RETURN node.text AS text, score, doc.name AS document
+                ORDER BY score DESC
+            """
+            result = mcp_client.call_tool_sync(
+                tool_use_id="vector-search",
+                name=cypher_tool,
+                arguments={"query": cypher, "params": {"query_vector": embedding}},
+            )
+            return result["content"][0]["text"]
 
-        return await mcp_conn.execute_query(f"""
-            CALL db.index.vector.queryNodes('chunkEmbeddings', {top_k}, $query_vector)
-            YIELD node, score
-            MATCH (node)-[:FROM_DOCUMENT]->(doc:Document)
-            WITH node {{.*, embedding: null}} AS node, score, doc
-            RETURN node.text AS text, score, doc.name AS document
-            ORDER BY score DESC
-        """, params={"query_vector": embedding})
+        @tool
+        def fulltext_search_tool(term: str, limit: int = 5) -> str:
+            """Search for chunks containing specific keywords.
+            Use this for exact terms, company names, tickers, or partial matches.
+            Supports operators: fuzzy (term~), wildcard (term*), AND, NOT."""
+            safe_term = term.replace("\\", "\\\\").replace("'", "\\'")
+            limit = int(limit)
 
-    @tool
-    async def fulltext_search_tool(term: str, limit: int = 5) -> str:
-        """Search for chunks containing specific keywords.
-        Use this for exact terms, company names, tickers, or partial matches.
-        Supports operators: fuzzy (term~), wildcard (term*), AND, NOT."""
-        safe_term = term.replace("\\", "\\\\").replace("'", "\\'")
-        limit = int(limit)
+            cypher = f"""
+                CALL db.index.fulltext.queryNodes('search_chunks', '{safe_term}')
+                YIELD node, score
+                MATCH (node)-[:FROM_DOCUMENT]->(doc:Document)
+                RETURN node.text AS text, score, doc.name AS document
+                ORDER BY score DESC
+                LIMIT {limit}
+            """
+            result = mcp_client.call_tool_sync(
+                tool_use_id="fulltext-search",
+                name=cypher_tool,
+                arguments={"query": cypher},
+            )
+            return result["content"][0]["text"]
 
-        return await mcp_conn.execute_query(f"""
-            CALL db.index.fulltext.queryNodes('search_chunks', '{safe_term}')
-            YIELD node, score
-            MATCH (node)-[:FROM_DOCUMENT]->(doc:Document)
-            RETURN node.text AS text, score, doc.name AS document
-            ORDER BY score DESC
-            LIMIT {limit}
-        """)
+        print('Custom tools created:')
+        print('  - vector_search')
+        print('  - fulltext_search_tool')
 
-    print('Custom tools created:')
-    print('  - vector_search')
-    print('  - fulltext_search_tool')
-
-    # Agent gets ONLY the custom tools — never sees raw embeddings or MCP tools
-    hybrid_agent = Agent(
-        model=bedrock_model,
-        system_prompt=HYBRID_PROMPT,
-        tools=[vector_search, fulltext_search_tool],
-    )
-    print('Hybrid agent ready!')
-
-    # -------------------------------------------------------------------------
-    # 6. Hybrid Search
-    # -------------------------------------------------------------------------
-    async def hybrid_search(query: str):
-        """Run hybrid search using both vector and fulltext tools."""
-        print(f'Question: "{query}"')
-        print('=' * 60)
-
-        response = await hybrid_agent.invoke_async(
-            f"Answer this question using BOTH vector search and fulltext search: {query}"
+        # Agent gets ONLY the custom tools — never sees raw embeddings or MCP tools
+        hybrid_agent = Agent(
+            model=bedrock_model,
+            system_prompt=HYBRID_PROMPT,
+            tools=[vector_search, fulltext_search_tool],
         )
-        print(f'\n{response}')
-        return response
+        print('Hybrid agent ready!')
 
-    await hybrid_search("What are Apple's key risk factors?")
+        # ---------------------------------------------------------------------
+        # 6. Hybrid Search
+        # ---------------------------------------------------------------------
+        def hybrid_search(query: str):
+            """Run hybrid search using both vector and fulltext tools."""
+            print(f'Question: "{query}"')
+            print('=' * 60)
 
-    await hybrid_search('Which companies face cybersecurity-related risks?')
+            response = hybrid_agent(
+                f"Answer this question using BOTH vector search and fulltext search: {query}"
+            )
+            print(f'\n{response}')
+            return response
 
-    await hybrid_search('What products does Apple offer?')
+        hybrid_search("What are Apple's key risk factors?")
 
-    # Cleanup
-    await mcp_conn.close()
+        hybrid_search('Which companies face cybersecurity-related risks?')
+
+        hybrid_search('What products does Apple offer?')
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()

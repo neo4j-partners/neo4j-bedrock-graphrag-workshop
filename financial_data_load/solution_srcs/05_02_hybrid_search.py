@@ -225,7 +225,7 @@ def main() -> None:
 
         # Initialize embedder
         embedder = get_embedder()
-        print(f"Embedder: {embedder.model}")
+        print(f"Embedder: {embedder.model_id}")
 
         # Check indexes exist
         with driver.session() as session:

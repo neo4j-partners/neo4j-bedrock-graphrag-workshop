@@ -487,7 +487,7 @@ SOLUTIONS = [
     ("solution_srcs.03_01_basic_strands_agent", "Basic Strands Agent (Lab 3)", False, "main"),
     ("solution_srcs.04_01_vector_search_mcp", "Vector Search via MCP (Lab 4)", False, "main"),
     ("solution_srcs.04_02_graph_enriched_search_mcp", "Graph-Enriched Search via MCP (Lab 4)", False, "main"),
-    ("solution_srcs.04_03_fulltext_hybrid_search_mcp", "Fulltext & Hybrid Search via MCP (Lab 4)", True, "main"),
+    ("solution_srcs.04_03_fulltext_hybrid_search_mcp", "Fulltext & Hybrid Search via MCP (Lab 4)", False, "main"),
     ("solution_srcs.05_01_simple_agent", "Simple Agent", True, "run_agent"),
     ("solution_srcs.05_02_context_provider", "Context Provider Intro", True, "run_agent"),
     ("solution_srcs.05_01_fulltext_search", "Fulltext Search", False, "main"),

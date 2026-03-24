@@ -115,6 +115,12 @@ The database stores the knowledge graph and maintains its indexes. The tools pro
 | MCP Server (schema discovery, Text2Cypher), Cypher (agent-generated queries)
 |===
 
+== Learn More
+
+* https://neo4j.com/[Neo4j Graph Intelligence Platform] — official product page covering the full platform stack
+* https://neo4j.com/nodes-ai/agenda/from-data-to-knowledge-to-action-the-graph-intelligence-platform/[From Data to Knowledge to Action: The Graph Intelligence Platform] — Sudhir Hasbe (President & CPO, Neo4j) presents the platform vision at NODES AI 2026
+* https://neo4j.com/videos/live-from-nodes-2025-keynote-fireside-chat-with-andrew-ng-and-emil-eifrem/[Fireside Chat with Andrew Ng and Emil Eifrem] — NODES 2025 keynote on the future of AI and graphs
+
 == Next Steps
 
 Continue to xref:aws-services.adoc[AWS GenAI Services] to see how Amazon Bedrock, AgentCore, and SageMaker Studio provide the model access, hosting, and development environment that connect to this knowledge graph.

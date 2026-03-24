@@ -142,7 +142,7 @@ def main():
 
         # Initialize embedder
         embedder = get_embedder()
-        print(f"Embedder initialized: {embedder.model}\n")
+        print(f"Embedder initialized: {embedder.model_id}\n")
 
         # Show graph summary
         print("\n" + "="*60)

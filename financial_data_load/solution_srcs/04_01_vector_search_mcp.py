@@ -8,14 +8,15 @@ and Cypher execution, keeping embeddings off the LLM context window.
 Run with: uv run python main.py solutions <N>
 """
 
-import asyncio
 import os
 import sys
 
 import nest_asyncio
 from dotenv import load_dotenv
+from mcp.client.streamable_http import streamablehttp_client
 from strands import Agent, tool
 from strands.models import BedrockModel
+from strands.tools.mcp import MCPClient
 
 nest_asyncio.apply()
 
@@ -24,7 +25,6 @@ FINANCIAL_DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..
 sys.path.insert(0, FINANCIAL_DATA_DIR)
 
 from lib.data_utils import get_embedding  # noqa: E402
-from lib.mcp_utils import MCPConnection  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # 1. Configuration
@@ -36,6 +36,8 @@ load_dotenv(_env_path)
 
 MODEL_ID = os.getenv("MODEL_ID", "us.anthropic.claude-sonnet-4-6")
 REGION = os.getenv("AWS_REGION", os.getenv("REGION", "us-east-1"))
+MCP_GATEWAY_URL = os.getenv("MCP_GATEWAY_URL")
+MCP_ACCESS_TOKEN = os.getenv("MCP_ACCESS_TOKEN")
 
 
 # ---------------------------------------------------------------------------
@@ -58,7 +60,7 @@ For each result, show:
 # ---------------------------------------------------------------------------
 
 
-async def run():
+def main():
     """Run vector search demo."""
     print(f"Model:     {MODEL_ID}")
     print(f"Region:    {REGION}")
@@ -68,79 +70,90 @@ async def run():
     print(f"\nEmbedding dimensions: {len(test_embedding)}")
     print(f"First 5 values: {test_embedding[:5]}")
 
-    # Initialize model and MCP connection
+    # Initialize model
     bedrock_model = BedrockModel(
         model_id=MODEL_ID,
         region_name=REGION,
         temperature=0,
     )
 
-    mcp_conn = await MCPConnection.create(_env_path)
+    mcp_client = MCPClient(lambda: streamablehttp_client(
+        url=MCP_GATEWAY_URL,
+        headers={"Authorization": f"Bearer {MCP_ACCESS_TOKEN}"},
+    ))
 
-    print(f"\nModel: {MODEL_ID}")
-    print("MCP connection established.\n")
+    with mcp_client:
+        # Discover the Cypher query tool
+        mcp_tools = mcp_client.list_tools_sync()
+        tool_names = [t.tool_name for t in mcp_tools]
+        print(f"MCP tools discovered: {tool_names}")
 
-    # -- Vector search tool (embedding stays on the data plane) --
-
-    @tool
-    async def vector_search_tool(query: str, top_k: int = 5) -> str:
-        """Search for semantically similar chunks using vector embeddings.
-        Use this for semantic queries about SEC 10-K filing data."""
-        embedding = get_embedding(query)
-        top_k = int(top_k)
-
-        return await mcp_conn.execute_query(f"""
-            CALL db.index.vector.queryNodes('chunkEmbeddings', {top_k}, $query_vector)
-            YIELD node, score
-            WITH node {{.*, embedding: null}} AS node, score
-            RETURN node.text AS text, score
-            ORDER BY score DESC
-        """, params={"query_vector": embedding})
-
-    agent = Agent(
-        model=bedrock_model,
-        system_prompt=VECTOR_SEARCH_PROMPT,
-        tools=[vector_search_tool],
-    )
-
-    async def vector_search(query: str, top_k: int = 5):
-        """Run vector search through the agent."""
-        print(f'Query: "{query}"')
-        print(f"Top K: {top_k}")
-        print("-" * 60)
-
-        response = await agent.invoke_async(
-            f"Search for: {query}\nUse top_k={top_k}."
+        cypher_tool = next(
+            (n for n in tool_names if "read-cypher" in n),
+            next((n for n in tool_names if "execute-query" in n), None),
         )
-        print(f"\n{response}")
-        return response
+        assert cypher_tool, f"No Cypher query tool found among: {tool_names}"
+        print(f"\nModel: {MODEL_ID}")
+        print(f"Cypher tool: {cypher_tool}\n")
 
-    # --- Run vector searches ---
+        # -- Vector search tool (embedding stays on the data plane) --
 
-    # Search for product-related information
-    print("=" * 60)
-    await vector_search("What are Apple's main products?", top_k=5)
+        @tool
+        def vector_search_tool(query: str, top_k: int = 5) -> str:
+            """Search for semantically similar chunks using vector embeddings.
+            Use this for semantic queries about SEC 10-K filing data."""
+            embedding = get_embedding(query)
+            top_k = int(top_k)
 
-    # Search for risk factor information
-    print("\n" + "=" * 60)
-    await vector_search(
-        "What are the key risk factors mentioned in SEC filings?",
-        top_k=5,
-    )
+            cypher = f"""
+                CALL db.index.vector.queryNodes('chunkEmbeddings', {top_k}, $query_vector)
+                YIELD node, score
+                WITH node {{.*, embedding: null}} AS node, score
+                RETURN node.text AS text, score
+                ORDER BY score DESC
+            """
+            result = mcp_client.call_tool_sync(
+                tool_use_id="vector-search",
+                name=cypher_tool,
+                arguments={"query": cypher, "params": {"query_vector": embedding}},
+            )
+            return result["content"][0]["text"]
 
-    # Compare top_k values — fewer results for a focused search
-    print("\n" + "=" * 60)
-    await vector_search(
-        "What financial metrics indicate company performance?",
-        top_k=3,
-    )
+        agent = Agent(
+            model=bedrock_model,
+            system_prompt=VECTOR_SEARCH_PROMPT,
+            tools=[vector_search_tool],
+        )
 
-    await mcp_conn.close()
+        def vector_search(query: str, top_k: int = 5):
+            """Run vector search through the agent."""
+            print(f'Query: "{query}"')
+            print(f"Top K: {top_k}")
+            print("-" * 60)
 
+            response = agent(f"Search for: {query}\nUse top_k={top_k}.")
+            print(f"\n{response}")
+            return response
 
-def main():
-    """Entry point."""
-    asyncio.run(run())
+        # --- Run vector searches ---
+
+        # Search for product-related information
+        print("=" * 60)
+        vector_search("What are Apple's main products?", top_k=5)
+
+        # Search for risk factor information
+        print("\n" + "=" * 60)
+        vector_search(
+            "What are the key risk factors mentioned in SEC filings?",
+            top_k=5,
+        )
+
+        # Compare top_k values — fewer results for a focused search
+        print("\n" + "=" * 60)
+        vector_search(
+            "What financial metrics indicate company performance?",
+            top_k=3,
+        )
 
 
 if __name__ == "__main__":
