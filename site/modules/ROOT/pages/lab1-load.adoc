@@ -113,9 +113,9 @@ Expected counts:
 | Label | Count
 
 | AssetManager | 15
-| Company | ~76
-| Product | 274
-| RiskFactor | 203
+| Company | ~73
+| Product | 91
+| RiskFactor | 57
 |===
 
 NOTE: The Company count is higher than the number of companies in the seed CSV because COMPETES_WITH and PARTNERS_WITH relationships reference companies mentioned in filings (e.g., Google, Samsung, OpenAI) that are not themselves in the seed data. The original seed companies have a `companyId` property; the additional companies created by competitor and partner relationships do not.

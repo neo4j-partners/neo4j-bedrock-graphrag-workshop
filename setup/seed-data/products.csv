@@ -1,365 +1,92 @@
-product_id,name
-P001,A-to-z Guarantee
-P002,A100 Integrated Circuit
-P003,A100X
-P004,A800
-P005,AGX
-P006,AI Cloud Services
-P007,"AI Frameworks, SDKs, and APIs"
-P008,AI Innovations
-P009,AI Platform Services
-P010,AI Products and Services
-P011,AI Services
-P012,AI Skills Initiative
-P013,AI Technologies and Associated Products
-P014,AI and Machine Learning Platform
-P015,AI-powered Productivity Services
-P016,AWS
-P017,Accelerated Computing Platform
-P018,Accessories
-P019,Ada Lovelace Architecture
-P020,Adapter Card Products and Switch Systems
-P021,AirPods
-P022,Amazon Bedrock
-P023,Amazon CodeWhisperer
-P024,Amazon Prime
-P025,Amazon Stores
-P026,App Store
-P027,Apple Arcade
-P028,Apple Card
-P029,Apple Fitness+
-P030,Apple Music
-P031,Apple News+
-P032,Apple Pay
-P033,Apple TV
-P034,Apple TV 4K
-P035,Apple TV+
-P036,Apple Vision Pro
-P037,Apple Watch
-P038,Apple Watch Series 9
-P039,Apple Watch Ultra 2
-P040,AppleCare
-P041,Automotive AI Cockpit
-P042,Azure
-P043,Azure AI
-P044,Azure AI Platform
-P045,Azure Arc
-P046,Azure IoT Edge
-P047,Azure Orbital
-P048,Backbone Gas Transmission Service
-P049,Beats
-P050,Bing
-P051,Bing Chat
-P052,Blink
-P053,Braintree
-P054,Braintree (Unbranded Card Processing)
-P055,Branded Credit Card
-P056,Branded Debit Card
-P057,Bundled Customer Electricity Supply
-P058,Bundled Electric Service
-P059,Bundled Gas Sales
-P060,Buy Now Pay Later
-P061,Buy Now Pay Later / Installment Methods
-P062,"Buy Now, Pay Later"
-P063,CARE Program
-P064,CMP (Cryptocurrency Mining Processors)
-P065,CPU
-P066,CUDA
-P067,CUDA Parallel Programming Model
-P068,CUDA-X Application Acceleration Libraries
-P069,Card Readers and Point of Sale Devices
-P070,Cellular Handsets
-P071,Co-Branded Credit Card Programs
-P072,Compute & Networking
-P073,Consulting Services
-P074,Consumer Credit Products
-P075,Consumer Installment Loans
-P076,Consumer Interest-Bearing Installment Products
-P077,Consumer Loans
-P078,Consumer Receivables - Revolving Products
-P079,Consumer Short-Term Installment Loan
-P080,Consumer Short-Term Interest-Free Installment Product (Australia)
-P081,Consumer Short-Term Interest-Free Installment Product (US)
-P082,"Consumer Short-Term Interest-Free Installment Products (UK, France, Germany, Spain, Italy)"
-P083,Core PayPal
-P084,Credit Products
-P085,Cryptocurrency Custodial Services
-P086,Cryptocurrency Offerings
-P087,Cryptocurrency Products
-P088,Cryptocurrency Purchase and Sale
-P089,Cryptocurrency Services
-P090,Cryptocurrency Transactions
-P091,Customer Protection Programs
-P092,DGX AI Supercomputer
-P093,DGX Systems
-P094,DOCA
-P095,DPU (Data Processing Unit)
-P096,DRIVE
-P097,DRIVE AGX
-P098,DRIVE Chauffeur
-P099,DRIVE Hyperion
-P100,DRIVE Software
-P101,Deep Learning Institute
-P102,Dev Home
-P103,Diablo Canyon Nuclear Generation Facility
-P104,Diablo Canyon Nuclear Power Plant
-P105,Diablo Canyon Unit 1
-P106,Diablo Canyon Unit 2
-P107,Digital Payments Platform
-P108,Digital Wallet
-P109,Dynamics 365
-P110,Dynamics Business Solutions
-P111,Eclipse
-P112,Elkhorn Battery Energy Storage System
-P113,End-to-End Payments Solution for Merchants
-P114,Enhanced Powerline Safety Settings (EPSS)
-P115,Enterprise Agreement
-P116,Enterprise Mobility + Security
-P117,Enterprise Services
-P118,Enterprise Support Services
-P119,Ethernet Network Adapters and Switches
-P120,Exchange Server
-P121,Fire TV
-P122,Fire Tablet
-P123,Fossil Fuel-Fired Generation - Colusa Generating Station
-P124,Fossil Fuel-Fired Generation - Gateway Generating Station
-P125,Fossil Fuel-Fired Generation - Humboldt Bay Generating Station
-P126,Fulfillment by Amazon
-P127,GPT-4 services
-P128,Gaming - Cloud Gaming
-P129,Gaming - Console
-P130,Gaming - Mobile
-P131,Gaming - PC
-P132,Gaming GPUs
-P133,Gaming Platform
-P134,Gas Delivery Service
-P135,Gas Service
-P136,Gas Storage Service
-P137,Gas Transmission and Storage
-P138,Gateway Services
-P139,GeForce Experience
-P140,GeForce GPU
-P141,GeForce GTX GPUs
-P142,GeForce NOW
-P143,GeForce NOW Ultimate
-P144,GeForce Platform
-P145,GeForce RTX 40 Series
-P146,GeForce RTX 4070 Ti
-P147,GeForce RTX 4080
-P148,GeForce RTX 4090
-P149,GeForce RTX GPUs
-P150,Geothermal Energy
-P151,GitHub
-P152,GitHub Copilot
-P153,Grace CPU
-P154,H100 GPU
-P155,H100 Integrated Circuit
-P156,H100 integrated circuits
-P157,HGX
-P158,HoloLens
-P159,HomePod
-P160,HomePod (second-generation)
-P161,Hyperwallet
-P162,IGX
-P163,Inception Program
-P164,Industry Solutions
-P165,InfiniBand Network Adapters and Switches
-P166,Intelligent Cloud
-P167,Jetson for robotics and embedded platforms
-P168,Kindle
-P169,LHR GeForce GPU
-P170,LinkedIn
-P171,LinkedIn Learning (Generative AI Pathway)
-P172,LinkedIn Marketing Solutions
-P173,LinkedIn Premium Subscriptions
-P174,LinkedIn Sales Solutions
-P175,LinkedIn Talent Solutions
-P176,MLS Season Pass
-P177,Mac
-P178,Mac Pro
-P179,Mac Studio
-P180,Mac mini
-P181,"MacBook Air 15"""
-P182,"MacBook Pro 14"""
-P183,"MacBook Pro 16"""
-P184,Marketing Tools and Logistics Services (India)
-P185,Marketplace for Sellers
-P186,Merchandise and Content (Resale)
-P187,Merchant Finance Offerings
-P188,Merchant Financing
-P189,Merchant Loans and Advances
-P190,Merchant and Consumer Credit Products
-P191,Merchant lending product in Australia
-P192,"Merchant lending product in Germany, France and the Netherlands"
-P193,Merchant lending product in the U.K.
-P194,Meta LLaMA2
-P195,Metering Services
-P196,Microsoft 365
-P197,Microsoft 365 Commercial
-P198,Microsoft 365 Consumer
-P199,Microsoft 365 Copilot
-P200,Microsoft Account services
-P201,Microsoft Advertising
-P202,Microsoft Cloud
-P203,Microsoft Cloud Solution Provider
-P204,Microsoft Cloud for Sustainability
-P205,Microsoft Customer Agreement
-P206,Microsoft Defender for Endpoint
-P207,Microsoft Edge
-P208,Microsoft Fabric
-P209,Microsoft Graph
-P210,Microsoft Intelligent Data Platform
-P211,Microsoft Learn
-P212,Microsoft Mesh
-P213,Microsoft News
-P214,Microsoft Office
-P215,Microsoft Online Subscription Agreement
-P216,Microsoft Power Platform
-P217,Microsoft Products and Services Agreement
-P218,Microsoft Security
-P219,Microsoft Services Provider License Agreement
-P220,Microsoft Store
-P221,Microsoft Sustainability Manager
-P222,Microsoft Teams
-P223,Microsoft Viva
-P224,NVIDIA AI Cloud Service
-P225,NVIDIA AI Enterprise
-P226,NVIDIA Ampere Architecture
-P227,NVIDIA Ampere Architecture RTX GPUs
-P228,NVIDIA BioNeMo LLM
-P229,NVIDIA BlueField DPU
-P230,NVIDIA DGX Cloud
-P231,NVIDIA DLSS
-P232,NVIDIA DLSS 3
-P233,NVIDIA DRIVE Orin
-P234,NVIDIA DRIVE Sim
-P235,NVIDIA DRIVE Thor
-P236,NVIDIA GPU Cloud (NGC)
-P237,NVIDIA H100 Tensor Core GPU
-P238,NVIDIA Hopper GPU Architecture
-P239,NVIDIA NeMo LLM
-P240,NVIDIA OVX Server Reference Design
-P241,NVIDIA Omniverse
-P242,NVIDIA Omniverse Avatar
-P243,NVIDIA Omniverse Enterprise
-P244,NVIDIA RTX
-P245,NVIDIA RTX GPUs
-P246,NVIDIA RTX Platform
-P247,NVIDIA Spectrum-4 Networking Platform
-P248,NVIDIA vGPU Software
-P249,Networking Cables
-P250,Networking Products
-P251,Nuance
-P252,OEM and Other
-P253,Office 365
-P254,Office 365 Security and Compliance
-P255,Office Commercial
-P256,Office Consumer
-P257,Office products and cloud services
-P258,Omniverse Avatar Cloud Engine
-P259,Omniverse Cloud
-P260,Omniverse Enterprise software
-P261,On-Premises Software Licenses
-P262,OneDrive
-P263,Open Value
-P264,Outlook
-P265,Outlook.com
-P266,Paidy
-P267,Paidy Consumer Installment Product
-P268,Partner Payment Solution
-P269,PayPal
-P270,PayPal Branded Consumer Credit Products
-P271,PayPal Branded Debit and Credit Cards
-P272,PayPal Business Loan
-P273,PayPal Consumer Credit
-P274,PayPal Consumer Credit Card
-P275,PayPal Credit
-P276,PayPal Digital Wallet
-P277,PayPal Honey
-P278,PayPal Payments Platform
-P279,PayPal Working Capital
-P280,PayPal Zettle
-P281,PayPal-branded Checkout
-P282,Power Apps
-P283,Power Automate
-P284,Professional Visualization Platform
-P285,Professional Visualization Products
-P286,Professional Workstation Platforms
-P287,Purchase Protection Program
-P288,Quadro/NVIDIA RTX GPUs
-P289,Quantum-2
-P290,Ring
-P291,SHIELD
-P292,SQL Server
-P293,Search
-P294,Search and news advertising
-P295,Select Plus
-P296,Seller Protection Program
-P297,Senior Secured Recovery Bonds
-P298,Senior Secured Recovery Bonds Series 2022-A
-P299,Senior Secured Recovery Bonds Series 2022-B
-P300,Server products and cloud services
-P301,SharePoint
-P302,SharePoint Online
-P303,Skype
-P304,Skype for Business
-P305,Software Assurance
-P306,Software Products and Services Financing Program
-P307,"Sponsored Ads, Display, and Video Advertising"
-P308,Studio Drivers
-P309,Surface
-P310,Surface Laptop
-P311,Surface Pro
-P312,System Center
-P313,Tablet
-P314,Third-Party Seller Products
-P315,Third-Party Seller Program
-P316,Third-Party Seller Services
-P317,Tokenized Payment Cards
-P318,Transmission Services
-P319,U.S. Installment Loan Products
-P320,U.S. merchant lending product
-P321,Venmo
-P322,Venmo Branded Credit Products
-P323,Venmo Branded Debit and Credit Cards
-P324,Venmo Consumer Credit
-P325,Venmo Digital Wallet
-P326,Venmo co-branded consumer credit card
-P327,Video Games
-P328,Visio
-P329,Visual Studio
-P330,Viva Engage
-P331,Viva Learning
-P332,Volume Licensing Programs
-P333,Wearables and Accessories
-P334,"Wearables, Home and Accessories"
-P335,Windows
-P336,Windows 11
-P337,Windows 365
-P338,Windows Commercial
-P339,Windows Copilot
-P340,Windows IoT
-P341,Windows OEM
-P342,Windows Server
-P343,Windows post-delivery support
-P344,Xbox
-P345,Xbox Consoles
-P346,Xbox Game Pass
-P347,Xbox Game Studios
-P348,Xbox hardware
-P349,Xbox subscriptions
-P350,Xoom
-P351,Xoom International Money Transfer
-P352,eero
-P353,iOS 17
-P354,iPad
-P355,iPad Pro
-P356,iPadOS 17
-P357,iPhone
-P358,iPhone 15
-P359,iPhone 15 Plus
-P360,iPhone 15 Pro
-P361,iPhone 15 Pro Max
-P362,macOS Sonoma
-P363,tvOS 17
-P364,watchOS 10
+product_id,name,description
+P001,AWS,
+P002,AirPods,
+P003,Amazon Prime,
+P004,Amazon Stores,
+P005,App Store,
+P006,Apple Arcade,
+P007,Apple Music,
+P008,Apple Pay,
+P009,Apple TV+,
+P010,Apple Vision Pro,
+P011,Apple Watch,
+P012,AppleCare,
+P013,Azure,
+P014,Bing,
+P015,Blink,
+P016,Braintree,
+P017,Bundled Electric Service,
+P018,Bundled Gas Sales,
+P019,"Buy Now, Pay Later",
+P020,CUDA,
+P021,Consumer Credit Products,
+P022,Cryptocurrency Services,
+P023,DGX Systems,
+P024,DRIVE,
+P025,Diablo Canyon Nuclear Power Plant,
+P026,Dynamics 365,
+P027,Elkhorn Battery Energy Storage System,
+P028,Enhanced Powerline Safety Settings (EPSS),
+P029,Fire TV,
+P030,Fire Tablet,
+P031,Fulfillment by Amazon,
+P032,Gas Delivery Service,
+P033,Gas Transmission and Storage,
+P034,GeForce GPU,
+P035,GeForce NOW,
+P036,GeForce RTX GPUs,
+P037,Geothermal Energy,
+P038,GitHub,
+P039,GitHub Copilot,
+P040,Grace CPU,
+P041,HoloLens,
+P042,HomePod,
+P043,Hyperwallet,
+P044,InfiniBand Network Adapters and Switches,
+P045,Jetson for robotics and embedded platforms,
+P046,Kindle,
+P047,LinkedIn,
+P048,Mac,
+P049,Merchant Financing,
+P050,Metering Services,
+P051,Microsoft 365,
+P052,Microsoft 365 Copilot,
+P053,Microsoft Defender for Endpoint,
+P054,Microsoft Edge,
+P055,Microsoft Fabric,
+P056,Microsoft Office,
+P057,Microsoft Power Platform,
+P058,Microsoft Teams,
+P059,NVIDIA AI Enterprise,
+P060,NVIDIA BlueField DPU,
+P061,NVIDIA DGX Cloud,
+P062,NVIDIA DLSS,
+P063,NVIDIA H100 Tensor Core GPU,
+P064,NVIDIA Omniverse,
+P065,NVIDIA RTX GPUs,
+P066,NVIDIA Spectrum-4 Networking Platform,
+P067,Networking Products,
+P068,OneDrive,
+P069,Outlook,
+P070,Paidy,
+P071,PayPal,
+P072,PayPal Digital Wallet,
+P073,PayPal Honey,
+P074,PayPal Zettle,
+P075,Professional Visualization Products,
+P076,Ring,
+P077,SharePoint,
+P078,Surface,
+P079,Transmission Services,
+P080,Venmo,
+P081,Venmo Digital Wallet,
+P082,Visual Studio,
+P083,"Wearables, Home and Accessories",
+P084,Windows,
+P085,Xbox,
+P086,Xoom International Money Transfer,
+P087,eero,
+P088,iOS 17,
+P089,iPad,
+P090,iPhone,
+P091,macOS Sonoma,

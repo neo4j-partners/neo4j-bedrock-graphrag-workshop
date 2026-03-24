@@ -41,9 +41,9 @@ Open each notebook in order. Each one builds on the graph state left by the prev
 | VectorCypher Retriever
 | A `VectorCypherRetriever` that enriches each vector match with neighboring chunks and document metadata via Cypher
 
-| `05_fulltext_search.ipynb`
-| Fulltext Search
-| A fulltext index on Chunk text with fuzzy, wildcard, and boolean search operators
+| `05_hybrid_rag.ipynb`
+| Hybrid RAG
+| `HybridRetriever` + `GraphRAG` comparing vector-only vs hybrid RAG answers with alpha tuning
 
 | `06_hybrid_search.ipynb`
 | Hybrid Search

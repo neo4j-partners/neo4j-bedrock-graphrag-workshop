@@ -8,16 +8,14 @@ LLM/embedder initialization, and configuration management.
 Uses AWS Bedrock for LLM and embedding services.
 """
 
-import json
 from contextlib import contextmanager
 from pathlib import Path
 
-import boto3
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
 from neo4j_graphrag.embeddings import BedrockNovaEmbeddings
 from neo4j_graphrag.llm import BedrockLLM
-from pydantic import BaseModel, Field
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Load .env from financial_data_load directory
@@ -68,7 +66,6 @@ def get_embedder() -> BedrockNovaEmbeddings:
     """Get embedder using AWS Bedrock Nova Multimodal Embeddings.
 
     Returns a BedrockNovaEmbeddings object for use with neo4j-graphrag retrievers.
-    For raw float arrays (e.g., for Cypher queries), use get_embedding() instead.
     """
     config = BedrockConfig()
 
@@ -88,45 +85,3 @@ def get_llm() -> BedrockLLM:
     )
 
 
-class _NovaEmbedding(BaseModel):
-    embedding: list[float]
-
-
-class _NovaEmbeddingResponse(BaseModel):
-    embeddings: list[_NovaEmbedding]
-
-
-_bedrock_client = None
-
-
-def get_embedding(text: str) -> list[float]:
-    """Generate an embedding vector for text using Bedrock Nova.
-
-    Returns the raw float array for use in Cypher vector search queries.
-    Unlike get_embedder(), this returns floats directly rather than a
-    BedrockNovaEmbeddings object.
-    """
-    global _bedrock_client
-    config = BedrockConfig()
-    if _bedrock_client is None:
-        _bedrock_client = boto3.client(
-            "bedrock-runtime", region_name=config.region
-        )
-    request_body = {
-        "taskType": "SINGLE_EMBEDDING",
-        "singleEmbeddingParams": {
-            "embeddingPurpose": "GENERIC_INDEX",
-            "embeddingDimension": config.embedding_dimensions,
-            "text": {
-                "truncationMode": "END",
-                "value": text,
-            },
-        },
-    }
-    response = _bedrock_client.invoke_model(
-        modelId="amazon.nova-2-multimodal-embeddings-v1:0",
-        body=json.dumps(request_body),
-    )
-    result = json.loads(response["body"].read())
-    parsed = _NovaEmbeddingResponse.model_validate(result)
-    return parsed.embeddings[0].embedding

@@ -216,11 +216,10 @@ def main():
             """Search for chunks containing specific keywords.
             Use this for exact terms, company names, tickers, or partial matches.
             Supports operators: fuzzy (term~), wildcard (term*), AND, NOT."""
-            safe_term = term.replace("\\", "\\\\").replace("'", "\\'")
             limit = int(limit)
 
             cypher = f"""
-                CALL db.index.fulltext.queryNodes('search_chunks', '{safe_term}')
+                CALL db.index.fulltext.queryNodes('search_chunks', $search_term)
                 YIELD node, score
                 MATCH (node)-[:FROM_DOCUMENT]->(doc:Document)
                 RETURN node.text AS text, score, doc.name AS document
@@ -230,7 +229,7 @@ def main():
             result = mcp_client.call_tool_sync(
                 tool_use_id="fulltext-search",
                 name=cypher_tool,
-                arguments={"query": cypher},
+                arguments={"query": cypher, "params": {"search_term": term}},
             )
             return result["content"][0]["text"]
 

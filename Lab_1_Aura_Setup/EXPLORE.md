@@ -63,7 +63,7 @@ Clear the current search and build a new pattern:
 
 This creates the pattern: `Company — COMPETES_WITH → Company`
 
-The visualization shows which filing companies compete with which other companies. You'll see Microsoft with the most competitor edges, followed by NVIDIA and PG&E. The outer ring of smaller nodes are mentioned companies (Google, Oracle, Samsung, etc.) that appear in filings but aren't filing companies themselves.
+The visualization shows which filing companies compete with which other companies. You'll see Microsoft with the most competitor edges, followed by NVIDIA and Apple. The outer ring of smaller nodes are mentioned companies (Alphabet, Oracle, Samsung, etc.) that appear in filings but aren't filing companies themselves.
 
 
 
@@ -89,7 +89,7 @@ After the algorithm completes, click **Size nodes based on scores** to visually 
 
 ![Size Nodes](images/size_nodes.png)
 
-Microsoft will dominate the visualization (24 competitor edges), making it immediately obvious which filing company operates in the most competitive markets. Mentioned companies like Google and Oracle will be small since they only have a single incoming edge.
+Microsoft will dominate the visualization (32 competitor edges), making it immediately obvious which filing company operates in the most competitive markets. Mentioned companies like Alphabet and Oracle will be small since they only have a single incoming edge.
 
 ![Centrality Results](images/Centrality_Company.png)
 

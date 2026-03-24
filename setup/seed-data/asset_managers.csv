@@ -1,16 +1,16 @@
 manager_id,name
-AM001,ALLIANCEBERNSTEIN L.P.
-AM002,AMERIPRISE FINANCIAL INC
-AM003,AMUNDI
-AM004,BANK OF AMERICA CORP /DE/
+AM001,AllianceBernstein L.P.
+AM002,Ameriprise Financial Inc.
+AM003,Amundi
+AM004,Bank of America Corp
 AM005,Bank of New York Mellon Corp
-AM006,Berkshire Hathaway Inc
+AM006,Berkshire Hathaway Inc.
 AM007,BlackRock Inc.
 AM008,Capital World Investors
 AM009,FMR LLC
-AM010,"GEODE CAPITAL MANAGEMENT, LLC"
-AM011,MORGAN STANLEY
-AM012,NORTHERN TRUST CORP
-AM013,STATE STREET CORP
-AM014,WELLINGTON MANAGEMENT GROUP LLP
-AM015,WELLS FARGO & COMPANY/MN
+AM010,"Geode Capital Management, LLC"
+AM011,Morgan Stanley
+AM012,Northern Trust Corp
+AM013,State Street Corp
+AM014,Wellington Management Group LLP
+AM015,Wells Fargo & Company

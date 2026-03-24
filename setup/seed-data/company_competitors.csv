@@ -1,117 +1,30 @@
 source_company_id,target_company_id,target_company_name
-C001,,"1Life Healthcare, Inc. (One Medical)"
-C001,,MGM Holdings Inc.
-C001,,Rivian
-C001,,iRobot Corporation
-C004,,AMD
-C004,,"Advanced Micro Devices, Inc."
-C004,,Advantest America Inc.
-C004,,Alibaba Group
-C004,,Alphabet
-C004,C001,"Amazon.com, Inc."
-C004,,"Ambarella, Inc."
-C004,,Amkor Technology
-C004,,"Applied Optoelectronics, Inc."
-C004,,Arista Networks
-C004,,Arm
-C004,,BYD Auto
-C004,,"Baidu, Inc."
-C004,,Booz Allen Hamilton Inc.
-C004,,Broadcom Inc.
-C004,,Chroma ATE Inc.
-C004,,"Cisco Systems, Inc."
-C004,,"Coherent, Inc."
-C004,,Cooley LLP
-C004,,Fabrinet
-C004,,Flex Ltd.
-C004,,Hewlett Packard Enterprise Company
-C004,,Hewlett-Packard
-C004,,Hon Hai
-C004,,Hon Hai Precision Industry Co.
-C004,,Ibiden Co. Ltd.
-C004,,Intel Corporation
-C004,,JDS Uniphase Corp.
-C004,,Jabil Inc.
-C004,,"Juniper Networks, Inc."
-C004,,"King Yuan Electronics Co., Ltd."
-C004,,Kinsus Interconnect Technology Corporation
-C004,,Lockheed Missiles and Space Company
-C004,,Lumentum Holdings
-C004,,Marvell Technology Group
-C004,,Micron Technology
-C004,C003,Microsoft Corporation
-C004,,"Omni Logistics, LLC"
-C004,,Qualcomm Incorporated
-C004,,Quantum Corp.
-C004,,Renesas Electronics Corporation
-C004,,SK Hynix
-C004,,Samsung
-C004,,Samsung Electronics Co. Ltd
-C004,,"Samsung Semiconductor, Inc."
-C004,,Siliconware Precision Industries Company Ltd.
-C004,,SoftBank
-C004,,SoftBank Group Corp.
-C004,,"Sun Microsystems, Inc."
-C004,,Taiwan Semiconductor Manufacturing Company Limited
-C004,,"Tesla, Inc."
-C004,,Texas Instruments Incorporated
-C004,,Unimicron Technology Corporation
-C004,,"Universal Scientific Industrial Co., Ltd."
-C004,,Wistron Corporation
-C006,,"Block, Inc."
-C006,,Paidy
-C006,,PayPal (Europe)
-C006,,PayPal Credit Pty Limited
-C006,,PayPal Pte. Ltd.
-C006,,"PayPal, Inc."
-C006,,TIO Networks
-C006,,Venmo
-C006,,eBay
-C002,,Appiphany Technologies Corporation
-C002,,Google (Android)
-C002,,Microsoft (Windows)
-C002,,Microsoft (Xbox)
+C001,,Alibaba Group
+C001,,Alphabet
+C001,C003,Microsoft Corporation
+C001,,eBay
+C002,,Alphabet
+C002,C003,Microsoft Corporation
 C002,,Nintendo
-C002,,Sony (PlayStation)
-C002,,"Verde Bio Holdings, Inc."
-C005,,CAISO
-C005,,California Independent System Operator (CAISO)
-C005,,PG&E
-C005,,PG&E Recovery Funding LLC
-C005,,PG&E Utility
-C005,,PG&E Wildfire Recovery Funding LLC
-C005,,Pacific Gas and Electric (PG&E Utility)
-C005,,Pacific Gas and Electric (PG&E)
-C005,,Pacific Gas and Electric (PG&E) Utility
-C005,,Pacific Gas and Electric (The Utility)
-C005,,Pacific Gas and Electric (Utility)
-C005,,Pacific Gas and Electric Company
-C005,,Pacific Generation LLC
-C005,,San Diego Gas & Electric Company
-C003,,"Activision Blizzard, Inc."
+C002,,Samsung Electronics Co. Ltd
+C002,,Sony
 C003,,Adobe
 C003,C001,"Amazon.com, Inc."
 C003,C002,Apple Inc.
 C003,,BMC
-C003,,Bethesda Softworks LLC
 C003,,CA Technologies
 C003,,"Cisco Systems, Inc."
 C003,,Dell
-C003,,GitHub
-C003,,Google
+C003,,Alphabet
 C003,,Hewlett-Packard
 C003,,IBM
 C003,,Intel Security Group
 C003,,Lenovo
-C003,,LinkedIn
 C003,,"McAfee, LLC"
 C003,,Meta
-C003,,Microsoft Mobile Oy
 C003,,"Netflix, Inc."
 C003,,Nintendo
 C003,,Nokia
-C003,,Nuance
-C003,,"Nuance Communications, Inc."
 C003,,Okta
 C003,,OpenAI
 C003,,Oracle
@@ -126,5 +39,36 @@ C003,,Symantec
 C003,,Tencent
 C003,,VMware
 C003,,Yahoo
-C003,,ZeniMax Media Inc.
 C003,,Zoom
+C004,,"Advanced Micro Devices, Inc."
+C004,,Advantest America Inc.
+C004,,Alibaba Group
+C004,,Alphabet
+C004,C001,"Amazon.com, Inc."
+C004,,"Ambarella, Inc."
+C004,,Arista Networks
+C004,,Arm
+C004,,BYD Auto
+C004,,"Baidu, Inc."
+C004,,Broadcom Inc.
+C004,,"Cisco Systems, Inc."
+C004,,Hewlett Packard Enterprise Company
+C004,,Hewlett-Packard
+C004,,Intel Corporation
+C004,,"Juniper Networks, Inc."
+C004,,Marvell Technology Group
+C004,,Micron Technology
+C004,C003,Microsoft Corporation
+C004,,Qualcomm Incorporated
+C004,,Quantum Corp.
+C004,,Renesas Electronics Corporation
+C004,,SK Hynix
+C004,,Samsung Electronics Co. Ltd
+C004,,SoftBank Group Corp.
+C004,,"Tesla, Inc."
+C004,,Texas Instruments Incorporated
+C005,,CAISO
+C005,,San Diego Gas & Electric Company
+C006,,"Block, Inc."
+C006,,eBay
+C006,C002,Apple Inc.

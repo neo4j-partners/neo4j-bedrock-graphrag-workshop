@@ -10,9 +10,9 @@ Run with: uv run python main.py solutions 6
 from typing import Final
 
 from neo4j import Driver
-from neo4j_graphrag.embeddings import OpenAIEmbeddings
+from neo4j_graphrag.embeddings import BedrockNovaEmbeddings
 from neo4j_graphrag.generation import GraphRAG
-from neo4j_graphrag.llm import OpenAILLM
+from neo4j_graphrag.llm import BedrockLLM
 from neo4j_graphrag.retrievers import VectorCypherRetriever
 
 from config import get_embedder, get_llm, get_neo4j_driver
@@ -57,7 +57,7 @@ LIMIT 10
 
 
 def create_vector_cypher_retriever(
-    driver: Driver, embedder: OpenAIEmbeddings, retrieval_query: str
+    driver: Driver, embedder: BedrockNovaEmbeddings, retrieval_query: str
 ) -> VectorCypherRetriever:
     """Create a VectorCypherRetriever with custom retrieval query.
 
@@ -78,7 +78,7 @@ def create_vector_cypher_retriever(
 
 
 def demo_retriever(
-    llm: OpenAILLM, retriever: VectorCypherRetriever, query: str, description: str
+    llm: BedrockLLM, retriever: VectorCypherRetriever, query: str, description: str
 ) -> None:
     """Demo a retriever with GraphRAG.
 

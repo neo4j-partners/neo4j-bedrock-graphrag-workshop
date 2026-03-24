@@ -6,6 +6,7 @@
 # Usage:
 #   ./setup_s3_seed_data.sh                    # defaults to us-east-1
 #   ./setup_s3_seed_data.sh --region us-west-2
+#   ./setup_s3_seed_data.sh --refresh          # re-upload CSVs and invalidate CloudFront cache
 #   ./setup_s3_seed_data.sh --cleanup          # delete CloudFront, OAC, bucket
 
 set -euo pipefail
@@ -14,6 +15,7 @@ BUCKET_NAME="neo4j-aws-workshop-data"
 S3_PREFIX="sec-filings"
 REGION="us-east-1"
 CLEANUP=false
+REFRESH=false
 OAC_NAME="neo4j-workshop-oac"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SEED_DATA_DIR="${SCRIPT_DIR}/seed-data"
@@ -29,9 +31,13 @@ while [[ $# -gt 0 ]]; do
             CLEANUP=true
             shift
             ;;
+        --refresh)
+            REFRESH=true
+            shift
+            ;;
         *)
             echo "Unknown option: $1"
-            echo "Usage: $0 [--region REGION] [--cleanup]"
+            echo "Usage: $0 [--region REGION] [--refresh] [--cleanup]"
             exit 1
             ;;
     esac
@@ -90,6 +96,41 @@ if [ "$CLEANUP" = true ]; then
     aws s3 rb "s3://${BUCKET_NAME}" --region "$REGION" 2>/dev/null || true
 
     echo "Cleanup complete."
+    exit 0
+fi
+
+# ── Refresh mode: re-upload CSVs and invalidate CloudFront cache ─────────────
+
+if [ "$REFRESH" = true ]; then
+    echo "Uploading CSVs from ${SEED_DATA_DIR}/ to s3://${BUCKET_NAME}/${S3_PREFIX}/ ..."
+
+    csv_count=0
+    for csv_file in "${SEED_DATA_DIR}"/*.csv; do
+        [ -f "$csv_file" ] || continue
+        filename="$(basename "$csv_file")"
+        aws s3 cp "$csv_file" "s3://${BUCKET_NAME}/${S3_PREFIX}/${filename}" \
+            --region "$REGION" \
+            --content-type "text/csv" \
+            --quiet
+        echo "  ${filename}"
+        csv_count=$((csv_count + 1))
+    done
+    echo "  Uploaded ${csv_count} CSV files."
+
+    DIST_ID=$(find_distribution_id)
+    if [ "$DIST_ID" != "None" ] && [ -n "$DIST_ID" ]; then
+        echo "Invalidating CloudFront cache ..."
+        INVALIDATION_ID=$(aws cloudfront create-invalidation \
+            --distribution-id "$DIST_ID" \
+            --paths "/${S3_PREFIX}/*" \
+            --query "Invalidation.Id" --output text)
+        echo "  Invalidation created: ${INVALIDATION_ID}"
+        echo "  Cache will clear within a few minutes."
+    else
+        echo "  No CloudFront distribution found — skipping invalidation."
+    fi
+
+    echo "Refresh complete."
     exit 0
 fi
 

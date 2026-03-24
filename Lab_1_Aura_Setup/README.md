@@ -159,14 +159,14 @@ You should see approximately:
 | Label | Count |
 |---|---|
 | AssetManager | 15 |
-| Company | 76 |
-| Product | 274 |
-| RiskFactor | 203 |
+| Company | ~73 |
+| Product | 91 |
+| RiskFactor | 57 |
 
-> **Note:** The Company count is higher than 9 because COMPETES_WITH and PARTNERS_WITH
+> **Note:** The Company count is higher than 6 because COMPETES_WITH and PARTNERS_WITH
 > relationships reference companies mentioned in filings (e.g., Google, Samsung, OpenAI) that
 > aren't themselves filing companies. These "mentioned companies" have a `name` but no
-> `companyId`, `ticker`, or other identifiers. The 9 filing companies can be found with:
+> `companyId`, `ticker`, or other identifiers. The 6 filing companies can be found with:
 > ```cypher
 > MATCH (c:Company) WHERE c.companyId IS NOT NULL RETURN c.name, c.ticker ORDER BY c.name;
 > ```

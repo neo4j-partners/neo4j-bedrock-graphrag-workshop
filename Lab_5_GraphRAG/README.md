@@ -8,7 +8,7 @@ Build a complete GraphRAG pipeline over SEC 10-K financial filing data using Neo
 - **Embeddings**: Generate vector embeddings with Amazon Nova and create a vector index
 - **VectorRetriever**: Pure semantic similarity search over embedded chunks
 - **VectorCypherRetriever**: Vector search enriched with graph traversal to connected entities
-- **Fulltext Search**: Keyword-based search with fuzzy, wildcard, and boolean operators
+- **Hybrid RAG**: Hybrid retrieval (vector + fulltext) powering GraphRAG answer generation
 - **HybridRetriever**: Combined vector and fulltext search with tunable alpha parameter
 
 ## Prerequisites
@@ -27,7 +27,7 @@ Before starting this lab, make sure you have:
 | [02_embeddings.ipynb](02_embeddings.ipynb) | Embeddings | Vector embeddings on every Chunk node, plus a `chunkEmbeddings` vector index |
 | [03_vector_retriever.ipynb](03_vector_retriever.ipynb) | Vector Retriever | A `VectorRetriever` wired into a `GraphRAG` pipeline for semantic Q&A |
 | [04_vector_cypher_retriever.ipynb](04_vector_cypher_retriever.ipynb) | VectorCypher Retriever | A `VectorCypherRetriever` that enriches each vector match with neighboring chunks and document metadata via Cypher |
-| [05_fulltext_search.ipynb](05_fulltext_search.ipynb) | Fulltext Search | A fulltext index on Chunk text with fuzzy, wildcard, and boolean search operators |
+| [05_hybrid_rag.ipynb](05_hybrid_rag.ipynb) | Hybrid RAG | `HybridRetriever` + `GraphRAG` comparing vector-only vs hybrid RAG answers with alpha tuning |
 | [06_hybrid_search.ipynb](06_hybrid_search.ipynb) | Hybrid Search | `HybridRetriever` and `HybridCypherRetriever` combining vector and fulltext search with tunable alpha |
 
 ## Next Steps

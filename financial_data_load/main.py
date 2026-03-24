@@ -490,7 +490,7 @@ SOLUTIONS = [
     ("solution_srcs.04_03_fulltext_hybrid_search_mcp", "Fulltext & Hybrid Search via MCP (Lab 4)", False, "main"),
     ("solution_srcs.05_01_simple_agent", "Simple Agent", True, "run_agent"),
     ("solution_srcs.05_02_context_provider", "Context Provider Intro", True, "run_agent"),
-    ("solution_srcs.05_01_fulltext_search", "Fulltext Search", False, "main"),
+    ("solution_srcs.05_01_hybrid_rag", "Hybrid RAG", False, "main"),
     ("solution_srcs.05_02_hybrid_search", "Hybrid Search", False, "main"),
     ("solution_srcs.06_01_fulltext_context_provider", "Fulltext Context Provider", True, "run_agent"),
     ("solution_srcs.06_02_vector_context_provider", "Vector Context Provider", True, "run_agent"),

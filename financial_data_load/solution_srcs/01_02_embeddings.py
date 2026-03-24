@@ -8,6 +8,7 @@ Run with: uv run python main.py solutions 2
 """
 
 from neo4j_graphrag.indexes import create_vector_index
+from neo4j_graphrag.retrievers import VectorRetriever
 
 from config import get_neo4j_driver, get_embedder, BedrockConfig
 
@@ -31,14 +32,23 @@ def generate_and_store_embeddings(driver, embedder) -> int:
 
     print(f"Found {len(chunks)} chunks without embeddings")
 
+    # Generate all embeddings first
+    embeddings_data = []
     for chunk in chunks:
         embedding = embedder.embed_query(chunk["text"])
-        with driver.session() as session:
-            session.run("""
-                MATCH (c:Chunk) WHERE elementId(c) = $chunk_id
-                SET c.embedding = $embedding
-            """, chunk_id=chunk["chunk_id"], embedding=embedding)
+        embeddings_data.append({
+            "chunk_id": chunk["chunk_id"],
+            "embedding": embedding,
+        })
         print(f"  Embedded Chunk {chunk['index']} ({len(embedding)} dimensions)")
+
+    # Batch store all embeddings in a single transaction
+    with driver.session() as session:
+        session.run("""
+            UNWIND $data AS row
+            MATCH (c:Chunk) WHERE elementId(c) = row.chunk_id
+            SET c.embedding = row.embedding
+        """, data=embeddings_data)
 
     return len(chunks)
 
@@ -64,22 +74,15 @@ def create_index(driver) -> None:
     )
 
 
-def vector_search(driver, embedder, query: str, top_k: int = 3) -> list:
-    """Search for chunks similar to the query."""
-    query_embedding = embedder.embed_query(query)
-
-    with driver.session() as session:
-        result = session.run("""
-            CALL db.index.vector.queryNodes($index_name, $top_k, $embedding)
-            YIELD node, score
-            RETURN node.text as text, node.index as idx, score
-            ORDER BY score DESC
-        """, index_name=INDEX_NAME, top_k=top_k, embedding=query_embedding)
-        return list(result)
-
-
 def demo_search(driver, embedder) -> None:
-    """Demo vector similarity search."""
+    """Demo vector similarity search using VectorRetriever."""
+    retriever = VectorRetriever(
+        driver=driver,
+        index_name=INDEX_NAME,
+        embedder=embedder,
+        return_properties=["text", "index"],
+    )
+
     queries = [
         "What products does Apple make?",
         "What are the key risk factors?",
@@ -90,11 +93,13 @@ def demo_search(driver, embedder) -> None:
     for query in queries:
         print(f'\nQuery: "{query}"')
         print("-" * 50)
-        results = vector_search(driver, embedder, query, top_k=1)
-        if results:
-            record = results[0]
-            print(f"Best match (score: {record['score']:.4f}, Chunk {record['idx']}):")
-            print(f"  {record['text'][:150]}...")
+        results = retriever.search(query_text=query, top_k=1)
+        if results.items:
+            item = results.items[0]
+            score = item.metadata.get("score", 0)
+            content = item.content if isinstance(item.content, str) else str(item.content)
+            print(f"Best match (score: {score:.4f}):")
+            print(f"  {content[:150]}...")
 
 
 def main():

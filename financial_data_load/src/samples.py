@@ -220,6 +220,13 @@ def _asset_manager_holdings(driver: Driver, limit: int) -> None:
 # 8. Document-Chunk structure
 # ---------------------------------------------------------------------------
 
+_FILINGS_Q = """\
+MATCH (c:Company)-[:FILED]->(d:Document)
+OPTIONAL MATCH (d)<-[:FROM_DOCUMENT]-(ch:Chunk)
+WITH c, d, count(ch) AS chunks
+RETURN c.name AS company, d.path AS path, chunks
+ORDER BY c.name"""
+
 _DOCS_Q = """\
 MATCH (d:Document)
 OPTIONAL MATCH (d)<-[:FROM_DOCUMENT]-(c:Chunk)
@@ -241,8 +248,19 @@ RETURN d.path AS doc, c.index AS idx,
 def _document_chunks(driver: Driver, limit: int) -> None:
     _header(
         "8. Document-Chunk Structure",
-        "Documents with chunk counts and embedding stats.",
+        "Company filings, documents, chunk counts, and embedding stats.",
     )
+
+    _cypher(_FILINGS_Q)
+    rows, _, _ = driver.execute_query(_FILINGS_Q)
+    if rows:
+        _table(
+            ["Company", "Document", "Chunks"],
+            [[r["company"], _val(r["path"], 40), r["chunks"]] for r in rows],
+        )
+    else:
+        print("  (no filings -- run 'load' first)\n")
+
     _cypher(_DOCS_Q)
     rows, _, _ = driver.execute_query(_DOCS_Q)
     if not rows:

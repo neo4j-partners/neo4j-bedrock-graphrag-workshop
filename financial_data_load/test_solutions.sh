@@ -8,9 +8,9 @@
 #   ./test_solutions.sh .env.gold 8      # Run only solution 8
 #   ./test_solutions.sh .env.gold 8-11   # Run solutions 8 through 11
 #
-# The env file is copied to .env before running (restored on exit).
+# The env file is sourced into the shell environment (your .env is not modified).
 # Solutions 1-3 are skipped by default because they are destructive (delete data).
-# Lab 4 solutions (9-11) require MCP_GATEWAY_URL and MCP_ACCESS_TOKEN in CONFIG.txt.
+# Lab 4 solutions (9-11) require MCP_GATEWAY_URL and MCP_ACCESS_TOKEN in the env file.
 
 set -euo pipefail
 
@@ -82,22 +82,10 @@ else
     END=$DEFAULT_END
 fi
 
-# --- Backup and swap .env ---
-ORIG_ENV="$SCRIPT_DIR/.env"
-BACKUP_ENV="$SCRIPT_DIR/.env.test-backup"
-
-cleanup() {
-    if [[ -f "$BACKUP_ENV" ]]; then
-        mv "$BACKUP_ENV" "$ORIG_ENV"
-        echo -e "\n${CYAN}Restored original .env${NC}"
-    fi
-}
-trap cleanup EXIT
-
-if [[ -f "$ORIG_ENV" ]]; then
-    cp "$ORIG_ENV" "$BACKUP_ENV"
-fi
-cp "$ENV_FILE" "$ORIG_ENV"
+# --- Load env vars from file (no .env copy) ---
+set -a
+source "$ENV_FILE"
+set +a
 
 echo -e "${BOLD}Testing solutions with: $(basename "$ENV_FILE")${NC}"
 echo -e "Range: ${START}-${END}"
@@ -105,8 +93,7 @@ echo ""
 
 # --- Check MCP configuration for Lab 4 solutions ---
 MCP_AVAILABLE=false
-MCP_GW=$(grep -E '^MCP_GATEWAY_URL=' "$ENV_FILE" 2>/dev/null | cut -d= -f2- || true)
-if [[ -n "$MCP_GW" && "$MCP_GW" != "your-gateway-url-here" ]]; then
+if [[ -n "${MCP_GATEWAY_URL:-}" && "$MCP_GATEWAY_URL" != "your-gateway-url-here" ]]; then
     MCP_AVAILABLE=true
 fi
 
@@ -159,7 +146,7 @@ for i in $(seq "$START" "$END"); do
     done
 
     if [[ "$needs_mcp" == "true" && "$MCP_AVAILABLE" == "false" ]]; then
-        echo -e "${YELLOW}[SKIP]${NC} ${BOLD}#${i}${NC} ${name} (MCP not configured in CONFIG.txt)"
+        echo -e "${YELLOW}[SKIP]${NC} ${BOLD}#${i}${NC} ${name} (MCP not configured in $(basename "$ENV_FILE"))"
         RESULTS+=("SKIP|$i|$name|MCP not configured")
         SKIP=$((SKIP + 1))
         continue

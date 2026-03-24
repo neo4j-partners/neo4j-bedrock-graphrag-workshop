@@ -152,7 +152,32 @@ Per-label defaults (used by the cleanse pipeline):
 | `main.py compare` | Compare resolution runs, score against ground truth |
 | `main.py apply-merges [--plan PATH]` | Apply merge plan from resolve |
 
-### 7. Run Workshop Solutions
+### 7. Run Sample Queries
+
+After loading and cleansing the data, run the built-in sample queries to explore the knowledge graph. These are read-only and don't modify the database.
+
+```bash
+# Run all 9 sample query sections (10 rows each)
+uv run python main.py samples
+
+# Limit rows per section
+uv run python main.py samples --limit 5
+```
+
+The samples cover:
+1. **Company Overview** — companies with entity counts
+2. **Risk Factors** — risk factors from 10-K filings
+3. **Products & Services** — products offered by companies
+4. **Executives** — company executives and board members
+5. **Financial Metrics** — key financial metrics
+6. **Competitive Landscape** — competitor relationships
+7. **Asset Manager Holdings** — top positions by share count
+8. **Document-Chunk Structure** — documents, chunk counts, and chain preview
+9. **Vector Similarity Search** — finds similar chunks via the vector index (uses stored embeddings, no API key needed)
+
+Each section prints the Cypher query it runs followed by the results, making it useful for learning graph query patterns.
+
+### 8. Run Workshop Solutions
 
 ```bash
 # Interactive menu
@@ -165,7 +190,7 @@ uv run python main.py solutions 4
 uv run python main.py solutions A
 ```
 
-### 8. Test Solutions
+### 9. Test Solutions
 
 Use the test script to validate all solutions against a given `.env` file:
 
@@ -180,7 +205,7 @@ Use the test script to validate all solutions against a given `.env` file:
 ./test_solutions.sh .env.gold 8-11
 ```
 
-Each solution runs with a 5-minute timeout. Solutions 9-11 (Lab 4 MCP) require `MCP_GATEWAY_URL` and `MCP_ACCESS_TOKEN` in the env file — they are skipped if not configured. The script backs up and restores your `.env` automatically.
+Each solution runs with a 5-minute timeout. Solutions 9-11 (Lab 4 MCP) require `MCP_GATEWAY_URL` and `MCP_ACCESS_TOKEN` in the env file — they are skipped if not configured. The env file is sourced into the shell environment; your `.env` is not modified.
 
 ## Workshop Solutions
 
@@ -222,7 +247,7 @@ Advanced search patterns:
 
 | # | Solution | Description |
 |---|----------|-------------|
-| 12 | `05_01_fulltext_search.py` | Full-text search capabilities |
+| 12 | `05_01_hybrid_rag.py` | Hybrid RAG: HybridRetriever + GraphRAG |
 | 13 | `05_02_hybrid_search.py` | Hybrid vector + keyword search |
 
 ### Context Providers (06_xx)
