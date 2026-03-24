@@ -1,6 +1,6 @@
 = Lab 6: Neo4j MCP Agent
 
-Lab 4 used MCP as a retrieval mechanism, executing pre-written Cypher queries through an MCP server. This lab goes further: the agent discovers the graph schema through MCP, writes its own Cypher queries, and executes them without any pre-written query templates. The agent has full autonomy over how it interacts with the knowledge graph, making this the most capable agent pattern in the workshop.
+Lab 4 focused on graph-enriched search, executing pre-written Cypher queries through an MCP server. This lab goes further: the agent discovers the graph schema through MCP, writes its own Cypher queries, and executes them without any pre-written query templates. The agent has full autonomy over how it interacts with the knowledge graph, making this the most capable agent pattern in the workshop.
 
 TIP: Ready to start? Jump to the xref:lab6-instructions.adoc[Lab 6 Instructions] for step-by-step setup.
 

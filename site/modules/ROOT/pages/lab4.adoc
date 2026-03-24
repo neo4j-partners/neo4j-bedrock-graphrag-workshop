@@ -1,25 +1,38 @@
-= Lab 4: MCP Retrieval
+= Lab 4: Graph-Enriched Search
 
-In Lab 3 you built an agent that calls simple tools. Now you connect an agent to your knowledge graph. This lab introduces MCP (Model Context Protocol) as the bridge between an AI agent and Neo4j, and walks through three retrieval strategies that grow in sophistication.
+In Lab 3 you built an agent that calls simple tools. Now you connect an agent to your knowledge graph and explore what makes searching a knowledge graph different from searching a standalone vector database. This lab walks through three retrieval strategies that grow in sophistication — from basic vector search, to graph-enriched search that follows relationships to connected entities, to hybrid search that combines semantic and keyword matching.
 
 TIP: Ready to start? Jump to the xref:lab4-instructions.adoc[Lab 4 Instructions] for step-by-step notebook walkthroughs.
 
 .**At a Glance**
 
-* **MCP retrieval** — an AI agent uses MCP tools to execute Cypher queries against Neo4j, instead of connecting with a driver and calling retriever classes directly
-* **Vector search** — embed a query and find semantically similar chunks
 * **Graph-enriched search** — follow relationships from matched chunks to connected entities like documents, companies, products, and risk factors
+* **Vector search** — embed a query and find semantically similar chunks
 * **Hybrid search** — combine keyword-based fulltext search with vector similarity for broader recall
 
-image::lab4-mcp-retrieval-architecture.png[MCP Retrieval Architecture,700]
+image::lab4-mcp-retrieval-architecture.png[Graph-Enriched Search Architecture,700]
 
-== What Is MCP Retrieval?
+== Why Graph-Enriched Search?
 
-Instead of connecting to Neo4j with a driver and using retriever classes directly, an AI agent uses MCP tools to execute Cypher queries against the database. The agent sends Cypher through an `execute-query` tool exposed by the Neo4j MCP Server. The server handles the connection, runs the query, and returns structured results that the agent can reason over.
+A standard vector search returns isolated text passages ranked by similarity. That is useful, but it throws away the structured knowledge surrounding each passage. When your data lives in a knowledge graph, every chunk of text is connected to the entities it describes.
 
-MCP (Model Context Protocol) is an open standard for agent-to-tool communication. It defines how an agent discovers available tools, calls them with structured inputs, and receives structured outputs. In this lab you use it as a transport layer for Cypher queries. For a deeper look at how MCP works and how to build full MCP agents, see xref:lab6.adoc[Lab 6].
+Consider a query about supply chain risks. A vector search finds the most relevant chunk from a 10-K filing — a paragraph discussing logistics disruptions. Graph-enriched search returns that same chunk _plus_ the Company that filed it, the Products affected, other RiskFactors the company faces, and the Document the chunk came from. The agent receives structured context alongside the unstructured text, and can give a far richer answer.
 
-NOTE: This lab uses the https://github.com/neo4j/mcp[Neo4j MCP Server], an official MCP server that exposes a Neo4j database as a set of tools an agent can call — including `execute-query` for running Cypher, schema introspection, and index management. The server has been deployed to AgentCore using the https://github.com/neo4j-partners/aws-starter/tree/main/neo4j-agentcore-mcp-server[neo4j-agentcore-mcp-server starter] and connects to a database pre-loaded with Document and Chunk nodes, vector embeddings (`chunkEmbeddings` index), and fulltext indexes (`search_chunks`, `search_entities`). The workshop admin set this up before the workshop. You do not need to deploy the MCP server or create these data structures yourself — everything is ready to query.
+This is what makes retrieval from a knowledge graph different. The graph turns text retrieval into knowledge retrieval.
+
+== Chunks and Embeddings
+
+Before diving into the retrieval strategies, two concepts you will see throughout the notebooks.
+
+=== What Are Chunks?
+
+SEC 10-K filings are long documents — too long to search as a single unit. Each filing is split into smaller passages called chunks. In the knowledge graph, each passage is a `Chunk` node linked to its source `Document` via a `FROM_DOCUMENT` relationship and to adjacent chunks via `NEXT_CHUNK`, preserving the original reading order. The chunking has already been done for you — the database is pre-loaded and ready to query.
+
+=== What Are Embeddings?
+
+An embedding is a numerical vector that captures the meaning of a piece of text. An embedding model (Bedrock Nova in this workshop) reads a chunk and produces a 1024-dimensional vector. Chunks about similar topics produce similar vectors, so "supply chain disruption" and "logistics bottleneck risk" end up close together in vector space. These vectors are stored on `Chunk` nodes and indexed for fast approximate nearest-neighbor search via the `chunkEmbeddings` vector index.
+
+NOTE: The chunks, embeddings, and indexes were created by the workshop admin before the lab. You do not need to build the data pipeline yourself. xref:lab5.adoc[Lab 5] covers building it from scratch, including chunking trade-offs and embedding generation.
 
 == Three Retrieval Strategies
 
@@ -27,11 +40,11 @@ The three notebooks progress through retrieval strategies that build on each oth
 
 === Vector Search
 
-Notebook 01 introduces the basic pattern. You embed a natural-language query using Bedrock Nova, pass the embedding to the agent, and let the agent execute vector search Cypher through MCP. The vector index (`chunkEmbeddings`) finds the chunks whose embeddings are most similar to the query embedding.
+Notebook 01 introduces the basic pattern. You embed a natural-language query using Bedrock Nova, pass the embedding to the agent, and let the agent execute vector search Cypher. The vector index (`chunkEmbeddings`) finds the chunks whose embeddings are most similar to the query embedding. The results are isolated chunks ranked by similarity — no graph context yet.
 
 === Graph-Enriched Search
 
-Notebook 02 extends vector search by adding graph traversal. After finding semantically similar chunks, the agent follows relationships to pull in document metadata, neighboring chunks (via NEXT_CHUNK), and connected entities — companies, products, and risk factors. This context enrichment gives the agent more information to work with when generating answers.
+Notebook 02 extends vector search by adding graph traversal. After finding semantically similar chunks, the agent follows relationships to pull in document metadata, neighboring chunks (via `NEXT_CHUNK`), and connected entities — companies, products, and risk factors. This context enrichment gives the agent more information to work with when generating answers.
 
 image::lab4-graph-enriched-retrieval.png[Graph-Enriched Retrieval Flow,700]
 
@@ -39,7 +52,13 @@ image::lab4-graph-enriched-retrieval.png[Graph-Enriched Retrieval Flow,700]
 
 Notebook 03 introduces an alternative search method: fulltext keyword search using Lucene operators against the `search_chunks` and `search_entities` indexes. It then combines both approaches for agent-driven hybrid search using custom `@tool` wrappers that encapsulate embedding generation.
 
-=== How the Tool Pattern Works
+== How the Agent Connects: MCP
+
+The agent communicates with Neo4j through MCP (Model Context Protocol), an open standard for agent-to-tool communication. The agent sends Cypher through an `execute-query` tool exposed by the Neo4j MCP Server. The server handles the connection, runs the query, and returns structured results. MCP is the transport layer for these queries, not the retrieval strategy itself. For a deeper look at MCP and building agents that write their own Cypher, see xref:lab6.adoc[Lab 6].
+
+NOTE: This lab uses the https://github.com/neo4j/mcp[Neo4j MCP Server], an official MCP server that exposes a Neo4j database as a set of tools an agent can call — including `execute-query` for running Cypher, schema introspection, and index management. The server has been deployed to AgentCore using the https://github.com/neo4j-partners/aws-starter/tree/main/neo4j-agentcore-mcp-server[neo4j-agentcore-mcp-server starter] and connects to a database pre-loaded with Document and Chunk nodes, vector embeddings (`chunkEmbeddings` index), and fulltext indexes (`search_chunks`, `search_entities`). The workshop admin set this up before the workshop. You do not need to deploy the MCP server or create these data structures yourself — everything is ready to query.
+
+== The @tool Pattern
 
 All three strategies share the same underlying flow. The agent receives a natural-language question, decides which search to run, and calls a custom tool function. That tool function handles the mechanical work the LLM should never see: generating the embedding, building the Cypher query, and sending it to Neo4j through the MCP connection. The results come back as text that the agent can reason over and present to the user.
 
@@ -47,7 +66,7 @@ The important design choice is where the embedding lives. A 1024-dimensional vec
 
 This is the same separation of concerns that the neo4j-graphrag library enforces in Lab 5: the `VectorRetriever` generates embeddings and queries the index internally, and the LLM only sees retrieved text. The `@tool` wrapper achieves the same boundary when working through MCP instead of a direct driver connection.
 
-== MCP vs Direct Library
+== Comparing Approaches: MCP vs Direct Library
 
 All three notebooks use the same underlying Neo4j indexes and graph structure as Lab 5. The difference is in how the search is executed.
 
@@ -78,7 +97,7 @@ All three notebooks use the same underlying Neo4j indexes and graph structure as
 
 == What Is Covered Here vs Lab 5
 
-This lab focuses on MCP-based retrieval: using an agent to execute search queries through MCP tools. For the following topics, see xref:lab5.adoc[Lab 5]:
+This lab focuses on graph-enriched search: using an agent to execute retrieval queries against a knowledge graph. For the following topics, see xref:lab5.adoc[Lab 5]:
 
 * **Direct driver connections** — `neo4j.GraphDatabase.driver()` for direct access
 * **neo4j-graphrag retriever classes** — `VectorRetriever`, `VectorCypherRetriever`, `HybridRetriever`, `HybridCypherRetriever`

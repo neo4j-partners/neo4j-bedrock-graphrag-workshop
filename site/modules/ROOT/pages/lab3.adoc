@@ -178,4 +178,4 @@ result = agent("What time is it and what is 42 + 17?")
 
 == Next Steps
 
-Continue to xref:lab3-instructions.adoc[Lab 3 Instructions] to set up SageMaker Studio and run the agent notebook, or proceed to xref:lab4.adoc[Lab 4: MCP-Based Retrieval] to connect agents to the Neo4j knowledge graph.
+Continue to xref:lab3-instructions.adoc[Lab 3 Instructions] to set up SageMaker Studio and run the agent notebook, or proceed to xref:lab4.adoc[Lab 4: Graph-Enriched Search] to connect agents to the Neo4j knowledge graph.

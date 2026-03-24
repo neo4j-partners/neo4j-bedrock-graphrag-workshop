@@ -20,12 +20,12 @@ from strands.models import BedrockModel
 
 nest_asyncio.apply()
 
-# Add project root to sys.path so lib imports work
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-sys.path.insert(0, PROJECT_ROOT)
+# Add financial_data_load to sys.path so local lib imports work
+FINANCIAL_DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, FINANCIAL_DATA_DIR)
 
+from lib.data_utils import get_embedding  # noqa: E402
 from lib.mcp_utils import MCPConnection  # noqa: E402
-from solution_srcs.config import get_embedding  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # 1. Configuration

@@ -119,4 +119,4 @@ NOTE: The AgentCore deployment section at the end of the notebook creates AWS re
 
 == Next Steps
 
-Continue to xref:lab4.adoc[Lab 4: MCP-Based Retrieval] to connect an agent to the Neo4j knowledge graph through the Model Context Protocol and perform semantic vector search and graph-enriched retrieval.
+Continue to xref:lab4.adoc[Lab 4: Graph-Enriched Search] to search the Neo4j knowledge graph with vector, graph-enriched, and hybrid retrieval strategies.

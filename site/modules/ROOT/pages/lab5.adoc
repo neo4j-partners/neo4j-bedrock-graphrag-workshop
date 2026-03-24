@@ -1,6 +1,6 @@
 = Lab 5: GraphRAG
 
-Lab 4 showed retrieval through MCP where an agent executes Cypher remotely. This lab takes the direct approach: connect to Neo4j with a Python driver and use the neo4j-graphrag library's retriever classes. You will build the full pipeline from raw text to hybrid retrieval.
+Lab 4 introduced graph-enriched search — vector retrieval augmented with graph traversal — where an agent executes Cypher through MCP. This lab takes the direct approach: connect to Neo4j with a Python driver and use the neo4j-graphrag library's retriever classes. You will build the full pipeline from raw text to hybrid retrieval.
 
 TIP: Ready to start? Jump to the xref:lab5-instructions.adoc[Lab 5 Instructions] for the notebook walkthrough.
 

@@ -76,7 +76,7 @@ image::workshop-architecture.png[Workshop Architecture,800]
 | 30 min
 
 | xref:lab4.adoc[Lab 4]
-| Vector, graph-enriched, and hybrid retrieval through the Model Context Protocol
+| Graph-enriched search: vector, graph-traversal, and hybrid retrieval over a knowledge graph
 | 30 min
 
 | xref:lab5.adoc[Lab 5]
