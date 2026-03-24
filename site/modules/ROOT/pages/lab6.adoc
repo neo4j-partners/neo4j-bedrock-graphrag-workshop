@@ -104,7 +104,7 @@ With schema retrieval, the agent sees the actual labels (`Company`, `Product`, `
 
 == Lab 4 vs Lab 6
 
-Lab 4 used MCP to execute pre-written Cypher queries. The retrieval logic was defined in advance, and MCP served as the transport layer between the agent and Neo4j. The agent selected which query to run, but did not write the queries itself.
+Lab 4 focused on graph-enriched search using pre-written Cypher queries executed through MCP. The retrieval logic was defined in advance, and MCP served as the transport layer between the agent and Neo4j. The agent selected which query to run, but did not write the queries itself.
 
 Lab 6 removes that constraint. The agent inspects the schema, reasons about the question, writes its own Cypher, and executes it. This gives the agent full autonomy over how it queries the graph. The trade-off is that the agent's Cypher quality depends on the LLM's ability to reason about graph structures, which is why the schema-first approach is important.
 
