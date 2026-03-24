@@ -146,6 +146,7 @@ Per-label defaults (used by the cleanse pipeline):
 | `main.py verify` | Counts + enrichment checks + end-to-end search validation |
 | `main.py clean` | Clear all data |
 | `main.py samples [--limit N]` | Run sample queries showcasing the graph |
+| `test_solutions.sh <env-file> [N\|N-M]` | Test solutions against a given `.env` file |
 | `main.py snapshot` | Export Company entity snapshot (for standalone resolution testing) |
 | `main.py resolve [--snapshot PATH] [--strategy ...] [--threshold ...]` | LLM entity resolution on snapshot (Company only) |
 | `main.py compare` | Compare resolution runs, score against ground truth |
@@ -163,6 +164,23 @@ uv run python main.py solutions 4
 # Run all (from option 4 onwards)
 uv run python main.py solutions A
 ```
+
+### 8. Test Solutions
+
+Use the test script to validate all solutions against a given `.env` file:
+
+```bash
+# Run all safe solutions (4-22, skips destructive 1-3)
+./test_solutions.sh .env.gold
+
+# Run a specific solution
+./test_solutions.sh .env.gold 8
+
+# Run a range
+./test_solutions.sh .env.gold 8-11
+```
+
+Each solution runs with a 5-minute timeout. Solutions 9-11 (Lab 4 MCP) require `MCP_GATEWAY_URL` and `MCP_ACCESS_TOKEN` in the env file — they are skipped if not configured. The script backs up and restores your `.env` automatically.
 
 ## Workshop Solutions
 
@@ -251,6 +269,7 @@ Embedding dimensions default to 1024 (Nova default is 3072 but we use 1024 to ma
 financial_data_load/
 ├── pyproject.toml          # Dependencies (uv sync)
 ├── main.py                 # CLI entry point (load, cleanse, apply-cleanse, finalize, etc.)
+├── test_solutions.sh       # Test runner for workshop solutions
 ├── financial-data/         # SEC 10-K data files
 │   ├── Company_Filings.csv
 │   ├── Asset_Manager_Holdings.csv

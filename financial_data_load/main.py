@@ -38,14 +38,49 @@ Usage from financial_data_load directory:
 import argparse
 import asyncio
 import importlib
+import logging
 import sys
 import time
+from datetime import datetime
 from pathlib import Path
 
 # Add solution_srcs to path so solution files can import their config module.
 # shared/ is added after solution_srcs/ so solution_srcs/config.py takes priority.
 sys.path.insert(0, str(Path(__file__).parent.parent / "shared"))
 sys.path.insert(0, str(Path(__file__).parent / "solution_srcs"))
+
+_LOG_DIR = Path(__file__).parent / "logs"
+
+
+def _setup_logging(command: str) -> Path:
+    """Configure file + stderr logging for all commands.
+
+    Returns the log file path. Each process invocation gets its own log file
+    named after the command (e.g. logs/cleanse_20260323_141500.log).
+    """
+    _LOG_DIR.mkdir(exist_ok=True)
+    log_file = _LOG_DIR / f"{command}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+
+    file_formatter = logging.Formatter(
+        "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(file_formatter)
+
+    # Stderr handler — only warnings and above so it doesn't drown out prints
+    stderr_handler = logging.StreamHandler(sys.stderr)
+    stderr_handler.setLevel(logging.WARNING)
+    stderr_handler.setFormatter(logging.Formatter("%(levelname)s: %(name)s: %(message)s"))
+
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+    root.addHandler(file_handler)
+    root.addHandler(stderr_handler)
+
+    return log_file
+
 
 # Data directory -- relative to this script.
 DATA_DIR = Path(__file__).parent / "financial-data"
@@ -768,6 +803,9 @@ def main():
     if not args.command:
         parser.print_help()
         return
+
+    log_file = _setup_logging(args.command)
+    logging.getLogger(__name__).debug(f"Command: {args.command}, log: {log_file}")
 
     args.func(args)
 

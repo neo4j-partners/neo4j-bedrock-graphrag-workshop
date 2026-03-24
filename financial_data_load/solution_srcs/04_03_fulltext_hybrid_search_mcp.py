@@ -64,9 +64,10 @@ CALL db.index.fulltext.queryNodes('search_chunks', $search_term)
 YIELD node, score
 MATCH (node)-[:FROM_DOCUMENT]->(doc:Document)
 OPTIONAL MATCH (doc)<-[:FILED]-(company:Company)
-OPTIONAL MATCH (product:Product)-[:FROM_CHUNK]->(node)
 WITH node, doc, score,
-     collect(DISTINCT company.name) AS companies,
+     collect(DISTINCT company.name) AS companies
+OPTIONAL MATCH (product:Product)-[:FROM_CHUNK]->(node)
+WITH node, doc, score, companies,
      collect(DISTINCT product.name) AS products
 RETURN node.text AS text, score, doc.name AS document, companies, products
 ORDER BY score DESC

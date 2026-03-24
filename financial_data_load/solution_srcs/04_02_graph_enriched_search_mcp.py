@@ -152,10 +152,11 @@ YIELD node, score
 MATCH (node)-[:FROM_DOCUMENT]->(doc:Document)
 OPTIONAL MATCH (doc)<-[:FILED]-(company:Company)
 OPTIONAL MATCH (company)-[:FACES_RISK]->(risk:RiskFactor)
-OPTIONAL MATCH (product:Product)-[:FROM_CHUNK]->(node)
 WITH node, doc, score,
      collect(DISTINCT company.name) AS companies,
-     collect(DISTINCT risk.name)[0..5] AS risks,
+     collect(DISTINCT risk.name)[0..5] AS risks
+OPTIONAL MATCH (product:Product)-[:FROM_CHUNK]->(node)
+WITH node, doc, score, companies, risks,
      collect(DISTINCT product.name)[0..5] AS products
 RETURN node.text AS text, score, doc.name AS document,
        companies, risks, products

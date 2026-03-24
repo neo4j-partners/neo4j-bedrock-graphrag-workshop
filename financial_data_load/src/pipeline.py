@@ -18,37 +18,7 @@ _PIPELINE_LABELS = ["__Entity__", "__KGBuilder__"]
 # Labels for extracted entity nodes.
 _EXTRACTED_LABELS = ["RiskFactor", "Product", "Executive", "FinancialMetric"]
 
-_LOG_DIR = Path(__file__).resolve().parent.parent / "logs"
-
 logger = logging.getLogger(__name__)
-
-
-# ---------------------------------------------------------------------------
-# Logging setup
-# ---------------------------------------------------------------------------
-
-
-def _setup_logging() -> Path:
-    """Configure file logging for pipeline runs, return log file path."""
-    _LOG_DIR.mkdir(exist_ok=True)
-    log_file = _LOG_DIR / f"data_load_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
-
-    file_formatter = logging.Formatter(
-        '%(asctime)s | %(levelname)-8s | %(name)s | %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S',
-    )
-    file_handler = logging.FileHandler(log_file)
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(file_formatter)
-
-    root = logging.getLogger()
-    if not any(isinstance(h, logging.FileHandler) for h in root.handlers):
-        root.addHandler(file_handler)
-        root.setLevel(logging.DEBUG)
-        logging.getLogger("neo4j").setLevel(logging.DEBUG)
-        logging.getLogger("neo4j_graphrag").setLevel(logging.DEBUG)
-
-    return log_file
 
 
 # ---------------------------------------------------------------------------
@@ -91,9 +61,6 @@ def process_all_pdfs(
     from .loader import normalize_company_name
     from .schema import build_extraction_schema
     from neo4j_graphrag.experimental.pipeline.kg_builder import SimpleKGPipeline
-
-    log_file = _setup_logging()
-    logger.info(f"Logging to: {log_file}")
 
     print("Initializing LLM and Embedder...")
     llm = get_llm()

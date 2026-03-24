@@ -38,32 +38,11 @@ The dataset covers approximately 76 companies across technology, finance, health
 
 The SEC financial dataset includes six entity types connected by typed relationships:
 
-----
-(:Company)       -[:OFFERS]->         (:Product)
-(:Company)       -[:FACES_RISK]->     (:RiskFactor)
-(:Company)       -[:COMPETES_WITH]->  (:Company)
-(:Company)       -[:PARTNERS_WITH]->  (:Company)
-(:AssetManager)  -[:OWNS {shares}]->  (:Company)
-(:Company)       -[:FILED]-> (:Document) <-[:FROM_DOCUMENT]- (:Chunk)
-----
+image::financial-data-model.png[SEC 10-K Financial Data Model,800]
 
 == Architecture
 
-----
-User Query -> AI Agent -> Tool Selection
-                               |
-         +---------------------+-------------------------+
-         |                     |                         |
-   Vector Search         Text2Cypher              Cypher Template
-         |                     |                         |
-   Nova Embeddings        Claude LLM                Direct Query
-         |                     |                         |
-         +---------------------+-------------------------+
-                               |
-                        Neo4j Aura
-                               |
-                  SEC 10-K Knowledge Graph
-----
+image::workshop-architecture.png[Workshop Architecture,800]
 
 == Labs
 
