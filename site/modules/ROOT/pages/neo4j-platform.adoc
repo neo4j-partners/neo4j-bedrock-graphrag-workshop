@@ -66,7 +66,7 @@ The architecture stores all three memory types in Neo4j, combining vector search
 
 === Agentic Ecosystem
 
-Neo4j integrates with the broader AI framework landscape through MCP Servers, driver libraries, and framework connectors. The Neo4j MCP Server exposes graph query capabilities over the Model Context Protocol, allowing any MCP-compatible agent to discover and call graph tools. Labs 4 and 6 connect to Neo4j MCP Servers hosted on AWS AgentCore, where agents call tools like `run_read_query` to execute Cypher against the knowledge graph. Driver libraries for Python, Java, JavaScript, Go, and .NET provide direct programmatic access. Connectors for LangChain, LlamaIndex, and the Strands Agents SDK let framework-native code interact with Neo4j without manual driver management.
+Neo4j integrates with the broader AI framework landscape through MCP Servers, driver libraries, and framework connectors. The Neo4j MCP Server exposes graph query capabilities over the Model Context Protocol, allowing any MCP-compatible agent to discover and call graph tools. Labs 4 and 6 connect to Neo4j MCP Servers hosted on AWS AgentCore, where agents call tools like `read-cypher` to execute Cypher against the knowledge graph. Driver libraries for Python, Java, JavaScript, Go, and .NET provide direct programmatic access. Connectors for LangChain, LlamaIndex, and the Strands Agents SDK let framework-native code interact with Neo4j without manual driver management.
 
 == How the Platform Layers Connect
 
