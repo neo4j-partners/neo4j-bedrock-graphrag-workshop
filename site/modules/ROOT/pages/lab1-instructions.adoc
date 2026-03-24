@@ -47,7 +47,7 @@ image::lab1-free-trial-credentials.png[Free trial credentials]
 
 NOTE: If you signed up using the Free Trial option, your instance was already created during signup. Skip ahead to xref:lab1-load.adoc[Load the Knowledge Graph].
 
-=== Create Your Database Instance
+== Part 2: Create Your Database Instance
 
 1. After logging in, click on **Instances** in the left sidebar under "Data services", then click **Create instance**
 +
@@ -68,7 +68,7 @@ image::lab1-create-instance.png[Create Instance]
 +
 image::lab1-configure-instance.png[Configure Instance]
 
-=== Save Your Credentials
+== Save Your Credentials
 
 IMPORTANT: After clicking Create, a credentials dialog appears with your Connection URI, Username, and Password. **Save this information immediately** — the password will not be shown again.
 
