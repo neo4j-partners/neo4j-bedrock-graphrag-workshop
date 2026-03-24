@@ -32,7 +32,7 @@ This lab starts with step 4 (vector search) and builds toward step 6 (graph-enri
 
 The graph you explored in Lab 1 — companies, products, risk factors, asset managers — is the structured layer. The documents and chunks described above are the unstructured layer, added on top. The `FILED` relationship bridges them: `(Company)-[:FILED]->(Document)`. When graph-enriched search traverses from a chunk to its source document to the company that filed it, it crosses from unstructured text into the structured entities you already know. That traversal chain, `(Chunk)-[:FROM_DOCUMENT]->(Document)<-[:FILED]-(Company)`, is what makes graph-enriched search possible.
 
-NOTE: xref:lab5.adoc[Lab 5] covers building the data pipeline from scratch — chunking, embedding generation — and shows how the neo4j-graphrag library abstracts the retrieval strategies you build by hand in this lab.
+NOTE: xref:lab5.adoc[Lab 5] covers building the data pipeline from scratch — chunking, embedding generation — and introduces the neo4j-graphrag library's retriever classes.
 
 == Three Retrieval Strategies
 
