@@ -143,12 +143,12 @@ ORDER BY comp.name
             pass_condition=lambda rows: len(rows) > 0,
         ))
 
-        # Query 6: Portfolio Exposure — BlackRock
+        # Query 6: Portfolio Exposure — Berkshire Hathaway
         results.append(run_query(
             driver,
-            "Which risk factors expose BlackRock's portfolio across multiple companies?",
+            "Which risk factors expose Berkshire Hathaway's portfolio across multiple companies?",
             """
-MATCH (am:AssetManager {name: 'BlackRock'})-[:OWNS]->(c:Company)-[:FACES_RISK]->(r:RiskFactor)
+MATCH (am:AssetManager {name: 'Berkshire Hathaway Inc.'})-[:OWNS]->(c:Company)-[:FACES_RISK]->(r:RiskFactor)
 WITH am, r, collect(DISTINCT c.name) AS exposedCompanies, count(DISTINCT c) AS cnt
 RETURN r.name AS riskFactor, exposedCompanies, cnt
 ORDER BY cnt DESC LIMIT 10
@@ -176,7 +176,7 @@ ORDER BY c.name
             "Which companies have filed documents?",
             """
 MATCH (c:Company)-[:FILED]->(d:Document)
-RETURN c.name, c.ticker, d.source
+RETURN c.name, c.ticker, d.accessionNumber, d.filingType
 ORDER BY c.name
             """,
             pass_condition=lambda rows: len(rows) > 0,

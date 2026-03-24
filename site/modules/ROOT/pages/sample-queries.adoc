@@ -2,7 +2,7 @@
 
 Copy and paste these queries into the https://console.neo4j.io[Neo4j Aura Query interface] to explore the SEC financial knowledge graph. Queries are organized by retrieval strategy, progressing from direct graph traversals through vector and fulltext search to graph-enriched retrieval.
 
-TIP: Queries in Sections 2 and 3 require the data loaded in Lab 5 (Document/Chunk nodes, embeddings, and fulltext indexes). They will not return results until those notebooks have been run.
+TIP: Queries in Section 2 require the data loaded in Lab 5 (Chunk nodes, embeddings, and fulltext indexes). They will not return results until those notebooks have been run.
 
 == Cypher Quick Reference
 
@@ -90,14 +90,14 @@ Which risk factors expose an asset manager's portfolio across multiple companies
 
 [source,cypher]
 ----
-MATCH (am:AssetManager {name: 'BlackRock'})-[:OWNS]->(c:Company)-[:FACES_RISK]->(r:RiskFactor)
+MATCH (am:AssetManager {name: 'Berkshire Hathaway Inc.'})-[:OWNS]->(c:Company)-[:FACES_RISK]->(r:RiskFactor)
 WITH am, r, collect(DISTINCT c.name) AS exposedCompanies, count(DISTINCT c) AS cnt
 RETURN r.name AS riskFactor, exposedCompanies, cnt
 ORDER BY cnt DESC
 LIMIT 10
 ----
 
-NOTE: Two-hop traversal: AssetManager to Company via OWNS, then Company to RiskFactor via FACES_RISK. This query shows which risks affect the most companies in BlackRock's portfolio. `count(DISTINCT c)` avoids double-counting when multiple paths exist.
+NOTE: Two-hop traversal: AssetManager to Company via OWNS, then Company to RiskFactor via FACES_RISK. This query shows which risks affect the most companies in Berkshire Hathaway's portfolio. `count(DISTINCT c)` avoids double-counting when multiple paths exist.
 
 === Top Asset Managers
 
@@ -137,6 +137,19 @@ MATCH (c:Company {ticker: 'NVDA'})-[:PARTNERS_WITH]->(p)
 RETURN p.name
 ORDER BY p.name
 ----
+
+=== Filed Documents
+
+Which companies have filed SEC documents?
+
+[source,cypher]
+----
+MATCH (c:Company)-[:FILED]->(d:Document)
+RETURN c.name, c.ticker, d.accessionNumber, d.filingType
+ORDER BY c.name
+----
+
+NOTE: The FILED relationship bridges the structured entity layer (Company, Product, RiskFactor) to the unstructured document layer (Document, Chunk). Each Document represents a SEC 10-K filing identified by its accession number.
 
 === Cross-Entity Analysis
 

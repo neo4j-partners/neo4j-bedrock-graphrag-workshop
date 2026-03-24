@@ -610,8 +610,37 @@ def export(driver: Driver) -> None:
         rows,
     )
 
+    # ── Documents (FILED) ──────────────────────────────────────────────
+    records = run(driver, """
+        MATCH (c:Company)-[:FILED]->(d:Document)
+        WHERE c.name IN $companies
+        RETURN c.name AS company_name, d.source AS source
+        ORDER BY c.name, d.source
+    """, **params)
+
+    documents: list[dict] = []
+    doc_junctions: list[dict] = []
+    document_id_map: dict[str, str] = {}
+    for r in records:
+        # Extract accession number from the source path filename
+        source = r["source"]
+        accession = source.rsplit("/", 1)[-1].replace(".pdf", "")
+        did = f"D{len(documents) + 1:03d}"
+        documents.append({
+            "document_id": did,
+            "accession_number": accession,
+            "filing_type": "10-K",
+        })
+        document_id_map[source] = did
+        cid = company_id_map.get(r["company_name"])
+        if cid:
+            doc_junctions.append({"company_id": cid, "document_id": did})
+
+    write_csv("documents.csv", ["document_id", "accession_number", "filing_type"], documents)
+    write_csv("company_documents.csv", ["company_id", "document_id"], doc_junctions)
+
     # ── Verification ──────────────────────────────────────────────────────
-    verify(company_id_map, product_id_map, risk_id_map, manager_id_map, rows)
+    verify(company_id_map, product_id_map, risk_id_map, manager_id_map, document_id_map, rows)
 
 
 # ---------------------------------------------------------------------------
@@ -624,6 +653,7 @@ def verify(
     product_id_map: dict[str, str],
     risk_id_map: dict[str, str],
     manager_id_map: dict[str, str],
+    document_id_map: dict[str, str],
     partner_rows: list[dict],
 ) -> None:
     """Print summary counts and run integrity checks."""
@@ -635,9 +665,10 @@ def verify(
     csv_counts = {}
     for fname in [
         "companies.csv", "products.csv", "risk_factors.csv",
-        "asset_managers.csv", "company_products.csv",
+        "asset_managers.csv", "documents.csv", "company_products.csv",
         "company_risk_factors.csv", "company_competitors.csv",
         "company_partners.csv", "asset_manager_companies.csv",
+        "company_documents.csv",
     ]:
         path = EXPORT_DIR / fname
         if path.exists():
@@ -671,11 +702,13 @@ def verify(
     print(f"  {'Product':<30} {csv_counts['products.csv']:>6}")
     print(f"  {'RiskFactor':<30} {csv_counts['risk_factors.csv']:>6}")
     print(f"  {'AssetManager':<30} {csv_counts['asset_managers.csv']:>6}")
+    print(f"  {'Document':<30} {csv_counts['documents.csv']:>6}")
     print(f"  {'OFFERS edges':<30} {csv_counts['company_products.csv']:>6}")
     print(f"  {'FACES_RISK edges':<30} {csv_counts['company_risk_factors.csv']:>6}")
     print(f"  {'COMPETES_WITH edges':<30} {csv_counts['company_competitors.csv']:>6}")
     print(f"  {'PARTNERS_WITH edges':<30} {csv_counts['company_partners.csv']:>6}")
     print(f"  {'OWNS edges':<30} {csv_counts['asset_manager_companies.csv']:>6}")
+    print(f"  {'FILED edges':<30} {csv_counts['company_documents.csv']:>6}")
 
     # Lab 1 query checks
     print(f"\n  Lab 1 Query Checks:")
@@ -709,6 +742,9 @@ def verify(
     # Asset manager holdings
     print(f"    Asset manager holdings: {csv_counts['asset_manager_companies.csv']} (need > 0)")
 
+    # Filed documents
+    print(f"    Filed documents: {csv_counts['company_documents.csv']} (need > 0)")
+
     # Referential integrity
     print(f"\n  Referential Integrity:")
     _check_refs("company_products.csv", "product_id", "products.csv", "product_id")
@@ -718,11 +754,14 @@ def verify(
     _check_refs("asset_manager_companies.csv", "manager_id", "asset_managers.csv", "manager_id")
     _check_refs("asset_manager_companies.csv", "company_id", "companies.csv", "company_id")
     _check_refs("company_competitors.csv", "source_company_id", "companies.csv", "company_id")
+    _check_refs("company_documents.csv", "document_id", "documents.csv", "document_id")
+    _check_refs("company_documents.csv", "company_id", "companies.csv", "company_id")
 
     # Expected counts for Lab 1 README
     print(f"\n  Values for Lab 1 README verification table:")
     print(f"    AssetManager: {csv_counts['asset_managers.csv']}")
     print(f"    Company: ~{total_companies}")
+    print(f"    Document: {csv_counts['documents.csv']}")
     print(f"    Product: {csv_counts['products.csv']}")
     print(f"    RiskFactor: {csv_counts['risk_factors.csv']}")
     print()

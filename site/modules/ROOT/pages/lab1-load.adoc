@@ -28,6 +28,9 @@ FOR (r:RiskFactor) REQUIRE r.riskId IS UNIQUE;
 
 CREATE CONSTRAINT manager_id IF NOT EXISTS
 FOR (m:AssetManager) REQUIRE m.managerId IS UNIQUE;
+
+CREATE CONSTRAINT document_id IF NOT EXISTS
+FOR (d:Document) REQUIRE d.documentId IS UNIQUE;
 ----
 
 === Step 2: Load Nodes
@@ -52,6 +55,10 @@ SET r.name = row.name, r.description = row.description;
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/asset_managers.csv' AS row
 MERGE (m:AssetManager {managerId: row.manager_id})
 SET m.name = row.name;
+
+LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/documents.csv' AS row
+MERGE (d:Document {documentId: row.document_id})
+SET d.accessionNumber = row.accession_number, d.filingType = row.filing_type;
 ----
 
 === Step 3: Load Relationships
@@ -84,6 +91,11 @@ LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/com
 MATCH (a:Company {companyId: row.source_company_id})
 MERGE (b:Company {name: row.target_company_name})
 MERGE (a)-[:PARTNERS_WITH]->(b);
+
+LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/company_documents.csv' AS row
+MATCH (c:Company {companyId: row.company_id})
+MATCH (d:Document {documentId: row.document_id})
+MERGE (c)-[:FILED]->(d);
 ----
 
 === Step 4: Create Fulltext Index
@@ -114,6 +126,7 @@ Expected counts:
 
 | AssetManager | 15
 | Company | ~73
+| Document | 7
 | Product | 91
 | RiskFactor | 57
 |===
