@@ -2,20 +2,30 @@
 Vector Search via MCP
 
 This solution demonstrates semantic vector search through the Neo4j
-MCP server using Bedrock Nova embeddings and the Strands Agents SDK.
+MCP server using a @tool wrapper that encapsulates embedding generation
+and Cypher execution, keeping embeddings off the LLM context window.
 
 Run with: uv run python main.py solutions <N>
 """
 
+import asyncio
 import json
 import os
+import sys
 
-import boto3
+import nest_asyncio
 from dotenv import load_dotenv
-from mcp.client.streamable_http import streamablehttp_client
-from strands import Agent
+from strands import Agent, tool
 from strands.models import BedrockModel
-from strands.tools.mcp import MCPClient
+
+nest_asyncio.apply()
+
+# Add project root to sys.path so lib imports work
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.insert(0, PROJECT_ROOT)
+
+from lib.mcp_utils import MCPConnection  # noqa: E402
+from solution_srcs.config import get_embedding  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # 1. Configuration
@@ -27,61 +37,15 @@ load_dotenv(_env_path)
 
 MODEL_ID = os.getenv("MODEL_ID", "us.anthropic.claude-sonnet-4-6")
 REGION = os.getenv("AWS_REGION", os.getenv("REGION", "us-east-1"))
-MCP_GATEWAY_URL = os.getenv("MCP_GATEWAY_URL")
-MCP_ACCESS_TOKEN = os.getenv("MCP_ACCESS_TOKEN")
-
-# ---------------------------------------------------------------------------
-# 2. Embedding Helper
-# ---------------------------------------------------------------------------
-
-NOVA_MODEL_ID = "amazon.nova-2-multimodal-embeddings-v1:0"
-EMBEDDING_DIMENSIONS = 1024
-
-bedrock_runtime = boto3.client("bedrock-runtime", region_name=REGION)
-
-
-def get_embedding(text: str) -> list[float]:
-    """Generate an embedding vector for the given text using Bedrock Nova."""
-    request_body = {
-        "taskType": "SINGLE_EMBEDDING",
-        "singleEmbeddingParams": {
-            "embeddingPurpose": "GENERIC_INDEX",
-            "embeddingDimension": EMBEDDING_DIMENSIONS,
-            "text": {
-                "truncationMode": "END",
-                "value": text,
-            },
-        },
-    }
-    response = bedrock_runtime.invoke_model(
-        modelId=NOVA_MODEL_ID,
-        body=json.dumps(request_body),
-    )
-    result = json.loads(response["body"].read())
-    return result["embeddings"][0]["embedding"]
 
 
 # ---------------------------------------------------------------------------
-# 3. System Prompt
+# 2. System Prompt
 # ---------------------------------------------------------------------------
 
 VECTOR_SEARCH_PROMPT = """You are a retrieval assistant that performs semantic vector search against a Neo4j database containing SEC 10-K filing data.
 
-You have access to MCP tools that let you execute Cypher queries against the database.
-
-VECTOR SEARCH INSTRUCTIONS:
-When given a query embedding (a list of floats), use this Cypher pattern to find semantically similar text chunks:
-
-CALL db.index.vector.queryNodes('chunkEmbeddings', $top_k, $embedding)
-YIELD node, score
-RETURN node.text AS text, score
-ORDER BY score DESC
-
-- The vector index is named 'chunkEmbeddings' and is on Chunk nodes
-- The embedding will be provided in the user's message as a JSON array
-- Use the exact embedding provided — do not modify it
-- Return the chunk text and similarity score
-- Always ORDER BY score DESC
+You have a vector_search_tool that finds semantically similar text chunks. Call it with a natural language query and an optional top_k parameter.
 
 FORMAT:
 For each result, show:
@@ -91,104 +55,92 @@ For each result, show:
 
 
 # ---------------------------------------------------------------------------
-# 4. Vector Search Helper
-# ---------------------------------------------------------------------------
-
-bedrock_model = BedrockModel(
-    model_id=MODEL_ID,
-    region_name=REGION,
-    temperature=0,
-)
-
-mcp_client = MCPClient(
-    lambda: streamablehttp_client(
-        url=MCP_GATEWAY_URL,
-        headers={"Authorization": f"Bearer {MCP_ACCESS_TOKEN}"},
-    )
-)
-
-
-def vector_search(query: str, top_k: int = 5):
-    """Embed a query and run vector search through the MCP agent."""
-    print(f'Query: "{query}"')
-    print(f"Top K: {top_k}")
-    print("-" * 60)
-
-    # Generate embedding for the query
-    embedding = get_embedding(query)
-
-    # Build the message with the embedding for the agent
-    message = (
-        f"Run a vector search for the following query. Use top_k={top_k}.\n\n"
-        f"Query: {query}\n\n"
-        f"Embedding (use this exact array in the Cypher query):\n{json.dumps(embedding)}"
-    )
-
-    with mcp_client:
-        tools = mcp_client.list_tools_sync()
-        print(f"  MCP tools: {[t.tool_name for t in tools]}")
-
-        agent = Agent(
-            model=bedrock_model,
-            system_prompt=VECTOR_SEARCH_PROMPT,
-            tools=tools,
-        )
-
-        response = agent(message)
-        print(f"\n{response}")
-        return response
-
-
-# ---------------------------------------------------------------------------
-# 5. Main
+# 3. Main
 # ---------------------------------------------------------------------------
 
 
-def main():
+async def run():
     """Run vector search demo."""
     print(f"Model:     {MODEL_ID}")
     print(f"Region:    {REGION}")
-    print(
-        f"Gateway:   {MCP_GATEWAY_URL[:50]}..."
-        if MCP_GATEWAY_URL and len(MCP_GATEWAY_URL) > 50
-        else f"Gateway:   {MCP_GATEWAY_URL}"
-    )
 
-    # Validate MCP config
-    assert MCP_GATEWAY_URL and MCP_GATEWAY_URL != "your-gateway-url-here", \
-        "MCP_GATEWAY_URL not configured in CONFIG.txt"
-    assert MCP_ACCESS_TOKEN and MCP_ACCESS_TOKEN != "your-access-token-here", \
-        "MCP_ACCESS_TOKEN not configured in CONFIG.txt"
-
-    print("\nConfiguration loaded!")
-
-    # Test the embedding function
+    # Test the shared embedding function
     test_embedding = get_embedding("What are Apple's main products?")
     print(f"\nEmbedding dimensions: {len(test_embedding)}")
     print(f"First 5 values: {test_embedding[:5]}")
 
+    # Initialize model and MCP connection
+    bedrock_model = BedrockModel(
+        model_id=MODEL_ID,
+        region_name=REGION,
+        temperature=0,
+    )
+
+    mcp_conn = await MCPConnection.create(_env_path)
+
     print(f"\nModel: {MODEL_ID}")
-    print("MCP client created.\n")
+    print("MCP connection established.\n")
+
+    # -- Vector search tool (embedding stays on the data plane) --
+
+    @tool
+    async def vector_search_tool(query: str, top_k: int = 5) -> str:
+        """Search for semantically similar chunks using vector embeddings.
+        Use this for semantic queries about SEC 10-K filing data."""
+        embedding = get_embedding(query)
+        top_k = int(top_k)
+
+        return await mcp_conn.execute_query(f"""
+            CALL db.index.vector.queryNodes('chunkEmbeddings', {top_k}, {json.dumps(embedding)})
+            YIELD node, score
+            RETURN node.text AS text, score
+            ORDER BY score DESC
+        """)
+
+    agent = Agent(
+        model=bedrock_model,
+        system_prompt=VECTOR_SEARCH_PROMPT,
+        tools=[vector_search_tool],
+    )
+
+    async def vector_search(query: str, top_k: int = 5):
+        """Run vector search through the agent."""
+        print(f'Query: "{query}"')
+        print(f"Top K: {top_k}")
+        print("-" * 60)
+
+        response = await agent.invoke_async(
+            f"Search for: {query}\nUse top_k={top_k}."
+        )
+        print(f"\n{response}")
+        return response
 
     # --- Run vector searches ---
 
     # Search for product-related information
     print("=" * 60)
-    vector_search("What are Apple's main products?", top_k=5)
+    await vector_search("What are Apple's main products?", top_k=5)
 
     # Search for risk factor information
     print("\n" + "=" * 60)
-    vector_search(
+    await vector_search(
         "What are the key risk factors mentioned in SEC filings?",
         top_k=5,
     )
 
     # Compare top_k values — fewer results for a focused search
     print("\n" + "=" * 60)
-    vector_search(
+    await vector_search(
         "What financial metrics indicate company performance?",
         top_k=3,
     )
+
+    await mcp_conn.close()
+
+
+def main():
+    """Entry point."""
+    asyncio.run(run())
 
 
 if __name__ == "__main__":

@@ -19,7 +19,7 @@ Instead of connecting to Neo4j with a driver and using retriever classes directl
 
 MCP (Model Context Protocol) is an open standard for agent-to-tool communication. It defines how an agent discovers available tools, calls them with structured inputs, and receives structured outputs. In this lab you use it as a transport layer for Cypher queries. For a deeper look at how MCP works and how to build full MCP agents, see xref:lab6.adoc[Lab 6].
 
-NOTE: The Neo4j MCP Server used in this lab connects to a database that has been pre-loaded with Document and Chunk nodes, vector embeddings (`chunkEmbeddings` index), and fulltext indexes (`search_chunks`, `search_entities`). The workshop admin set this up before the workshop. You do not need to create these data structures yourself — the MCP Server's database is ready to query.
+NOTE: This lab uses the https://github.com/neo4j/mcp[Neo4j MCP Server], an official MCP server that exposes a Neo4j database as a set of tools an agent can call — including `execute-query` for running Cypher, schema introspection, and index management. The server has been deployed to AgentCore using the https://github.com/neo4j-partners/aws-starter/tree/main/neo4j-agentcore-mcp-server[neo4j-agentcore-mcp-server starter] and connects to a database pre-loaded with Document and Chunk nodes, vector embeddings (`chunkEmbeddings` index), and fulltext indexes (`search_chunks`, `search_entities`). The workshop admin set this up before the workshop. You do not need to deploy the MCP server or create these data structures yourself — everything is ready to query.
 
 == Three Retrieval Strategies
 
@@ -38,6 +38,14 @@ image::lab4-graph-enriched-retrieval.png[Graph-Enriched Retrieval Flow,700]
 === Hybrid Search
 
 Notebook 03 introduces an alternative search method: fulltext keyword search using Lucene operators against the `search_chunks` and `search_entities` indexes. It then combines both approaches for agent-driven hybrid search using custom `@tool` wrappers that encapsulate embedding generation.
+
+=== How the Tool Pattern Works
+
+All three strategies share the same underlying flow. The agent receives a natural-language question, decides which search to run, and calls a custom tool function. That tool function handles the mechanical work the LLM should never see: generating the embedding, building the Cypher query, and sending it to Neo4j through the MCP connection. The results come back as text that the agent can reason over and present to the user.
+
+The important design choice is where the embedding lives. A 1024-dimensional vector is roughly 8–10KB of floating-point numbers. If that array passes through the LLM's context window, it wastes tokens on data the model cannot interpret, doubles the payload (once in the message, once in the tool call), and risks the model silently truncating or rounding values. Wrapping embedding generation inside a `@tool` function keeps the vector on the data plane. The agent calls `vector_search_tool("supply chain risks")` and receives chunk text and scores. It never touches the float array.
+
+This is the same separation of concerns that the neo4j-graphrag library enforces in Lab 5: the `VectorRetriever` generates embeddings and queries the index internally, and the LLM only sees retrieved text. The `@tool` wrapper achieves the same boundary when working through MCP instead of a direct driver connection.
 
 == MCP vs Direct Library
 
