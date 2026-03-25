@@ -8,7 +8,7 @@ This is a hands-on workshop teaching GraphRAG (Graph Retrieval-Augmented Generat
 
 ## Workshop Structure
 
-- **Part 1 (Labs 0-2)**: No-code exploration using Neo4j Aura console and Aura Agents visual builder
+- **Part 1 (Labs 0-2)**: Setup & Visual Exploration with Neo4j
 - **Part 2 (Labs 3-4)**: Python-based GraphRAG with Strands Agents SDK and neo4j-graphrag library
 - **Part 3 (Labs 5-6)**: MCP agents and GraphRAG data pipeline
 

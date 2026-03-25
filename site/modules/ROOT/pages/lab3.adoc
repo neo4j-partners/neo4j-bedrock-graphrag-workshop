@@ -1,6 +1,6 @@
 = Lab 3: Bedrock and Agents
 
-The no-code track showed what a GraphRAG agent can do. Now you shift to building agents with code. This lab introduces the foundational pieces: Amazon Bedrock for LLM access, the Strands Agents SDK for agent orchestration, and the ReAct pattern that drives every agent in the remaining labs.
+The visual exploration track showed what a GraphRAG agent can do. Now you shift to building agents with code. This lab introduces the foundational pieces: Amazon Bedrock for LLM access, the Strands Agents SDK for agent orchestration, and the ReAct pattern that drives every agent in the remaining labs.
 
 TIP: Ready to start? Jump to the xref:lab3-instructions.adoc[Lab 3 Instructions] for step-by-step setup.
 

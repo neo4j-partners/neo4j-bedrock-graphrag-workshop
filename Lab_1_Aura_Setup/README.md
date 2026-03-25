@@ -61,7 +61,7 @@ If you're completing this lab independently or your organizer has instructed you
 
    ![Credentials dialog showing username and password with download option](images/09_Download_Credentails.png)
 
-> **CRITICAL:** The password is only shown once and will not be available after you close this dialog. Download the credentials file and store it somewhere safe. You will need these credentials in later labs to connect your applications to Neo4j.
+> **CRITICAL:** The password is only shown once and will not be available after you close this dialog. Download the credentials file and store it somewhere safe. You will need the **URI**, **Username**, and **Password** to fill in `CONFIG.txt` when you set up the coding environment in Lab 3.
 
 
 ## Part 3: Load the Knowledge Graph

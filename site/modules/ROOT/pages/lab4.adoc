@@ -10,23 +10,34 @@ TIP: Ready to start? Jump to the xref:lab4-instructions.adoc[Lab 4 Instructions]
 * **Vector search** — find text passages whose meaning is closest to your question using `VectorRetriever`
 * **Graph-enriched search** — after finding matching passages, follow graph relationships to pull in companies, products, and risk factors using `VectorCypherRetriever`
 
-== From Filings to Searchable Knowledge
+== Chunks, Embeddings, and Graph-Enriched Search
 
-Before diving into the retrieval strategies, here is how the data in this lab was prepared and why each step matters.
+Most documents are too long for an LLM to process in a single pass. Retrieval-Augmented Generation (RAG) solves this by finding the most relevant pieces of a document and feeding only those to the model. The building blocks are:
 
-. **The raw data is SEC 10-K filings.** These are annual financial reports that public companies file with the Securities and Exchange Commission. A single filing can run tens of thousands of words covering business operations, risk factors, financial results, and more.
+**Chunks.** A long document is split into smaller passages called chunks. Each chunk is short enough to embed and retrieve individually, but long enough to carry useful context. Chunks are stored as nodes in the graph and linked in sequence so the original reading order is preserved.
 
-. **Filings are split into chunks.** A full filing is too long to search precisely, so each one is split into smaller passages called chunks. Each chunk becomes a node in the knowledge graph, linked to its source document and to adjacent chunks so the original reading order is preserved.
+**Embeddings.** An embedding model reads a chunk's text and produces a numerical vector that captures what the text _means_, not just what words it contains. "Supply chain disruption" and "logistics bottleneck risk" produce similar vectors because they describe related concepts, even though they share no keywords.
 
-. **Each chunk is encoded as an embedding.** An embedding model reads the chunk's text and produces a numerical vector that captures what the text _means_, not just what words it contains. "Supply chain disruption" and "logistics bottleneck risk" produce similar vectors because they describe related concepts, even though they share no keywords.
+**Vector search.** Given a natural-language question, the system encodes it with the same embedding model and finds stored chunk vectors whose meaning is closest. This is semantic similarity search — it matches on concepts rather than exact words. The results are ranked text fragments with similarity scores.
 
-. **Vector search finds chunks by meaning.** Given a natural-language question, the system encodes it using the same embedding model and searches for stored chunk vectors whose meaning is closest. This is semantic similarity search: it matches on concepts rather than exact words.
+**The limitation of vector search alone.** Vector search returns isolated passages. You get the chunk text and a score, but nothing about where the passage came from, what entities it mentions, or how it relates to other information in the corpus.
 
-. **Vector search returns isolated passages.** The results are ranked text fragments with no surrounding context. You get the chunk text and a similarity score, but nothing about which company filed it, what products it mentions, or what risks it describes.
+**Graph-enriched search.** A knowledge graph connects chunks to structured entities — documents, companies, products, risk factors — through typed relationships. After vector search finds relevant chunks, graph traversal follows those relationships to pull in structured context. The result is not just "here's a matching passage" but "here's a matching passage, filed by this company, mentioning these products, linked to these risk factors." That additional context grounds the LLM's answer in verified, structured data.
 
-. **Graph-enriched search follows relationships to fill that gap.** The knowledge graph connects chunks to documents, companies, products, and risk factors through typed relationships. After vector search finds relevant chunks, graph traversal follows those relationships to pull in structured context. The result is not just "here's a matching passage" but "here's a matching passage from Apple's 10-K, mentioning the iPhone, linked to a cybersecurity risk factor."
+=== Example: SEC 10-K Filings
 
-This lab covers steps 4 through 6. The chunking and embedding were pre-computed and are loaded in Notebook 01. xref:lab6.adoc[Lab 6] covers building that data pipeline from scratch.
+This lab applies the pattern above to SEC 10-K filings — annual financial reports that public companies file with the Securities and Exchange Commission. A single filing can run tens of thousands of words covering business operations, risk factors, financial results, and more.
+
+. Each filing is split into chunks and stored as `(:Chunk)` nodes linked by `NEXT_CHUNK` relationships.
+. Each chunk is encoded into a 1024-dimensional embedding vector using Amazon Bedrock Nova.
+. A vector index (`chunkEmbeddings`) enables semantic similarity search across all chunks.
+. Graph relationships connect chunks back to their source `(:Document)`, which is linked to the `(:Company)` that filed it, and cross-links (`FROM_CHUNK`) tie chunks to the `(:Product)` and `(:RiskFactor)` entities they mention.
+
+When you ask "What cybersecurity risks does Apple face?", vector search finds the most relevant passages. Graph-enriched search then follows relationships from those passages to return Apple as the filer, the specific products mentioned, and the risk factor classifications — all in a single retrieval step.
+
+This lab covers vector search and graph-enriched retrieval (steps 3 and 4). The chunking and embedding were pre-computed and are loaded in Notebook 01. xref:lab6.adoc[Lab 6] covers building that data pipeline from scratch.
+
+image::graph-enriched-retrieval.png[SEC 10-K GraphRAG Retrieval Flow,800]
 
 == The Two-Layer Graph
 

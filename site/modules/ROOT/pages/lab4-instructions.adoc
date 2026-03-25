@@ -13,10 +13,23 @@ TIP: For concepts and background, see xref:lab4.adoc[Lab 4: GraphRAG Retrievers]
 == Prerequisites
 
 * Completed **Lab 1** — Aura instance created and knowledge graph loaded
-* `CONFIG.txt` at the project root filled in with `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD`, `MODEL_ID`, and `REGION`
+* Completed **Lab 3** — SageMaker Studio set up and repository cloned
 * A running environment (SageMaker Studio or GitHub Codespace)
 
 NOTE: This lab uses the same Neo4j Aura instance from Labs 1-2. The structured graph (companies, products, risk factors, asset managers) must already be loaded. Notebook 01 adds the unstructured layer on top — it does not clear existing data.
+
+=== Update CONFIG.txt with Neo4j Credentials
+
+Before running the notebooks, open `CONFIG.txt` at the repository root and fill in the Neo4j credentials you saved in Lab 1:
+
+[source,text]
+----
+NEO4J_URI=neo4j+s://xxxxxxxx.databases.neo4j.io
+NEO4J_USERNAME=neo4j
+NEO4J_PASSWORD=your-password-from-lab-1
+----
+
+`MODEL_ID` and `REGION` are pre-configured with working defaults. See xref:configuration.adoc[Configuration Reference] for details on all fields.
 
 == Notebooks
 
