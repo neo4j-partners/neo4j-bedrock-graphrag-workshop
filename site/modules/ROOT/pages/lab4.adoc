@@ -70,12 +70,23 @@ OPTIONAL MATCH (product:Product)-[:FROM_CHUNK]->(node)
 
 The LLM now receives the matched chunk alongside the filing accession number, company name, product list, and risk factor labels — producing answers grounded in both unstructured text and structured knowledge graph relationships.
 
+== What the Library Does Under the Hood
+
+The neo4j-graphrag retrievers handle several steps internally so you can focus on the query rather than the plumbing. When you call a retriever, it:
+
+1. **Embeds your question** — sends the text to the embedding model (Bedrock Nova) and gets back a 1024-dimensional vector.
+2. **Queries the vector index** — runs a Cypher query against the `chunkEmbeddings` index using that vector.
+3. **Traverses the graph** (Cypher retrievers only) — executes the `retrieval_query` you provide to follow relationships from matched chunks to connected entities.
+4. **Formats results for the LLM** — packages the retrieved text and metadata into a prompt-ready format.
+
+In xref:lab5.adoc[Lab 5], you will do each of these steps yourself through MCP — writing the Cypher by hand, managing embeddings in `@tool` functions, and wiring the results back to the agent. Understanding what the library automates here will make the manual approach in Lab 5 clearer.
+
 == What Is Covered Here vs Other Labs
 
 This lab focuses on the neo4j-graphrag library's retriever classes and direct Python driver connections. For related topics, see:
 
 * **MCP-based agent retrieval** — connecting agents to Neo4j via MCP, Text2Cypher pattern → xref:lab5.adoc[Lab 5]
-* **Building the data pipeline from scratch** — chunking, embedding generation, data loading → xref:lab6.adoc[Lab 6]
+* **Building the data pipeline from scratch** — chunking, embedding generation, data loading → xref:lab6.adoc[Lab 6] (bonus)
 
 == Pattern Reference
 
@@ -83,4 +94,4 @@ This lab covers the **Cypher Templates** pattern from Neo4j's https://graphrag.c
 
 == Next Steps
 
-Continue to xref:lab4-instructions.adoc[Lab 4 Instructions] to work through the notebooks. After completing this lab, proceed to xref:lab5.adoc[Lab 5: Neo4j MCP Server] for agent-based retrieval via MCP, or to xref:lab6.adoc[Lab 6: GraphRAG Pipeline] to build the data loading and embedding pipeline from scratch.
+Continue to xref:lab4-instructions.adoc[Lab 4 Instructions] to work through the notebooks. After completing this lab, proceed to xref:lab5.adoc[Lab 5: Neo4j MCP Server] for agent-based retrieval via MCP.

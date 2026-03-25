@@ -6,16 +6,14 @@ In this lab, you will use Neo4j's "Create with AI" workflow to build a no-code a
 
 - **Create with AI**: Build a no-code agent by describing your use case to Neo4j
 - **Cypher Templates**: Controlled graph traversals for specific lookups and comparisons
-- **Similarity Search**: Semantic retrieval over embedded filing text using vector indexes
 - **Text2Cypher**: Natural language to Cypher translation for ad-hoc exploration
 - **Agent Testing**: Evaluate tool selection and response quality with sample questions
 
 ## Prerequisites
 
 - Completed **Lab 0** (AWS sign-in)
-- Completed **Lab 1** (Neo4j Aura setup with backup restored)
-
-The pre-built backup you restored in Lab 1 already contains the complete knowledge graph with embeddings, so you can start building agents immediately.
+- Completed **Lab 1** (Neo4j Aura setup with knowledge graph loaded)
+- Your Neo4j instance should show a **Running** status in the Aura console
 
 ## Step 1: Navigate to Agents
 
@@ -35,18 +33,18 @@ Select the Neo4j instance you provisioned in Lab 1. The instance should show a *
 
 ## Step 3: Configure AI Settings
 
-The "Create with AI" dialog needs three pieces of configuration: the embedding provider, the embedding model, and a prompt describing what the agent should do.
+The "Create with AI" dialog needs your instance selection and a prompt describing what the agent should do.
 
-![Create with AI Settings](images/3_create_ai_setting.png)
+![Create with AI Settings](images/Create_with_AI.png)
 
 Configure the following settings:
 
-- **Instance:** Your Lab 1 instance (pre-selected from Step 2)
-- Check **This instance contains vector embeddings**
-- **Embedding provider:** `OpenAI`
-- **Embedding model:** `text-embedding-3-small`
+| Setting | Value |
+|---|---|
+| **Instance** | Your Lab 1 instance (pre-selected from Step 2) |
+| **Vector embeddings** | Do not select (no embeddings loaded yet) |
 
-**Prompt:**
+Enter the following prompt:
 ```
 You are an expert financial analyst assistant specializing in SEC 10-K filings analysis.
 You help users understand:
@@ -65,19 +63,20 @@ Click **Create**. Neo4j will analyze the graph schema and generate the agent alo
 
 After creation, the agent appears with a full set of auto-generated tools. Neo4j derived these from the node labels, relationship types, and indexes in your knowledge graph.
 
-![Agent Tools](images/4_AgentTools.png)
+![Agent Tools](images/agent_tools.png)
 
-The generated tools fall into three categories:
+The generated tools fall into two categories:
 
 | Tool Type | Generated Tools |
 |-----------|----------------|
-| **Cypher Templates** | Company Details, Company Risk Factors, Companies Owned by Asset Manager, Company Financial Metrics, Company Products Offered, Documents by Company Identifier, Company Executives |
-| **Similarity Search** | Search Chunks |
+| **Cypher Templates** | Company Details, Company Risk Factors, Companies Owned by Asset Manager, Company Financial Metrics, Company Products Offered, Documents by Company Identifier |
 | **Text2Cypher** | Natural Language to Cypher Tool |
+
+Each Cypher Template tool maps to a specific traversal pattern in the graph. The Text2Cypher tool translates arbitrary natural language questions into Cypher queries for ad-hoc exploration.
 
 ## Step 5: Test the Agent
 
-Test your agent with the sample questions below. After each test, observe:
+Test your agent with the sample questions below. After each response, observe:
 1. Which tool the agent selected and why
 2. The context retrieved from the knowledge graph
 3. How the agent synthesized the response
@@ -93,31 +92,16 @@ The agent recognizes this as a company lookup, selects the appropriate Cypher Te
 The reasoning panel shows the agent's decision process: it identified the question as a company overview request and selected the `get_company_overview` tool with `"APPLE INC"` as the parameter.
 
 Other Cypher Template questions to try:
-- "What risks do Apple Inc. and Microsoft Corporation share?" - Compares risk factor nodes connected to both companies.
-- "Which companies does BlackRock Inc. own shares in?" - Traverses the OWNS relationships from the AssetManager node.
-- "What products does NVIDIA Corporation offer?" - Retrieves Product nodes linked to NVIDIA, returning GPU architectures, platforms, and software services.
-- "Who are the executives at NVIDIA Corporation?" - Traverses HAS_EXECUTIVE relationships to list leadership names and titles.
-- "Show me the documents filed by Apple Inc." - Uses the Documents by Company Identifier tool to retrieve SEC filing metadata.
-
-### Semantic Search Questions
-
-Try asking: **"What do the filings say about AI and machine learning?"**
-
-The agent uses the Similarity Search tool to find semantically relevant passages from SEC filings, then synthesizes insights across multiple companies' discussions of AI.
-
-Other semantic search questions to try:
-- "Find content about supply chain risks" - Searches for passages discussing supply chain challenges and dependencies.
-- "What do companies say about climate change?" - Finds relevant environmental risk disclosures across filings.
-- "Find content about cybersecurity risks and data breaches" - Searches for passages about cyberattacks, ransomware, and data protection across filings.
+- "What risks do Apple Inc. and Microsoft Corporation share?" — Compares risk factor nodes connected to both companies.
+- "Which companies does BlackRock Inc. own shares in?" — Traverses the OWNS relationships from the AssetManager node.
+- "What products does NVIDIA Corporation offer?" — Retrieves Product nodes linked to NVIDIA, returning GPU architectures, platforms, and software services.
+- "Show me the documents filed by Apple Inc." — Uses the Documents by Company Identifier tool to retrieve SEC filing metadata.
 
 ### Text2Cypher Questions
 
 Try asking: **"How many products does NVIDIA Corporation mention?"**
 
 The agent translates this natural language question into a Cypher query that counts Product nodes linked to NVIDIA and returns the result.
-
-Other Text2Cypher questions to try:
-- "What executives does NVIDIA Corporation have?" - Generates a query to find Executive nodes and their titles associated with NVIDIA.
 
 ## Step 6: (Optional) Deploy to API
 
@@ -130,17 +114,19 @@ Deploy your agent to a production endpoint:
 
 You can connect your Aura Agent to MCP-compatible clients like Claude Code, Claude Desktop, VS Code, or Cursor. This gives the client direct access to all the agent tools you just tested, without writing any code.
 
-See the full setup guide: **[MCP Server Setup](mcp_setup.md)**
+1. **Enable External access and MCP server** on your agent
 
-The quick version:
+   ![MCP Server Setup](images/6_option_mcp_setup.png)
 
-1. **Enable External access and MCP server** on your agent (see [Configure](images/6_option_mcp_setup.png))
-2. **Copy the MCP server endpoint URL** from the agent menu (see [Copy Endpoint](images/7_option_mcp.png))
-3. **Get your API credentials** from Account Settings → API Keys
-4. **Configure your client** using the `.env.example` and `.mcp.json.template` files in this directory
+2. **Copy the MCP server endpoint URL** from the agent menu
+
+   ![MCP Endpoint](images/7_option_mcp.png)
+
+3. **Get your API credentials** from Account Settings -> API Keys
+4. **Configure your client** using the `.env.example` and `.mcp.json.template` files in the `Lab_2_Aura_Agents/` directory
 
 ## Next Steps
 
 **This completes Part 1 (Setup & Visual Exploration with Neo4j) of the workshop.**
 
-To continue with the coding labs, proceed to [Lab 3 - Intro to Bedrock and Agents](../Lab_3_Intro_to_Bedrock_and_Agents) to set up your development environment in Amazon SageMaker and learn how AI agents work with LangGraph.
+Continue to [Lab 3 - Bedrock and Agents](../Lab_3_Intro_to_Bedrock_and_Agents) to set up your development environment and learn how AI agents work with the Strands Agents SDK.

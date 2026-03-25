@@ -38,15 +38,24 @@ If you're completing this lab independently or your organizer has instructed you
 
    ![Instances page with Create instance button for existing instances](images/07_alternative_create_instance.png)
 
-2. Configure your new instance with the following settings:
-   - Select the **Aura Professional** plan
-   - Set the **Instance name** to a unique name based on your name (e.g., `ryans-lab-instance`). If you have an error try another unique name by adding your initials or a number.
-   - Set the **Sizing** to **4 GB RAM / 1 CPU**
-   - Enable **Vector-optimized configuration** under Additional settings
+2. Configure your new instance:
 
-   ![Create instance configuration page showing Professional tier, naming, sizing, and vector optimization options](images/08_Create_Instance_Details.png)
+   > **IMPORTANT:** 3 key settings to watch when creating your instance!
+   > 1. Select **Professional** — do *not* select Business Critical
+   > 2. Set **Graph Analytics** to **Plugin**
+   > 3. Enable **Vector-optimized** (under Additional settings)
 
-3. Click **Create** to provision your database instance.
+   | Setting | Value |
+   |---|---|
+   | **Tier** | Professional |
+   | **Instance name** | A unique name based on your name (e.g., `ryans-lab-instance`) |
+   | **Sizing** | 4 GB RAM / 1 CPU |
+   | **Graph Analytics** | Plugin |
+   | **Vector-optimized** | Enabled (under Additional settings) |
+
+3. Click **Create** to provision your database instance
+
+   ![Create instance configuration page showing Professional tier, naming, sizing, and vector optimization options](images/lab1-configure-instance.png)
 
 4. **Save your connection credentials immediately.** When your instance is created, a dialog will appear showing your database credentials (Username and Password). Click **Download and continue** to save the credentials file.
 

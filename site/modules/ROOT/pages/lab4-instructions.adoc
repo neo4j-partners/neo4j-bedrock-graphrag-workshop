@@ -39,4 +39,4 @@ NOTE: This lab uses the same Neo4j Aura instance from Labs 1-2. The structured g
 
 == Next Steps
 
-After completing these notebooks, continue to xref:lab5.adoc[Lab 5: Neo4j MCP Server] for agent-based retrieval via MCP, or to xref:lab6.adoc[Lab 6: GraphRAG Pipeline] to build the data loading and embedding pipeline from scratch.
+After completing these notebooks, explore the xref:lab4-sample-queries.adoc[Lab 4: Sample Queries] for more Cypher examples, then continue to xref:lab5.adoc[Lab 5: Neo4j MCP Server] for agent-based retrieval via MCP.

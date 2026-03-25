@@ -19,7 +19,7 @@ The Model Context Protocol is an open standard that defines how AI agents discov
 
 MCP defines a three-component architecture:
 
-image::lab6-mcp-agent-architecture.png[MCP Agent Architecture,700]
+image::lab5-mcp-agent-architecture.png[MCP Agent Architecture,700]
 
 **AI Agent (Client)**: The LLM-powered application that needs to access external data. It discovers available tools by asking the MCP server what operations are supported.
 
@@ -169,4 +169,6 @@ This lab uses the **Strands Agents SDK** — AWS-native, built-in MCP support, s
 
 == Next Steps
 
-Continue to xref:lab5-instructions.adoc[Lab 5 Instructions] for the notebook walkthrough, or proceed to xref:lab6.adoc[Lab 6: GraphRAG Pipeline] to build the data pipeline from scratch — chunking, embedding generation, and retrieval using the neo4j-graphrag library.
+Continue to xref:lab5-instructions.adoc[Lab 5 Instructions] for the notebook walkthrough. This is the final lab in the main workshop.
+
+For a bonus challenge, xref:lab6.adoc[Lab 6: GraphRAG Pipeline] walks through building the data pipeline from scratch — chunking, embedding generation, and retrieval using the neo4j-graphrag library.

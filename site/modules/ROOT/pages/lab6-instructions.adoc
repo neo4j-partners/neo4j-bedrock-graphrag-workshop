@@ -39,4 +39,4 @@ Open each notebook in order. Each one builds on the graph state left by the prev
 
 == Next Steps
 
-Congratulations — you have completed the workshop! You have progressed from setup and visual exploration (Labs 0-2) through building GraphRAG agents (Labs 3-5) to building a complete GraphRAG data pipeline from scratch.
+Congratulations — you have completed the bonus lab! The main workshop (Labs 0-5) covered setup, visual exploration, GraphRAG retrieval, and MCP-based agents. This bonus lab gave you hands-on experience building the data pipeline that powers those retrieval patterns.

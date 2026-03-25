@@ -1,19 +1,18 @@
 """
 Graph-Enriched Search via MCP
 
-This solution demonstrates vector search enriched with graph context
-(documents, neighboring chunks, entities) through the Neo4j MCP server
-using @tool wrappers that encapsulate embedding generation and Cypher
-execution, keeping embeddings off the LLM context window.
+Demonstrates vector search enriched with graph context (documents, neighboring
+chunks, entities) through the Neo4j MCP server using @tool wrappers that
+encapsulate embedding generation and Cypher execution.
 
 Run with: uv run python main.py solutions <N>
 """
 
 import os
 import sys
-import time
 import uuid
 
+from botocore.config import Config as BotocoreConfig
 from dotenv import load_dotenv
 from mcp.client.streamable_http import streamablehttp_client
 from strands import Agent, tool
@@ -21,17 +20,10 @@ from strands.models import BedrockModel
 from strands.tools.mcp import MCPClient
 
 # Add financial_data_load to sys.path so local lib imports work
-FINANCIAL_DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+FINANCIAL_DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, FINANCIAL_DATA_DIR)
 
 from lib.data_utils import get_embedding  # noqa: E402
-
-_t0 = time.time()
-
-
-def _log(msg: str):
-    elapsed = time.time() - _t0
-    print(f"[{elapsed:7.1f}s] {msg}", flush=True)
 
 # ---------------------------------------------------------------------------
 # 1. Configuration
@@ -41,7 +33,7 @@ _env_path = os.path.join(os.path.dirname(__file__), "..", ".env")
 load_dotenv(_env_path)
 
 MODEL_ID = os.getenv("MODEL_ID", "us.anthropic.claude-sonnet-4-6")
-REGION = os.getenv("AWS_REGION", os.getenv("REGION", "us-east-1"))
+REGION = os.getenv("REGION", os.getenv("AWS_REGION", "us-east-1"))
 MCP_GATEWAY_URL = os.getenv("MCP_GATEWAY_URL")
 MCP_ACCESS_TOKEN = os.getenv("MCP_ACCESS_TOKEN")
 
@@ -49,12 +41,6 @@ MCP_ACCESS_TOKEN = os.getenv("MCP_ACCESS_TOKEN")
 # ---------------------------------------------------------------------------
 # 2. System Prompts
 # ---------------------------------------------------------------------------
-
-VECTOR_ONLY_PROMPT = """You are a retrieval assistant that performs semantic vector search against a Neo4j database containing SEC 10-K filing data.
-
-You have a vector_search tool that finds semantically similar text chunks. Call it with a natural language query and an optional top_k parameter.
-
-For each result, show the similarity score and a preview of the chunk text."""
 
 GRAPH_ENRICHED_PROMPT = """You are a retrieval assistant that performs graph-enriched vector search against a Neo4j database containing SEC 10-K filing data.
 
@@ -91,74 +77,45 @@ Include the companies, products, and risk factors found. Cite the source documen
 
 def main():
     """Run graph-enriched search demo."""
-    _log("START main()")
     print(f"Model:     {MODEL_ID}")
     print(f"Region:    {REGION}")
+
+    # Verify the shared embedding function works
+    test_embedding = get_embedding("test")
+    print(f"Embedding dimensions: {len(test_embedding)}")
 
     bedrock_model = BedrockModel(
         model_id=MODEL_ID,
         region_name=REGION,
         temperature=0,
+        boto_client_config=BotocoreConfig(read_timeout=300),
     )
-    _log("BedrockModel created")
 
     mcp_client = MCPClient(lambda: streamablehttp_client(
         url=MCP_GATEWAY_URL,
         headers={"Authorization": f"Bearer {MCP_ACCESS_TOKEN}"},
     ))
 
-    _log("Opening MCP client context...")
     with mcp_client:
-        _log("MCP client context entered")
-        # Discover the Cypher query tool
         mcp_tools = mcp_client.list_tools_sync()
         tool_names = [t.tool_name for t in mcp_tools]
-        _log(f"MCP tools discovered: {tool_names}")
+        print(f"MCP tools discovered: {tool_names}")
 
         cypher_tool = next(
             (n for n in tool_names if "read-cypher" in n),
             next((n for n in tool_names if "execute-query" in n), None),
         )
         assert cypher_tool, f"No Cypher query tool found among: {tool_names}"
-        _log(f"Cypher tool: {cypher_tool}")
-        print("MCP connection established.\n")
+        print(f"\nModel: {MODEL_ID}")
+        print(f"Cypher tool: {cypher_tool}\n")
 
         # -- Search tools (embeddings stay on the data plane) --
-
-        @tool
-        def vector_search(query: str, top_k: int = 3) -> str:
-            """Search for semantically similar chunks using vector embeddings.
-            Use this for semantic queries about SEC 10-K filing data."""
-            _log(f"vector_search CALLED: query={query!r}")
-            _log("  generating embedding...")
-            embedding = get_embedding(query)
-            _log("  embedding done")
-            top_k = int(top_k)
-
-            cypher = f"""
-                CALL db.index.vector.queryNodes('chunkEmbeddings', {top_k}, $query_vector)
-                YIELD node, score
-                WITH node {{.*, embedding: null}} AS node, score
-                RETURN node.text AS text, score
-                ORDER BY score DESC
-            """
-            _log("  calling MCP call_tool_sync...")
-            result = mcp_client.call_tool_sync(
-                tool_use_id=str(uuid.uuid4()),
-                name=cypher_tool,
-                arguments={"query": cypher, "params": {"query_vector": embedding}},
-            )
-            _log("  MCP call_tool_sync returned")
-            return result["content"][0]["text"]
 
         @tool
         def graph_enriched_search(query: str, top_k: int = 3) -> str:
             """Search for similar chunks enriched with document and neighboring chunk context.
             Returns chunk text, source document, and text from adjacent chunks."""
-            _log(f"graph_enriched_search CALLED: query={query!r}")
-            _log("  generating embedding...")
             embedding = get_embedding(query)
-            _log("  embedding done")
             top_k = int(top_k)
 
             cypher = f"""
@@ -175,23 +132,18 @@ def main():
                        prev_text AS previous_chunk, next_text AS next_chunk
                 ORDER BY score DESC
             """
-            _log("  calling MCP call_tool_sync...")
             result = mcp_client.call_tool_sync(
                 tool_use_id=str(uuid.uuid4()),
                 name=cypher_tool,
                 arguments={"query": cypher, "params": {"query_vector": embedding}},
             )
-            _log("  MCP call_tool_sync returned")
             return result["content"][0]["text"]
 
         @tool
         def entity_enriched_search(query: str, top_k: int = 3) -> str:
             """Search for similar chunks enriched with companies, products, and risk factors.
             Returns chunk text, source document, and connected entities."""
-            _log(f"entity_enriched_search CALLED: query={query!r}")
-            _log("  generating embedding...")
             embedding = get_embedding(query)
-            _log("  embedding done")
             top_k = int(top_k)
 
             cypher = f"""
@@ -211,23 +163,15 @@ def main():
                        companies, risks, products
                 ORDER BY score DESC
             """
-            _log("  calling MCP call_tool_sync...")
             result = mcp_client.call_tool_sync(
                 tool_use_id=str(uuid.uuid4()),
                 name=cypher_tool,
                 arguments={"query": cypher, "params": {"query_vector": embedding}},
             )
-            _log("  MCP call_tool_sync returned")
             return result["content"][0]["text"]
 
-        # -- Create agents once, reuse for all queries --
-        _log("Creating agents...")
+        # -- Create agents --
 
-        vector_agent = Agent(
-            model=bedrock_model,
-            system_prompt=VECTOR_ONLY_PROMPT,
-            tools=[vector_search],
-        )
         graph_agent = Agent(
             model=bedrock_model,
             system_prompt=GRAPH_ENRICHED_PROMPT,
@@ -243,85 +187,47 @@ def main():
             system_prompt=QA_PROMPT,
             tools=[entity_enriched_search],
         )
-        _log("All 4 agents created")
 
-        # -- Compare: run the same query through all three search levels --
+        # -- Graph-enriched search --
+        print("=" * 60)
+        print("Graph-Enriched Search")
+        print("=" * 60)
+        print(graph_agent(
+            "Search for: What financial metrics indicate company performance?\n"
+            "Use top_k=3."
+        ))
 
-        def compare_search(query: str, top_k: int = 3):
-            """Run the same query through all three agents and display results."""
-            _log(f"compare_search START: {query!r}")
-            print(f'Query: "{query}"')
-            print("=" * 60)
-
-            print("\n--- VECTOR-ONLY RESULTS ---\n")
-            _log("  invoking vector_agent...")
-            print(vector_agent(f"Search for: {query}\nUse top_k={top_k}."))
-            _log("  vector_agent done")
-
-            print("\n\n--- GRAPH-ENRICHED RESULTS ---\n")
-            _log("  invoking graph_agent...")
-            print(graph_agent(f"Search for: {query}\nUse top_k={top_k}."))
-            _log("  graph_agent done")
-
-            print("\n\n--- ENTITY-ENRICHED RESULTS ---\n")
-            _log("  invoking entity_agent...")
-            print(entity_agent(f"Search for: {query}\nUse top_k={top_k}."))
-            _log("  entity_agent done")
-            _log(f"compare_search END: {query!r}")
+        # -- Entity-enriched search --
+        print("\n" + "=" * 60)
+        print("Entity-Enriched Search")
+        print("=" * 60)
+        print(entity_agent(
+            "Search for: What financial metrics indicate company performance?\n"
+            "Use top_k=3."
+        ))
 
         # -- Q&A --
 
         def ask(query: str, top_k: int = 5):
             """Ask a question using entity-enriched vector search for context."""
-            _log(f"ask START: {query!r}")
             print(f'Question: "{query}"')
             print("-" * 60)
-
-            _log("  invoking qa_agent...")
             response = qa_agent(
-                f"Answer this question using entity-enriched search with top_k={top_k}.\n\n"
-                f"Question: {query}"
+                f"Answer this question using entity-enriched search with "
+                f"top_k={top_k}.\n\nQuestion: {query}"
             )
-            _log("  qa_agent done")
             print(f"\n{response}")
-            _log(f"ask END: {query!r}")
             return response
 
-        # --- Run searches ---
-
-        _log("=== COMPARISON 1: Risk factors ===")
-        print("=" * 60)
-        print("COMPARISON 1: Risk factors")
-        print("=" * 60)
-        compare_search(
-            "What are the key risk factors mentioned in Apple's 10-K filing?"
-        )
-
-        print("\n")
-
-        _log("=== COMPARISON 2: Financial performance ===")
-        print("=" * 60)
-        print("COMPARISON 2: Financial performance")
-        print("=" * 60)
-        compare_search("What financial metrics indicate company performance?")
-
-        print("\n")
-
-        _log("=== Q&A 1: Apple risk factors ===")
-        print("=" * 60)
-        print("Q&A 1: Apple risk factors")
+        print("\n" + "=" * 60)
+        print("Q&A: Apple Risk Factors")
         print("=" * 60)
         ask("What are the key risk factors mentioned in Apple's 10-K filing?")
 
-        print("\n")
-
-        _log("=== Q&A 2: Cybersecurity risks ===")
-        print("=" * 60)
-        print("Q&A 2: Cybersecurity risks")
+        print("\n" + "=" * 60)
+        print("Q&A: Cybersecurity Risks")
         print("=" * 60)
         ask("Which companies face cybersecurity-related risks?")
-
-    _log("DONE — main() complete")
 
 
 if __name__ == "__main__":

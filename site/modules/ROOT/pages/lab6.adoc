@@ -1,4 +1,6 @@
-= Lab 6: GraphRAG Pipeline
+= Lab 6: GraphRAG Pipeline (Bonus)
+
+NOTE: This lab is optional. The main workshop is complete after Lab 5. This bonus lab is for participants who want to understand how the data pipeline behind Labs 4 and 5 was built.
 
 In Lab 4 you queried a pre-built knowledge graph — seed data and embeddings were already loaded. This lab builds that graph from scratch. You load raw SEC 10-K filing data, split it into chunks, generate vector embeddings, and then query the graph using the same neo4j-graphrag library from Lab 4 — this time with `VectorCypherRetriever`, which adds graph traversal to enrich every vector search result with connected entities.
 
@@ -110,4 +112,4 @@ Lab 4 and Lab 6 use the same neo4j-graphrag library and the same underlying grap
 
 == Next Steps
 
-Continue to xref:lab6-instructions.adoc[Lab 6 Instructions] for the notebook walkthrough. This is the final lab in the workshop.
+Continue to xref:lab6-instructions.adoc[Lab 6 Instructions] for the notebook walkthrough.

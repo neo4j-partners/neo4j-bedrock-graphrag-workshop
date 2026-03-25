@@ -471,19 +471,21 @@ def cmd_samples(args):
 # Solution definitions: (module_name, title, is_async, entry_func)
 # Module prefixes align with workshop labs:
 #   03_xx = Lab 3 (Intro to Bedrock and Agents)
-#   04_xx = Lab 4 (Graph-Enriched Search)
-#   05_xx = Lab 5 (GraphRAG)
+#   04_xx = Lab 4 (GraphRAG Search)
+#   05_xx = Lab 5 (MCP Server)
+#   06_xx = Lab 6 (GraphRAG Pipeline)
 SOLUTIONS = [
     ("solution_srcs.03_01_basic_strands_agent", "Basic Strands Agent (Lab 3)", False, "main"),
     ("solution_srcs.03_02_deploy_to_agentcore", "Deploy to AgentCore (Lab 3)", False, "main"),
-    ("solution_srcs.04_00_intro_strands_mcp", "Intro to Strands + MCP (Lab 4)", False, "main"),
-    ("solution_srcs.04_01_vector_search_mcp", "Vector Search via MCP (Lab 4)", False, "main"),
-    ("solution_srcs.04_02_graph_enriched_search_mcp", "Graph-Enriched Search via MCP (Lab 4)", False, "main"),
-    ("solution_srcs.05_01_data_loading", "Data Loading Fundamentals (Lab 5)", False, "main"),
-    ("solution_srcs.05_02_embeddings", "Embeddings (Lab 5)", False, "main"),
-    ("solution_srcs.05_03_vector_retriever", "Vector Retriever (Lab 5)", False, "main"),
-    ("solution_srcs.05_04_vector_cypher_retriever", "Vector Cypher Retriever (Lab 5)", False, "main"),
-    ("solution_srcs.05_05_hybrid_rag", "Hybrid Search and GraphRAG (Lab 5)", False, "main"),
+    ("solution_srcs.04_01_load_and_query", "Load Data and Query (Lab 4)", False, "main"),
+    ("solution_srcs.04_02_vector_retriever", "Vector Retriever (Lab 4)", False, "main"),
+    ("solution_srcs.04_03_vector_cypher_retriever", "VectorCypher Retriever (Lab 4)", False, "main"),
+    ("solution_srcs.05_01_intro_strands_mcp", "Intro to Strands + MCP (Lab 5)", False, "main"),
+    ("solution_srcs.05_02_graph_enriched_search", "Graph-Enriched Search via MCP (Lab 5)", False, "main"),
+    ("solution_srcs.05_03_text2cypher_agent", "Text2Cypher Agent (Lab 5)", False, "main"),
+    ("solution_srcs.06_01_data_loading", "Data Loading (Lab 6)", False, "main"),
+    ("solution_srcs.06_02_embeddings", "Embeddings (Lab 6)", False, "main"),
+    ("solution_srcs.06_03_vector_cypher_retriever", "VectorCypher Retriever (Lab 6)", False, "main"),
 ]
 
 
@@ -497,16 +499,18 @@ def _print_solutions_menu():
     print("\nLab 3 - Intro to Bedrock and Agents:")
     print("  1. Basic Strands Agent")
     print("  2. Deploy to AgentCore")
-    print("\nLab 4 - Graph-Enriched Search:")
-    print("  3. Intro to Strands + MCP")
-    print("  4. Vector Search via MCP")
-    print("  5. Graph-Enriched Search via MCP")
-    print("\nLab 5 - GraphRAG (WARNING: 6-7 will delete all data):")
-    print("  6. Data Loading Fundamentals")
-    print("  7. Embeddings")
-    print("  8. Vector Retriever")
-    print("  9. Vector Cypher Retriever")
-    print(" 10. Hybrid Search and GraphRAG")
+    print("\nLab 4 - GraphRAG Search:")
+    print("  3. Load Data and Query")
+    print("  4. Vector Retriever")
+    print("  5. VectorCypher Retriever")
+    print("\nLab 5 - MCP Server:")
+    print("  6. Intro to Strands + MCP")
+    print("  7. Graph-Enriched Search via MCP")
+    print("  8. Text2Cypher Agent")
+    print("\nLab 6 - GraphRAG Pipeline (WARNING: 9 will delete all data):")
+    print("  9. Data Loading")
+    print(" 10. Embeddings")
+    print(" 11. VectorCypher Retriever")
     print("\n  A. Run all")
     print("  0. Exit")
     print("=" * 50)

@@ -66,4 +66,4 @@ Once your agent is running in notebook 03, try these questions about the SEC fin
 
 == Next Steps
 
-Continue to xref:lab6.adoc[Lab 6: GraphRAG Pipeline] to build the data pipeline from scratch — chunking, embedding generation, and retrieval using the neo4j-graphrag library.
+Congratulations — you have completed the main workshop! For a bonus challenge, continue to xref:lab6.adoc[Lab 6: GraphRAG Pipeline] to build the data pipeline from scratch.

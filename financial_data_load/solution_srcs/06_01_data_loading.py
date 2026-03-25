@@ -1,16 +1,25 @@
 """
 Data Loading Fundamentals
 
-This solution demonstrates building a two-layer knowledge graph in Neo4j,
-creating structured entity nodes (Company, Product, RiskFactor) and
-unstructured document chunks with cross-link relationships.
+Builds a two-layer knowledge graph in Neo4j from scratch: structured entity
+nodes (Company, Product, RiskFactor) and unstructured document chunks with
+cross-link relationships.
 
-Run with: uv run python main.py solutions 1
+Run with: uv run python main.py solutions <N>
 """
+
+import os
+import sys
 
 from config import get_neo4j_driver
 
-# Structured filing data matching Lab_5_GraphRAG/financial_data.json
+# Add financial_data_load to sys.path so local lib imports work
+FINANCIAL_DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, FINANCIAL_DATA_DIR)
+
+from lib.data_utils import split_text  # noqa: E402
+
+# Structured filing data matching Lab_6_GraphRAG_Pipeline/financial_data.json
 FILING_DATA = {
     "company": {
         "name": "Apple Inc.",
@@ -96,7 +105,7 @@ FILING_DATA = {
 
 
 def clear_graph(driver) -> int:
-    """Remove all nodes."""
+    """Remove all nodes and relationships."""
     with driver.session() as session:
         result = session.run("""
             MATCH (n)
@@ -104,11 +113,6 @@ def clear_graph(driver) -> int:
             RETURN count(n) as deleted
         """)
         return result.single()["deleted"]
-
-
-def split_into_chunks(text: str) -> list[str]:
-    """Split text into chunks by double newlines (paragraphs)."""
-    return [chunk.strip() for chunk in text.split("\n\n") if chunk.strip()]
 
 
 def create_company(driver, company: dict) -> str:
@@ -159,31 +163,31 @@ def create_document(driver, company_id: str, document: dict) -> str:
         return result.single()["doc_id"]
 
 
-def create_chunks(driver, doc_id: str, chunks: list[str]) -> list[str]:
-    """Create Chunk nodes linked to a Document. Returns chunk element IDs."""
+def create_chunks(driver, doc_id: str, chunks: list[str]) -> None:
+    """Create Chunk nodes linked to a Document via FROM_DOCUMENT."""
+    chunk_data = [{"index": i, "text": t} for i, t in enumerate(chunks)]
     with driver.session() as session:
-        chunk_params = [{"text": text, "index": index} for index, text in enumerate(chunks)]
-        result = session.run("""
+        session.run("""
             MATCH (d:Document) WHERE elementId(d) = $doc_id
             UNWIND $chunks AS chunk
-            CREATE (c:Chunk {text: chunk.text, index: chunk.index})
-            CREATE (c)-[:FROM_DOCUMENT]->(d)
-            RETURN elementId(c) as chunk_id
-        """, doc_id=doc_id, chunks=chunk_params)
-        return [record["chunk_id"] for record in result]
+            MERGE (c:Chunk {index: chunk.index})
+            SET c.text = chunk.text
+            MERGE (c)-[:FROM_DOCUMENT]->(d)
+        """, doc_id=doc_id, chunks=chunk_data)
+        print(f"Created {len(chunks)} Chunk nodes with FROM_DOCUMENT relationships")
 
 
-def link_chunks(driver, chunk_ids: list[str]) -> int:
-    """Create NEXT_CHUNK relationships between sequential chunks."""
-    pairs = [{"id1": chunk_ids[i], "id2": chunk_ids[i + 1]} for i in range(len(chunk_ids) - 1)]
+def link_chunks(driver, num_chunks: int) -> None:
+    """Create NEXT_CHUNK relationships between consecutive chunks."""
+    pairs = [{"idx1": i, "idx2": i + 1} for i in range(num_chunks - 1)]
     with driver.session() as session:
         session.run("""
             UNWIND $pairs AS pair
-            MATCH (c1:Chunk) WHERE elementId(c1) = pair.id1
-            MATCH (c2:Chunk) WHERE elementId(c2) = pair.id2
-            CREATE (c1)-[:NEXT_CHUNK]->(c2)
+            MATCH (c1:Chunk {index: pair.idx1})
+            MATCH (c2:Chunk {index: pair.idx2})
+            MERGE (c1)-[:NEXT_CHUNK]->(c2)
         """, pairs=pairs)
-    return len(chunk_ids) - 1
+        print(f"Created {num_chunks - 1} NEXT_CHUNK relationships")
 
 
 def link_products_to_chunks(driver, products: list[dict]) -> int:
@@ -200,7 +204,9 @@ def link_products_to_chunks(driver, products: list[dict]) -> int:
             """, name=product["name"])
             count = result.single()["linked"]
             if count > 0:
+                print(f"  {product['name']} -> {count} chunk(s)")
                 total += count
+    print(f"\nCreated {total} FROM_CHUNK relationships")
     return total
 
 
@@ -257,8 +263,8 @@ def show_graph_structure(driver) -> None:
         """)
         print("\n=== Chunk Chain ===")
         for record in result:
-            next_str = f" -> Chunk {record['next_idx']}" if record['next_idx'] is not None else " (end)"
-            products_str = f" [Products: {', '.join(record['products'])}]" if record['products'] else ""
+            next_str = f" -> Chunk {record['next_idx']}" if record["next_idx"] is not None else " (end)"
+            products_str = f" [Products: {', '.join(record['products'])}]" if record["products"] else ""
             print(f"  Chunk {record['idx']}: \"{record['preview']}...\"{next_str}{products_str}")
 
 
@@ -271,6 +277,13 @@ def main():
         # Clear existing data
         deleted = clear_graph(driver)
         print(f"Deleted {deleted} existing nodes")
+
+        # Load filing data
+        filing_text = FILING_DATA["filing_text"]
+        print(f"\nCompany: {FILING_DATA['company']['name']} ({FILING_DATA['company']['ticker']})")
+        print(f"Products: {len(FILING_DATA['products'])}")
+        print(f"Risk Factors: {len(FILING_DATA['risk_factors'])}")
+        print(f"Filing text: {len(filing_text)} characters")
 
         # Create structured layer
         company_id = create_company(driver, FILING_DATA["company"])
@@ -288,20 +301,21 @@ def main():
         print(f"Created FILED relationship: {FILING_DATA['company']['name']} -> {FILING_DATA['document']['name']}")
 
         # Split text into chunks
-        chunks = split_into_chunks(FILING_DATA["filing_text"])
-        print(f"\nSplit text into {len(chunks)} chunks")
+        chunks = split_text(filing_text)
+        print(f"\nSplit into {len(chunks)} chunks")
+        for i, chunk in enumerate(chunks):
+            print(f"Chunk {i}: {len(chunk)} chars")
+            print(f"  {chunk[:80]}...\n")
 
-        # Create chunks
-        chunk_ids = create_chunks(driver, doc_id, chunks)
-        print(f"Created {len(chunk_ids)} Chunk nodes with FROM_DOCUMENT relationships")
+        # Create chunks and link to document
+        create_chunks(driver, doc_id, chunks)
 
-        # Link chunks
-        links = link_chunks(driver, chunk_ids)
-        print(f"Created {links} NEXT_CHUNK relationships")
+        # Link chunks sequentially
+        link_chunks(driver, len(chunks))
 
         # Link products to chunks
-        from_chunk_count = link_products_to_chunks(driver, FILING_DATA["products"])
-        print(f"Created {from_chunk_count} FROM_CHUNK relationships")
+        print("\nLinking products to chunks...")
+        link_products_to_chunks(driver, FILING_DATA["products"])
 
         # Show structure
         show_graph_structure(driver)

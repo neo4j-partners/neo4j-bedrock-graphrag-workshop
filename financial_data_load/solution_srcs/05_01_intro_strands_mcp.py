@@ -1,15 +1,14 @@
 """
-Introduction to Strands Agents with MCP (Text2Cypher)
+Introduction to Strands Agents with MCP
 
-This solution demonstrates the Text2Cypher pattern: a Strands Agent connected
-to a Neo4j MCP Server. The agent discovers tools at startup and writes its own
-Cypher queries — no custom @tool wrappers needed.
+Demonstrates a Strands Agent connected to a Neo4j MCP Server. The agent
+discovers tools at startup, inspects the graph schema, and runs simple
+queries — a pure MCP introduction with no custom @tool wrappers.
 
 Run with: uv run python main.py solutions <N>
 """
 
 import os
-import sys
 
 from botocore.config import Config as BotocoreConfig
 from dotenv import load_dotenv
@@ -26,7 +25,7 @@ _env_path = os.path.join(os.path.dirname(__file__), "..", ".env")
 load_dotenv(_env_path)
 
 MODEL_ID = os.getenv("MODEL_ID", "us.anthropic.claude-sonnet-4-6")
-REGION = os.getenv("AWS_REGION", os.getenv("REGION", "us-east-1"))
+REGION = os.getenv("REGION", os.getenv("AWS_REGION", "us-east-1"))
 MCP_GATEWAY_URL = os.getenv("MCP_GATEWAY_URL")
 MCP_ACCESS_TOKEN = os.getenv("MCP_ACCESS_TOKEN")
 
@@ -35,17 +34,12 @@ MCP_ACCESS_TOKEN = os.getenv("MCP_ACCESS_TOKEN")
 # 2. System Prompt
 # ---------------------------------------------------------------------------
 
-SYSTEM_PROMPT = """You are a financial analysis assistant with access to a Neo4j knowledge graph containing SEC 10-K filing data (companies, products, risk factors, asset managers, and document chunks).
+SYSTEM_PROMPT = """You are a helpful assistant with access to a Neo4j knowledge graph containing SEC 10-K financial filing data.
 
 Rules:
-1. Always retrieve the database schema before writing Cypher queries.
+1. Always retrieve the database schema before writing any Cypher query.
 2. Only use read-only Cypher (MATCH, RETURN, WITH, WHERE, ORDER BY, LIMIT).
-3. Use modern Cypher syntax:
-   - Use elementId(n) instead of id(n)
-   - Use COUNT{ pattern } instead of size((pattern))
-   - Use EXISTS{ pattern } instead of exists((pattern))
-   - Always use $parameter syntax for dynamic values
-4. Keep results concise — limit to 10 rows unless asked otherwise.
+3. Keep results concise — limit to 10 rows unless asked otherwise.
 """
 
 
@@ -55,7 +49,7 @@ Rules:
 
 
 def main():
-    """Run Text2Cypher demo via Strands Agent + MCP."""
+    """Run MCP intro demo."""
     print(f"Model:     {MODEL_ID}")
     print(f"Region:    {REGION}")
 
@@ -72,7 +66,6 @@ def main():
     ))
 
     with mcp_client:
-        # Discover available tools from the MCP server
         mcp_tools = mcp_client.list_tools_sync()
         tool_names = [t.tool_name for t in mcp_tools]
         print(f"MCP tools discovered: {tool_names}")
@@ -94,31 +87,14 @@ def main():
 
         # --- Run queries ---
 
-        # Schema discovery
         print("=" * 60)
-        query("What is the database schema? Give me a brief summary.")
-
-        # Single-hop traversal: Company → Product
-        print("\n" + "=" * 60)
-        query("What products does NVIDIA offer?")
-
-        # Aggregation across the graph
-        print("\n" + "=" * 60)
         query(
-            "Which risk factors are shared by more than one company? "
-            "Show the risk factor and which companies face it."
+            "What is the database schema? Give me a brief summary of "
+            "the node labels, relationship types, and key properties."
         )
 
-        # Multi-relationship query: competition and partnership
         print("\n" + "=" * 60)
-        query("Who are NVIDIA's competitors? Are any of them also partners?")
-
-        # Portfolio analysis: Asset Manager → Company → Risk
-        print("\n" + "=" * 60)
-        query(
-            "What companies does Berkshire Hathaway own, and what risk factors "
-            "do those companies face?"
-        )
+        query("How many companies are in the database?")
 
 
 if __name__ == "__main__":
