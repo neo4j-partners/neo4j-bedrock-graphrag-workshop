@@ -1,0 +1,131 @@
+= Lab 3 Instructions: Bedrock and Agents
+
+Follow these steps to set up SageMaker Studio, clone the workshop repository, and run the Strands agent notebook.
+
+TIP: For concepts and background, see xref:lab3.adoc[Lab 3: Bedrock and Agents].
+
+== Prerequisites
+
+* Completed **Lab 0** (AWS sign-in) and **Lab 1** (Neo4j Aura setup)
+* Access to AWS Console in **US East (N. Virginia) / us-east-1**
+* `CONFIG.txt` with your Neo4j credentials, MODEL_ID, and REGION
+
+== What You'll Learn
+
+* **Amazon Bedrock**: Configure and invoke foundation models from SageMaker notebooks
+* **Strands Agent Architecture**: Build agents with a model, tools, and a system prompt
+* **Tool Definition**: Define Python functions that an LLM can call with the `@tool` decorator
+* **ReAct Pattern**: Reason, act, observe, and repeat in a loop
+* **AgentCore Deployment**: Package and deploy an agent to managed AWS runtime
+* **Agent Invocation**: Call a deployed agent via CLI and boto3
+
+== SageMaker Studio Setup
+
+=== Step 1: Navigate to SageMaker AI
+
+1. In the AWS Management Console, click the **region selector** in the upper right corner and select **US East (N. Virginia)** / `us-east-1`
+2. In the search bar at the top, type `SageMaker`
+3. Select **Amazon SageMaker AI** from the results
+
+IMPORTANT: Select **Amazon SageMaker AI**, not "Amazon SageMaker." They are different services.
+
+IMPORTANT: SageMaker Studio must be set up in the **US East (N. Virginia) / us-east-1** region. Verify the region selector in the upper right corner shows `us-east-1` before proceeding.
+
+image::Select_SageMaker_East_1.png[Navigate to SageMaker AI in us-east-1]
+
+=== Step 2: Set Up a Domain
+
+1. Verify you see **Amazon SageMaker AI** in the left sidebar
+2. In the left panel under "Environment configuration", click **Domains**, then click the **Create domain** button in the top right corner
+
+image::lab3-create-domain.png[SageMaker AI Domains page showing Domains menu and Create domain button]
+
+. Select **Set up for single user (Quick setup)** on the left, then click the **Set up** button. This creates a domain with default settings.
+
+image::lab3-setup-single-user.png[Set up SageMaker Domain page showing Set up for single user option]
+
+=== Step 3: Open SageMaker Studio
+
+1. Wait while your environment is being set up (this takes 1-2 minutes)
+2. You will see progress indicators for IAM role creation, internet access, encryption, and storage
+3. Once setup completes, click **Open Studio** at the bottom of the page
+
+image::lab3-open-studio.png[Open Studio]
+
+=== Step 4: Launch JupyterLab
+
+1. In SageMaker Studio Home, you will see the Overview tab with workflow options
+2. Click the **JupyterLab** card to create and run Jupyter notebooks in a dedicated environment
+
+image::lab3-open-jupyterlab.png[Open JupyterLab]
+
+=== Step 5: Create a JupyterLab Space
+
+1. Under **Space templates**, find the **Quick start** option (ml.t3.medium - 5 GB - 4 GiB RAM)
+2. Click **Launch now** to create a lightweight development environment
+
+image::lab3-quick-start.png[Quick Start Launch]
+
+=== Step 6: Open Your Space
+
+1. Wait for the **Status** column to show **Running** (this may take 1-2 minutes)
+2. Once running, click on the space name (e.g., **quickstart-default-t...**) in the Name column to open JupyterLab
+
+image::lab3-open-space.png[JupyterLab spaces list showing Running status and space name to click]
+
+=== Step 7: Create a Labs Folder
+
+1. In the JupyterLab file browser on the left, click the **Create New Folder** icon (folder with a + sign)
+2. Name the folder `labs` and press Enter
+3. Double-click the **labs** folder to open it
+
+image::lab3-create-folder.png[Create Folder]
+
+=== Step 8: Clone the Git Repository
+
+1. With the `labs` folder open, click the **Git icon** in the left sidebar (it looks like a diamond/branch symbol)
+2. If a **Clone a Repository** button is visible, click it and enter the repository URL:
++
+----
+https://github.com/neo4j-partners/lab-neo4j-aws.git
+----
++
+If the clone button is not available, open a terminal instead:
++
+a. In the JupyterLab Launcher, click **Terminal** under the **Other** section
+b. Run these commands to clone the repository into your labs folder:
++
+[source,bash]
+----
+cd labs
+git clone https://github.com/neo4j-partners/lab-neo4j-aws.git
+----
++
+3. Once the clone completes, click the **file browser icon** (folder icon) in the left sidebar to navigate into the `labs/lab-neo4j-aws` directory
+
+== Notebook 1: Build and Test the Agent
+
+1. In the file browser, navigate to `Lab_3_Intro_to_Bedrock_and_Agents/`
+2. Open `01_basic_strands_agent.ipynb`
+3. The notebook loads configuration from `../CONFIG.txt` (MODEL_ID and REGION)
+4. Run through the cells to:
+** Install required packages
+** Define simple tools (`get_current_time`, `add_numbers`)
+** Build and run the Strands agent
+** Test the agent with sample queries
+** Ask questions about sample SEC financial filing data
+
+== Notebook 2: Deploy to AgentCore Runtime
+
+1. Open `02_deploy_to_agentcore.ipynb`
+2. The agent code is pre-built in the `agentcore_deploy/` directory
+3. Run through the cells to:
+** Review the deployment package (`agent.py` and `pyproject.toml`)
+** Configure and deploy the agent to AgentCore Runtime
+** Invoke the deployed agent via CLI and boto3
+
+NOTE: The deployment creates AWS resources. When you are finished, uncomment and run the cleanup cell to destroy the deployed agent.
+
+== Next Steps
+
+Continue to xref:lab4.adoc[Lab 4: Graph-Enriched Search] to search the Neo4j knowledge graph with vector, graph-enriched, and hybrid retrieval strategies.

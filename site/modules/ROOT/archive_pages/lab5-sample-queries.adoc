@@ -1,0 +1,271 @@
+= Lab 5: Advanced Sample Queries
+
+These queries require the data structures built in Lab 5: Document and Chunk nodes, the `chunkEmbeddings` vector index, and the `search_chunks` and `search_entities` fulltext indexes. They will not return results until the Lab 5 notebooks have been run.
+
+TIP: For structured graph queries against the entity data loaded in Lab 1, see the xref:sample-queries.adoc[Sample Cypher Queries] page.
+
+== Fulltext and Vector Search
+
+'''
+
+=== Document-Chunk Structure
+
+View all documents and their chunk counts:
+
+[source,cypher]
+----
+MATCH (d:Document)
+OPTIONAL MATCH (d)<-[:FROM_DOCUMENT]-(c:Chunk)
+RETURN d.source AS document, count(c) AS chunks
+ORDER BY chunks DESC
+----
+
+NOTE: `OPTIONAL MATCH` keeps documents even if chunking has not completed. Each Document represents one SEC 10-K filing.
+
+Browse the first chunks of a document:
+
+[source,cypher]
+----
+MATCH (c:Chunk)-[:FROM_DOCUMENT]->(d:Document)
+WITH c, d ORDER BY c.index LIMIT 10
+RETURN c.index AS chunkIndex,
+       substring(c.text, 0, 120) AS preview,
+       d.source AS document
+----
+
+NOTE: `substring()` truncates long text for readable output. Chunks are ordered by their `index` property, which reflects their position in the original filing.
+
+Walk the chunk chain:
+
+[source,cypher]
+----
+MATCH (c:Chunk)-[:FROM_DOCUMENT]->(d:Document)
+OPTIONAL MATCH (c)-[:NEXT_CHUNK]->(next:Chunk)
+WITH c, next, d ORDER BY c.index LIMIT 10
+RETURN c.index AS chunkIndex,
+       substring(c.text, 0, 80) AS preview,
+       next.index AS nextChunkIndex,
+       d.source AS document
+----
+
+NOTE: `OPTIONAL MATCH` on NEXT_CHUNK keeps the last chunk in the chain (which has no successor). The NEXT_CHUNK relationship preserves reading order so that adjacent context can be retrieved alongside vector matches.
+
+=== Fulltext Keyword Search
+
+IMPORTANT: Requires the `search_chunks` and `search_entities` fulltext indexes.
+
+Search chunks for a specific term:
+
+[source,cypher]
+----
+CALL db.index.fulltext.queryNodes('search_chunks', 'cybersecurity')
+YIELD node, score
+RETURN score,
+       substring(node.text, 0, 200) AS content
+ORDER BY score DESC
+LIMIT 5
+----
+
+NOTE: Fulltext search returns chunks ranked by Lucene relevance score. Terms are matched as keywords, not by semantic meaning.
+
+Fuzzy search (catches misspellings):
+
+[source,cypher]
+----
+CALL db.index.fulltext.queryNodes('search_chunks', 'regulatry~')
+YIELD node, score
+RETURN score,
+       substring(node.text, 0, 200) AS content
+ORDER BY score DESC
+LIMIT 5
+----
+
+NOTE: The `~` operator enables fuzzy matching, finding "regulatory" even when spelled as "regulatry". Useful for user-facing search where typos are common.
+
+Boolean keyword search:
+
+[source,cypher]
+----
+CALL db.index.fulltext.queryNodes('search_chunks', 'supply AND chain AND disruption')
+YIELD node, score
+RETURN score,
+       substring(node.text, 0, 200) AS content
+ORDER BY score DESC
+LIMIT 5
+----
+
+NOTE: Boolean operators (AND, OR, NOT) control how keywords combine. `AND` requires all terms to appear in the chunk.
+
+Search entity names:
+
+[source,cypher]
+----
+CALL db.index.fulltext.queryNodes('search_entities', 'NVIDIA')
+YIELD node, score
+RETURN labels(node)[0] AS type, node.name AS name, score
+ORDER BY score DESC
+LIMIT 10
+----
+
+NOTE: The `search_entities` index covers Company, Product, and RiskFactor names. This finds entities by name rather than searching filing text.
+
+=== Vector Similarity Search
+
+IMPORTANT: Requires the `chunkEmbeddings` vector index.
+
+Find chunks similar to a random seed chunk (no API key needed):
+
+[source,cypher]
+----
+MATCH (seed:Chunk)
+WHERE seed.embedding IS NOT NULL
+WITH seed, rand() AS r ORDER BY r LIMIT 1
+CALL db.index.vector.queryNodes(
+    'chunkEmbeddings', 6, seed.embedding
+) YIELD node, score
+WHERE node <> seed
+WITH seed, node, score ORDER BY score DESC LIMIT 5
+RETURN substring(seed.text, 0, 100) AS seedText,
+       score AS similarity,
+       substring(node.text, 0, 100) AS matchText
+----
+
+NOTE: Picks a random chunk and uses its stored embedding to find the most similar chunks in vector space. No embedding API call is needed because the query reuses embeddings already stored on Chunk nodes. `WHERE node <> seed` excludes the seed from its own results.
+
+Vector search with document context:
+
+[source,cypher]
+----
+MATCH (seed:Chunk)
+WHERE seed.embedding IS NOT NULL
+WITH seed, rand() AS r ORDER BY r LIMIT 1
+CALL db.index.vector.queryNodes(
+    'chunkEmbeddings', 6, seed.embedding
+) YIELD node, score
+WHERE node <> seed
+WITH seed, node, score ORDER BY score DESC LIMIT 5
+MATCH (node)-[:FROM_DOCUMENT]->(d:Document)
+RETURN substring(seed.text, 0, 80) AS seedText,
+       score AS similarity,
+       d.source AS document,
+       substring(node.text, 0, 80) AS matchText
+----
+
+NOTE: Enriches vector results by traversing FROM_DOCUMENT to include the source filing. This is the same pattern used by the VectorCypherRetriever in Lab 5: vector search finds the chunk, then graph traversal gathers context.
+
+'''
+
+== Graph-Enriched Retrieval
+
+These queries combine vector or fulltext search with graph traversal, demonstrating the GraphRAG patterns used in Labs 4 and 6.
+
+'''
+
+=== Chunk to Company (the GraphRAG traversal)
+
+From a vector match, traverse to the filing company:
+
+[source,cypher]
+----
+MATCH (seed:Chunk)
+WHERE seed.embedding IS NOT NULL
+WITH seed, rand() AS r ORDER BY r LIMIT 1
+CALL db.index.vector.queryNodes(
+    'chunkEmbeddings', 6, seed.embedding
+) YIELD node, score
+WHERE node <> seed
+WITH seed, node, score ORDER BY score DESC LIMIT 5
+MATCH (node)-[:FROM_DOCUMENT]->(d:Document)<-[:FILED]-(c:Company)
+RETURN substring(seed.text, 0, 80) AS seedText,
+       score AS similarity,
+       c.name AS company,
+       c.ticker AS ticker,
+       d.source AS document,
+       substring(node.text, 0, 80) AS matchText
+----
+
+NOTE: This is the core GraphRAG pattern. Vector search finds relevant chunks, then `FROM_DOCUMENT` reaches the Document and `FILED` reaches the Company. The agent receives both the text and the structured entity context. This traversal path is what the VectorCypherRetriever's `retrieval_query` parameter automates.
+
+=== Chunk to Company to Risk Factors
+
+Extend the traversal to include the company's risk factors:
+
+[source,cypher]
+----
+MATCH (seed:Chunk)
+WHERE seed.embedding IS NOT NULL
+WITH seed, rand() AS r ORDER BY r LIMIT 1
+CALL db.index.vector.queryNodes(
+    'chunkEmbeddings', 6, seed.embedding
+) YIELD node, score
+WHERE node <> seed
+WITH seed, node, score ORDER BY score DESC LIMIT 3
+MATCH (node)-[:FROM_DOCUMENT]->(d:Document)<-[:FILED]-(c:Company)
+OPTIONAL MATCH (c)-[:FACES_RISK]->(r:RiskFactor)
+RETURN c.name AS company,
+       substring(node.text, 0, 100) AS matchText,
+       score AS similarity,
+       collect(r.name) AS riskFactors
+----
+
+NOTE: Extends the base GraphRAG pattern by following FACES_RISK from the company. `OPTIONAL MATCH` keeps results even for companies with no risk factors loaded. `collect()` gathers all risk factors into a list per company.
+
+=== Adjacent Chunk Retrieval
+
+Retrieve surrounding chunks for broader context:
+
+[source,cypher]
+----
+MATCH (seed:Chunk)
+WHERE seed.embedding IS NOT NULL
+WITH seed, rand() AS r ORDER BY r LIMIT 1
+CALL db.index.vector.queryNodes(
+    'chunkEmbeddings', 6, seed.embedding
+) YIELD node, score
+WHERE node <> seed
+WITH seed, node, score ORDER BY score DESC LIMIT 3
+OPTIONAL MATCH (prev:Chunk)-[:NEXT_CHUNK]->(node)
+OPTIONAL MATCH (node)-[:NEXT_CHUNK]->(next:Chunk)
+RETURN substring(node.text, 0, 80) AS matchText,
+       score AS similarity,
+       node.index AS chunkIndex,
+       prev.index AS prevIndex,
+       next.index AS nextIndex,
+       substring(COALESCE(prev.text, ''), 0, 60) AS prevPreview,
+       substring(COALESCE(next.text, ''), 0, 60) AS nextPreview
+----
+
+NOTE: NEXT_CHUNK relationships form a linked list that preserves the original reading order. Retrieving the previous and next chunks alongside the vector match gives the agent a wider context window. `COALESCE` handles the first and last chunks in a chain, which have no predecessor or successor.
+
+=== Fulltext Search with Entity Enrichment
+
+Find chunks by keyword, then traverse to the company and its products:
+
+[source,cypher]
+----
+CALL db.index.fulltext.queryNodes('search_chunks', 'artificial intelligence')
+YIELD node, score
+WITH node, score ORDER BY score DESC LIMIT 5
+MATCH (node)-[:FROM_DOCUMENT]->(d:Document)<-[:FILED]-(c:Company)
+OPTIONAL MATCH (c)-[:OFFERS]->(p:Product)
+RETURN c.name AS company,
+       score AS relevance,
+       collect(DISTINCT p.name) AS products,
+       substring(node.text, 0, 120) AS excerpt
+----
+
+NOTE: Combines fulltext keyword search with the same graph traversal pattern used in vector-based GraphRAG. The difference is the starting point: fulltext search matches by keywords while vector search matches by semantic meaning. Both traverse the same graph structure to enrich results.
+
+=== Verify Indexes
+
+Confirm which indexes exist in the database:
+
+[source,cypher]
+----
+SHOW INDEXES
+YIELD name, type, labelsOrTypes, properties
+RETURN name, type, labelsOrTypes, properties
+ORDER BY type, name
+----
+
+NOTE: Run this to verify that vector and fulltext indexes were created successfully in Lab 5. Expected indexes include `chunkEmbeddings` (VECTOR), `search_chunks` (FULLTEXT), and `search_entities` (FULLTEXT).

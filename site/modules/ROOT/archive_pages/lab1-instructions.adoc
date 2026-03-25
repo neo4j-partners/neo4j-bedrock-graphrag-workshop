@@ -1,0 +1,95 @@
+= Lab 1 Instructions: Neo4j Aura Setup
+
+Follow these steps to sign up for Neo4j Aura and create your database instance.
+
+TIP: For concepts and background, see xref:lab1.adoc[Lab 1: Concepts and Reference].
+
+== Prerequisites
+
+* Completed **Lab 0** (environment setup)
+* For **Workshop SSO Login**: Access to OneBlink credentials page (provided by your organizer)
+* For **Free Trial Signup**: A valid email address
+
+== Part 1: Neo4j Aura Signup
+
+There are two signup options for this lab. **Follow the signup process provided by your workshop organizer.**
+
+=== Option A: Workshop SSO Login (Recommended for organized workshops)
+
+If your organizer has provided OneBlink credentials, use the SSO login process:
+
+1. Navigate to the OneBlink credentials page to retrieve your SSO login information (Org ID, Email, Password)
++
+image::lab1-oneblink-credentials.png[OneBlink credentials page]
+2. Go to https://console-preview.neo4j.io/[console-preview.neo4j.io]
+3. Click **Continue with Organization SSO**
++
+image::lab1-continue-sso.png[Continue with Organization SSO]
+4. Enter your **Org ID** from the OneBlink credentials page and click **Submit**
++
+image::01_Login_w_Org_SSO.png[Login with Organization SSO]
+5. Click **Continue with OneBlink SSO**
++
+image::lab1-oneblink-sso.png[Continue with OneBlink SSO]
+6. Enter your **Email** and **Password** from the OneBlink credentials page
++
+WARNING: The email field may be pre-populated with an incorrect address. Be sure to clear it and enter the email from your OneBlink credentials.
+
+=== Option B: Free Trial Signup (For self-paced learning)
+
+If you are completing this lab independently or your organizer has instructed you to create a free trial:
+
+1. Navigate to https://console-preview.neo4j.io/[console-preview.neo4j.io]
+2. Click **Don't have an account? Sign up**
+3. Follow the sign-up process to create your Neo4j Aura account
+4. When prompted, select **AWS** as the cloud provider and **US East (N. Virginia)** as the region
++
+image::lab1-free-trial-region.png[Free trial region selection]
+5. Click **Start 14-day free trial**
+6. **Save your credentials immediately** — click **Download to continue**. The password is only shown once.
++
+image::lab1-free-trial-credentials.png[Free trial credentials]
+
+NOTE: If you signed up using the Free Trial option, your instance was already created during signup. Skip ahead to xref:lab1-load.adoc[Load the Knowledge Graph].
+
+== Part 2: Create Your Database Instance
+
+1. After logging in, click on **Instances** in the left sidebar under "Data services", then click **Create instance**
++
+image::lab1-create-instance.png[Create Instance]
+2. Configure your new instance:
++
+IMPORTANT: 3 key settings to watch when creating your instance! +
+**1.** Select **Professional** — do _not_ select Business Critical +
+**2.** Set **Graph Analytics** to **Plugin** +
+**3.** Enable **Vector-optimized** (under Additional settings)
++
+[cols="1,2"]
+|===
+| Setting | Value
+
+| **Tier** | Professional
+| **Instance name** | A unique name based on your name (e.g., `ryans-lab-instance`)
+| **Sizing** | 4 GB RAM / 1 CPU
+| **Graph Analytics** | Plugin
+| **Vector-optimized** | Enabled (under Additional settings)
+|===
+
+3. Click **Create** to provision your database instance
++
+image::lab1-configure-instance.png[Configure Instance]
+
+== Save Your Credentials
+
+IMPORTANT: After clicking Create, a credentials dialog appears with your Connection URI, Username, and Password. **Save this information immediately.** The password will not be shown again.
+
+image::lab1-save-credentials.png[Save Credentials]
+
+Click **Download and continue** to save the credentials file. You will need these in:
+
+* Lab 2: Aura Agents configuration
+* Labs 3-6: `CONFIG.txt` for notebook configuration
+
+== Next Steps
+
+Continue to xref:lab1-load.adoc[Load the Knowledge Graph] to populate your database with SEC financial data.

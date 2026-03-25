@@ -1,0 +1,90 @@
+= Lab 2: Aura Agents
+
+This is Lab 2 of the workshop. You have a running knowledge graph from Lab 1 loaded with SEC 10-K filing data. Before writing any code, you will see what an AI agent can do with this graph through Neo4j's no-code platform: Aura Agents.
+
+TIP: Ready to start? Jump to the xref:lab2-instructions.adoc[Lab 2 Instructions] for step-by-step setup.
+
+.**At a Glance**
+
+* **Aura Agents** — combine graph traversal and natural language queries in one conversational interface
+* **"Create with AI"** — analyzes your graph schema and auto-generates tools with no Cypher to write manually
+* **Three retrieval patterns** — Cypher Templates (deterministic traversals), Text2Cypher (ad-hoc natural language queries), and Similarity Search (vector-based, not yet enabled for this dataset)
+* **Optional deployment** — expose the agent as a REST API endpoint or MCP server for integration with external clients
+
+== What Are Aura Agents?
+
+Aura Agents is Neo4j's no-code platform for building conversational AI interfaces grounded in graph data. Rather than writing retrieval logic by hand, you describe a use case in natural language and the platform generates an agent with tools tailored to your graph's schema. The agent then uses those tools to answer questions by combining graph traversals and dynamically generated Cypher queries.
+
+The "Create with AI" workflow inspects the node labels, relationship types, and indexes in your knowledge graph and produces a fully configured agent. For the SEC financial dataset, this means the agent automatically understands how to look up company details, traverse ownership chains, compare risk factors, and search filing text, all without manual configuration.
+
+== Three Retrieval Patterns
+
+The generated agent uses three categories of tools, each suited to different question types.
+
+=== Cypher Templates
+
+Cypher Templates are pre-built graph traversal patterns mapped to specific questions. Each template targets a known pattern in the graph (company details, risk factors, ownership relationships) and executes a precise, deterministic Cypher query. Because the query structure is fixed, results are predictable and fast.
+
+.Example
+[%collapsible]
+====
+"What products does NVIDIA Corporation offer?" triggers a template that traverses `(Company)-[:OFFERS]->(Product)` and returns the product list. No query generation is needed. The template maps directly to the graph pattern.
+====
+
+=== Text2Cypher
+
+Text2Cypher translates arbitrary natural language questions into Cypher queries at runtime. This is the most flexible retrieval pattern, able to answer questions the template authors did not anticipate, but it is also the least deterministic, since the generated query depends on the LLM's interpretation.
+
+.Example
+[%collapsible]
+====
+"How many products does NVIDIA Corporation mention?" generates a Cypher query like `MATCH (c:Company {name: 'NVIDIA Corporation'})-[:OFFERS]->(p:Product) RETURN count(p)` and executes it against the graph.
+====
+
+=== Similarity Search
+
+Similarity Search uses vector embeddings to find nodes that are semantically similar to a query. Aura Agents offers this as a tool type, but it requires a vector index with pre-computed embeddings on the target nodes. The current SEC 10-K dataset does not have embeddings loaded at this stage, so the Similarity Search tool is not enabled for this lab. You will add embeddings and use vector search in Lab 5.
+
+NOTE: If you see Similarity Search listed as an available tool type when creating your agent, you can skip it for now — there are no embeddings in the graph to search against yet.
+
+== Tool Type Comparison
+
+[cols="1,2,2,1"]
+|===
+| Tool Type | Purpose | Best For | Reliability
+
+| **Cypher Templates**
+| Controlled, precise graph traversals
+| Specific lookups, comparisons
+| Deterministic
+
+| **Text2Cypher**
+| Flexible natural language to Cypher
+| Ad-hoc questions about the data
+| Variable
+
+| **Similarity Search**
+| Vector-based semantic matching
+| Finding related content by meaning (requires embeddings)
+| Not available — dataset has no embeddings yet
+|===
+
+== Tool Reliability
+
+Templates and Text2Cypher sit at opposite ends of a reliability spectrum. Templates always return the same result for the same input but only cover questions someone anticipated. Text2Cypher handles everything else at the cost of predictability. The agent uses both: templates for known patterns, Text2Cypher for the long tail.
+
+.Why Text2Cypher needs cross-checking
+[%collapsible]
+====
+Because Text2Cypher generates a different query each invocation, subtle variations can produce incorrect answers silently. A query that filters on `"cybersecurity"` instead of `"Cybersecurity Threats"` returns no results for case-sensitive property values, and the agent may present that empty result confidently rather than flagging a possible query issue.
+
+Running the same question twice and comparing results is a practical way to spot this variability.
+====
+
+== Connection to Later Labs
+
+Labs 4 through 6 implement these retrieval patterns programmatically. Lab 4 builds Cypher Templates and Text2Cypher from scratch using Strands Agents and MCP. Lab 5 replaces the manual plumbing with the neo4j-graphrag library's retriever classes. Lab 6 gives the agent full autonomy to write its own Cypher. The no-code agent you build here provides a reference point: when you write these pipelines in code, you will already understand how each pattern behaves and what kinds of questions it handles well.
+
+== Next Steps
+
+Continue to xref:lab2-instructions.adoc[Lab 2 Instructions] to create your Aura Agent, or proceed to xref:lab3.adoc[Lab 3: Bedrock and Agents] to begin the coding labs.

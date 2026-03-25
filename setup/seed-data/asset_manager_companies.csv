@@ -1,4 +1,4 @@
-manager_id,company_id,shares
+managerId,companyId,shares
 AM001,C001,50065439
 AM001,C002,28143032
 AM001,C003,46541943

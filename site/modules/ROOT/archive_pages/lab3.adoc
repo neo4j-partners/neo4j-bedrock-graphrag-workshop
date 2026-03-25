@@ -1,0 +1,153 @@
+= Lab 3: Bedrock and Agents
+
+The no-code track showed what a GraphRAG agent can do. Now you shift to building agents with code. This lab introduces the foundational pieces: Amazon Bedrock for LLM access, the Strands Agents SDK for agent orchestration, and the ReAct pattern that drives every agent in the remaining labs.
+
+TIP: Ready to start? Jump to the xref:lab3-instructions.adoc[Lab 3 Instructions] for step-by-step setup.
+
+.**At a Glance**
+
+* **Amazon Bedrock** — managed access to foundation models through a unified API, no infrastructure to manage
+* **Strands Agents SDK** — lightweight, AWS-native agent framework with built-in tool use and MCP support
+* **The ReAct pattern** — reason, act, observe, repeat until the LLM reaches an answer
+* **Tools** — Python functions the LLM can invoke at runtime using the `@tool` decorator
+* **AgentCore Runtime** — packages and deploys agents as managed AWS services
+
+== Amazon Bedrock
+
+This lab uses Bedrock for two distinct purposes: Claude handles reasoning and tool selection, Nova generates embeddings for vector search in later labs. For a full overview of how Bedrock fits into the workshop architecture, including the Converse API tool use protocol and cross-region inference, see xref:aws-services.adoc[AWS GenAI Services].
+
+The code pattern that matters for this lab is the Converse API's tool use loop. Tool definitions go into the request. Claude examines them, decides whether to call one, and returns a `toolUse` content block. The framework executes the tool, appends the result, and calls Converse again. The Strands SDK's `BedrockModel` wraps this protocol:
+
+[source,python]
+----
+from strands.models import BedrockModel
+
+bedrock_model = BedrockModel(
+    model_id=MODEL_ID,
+    region_name=REGION,
+    temperature=0,
+)
+----
+
+.Cross-region inference profile handling in code
+[%collapsible]
+====
+The workshop uses a cross-region inference profile (the `us.` prefix on the Model ID), which routes requests across US AWS regions for higher throughput with no additional routing cost. The `BedrockModel` accepts the full cross-region model ID directly:
+
+[source,python]
+----
+MODEL_ID = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
+
+bedrock_model = BedrockModel(model_id=MODEL_ID, region_name=REGION)
+----
+====
+
+== The ReAct Pattern
+
+ReAct stands for Reason + Act. The loop works as follows:
+
+1. **Reason** — The LLM examines the question and the current state, then decides what to do next.
+2. **Act** — The LLM issues a tool call (or produces a final answer if no tool is needed).
+3. **Observe** — The tool executes and the result is appended to the message history.
+4. **Repeat** — The LLM sees the tool result and decides whether to call another tool or finish.
+
+.A multi-cycle example with SEC data
+[%collapsible]
+====
+A user asks: "What risks does NVIDIA face and which asset managers are exposed?"
+
+The agent reasons that it needs NVIDIA's risk factors first and calls a graph query tool. The result returns risk factors like "Supply Chain Disruption" and "Cybersecurity Threats." The agent then reasons that it needs to find asset managers who hold NVIDIA, calls the tool again with a different query, and observes that BlackRock, Vanguard, and State Street all hold positions. The agent synthesizes both results: "NVIDIA faces supply chain and cybersecurity risks. BlackRock, Vanguard, and State Street hold positions in NVIDIA, making their portfolios exposed to these risks."
+
+Each cycle follows the same pattern: reason about what information is missing, act by calling a tool, observe the result. The number of cycles depends on the question's complexity, not on a predetermined plan.
+====
+
+This loop is the foundation for every agent in the workshop. Labs 4 and 5 add retrieval tools (vector search, graph traversal). Lab 6 gives the agent full autonomy to discover the graph schema and write its own Cypher through MCP. The orchestration pattern stays the same.
+
+== Strands Agent Architecture
+
+The agent in this lab has two simple tools: one that returns the current time and one that adds numbers. The architecture is the same regardless of what the tools do — Labs 4 through 6 replace these simple tools with graph queries, vector search, and MCP server connections.
+
+Strands takes a model-driven approach: the model decides what to do at each step rather than following a developer-defined workflow. You provide a model, a system prompt, and a list of tools. The agent implements the ReAct loop internally: it reasons about the question, calls tools, observes results, and repeats until it reaches an answer.
+
+Tools are defined with the `@tool` decorator. The decorator converts a Python function into a tool the LLM can call. The docstring becomes the tool description that the LLM reads when deciding which tool to use.
+
+[source,python]
+----
+@tool
+def get_current_time() -> str:
+    """Get the current date and time."""
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+----
+
+The `Agent` constructor wires the model, system prompt, and tools into a complete ReAct loop:
+
+[source,python]
+----
+agent = Agent(
+    model=bedrock_model,
+    system_prompt="You are a helpful assistant.",
+    tools=[get_current_time, add_numbers],
+)
+
+result = agent("What time is it and what is 42 + 17?")
+----
+
+Strands is model-agnostic, supporting Bedrock, Anthropic, OpenAI, Ollama, and other providers through swappable model classes. This workshop uses `BedrockModel` throughout, but the agent code itself is independent of the provider. Strands also has native support for MCP (Model Context Protocol), which Labs 4 and 6 use to connect agents to the Neo4j knowledge graph through MCP servers rather than locally defined tools.
+
+.Why model-driven and why now
+[%collapsible]
+====
+Early agent frameworks (2023-era) compensated for weaker model capabilities with complex orchestration: hand-tuned prompt chains, custom response parsers, and explicit control flow graphs that routed the agent through predetermined steps. Building a production agent often took months of tuning.
+
+Current foundation models can plan multi-step tool use, recover from errors, and adapt their approach mid-task without developer-defined routing. The orchestration that earlier frameworks enforced in code is now handled by the model itself. Strands leans into this shift: rather than defining every possible execution path, the developer defines capabilities as tools and the model coordinates their use. The tradeoff is less fine-grained control over execution order in exchange for faster development and more adaptive behavior at runtime.
+====
+
+== AgentCore Deployment
+
+After testing the agent locally in the first notebook, a second notebook (`02_deploy_to_agentcore.ipynb`) walks through deploying it to Amazon Bedrock AgentCore Runtime. The agent code is pre-built in the `agentcore_deploy/` directory. AgentCore provides a serverless hosting environment that runs each agent session in an isolated microVM. For the full service overview, see xref:aws-services.adoc#_amazon_bedrock_agentcore[AgentCore in AWS GenAI Services].
+
+The deployment uses `direct_code_deploy` from the AgentCore Starter Toolkit, which packages agent code without requiring a Dockerfile:
+
+1. The agent code (`agent.py`) and dependencies (`pyproject.toml`) are pre-built in `agentcore_deploy/`
+2. Generate a `.bedrock_agentcore.yaml` configuration specifying the entrypoint, runtime, and the IAM execution role
+3. Run `agentcore deploy` — the toolkit packages the code, uploads it to S3, and creates the runtime environment
+4. Invoke the deployed agent via the `agentcore` CLI or programmatically with boto3
+
+NOTE: The AgentCore deployment requires IAM resources that the workshop admin creates before the workshop. See xref:admin-setup.adoc[Admin Setup] for the `setup_agentcore.sh` script that provisions the execution role, S3 bucket, and SageMaker permissions.
+
+.What happens during `agentcore deploy`
+[%collapsible]
+====
+The Starter Toolkit handles several steps internally:
+
+1. Reads the `.bedrock_agentcore.yaml` configuration for the entrypoint and runtime settings
+2. Packages the agent directory (code + `pyproject.toml`) into a deployable artifact
+3. Uploads the artifact to the S3 bucket (`bedrock-agentcore-codebuild-sources-\{account}-\{region}`)
+4. Creates the AgentCore Runtime resource, which provisions a microVM environment
+5. Returns the agent's ARN for invocation
+
+The deployed agent runs with the IAM execution role specified in the configuration. This role grants Bedrock model invocation, CloudWatch logging, and X-Ray tracing permissions.
+====
+
+.Invocation via boto3
+[%collapsible]
+====
+Once deployed, agents are invoked through the `bedrock-agentcore` boto3 client using the agent's ARN:
+
+[source,python]
+----
+client = boto3.client("bedrock-agentcore", region_name=REGION)
+response = client.invoke_agent_runtime(
+    agentRuntimeArn=AGENT_ARN,
+    runtimeSessionId=str(uuid.uuid4()),
+    payload=json.dumps({"prompt": prompt}).encode(),
+    qualifier="DEFAULT",
+)
+----
+
+Each invocation creates an isolated session in a dedicated microVM. The agent processes the request using the same Converse API it used in the notebook, but now running on managed infrastructure.
+====
+
+== Next Steps
+
+Continue to xref:lab3-instructions.adoc[Lab 3 Instructions] to set up SageMaker Studio and run the agent notebook, or proceed to xref:lab4.adoc[Lab 4: Graph-Enriched Search] to connect agents to the Neo4j knowledge graph.

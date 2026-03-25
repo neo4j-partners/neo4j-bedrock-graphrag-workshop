@@ -1,0 +1,161 @@
+= Lab 5: GraphRAG
+
+In Lab 4 you wrote every retrieval query by hand — vector search Cypher and graph traversal joins — and saw exactly how each strategy works at the query level. This lab replaces that manual plumbing with the neo4j-graphrag library. `VectorRetriever` replaces your hand-written vector Cypher. `VectorCypherRetriever` replaces your graph traversal joins. The library also adds capabilities Lab 4 did not cover: `HybridRetriever` combines vector similarity with fulltext keyword search, and `HybridCypherRetriever` layers graph traversal on top of that. You also build the data pipeline from scratch — chunking, embedding generation — that was pre-built for you in Lab 4.
+
+TIP: Ready to start? Jump to the xref:lab5-instructions.adoc[Lab 5 Instructions] for the notebook walkthrough.
+
+.**At a Glance**
+
+* **Five notebooks** — progress from loading raw text into a knowledge graph to running hybrid retrieval queries
+* **neo4j-graphrag library** — four retriever classes, each suited to a different query shape
+* **Retrieval pipeline** — vector similarity, keyword matching, and graph traversal combine into a single pipeline
+* **Alpha tuning** — the `alpha` parameter controls the balance between semantic and keyword search
+
+== Embeddings and Vector Search
+
+Lab 4 introduced embeddings and vector search conceptually. This lab builds them from scratch. Amazon Bedrock Nova generates 1024-dimensional embeddings for each chunk of SEC filing text. Those vectors are stored as properties on Chunk nodes in Neo4j and indexed with a vector index (`chunkEmbeddings`) that supports approximate nearest-neighbor lookup. When a retriever receives a question, it embeds the question with the same model, queries the index for the closest chunk vectors, and returns the matched text.
+
+.How vector search powers RAG
+[%collapsible]
+====
+Vector search is the mechanism that makes Retrieval-Augmented Generation work. The system embeds a question, searches for the closest chunks in vector space, and feeds those chunks to the LLM as context. The LLM generates its answer grounded in the retrieved text rather than relying solely on its training data. The quality of retrieval determines the quality of generation; if vector search surfaces irrelevant chunks, the LLM produces an answer grounded in the wrong context.
+====
+
+== Chunking
+
+SEC 10-K filings are too long to embed as single documents, so each filing is split into smaller passages. Each chunk becomes a Chunk node in the graph, linked to its source Document via `FROM_DOCUMENT` and to adjacent chunks via `NEXT_CHUNK` to preserve reading order.
+
+.Chunking trade-offs
+[%collapsible]
+====
+Larger chunks give the LLM more context during retrieval, which helps when the answer spans multiple sentences. Smaller chunks produce more precise results, returning only the relevant passage rather than a block of mixed content. A moderate size (500-1000 characters) is a reasonable starting point. The workshop uses `FixedSizeSplitter` from the neo4j-graphrag library, which splits text at fixed character boundaries. Tuning chunk size and overlap is an empirical process: adjust based on whether retrieved results contain too much noise or too little context.
+====
+
+== From Documents to Knowledge Graph
+
+Lab 4 explained how the structured layer (companies, products, risk factors) connects to the unstructured layer (documents and chunks) through the `FILED` relationship. This lab builds that unstructured layer from scratch in three stages:
+
+1. **Load filing text as Document and Chunk nodes.** Each 10-K filing becomes a Document node. The filing text is split into chunks, each stored as a Chunk node linked to its source via FROM_DOCUMENT and to adjacent chunks via NEXT_CHUNK.
+2. **Generate embeddings on every Chunk.** Bedrock Nova embeds each chunk's text into a 1024-dimensional vector, stored as a property on the Chunk node. A vector index (`chunkEmbeddings`) is created over these embeddings.
+3. **Create fulltext indexes.** Lucene-backed indexes on Chunk text and entity names enable keyword search alongside vector search.
+
+image::graphrag-retrieval-flow.png[GraphRAG Retrieval Flow,700]
+
+.Entity extraction and resolution
+[%collapsible]
+====
+The workshop's knowledge graph uses pre-built structured entities from CSV data rather than LLM-based entity extraction. The Company, Product, RiskFactor, and AssetManager nodes exist because they were loaded directly from structured sources, not because an LLM extracted them from filing text.
+
+In a full production pipeline, an LLM reads each chunk and extracts entities mentioned in the text: company names, product references, risk factors. Entity resolution then deduplicates these, merging "NVIDIA Corporation," "Nvidia," and "NVDA" into a single Company node. Cross-linking connects extracted entities to existing graph structure, so a risk factor mentioned in filing text links directly to the RiskFactor node that other companies also reference.
+
+The workshop sidesteps extraction because the SEC dataset already provides clean structured data. The conceptual model is the same: chunks connect to entities, entities connect to each other, and retrieval traverses both layers. Whether entities arrive via CSV loading or LLM extraction, the graph structure and retrieval patterns are identical.
+====
+
+== The Pipeline
+
+The five notebooks form a single arc: create the graph, generate embeddings, then layer increasingly sophisticated retrieval strategies on top.
+
+image::data-pipeline.png[Data Pipeline,700]
+
+Notebooks 01 and 02 build the foundation. Notebook 01 loads SEC filing text as Document and Chunk nodes linked by `FROM_DOCUMENT` and `NEXT_CHUNK` relationships. Notebook 02 generates vector embeddings on every Chunk node and creates a `chunkEmbeddings` vector index. Every notebook from 03 onward queries that same graph using a different retriever. Notebook 03 introduces pure vector similarity. Notebook 04 adds graph traversal to pull in surrounding context. Notebook 05 introduces hybrid search — combining vector and fulltext — and layers graph traversal on top with `HybridCypherRetriever`, showing how the `alpha` parameter controls the balance.
+
+== Four Retrievers Explained
+
+**VectorRetriever** performs pure semantic similarity search. It finds chunks whose embeddings are closest to the query embedding. This retriever works best for open-ended questions where meaning matters more than exact wording, such as "What are the main risk factors?"
+
+**VectorCypherRetriever** adds a graph traversal step after vector search. It finds semantically similar chunks the same way VectorRetriever does, then executes a custom Cypher `retrieval_query` that traverses from each matched chunk to related entities in the graph. The chunk acts as an anchor: vector search determines relevance, then Cypher gathers the structured context around it. A typical traversal follows FROM_DOCUMENT to the source Document, then FILED back to the Company, and from there to OFFERS, FACES_RISK, or other relationships. The LLM receives both the chunk text and the connected entities. This retriever works best when the answer needs filing context alongside the text, such as "What risks does Apple face and what document are they from?"
+
+image::retriever-comparison.png[Retriever Comparison: VectorRetriever vs VectorCypherRetriever,700]
+
+.The chunk-as-anchor constraint
+[%collapsible]
+====
+Graph traversal starts from what vector search found. If the question does not surface relevant chunks, no amount of traversal compensates. A question targeting a specific entity by name ("How many products does NVIDIA offer?") may return better results with a direct Cypher query than with vector search, because the answer depends on counting relationships, not finding semantically similar text. VectorCypherRetriever is strongest when the question combines semantic relevance with structural context: the vector search finds the right passage, and the graph traversal enriches it with the entities and relationships that surround it.
+====
+
+**HybridRetriever** combines vector similarity with fulltext keyword search. The `alpha` parameter controls the balance: `0.0` is pure keyword, `1.0` is pure vector, and `0.5` is balanced. This retriever works best for queries with specific terms like tickers or CIK numbers that vector search may rank lower.
+
+**HybridCypherRetriever** combines all three approaches in a single query: vector similarity, keyword matching, and graph traversal. This retriever provides the best overall coverage when you need semantic understanding, exact term matching, and graph context together.
+
+.How the retrieval_query parameter works
+[%collapsible]
+====
+The VectorCypherRetriever and HybridCypherRetriever accept a `retrieval_query` parameter: a Cypher query that executes once per matched chunk. The retriever binds the matched Chunk node to a variable (`node`), and the retrieval query traverses from there to gather context. A typical query follows the chain from chunk to document to company:
+
+[source,cypher]
+----
+MATCH (node)-[:FROM_DOCUMENT]->(d:Document)<-[:FILED]-(c:Company)
+OPTIONAL MATCH (c)-[:FACES_RISK]->(r:RiskFactor)
+RETURN node.text AS text, d.source AS document, c.name AS company,
+       collect(r.name) AS riskFactors
+----
+
+This query runs for each chunk that vector search returns. The retriever collects the results and passes them to the LLM as enriched context. The design separates the search step (which chunk is relevant) from the enrichment step (what structured context surrounds it).
+====
+
+== Retriever Selection Guide
+
+Each retriever fits a different query shape. The right choice depends on whether the query contains specific terms, needs graph context, or is purely semantic.
+
+[cols="2,2,3"]
+|===
+| Scenario | Retriever | Why
+
+| Simple semantic Q&A ("What are the main risk factors?")
+| `VectorRetriever`
+| Finds chunks by meaning without requiring exact keyword matches
+
+| Need company or filing context ("What risks does Apple face and what document are they from?")
+| `VectorCypherRetriever`
+| Traverses from matched chunks to related Document nodes, neighboring chunks, and entity relationships
+
+| Specific terms, tickers, or CIK numbers ("AAPL", "CIK 0000320193")
+| `HybridRetriever`
+| Fulltext component catches exact terms that vector search may rank lower
+
+| Best overall coverage
+| `HybridCypherRetriever`
+| Combines vector similarity, keyword matching, and graph traversal in a single query
+|===
+
+== Alpha Tuning
+
+The `HybridRetriever` and `HybridCypherRetriever` accept an `alpha` parameter that controls the weight between vector similarity and keyword matching. A value of `1.0` uses only vector similarity. A value of `0.0` uses only keyword search. Values in between blend the two scores.
+
+[source,python]
+----
+retriever.search(query, alpha=0.5)
+----
+
+Start with `alpha=0.5` for a balanced blend, then adjust based on your query patterns. Push toward `1.0` when queries are conversational and toward `0.0` when queries contain specific identifiers like tickers or filing numbers.
+
+TIP: After completing the Lab 5 notebooks, try the xref:lab5-sample-queries.adoc[Advanced Sample Queries] to explore fulltext search, vector similarity, and graph-enriched retrieval patterns against your data.
+
+== From First Principles to Library
+
+Lab 4 and Lab 5 query the same underlying Neo4j indexes and graph structure. The difference is in how the search is executed — and what each approach teaches you.
+
+[cols="1,2,2"]
+|===
+| Aspect | Lab 4 (First Principles) | Lab 5 (Library)
+
+| **Connection**
+| MCP server via AgentCore Gateway
+| Direct Neo4j driver
+
+| **Query execution**
+| Hand-written Cypher in `@tool` functions
+| Retriever class methods
+
+| **Embedding**
+| Client-side (Bedrock Nova), wrapped in `@tool`
+| Retriever calls embedder internally
+
+| **Graph traversal**
+| Cypher in `@tool` functions
+| `retrieval_query` parameter on retriever classes
+|===
+
+== Next Steps
+
+Continue to xref:lab5-instructions.adoc[Lab 5 Instructions] for the notebook walkthrough, or proceed to xref:lab6.adoc[Lab 6: Advanced Agents] to build autonomous agents that discover the graph schema and write their own Cypher queries.

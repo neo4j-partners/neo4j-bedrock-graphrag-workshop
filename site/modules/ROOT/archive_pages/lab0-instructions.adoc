@@ -1,0 +1,76 @@
+= Lab 0 Instructions: Sign In to AWS
+
+Follow these steps to sign in to your AWS account and verify Bedrock access.
+
+TIP: For concepts and background, see xref:lab0.adoc[Lab 0: Concepts and Reference].
+
+There are two setup paths depending on your situation:
+
+* <<Option A: Workshop Event (OneBlink)>> — for instructor-led workshop participants with an event code
+* <<Option B: Using Your Own AWS Account>> — for self-paced learners using a personal or company AWS account
+
+== Prerequisites
+
+* For **Workshop Event**: An event code from your instructor and the email you registered with
+* For **Own Account**: An AWS account with IAM permissions for Bedrock
+
+== Option A: Workshop Event (OneBlink)
+
+If you are attending an instructor-led workshop:
+
+1. Visit https://events.oneblink.ai[events.oneblink.ai]
+2. Enter the email you used to register along with the 7-digit event code
+3. Check the box to agree to the Terms and Conditions, then click **Register**
+
+image::lab0-oneblink-register.png[OneBlink Registration]
+
+Check your mailbox for the OneBlink validation code.
+
+image::lab0-validation-email.png[Validation Email]
+
+Enter your email, the event code, and the validation code from your email, then click **Access Sandbox**.
+
+image::lab0-access-sandbox.png[Access Sandbox]
+
+Once validated, you will receive your AWS credentials. **Save this information** — you will need it for all subsequent labs. These accounts are terminated at the end of the workshop.
+
+== Option B: Using Your Own AWS Account
+
+1. Ensure you have an IAM user with permissions for:
+** Amazon Bedrock (model access and agent creation)
+** CloudFormation (for CDK deployment)
+2. Create access keys for programmatic access if needed for Labs 4-7
+
+== Sign into AWS Console
+
+1. Open the AWS Console at https://console.aws.amazon.com/[console.aws.amazon.com]
+2. Enter your Account ID (or account alias) and click **Next**
+3. Enter your IAM username and password, then click **Sign in**
+
+image::lab0-aws-console-home.png[AWS Console Home]
+
+== Select the Correct Region
+
+Amazon Bedrock is available in select regions. For this workshop, use **US East (N. Virginia) - us-east-1** for the widest model availability.
+
+1. Click the region selector in the top-right corner of the console
+2. Select **US East (N. Virginia)**
+
+== Verify Bedrock Access
+
+1. In the AWS Console search bar, type **Bedrock** and select **Amazon Bedrock**
+2. In the left sidebar, click **Model access** to verify which models are available
+
+NOTE: If this is your first time using Bedrock, you may need to request access to specific models. Click **Manage model access**, enable **Amazon Nova Multimodal Embeddings** (usually approved instantly) and **Anthropic Claude 3.5 Sonnet** (may take a few minutes), then click **Save changes**.
+
+== Troubleshooting
+
+**"Access Denied" when accessing Bedrock** — Verify your IAM user has the `AmazonBedrockFullAccess` policy attached. Check you are in a supported region (us-east-1 recommended).
+
+**Model access shows "Not available"** — Some models require explicit access requests. Click **Manage model access** and request the needed models. Nova models are usually instant; Claude may take a few minutes.
+
+**Cannot find Bedrock in services** — Ensure you are in a region that supports Bedrock. Try switching to us-east-1 (N. Virginia).
+
+== Next Steps
+
+Continue to xref:lab1.adoc[Lab 1: Neo4j Aura Setup] to set up your Neo4j database.

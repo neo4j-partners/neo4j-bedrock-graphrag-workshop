@@ -1,4 +1,4 @@
-risk_id,name,description
+riskId,name,description
 R001,2017 Northern California Wildfire Claims,"PG&E faced $7.5 billion in claims costs associated with the 2017 Northern California wildfires, requiring securitization and recovery bonds to finance."
 R002,2019 Kincade Fire Liability,"PG&E Corporation and the Utility could be liable as a result of the 2019 Kincade fire, with probable losses recorded at the lower end of the reasonably estimable range."
 R003,2020 Zogg Fire Liability,"Criminal charges have been filed against the Utility in connection with the 2020 Zogg fire, and if convicted, total losses could materially exceed accrued estimated liabilities, with full restitution to victims required under California law."

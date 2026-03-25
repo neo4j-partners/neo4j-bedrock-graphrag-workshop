@@ -1,20 +1,19 @@
-"""Export Neo4j graph data to setup/seed-data/ CSVs and setup/seed-embeddings/.
+"""Export Neo4j graph data to setup/seed-data/.
 
-Exports the structured layer of the knowledge graph: companies, products,
+Exports the full knowledge graph: structured layer (companies, products,
 risk factors, asset managers, documents, financial metrics, and all their
-relationships. Filters to filing companies (those with a FILED relationship
-to a Document node) and their directly-connected entities.
+relationships) plus unstructured layer (chunks with embeddings, and their
+FROM_DOCUMENT, NEXT_CHUNK, FROM_CHUNK relationships).
 
-Also exports the unstructured layer (chunks with embeddings) to JSONL and
-their relationships (FROM_DOCUMENT, NEXT_CHUNK, FROM_CHUNK) to CSVs in
-setup/seed-embeddings/.
+Filters to filing companies (those with a FILED relationship to a Document
+node) and their directly-connected entities.
 
 Usage:
     cd setup/export_seed_data
     uv run export.py
 
 Reads credentials from ../setup/.env
-Writes CSVs to ../setup/seed-data/ and ../setup/seed-embeddings/
+Writes all output to ../setup/seed-data/
 """
 
 from __future__ import annotations
@@ -30,7 +29,6 @@ from neo4j import GraphDatabase
 
 ROOT = Path(__file__).resolve().parent.parent          # setup/
 EXPORT_DIR = ROOT / "seed-data"
-EMBEDDINGS_DIR = ROOT / "seed-embeddings"
 ENV_FILE = ROOT / ".env"
 
 # ---------------------------------------------------------------------------
@@ -49,17 +47,6 @@ def write_csv(filename: str, headers: list[str], rows: list[dict]) -> None:
 
 def strip_keys(row: dict, exclude: set[str]) -> dict:
     return {k: v for k, v in row.items() if k not in exclude}
-
-
-def write_embeddings_csv(
-    filename: str, headers: list[str], rows: list[dict],
-) -> None:
-    path = EMBEDDINGS_DIR / filename
-    with open(path, "w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=headers)
-        writer.writeheader()
-        writer.writerows(rows)
-    print(f"  {filename}: {len(rows)} rows")
 
 
 # ---------------------------------------------------------------------------
@@ -87,10 +74,10 @@ def export(driver) -> dict:  # noqa: C901
             cid = f"C{i:03d}"
             company_id_map[c["name"]] = cid
             company_names.append(c["name"])
-            c["company_id"] = cid
+            c["companyId"] = cid
         write_csv(
             "companies.csv",
-            ["company_id", "name", "ticker", "cik", "cusip"],
+            ["companyId", "name", "ticker", "cik", "cusip"],
             companies,
         )
         print(f"    -> Filing companies: {company_names}")
@@ -111,10 +98,10 @@ def export(driver) -> dict:  # noqa: C901
         for i, p in enumerate(products, 1):
             pid = f"P{i:03d}"
             product_id_map[p["name"]] = pid
-            p["product_id"] = pid
+            p["productId"] = pid
         write_csv(
             "products.csv",
-            ["product_id", "name", "description"],
+            ["productId", "name", "description"],
             products,
         )
 
@@ -132,10 +119,10 @@ def export(driver) -> dict:  # noqa: C901
         for i, r in enumerate(risks, 1):
             rid = f"R{i:03d}"
             risk_id_map[r["name"]] = rid
-            r["risk_id"] = rid
+            r["riskId"] = rid
         write_csv(
             "risk_factors.csv",
-            ["risk_id", "name", "description"],
+            ["riskId", "name", "description"],
             risks,
         )
 
@@ -154,10 +141,10 @@ def export(driver) -> dict:  # noqa: C901
         for i, m in enumerate(metrics, 1):
             mid = f"FM{i:03d}"
             metric_id_map[m["name"]] = mid
-            m["metric_id"] = mid
+            m["metricId"] = mid
         write_csv(
             "financial_metrics.csv",
-            ["metric_id", "name", "value", "period"],
+            ["metricId", "name", "value", "period"],
             metrics,
         )
 
@@ -174,10 +161,10 @@ def export(driver) -> dict:  # noqa: C901
         for i, m in enumerate(managers, 1):
             mid = f"AM{i:03d}"
             manager_id_map[m["name"]] = mid
-            m["manager_id"] = mid
+            m["managerId"] = mid
         write_csv(
             "asset_managers.csv",
-            ["manager_id", "name"],
+            ["managerId", "name"],
             managers,
         )
 
@@ -197,12 +184,12 @@ def export(driver) -> dict:  # noqa: C901
             # Extract accession number from PDF filename
             accession = Path(d["path"]).stem if d["path"] else ""
             doc_id_map[d["path"]] = did
-            d["document_id"] = did
-            d["accession_number"] = accession
-            d["filing_type"] = "10-K"
+            d["documentId"] = did
+            d["accessionNumber"] = accession
+            d["filingType"] = "10-K"
         write_csv(
             "documents.csv",
-            ["document_id", "accession_number", "filing_type"],
+            ["documentId", "accessionNumber", "filingType"],
             [strip_keys(d, {"path"}) for d in documents],
         )
 
@@ -219,8 +206,8 @@ def export(driver) -> dict:  # noqa: C901
             cid = company_id_map.get(r["company_name"])
             pid = product_id_map.get(r["product_name"])
             if cid and pid:
-                rows.append({"company_id": cid, "product_id": pid})
-        write_csv("company_products.csv", ["company_id", "product_id"], rows)
+                rows.append({"companyId": cid, "productId": pid})
+        write_csv("company_products.csv", ["companyId", "productId"], rows)
 
         # ── Junction: FACES_RISK (company -> risk) ─────────────────────
         result = session.run("""
@@ -235,8 +222,8 @@ def export(driver) -> dict:  # noqa: C901
             cid = company_id_map.get(r["company_name"])
             rid = risk_id_map.get(r["risk_name"])
             if cid and rid:
-                rows.append({"company_id": cid, "risk_id": rid})
-        write_csv("company_risk_factors.csv", ["company_id", "risk_id"], rows)
+                rows.append({"companyId": cid, "riskId": rid})
+        write_csv("company_risk_factors.csv", ["companyId", "riskId"], rows)
 
         # ── Junction: REPORTS (company -> financial metric) ────────────
         result = session.run("""
@@ -251,10 +238,10 @@ def export(driver) -> dict:  # noqa: C901
             cid = company_id_map.get(r["company_name"])
             mid = metric_id_map.get(r["metric_name"])
             if cid and mid:
-                rows.append({"company_id": cid, "metric_id": mid})
+                rows.append({"companyId": cid, "metricId": mid})
         write_csv(
             "company_financial_metrics.csv",
-            ["company_id", "metric_id"],
+            ["companyId", "metricId"],
             rows,
         )
 
@@ -274,13 +261,13 @@ def export(driver) -> dict:  # noqa: C901
             cid = company_id_map.get(r["company_name"])
             if mid and cid:
                 rows.append({
-                    "manager_id": mid,
-                    "company_id": cid,
+                    "managerId": mid,
+                    "companyId": cid,
                     "shares": r["shares"],
                 })
         write_csv(
             "asset_manager_companies.csv",
-            ["manager_id", "company_id", "shares"],
+            ["managerId", "companyId", "shares"],
             rows,
         )
 
@@ -298,13 +285,13 @@ def export(driver) -> dict:  # noqa: C901
             if sid:
                 tid = company_id_map.get(r["target"])
                 rows.append({
-                    "source_company_id": sid,
-                    "target_company_id": tid or "",
-                    "target_company_name": r["target"],
+                    "sourceCompanyId": sid,
+                    "targetCompanyId": tid or "",
+                    "targetCompanyName": r["target"],
                 })
         write_csv(
             "company_competitors.csv",
-            ["source_company_id", "target_company_id", "target_company_name"],
+            ["sourceCompanyId", "targetCompanyId", "targetCompanyName"],
             rows,
         )
 
@@ -322,13 +309,13 @@ def export(driver) -> dict:  # noqa: C901
             if sid:
                 tid = company_id_map.get(r["target"])
                 rows.append({
-                    "source_company_id": sid,
-                    "target_company_id": tid or "",
-                    "target_company_name": r["target"],
+                    "sourceCompanyId": sid,
+                    "targetCompanyId": tid or "",
+                    "targetCompanyName": r["target"],
                 })
         write_csv(
             "company_partners.csv",
-            ["source_company_id", "target_company_id", "target_company_name"],
+            ["sourceCompanyId", "targetCompanyId", "targetCompanyName"],
             rows,
         )
 
@@ -344,8 +331,139 @@ def export(driver) -> dict:  # noqa: C901
             cid = company_id_map.get(r["company_name"])
             did = doc_id_map.get(r["doc_path"])
             if cid and did:
-                rows.append({"company_id": cid, "document_id": did})
-        write_csv("company_documents.csv", ["company_id", "document_id"], rows)
+                rows.append({"companyId": cid, "documentId": did})
+        write_csv("company_documents.csv", ["companyId", "documentId"], rows)
+
+    return {
+        "company_names": company_names,
+        "doc_id_map": doc_id_map,
+        "product_id_map": product_id_map,
+        "risk_id_map": risk_id_map,
+        "metric_id_map": metric_id_map,
+        "company_id_map": company_id_map,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Export: Unstructured Layer (chunks with embeddings)
+# ---------------------------------------------------------------------------
+
+
+def export_chunks(driver, id_maps: dict) -> None:
+    """Export chunks, embeddings, and chunk relationships to seed-data/."""
+
+    company_names = id_maps["company_names"]
+    doc_id_map = id_maps["doc_id_map"]
+    product_id_map = id_maps["product_id_map"]
+    risk_id_map = id_maps["risk_id_map"]
+    metric_id_map = id_maps["metric_id_map"]
+    company_id_map = id_maps["company_id_map"]
+
+    with driver.session() as session:
+        params = {"filing_companies": company_names}
+
+        # ── Chunks with embeddings (JSONL) ───────────────────────────
+        result = session.run("""
+            MATCH (c:Company)-[:FILED]->(d:Document)<-[:FROM_DOCUMENT]-(chunk:Chunk)
+            WHERE c.name IN $filing_companies
+              AND chunk.embedding IS NOT NULL
+            RETURN chunk.index AS index,
+                   chunk.text AS text,
+                   chunk.embedding AS embedding,
+                   d.path AS document_path
+            ORDER BY d.path, chunk.index
+        """, **params)
+        chunks = [dict(r) for r in result]
+
+        # Assign chunk IDs and build map keyed by (document_path, index)
+        chunk_id_map: dict[tuple[str, int], str] = {}
+        for i, c in enumerate(chunks, 1):
+            cid = f"CH{i:03d}"
+            chunk_id_map[(c["document_path"], c["index"])] = cid
+
+        # Write JSONL — embedding stored as native JSON array
+        jsonl_path = EXPORT_DIR / "chunks.jsonl"
+        with open(jsonl_path, "w") as f:
+            for c in chunks:
+                embedding = c["embedding"]
+                if hasattr(embedding, "to_native"):
+                    embedding = embedding.to_native()
+                obj = {
+                    "chunkId": chunk_id_map[(c["document_path"], c["index"])],
+                    "index": c["index"],
+                    "text": c["text"],
+                    "embedding": embedding,
+                }
+                f.write(json.dumps(obj) + "\n")
+        file_size = jsonl_path.stat().st_size
+        print(f"  chunks.jsonl: {len(chunks)} chunks ({file_size / 1024 / 1024:.1f} MB)")
+
+        # ── chunk_documents.csv (FROM_DOCUMENT) ─────────────────────
+        rows = []
+        for c in chunks:
+            chid = chunk_id_map.get((c["document_path"], c["index"]))
+            did = doc_id_map.get(c["document_path"])
+            if chid and did:
+                rows.append({"chunkId": chid, "documentId": did})
+        write_csv(
+            "chunk_documents.csv", ["chunkId", "documentId"], rows,
+        )
+
+        # ── chunk_sequence.csv (NEXT_CHUNK) ──────────────────────────
+        result = session.run("""
+            MATCH (c:Company)-[:FILED]->(d:Document)<-[:FROM_DOCUMENT]-(curr:Chunk)
+                  -[:NEXT_CHUNK]->(next:Chunk)-[:FROM_DOCUMENT]->(d)
+            WHERE c.name IN $filing_companies
+            RETURN curr.index AS curr_index, next.index AS next_index,
+                   d.path AS document_path
+            ORDER BY d.path, curr.index
+        """, **params)
+        rows = []
+        for r in result:
+            curr_id = chunk_id_map.get((r["document_path"], r["curr_index"]))
+            next_id = chunk_id_map.get((r["document_path"], r["next_index"]))
+            if curr_id and next_id:
+                rows.append({"chunkId": curr_id, "nextChunkId": next_id})
+        write_csv(
+            "chunk_sequence.csv", ["chunkId", "nextChunkId"], rows,
+        )
+
+        # ── entity_chunks.csv (FROM_CHUNK) ───────────────────────────
+        # Map entity label → (id_map, id_field_name)
+        entity_configs = [
+            ("Product", product_id_map),
+            ("RiskFactor", risk_id_map),
+            ("FinancialMetric", metric_id_map),
+            ("Company", company_id_map),
+        ]
+
+        rows = []
+        for label, id_map in entity_configs:
+            result = session.run(f"""
+                MATCH (e:{label})-[:FROM_CHUNK]->(chunk:Chunk)
+                      -[:FROM_DOCUMENT]->(d:Document)<-[:FILED]-(c:Company)
+                WHERE c.name IN $filing_companies
+                RETURN e.name AS entity_name, chunk.index AS chunk_index,
+                       d.path AS document_path
+                ORDER BY d.path, chunk.index, e.name
+            """, **params)
+            for r in result:
+                eid = id_map.get(r["entity_name"])
+                chid = chunk_id_map.get(
+                    (r["document_path"], r["chunk_index"]),
+                )
+                if eid and chid:
+                    rows.append({
+                        "entityType": label,
+                        "entityId": eid,
+                        "chunkId": chid,
+                    })
+
+        write_csv(
+            "entity_chunks.csv",
+            ["entityType", "entityId", "chunkId"],
+            rows,
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -405,8 +523,10 @@ def main() -> None:
         print("Connected.\n")
 
         print_summary(driver)
-        print(f"\nExporting to {EXPORT_DIR}/ ...\n")
-        export(driver)
+        print(f"\nExporting structured data to {EXPORT_DIR}/ ...\n")
+        id_maps = export(driver)
+        print(f"\nExporting chunks to {EXPORT_DIR}/ ...\n")
+        export_chunks(driver, id_maps)
         print("\nDone.")
     finally:
         driver.close()

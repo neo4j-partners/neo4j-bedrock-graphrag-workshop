@@ -1,0 +1,115 @@
+= Lab 1: Explore the Knowledge Graph
+
+Use Neo4j Explore to visually navigate and analyze your knowledge graph. You will search for patterns, visualize relationships, and apply graph algorithms to gain insights from the SEC financial data.
+
+TIP: For setup, see xref:lab1-instructions.adoc[Aura Setup]. For data loading, see xref:lab1-load.adoc[Load the Knowledge Graph].
+
+== Access the Aura Console
+
+Go to the Neo4j Aura console at https://console.neo4j.io[console.neo4j.io].
+
+== Open Explore
+
+In the left sidebar, click **Explore** under the Tools section.
+
+image::lab1-open-explore.png[Open Explore]
+
+Click **Connect to instance** and select your database instance.
+
+image::lab1-connect-instance.png[Connect Instance]
+
+== Search for Asset Manager Relationships
+
+In the search bar, build a pattern to explore relationships between asset managers, companies, and risk factors:
+
+1. Type `AssetManager`
+2. Select the **OWNS** relationship
+3. Select **Company**
+4. Select the **FACES_RISK** relationship
+5. Select **RiskFactor**
+
+This creates the pattern: `AssetManager -- OWNS -> Company -- FACES_RISK -> RiskFactor`
+
+image::lab1-build-pattern.png[Build Pattern]
+
+== Visualize the Knowledge Graph
+
+After executing the search, you will see a visual representation showing:
+
+* **AssetManager nodes** (orange/salmon) — Institutional investors like BlackRock, Vanguard
+* **Company nodes** (pink) — Tech companies with SEC filings
+* **RiskFactor nodes** (yellow) — Risk categories extracted from filings
+
+The visualization reveals how different asset managers are exposed to various risk factors through the companies they own.
+
+image::lab1-company-graph.png[Company Graph]
+
+=== Navigation Tips
+
+**Zoom and Pan:**
+
+* **Zoom**: Scroll wheel or pinch gesture
+* **Pan**: Click and drag the canvas
+* **Center**: Double-click on empty space
+
+**Inspect Nodes and Relationships:**
+
+* Click on a node to see its properties
+* Click on a relationship to see its type and properties
+* Double-click a node to expand and see more connections
+
+== Access Graph Data Science
+
+Click the **Graph Data Science** button in the left toolbar to open the data science panel.
+
+image::lab1-gds-panel.png[Graph Data Science]
+
+== Apply Degree Centrality Algorithm
+
+1. Click **Add algorithm**
+2. Select **Degree Centrality** from the dropdown — this measures the number of incoming and outgoing relationships for each node, identifying the most connected nodes in the graph
+3. Click **Apply algorithm** to run the analysis
+
+image::lab1-apply-centrality.png[Apply Centrality]
+
+== Size Nodes Based on Scores
+
+After the algorithm completes, click **Size nodes based on scores** to visually represent centrality. Nodes with more connections appear larger.
+
+image::lab1-size-nodes.png[Size Nodes]
+
+== Analyze the Results
+
+The graph now displays nodes sized according to their degree centrality scores:
+
+* **Larger nodes** = More connections (higher centrality)
+* Asset managers owning more companies appear larger
+* Companies with more risk factors appear larger
+
+This makes it easy to visually identify the most significant institutional investors, companies with diverse risk profiles, and common risk factors across multiple companies.
+
+image::lab1-centrality-results.png[Centrality Results]
+
+== Additional Exploration Ideas
+
+Try these patterns to explore more of the knowledge graph:
+
+=== Explore Company Products
+----
+Company -- OFFERS -> Product
+----
+Reveals products and services mentioned in filings.
+
+=== Explore Competitive Landscape
+----
+Company -- COMPETES_WITH -> Company
+Company -- PARTNERS_WITH -> Company
+----
+Shows competitive and partnership relationships between companies.
+
+=== Compare Risk Factors
+Click on a specific RiskFactor node and expand to see which companies share that risk.
+
+== Next Steps
+
+Proceed to Lab 2 to build an AI agent using this knowledge graph.

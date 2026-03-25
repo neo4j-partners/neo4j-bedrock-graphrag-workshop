@@ -1,0 +1,69 @@
+= Lab 6 Instructions: Advanced Agents
+
+TIP: For concepts and background, see xref:lab6.adoc[Lab 6: Advanced Agents].
+
+== What You'll Learn
+
+* **Text2Cypher pattern**: How an LLM generates Cypher from a schema and a natural language question — compared to Lab 4's pre-written Cypher Templates
+* **Schema-First Queries**: Why the agent retrieves the graph schema before writing Cypher
+* **MCP Tool Discovery**: The agent discovers available tools automatically through the MCP protocol
+* **Two Frameworks**: LangGraph (complex workflows) and Strands (lightweight, AWS-native)
+
+== Prerequisites
+
+* Completed **Lab 1** (Neo4j Aura instance with SEC financial data loaded)
+* Your `CONFIG.txt` file updated with MCP Gateway credentials (`MCP_GATEWAY_URL` and `MCP_ACCESS_TOKEN`)
+* AWS credentials configured for Amazon Bedrock access
+
+== Notebooks
+
+This lab provides two notebook options. Both connect to the same MCP server and produce the same results.
+
+[cols="1,1,3"]
+|===
+| Notebook | Framework | Description
+
+| `neo4j_langgraph_mcp_agent.ipynb`
+| LangGraph
+| Full-featured agent with LangChain MCP adapters. Better for complex, multi-step workflows with fine-grained control over the agent loop.
+
+| `neo4j_strands_mcp_agent.ipynb`
+| Strands
+| Lightweight agent using the AWS-native Strands SDK. Fewer lines of code, built-in MCP support, simpler API.
+|===
+
+Open either notebook in the `Lab_6_Advanced_Agents/` directory and follow the instructions within.
+
+== Sample Queries
+
+Once your agent is running, try these questions about the SEC financial data:
+
+[cols="1,3"]
+|===
+| Category | Example Question
+
+| **Exploration**
+| "How many companies are in the database?"
+
+| **Products**
+| "What products does Apple offer?"
+
+| **Ownership**
+| "Which asset managers own stakes in NVIDIA?"
+
+| **Risk**
+| "What risk factors does Microsoft face?"
+
+| **Financials**
+| "Show me the financial metrics for Tesla."
+
+| **Executives**
+| "Who are the executives at Amazon?"
+
+| **Cross-entity**
+| "Which companies face risk factors related to cybersecurity?"
+|===
+
+== Next Steps
+
+Congratulations — you have completed the workshop! You've built GraphRAG pipelines from no-code tools through Cypher Templates and Graph-Enhanced Vector Search, and graduated to autonomous Text2Cypher agents that inspect schemas and write their own queries.

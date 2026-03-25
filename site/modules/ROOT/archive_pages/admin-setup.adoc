@@ -1,0 +1,104 @@
+= Admin Setup
+
+These steps must be completed by the workshop admin before participants begin. They configure AWS resources that participant notebooks depend on.
+
+.**At a Glance**
+
+* **Bedrock model access** — enable Claude and Nova in the Bedrock console (manual, cannot be scripted)
+* **AgentCore IAM and resources** — run `setup_agentcore.sh` to create the execution role, S3 bucket, and SageMaker permissions needed for Lab 3 deployment
+* **CONFIG.txt preparation** — fill in MCP Gateway credentials and verify defaults before distributing to participants
+* **SageMaker lifecycle configuration** (optional) — pre-install packages so notebooks start faster
+
+== Step 1: Enable Bedrock Model Access
+
+In the AWS Console, navigate to **Amazon Bedrock > Model access** and enable:
+
+* `us.anthropic.claude-sonnet-4-5-20250929-v1:0` (or your preferred Claude model)
+* `amazon.nova-2-multimodal-embeddings-v1:0`
+
+This is a manual console step. Nova models are usually approved instantly; Claude may take a few minutes. Participants also verify model access in xref:lab0-instructions.adoc[Lab 0], but enabling it in advance avoids delays.
+
+== Step 2: Set Up AgentCore IAM and Resources
+
+The `setup_agentcore.sh` script creates the IAM roles, S3 bucket, and permissions needed for Lab 3's AgentCore deployment. Run it once per AWS account:
+
+[source,bash]
+----
+cd setup
+./setup_agentcore.sh
+----
+
+This creates three resources:
+
+**AgentCore execution role** (`AmazonBedrockAgentCoreLabRuntime-\{region}`). The IAM role that deployed agents assume at runtime. It grants Bedrock model invocation, CloudWatch logging, and X-Ray tracing permissions.
+
+**S3 bucket** (`bedrock-agentcore-codebuild-sources-\{account}-\{region}`). Used by `agentcore deploy` to upload packaged agent code during deployment.
+
+**SageMaker role permissions**. Adds an inline policy (`BedrockAgentCoreLabDeployPolicy`) to all `AmazonSageMaker-ExecutionRole-*` roles. This policy grants:
+
+* AgentCore API access (`bedrock-agentcore:*`)
+* IAM role management scoped to `*BedrockAgentCore*` roles
+* `iam:PassRole` for AgentCore execution roles
+* S3 access for the code deployment bucket
+* CloudWatch Logs read access for AgentCore log groups
+
+To specify a different region:
+
+[source,bash]
+----
+./setup_agentcore.sh --region us-west-2
+----
+
+The script auto-detects the region from `CONFIG.txt` if `--region` is not specified. It defaults to `us-east-1` if neither source provides a value.
+
+== Step 3: Prepare CONFIG.txt
+
+Verify the following fields in `CONFIG.txt` before distributing to participants. See xref:configuration.adoc[Configuration Reference] for the full field list.
+
+**Pre-configured defaults** (should not need changes):
+
+[source]
+----
+MODEL_ID=us.anthropic.claude-sonnet-4-5-20250929-v1:0
+REGION=us-east-1
+----
+
+**Admin-provided values** (fill in before distribution):
+
+[source]
+----
+MCP_GATEWAY_URL=your-gateway-url-here
+MCP_ACCESS_TOKEN=your-access-token-here
+----
+
+The MCP Gateway URL and access token come from the Neo4j MCP Server deployment on AgentCore. Labs 4 and 6 require these values. Participants fill in their own `NEO4J_URI`, `NEO4J_USERNAME`, and `NEO4J_PASSWORD` after completing xref:lab1.adoc[Lab 1].
+
+== Step 4: SageMaker Lifecycle Configuration (Optional)
+
+If you pre-create SageMaker domains for participants, a lifecycle configuration script can pre-install packages so notebooks run faster. If participants create their own domains (as described in xref:lab3-instructions.adoc[Lab 3 Instructions]), this step is not needed because the `%pip install` cells in each notebook handle dependencies.
+
+Example lifecycle config script for JupyterLab (attach to the space's default app):
+
+[source,bash]
+----
+#!/bin/bash
+set -eux
+# Install zip (required by agentcore deploy)
+apt-get update -qq && apt-get install -y -qq zip
+# Pre-install common workshop packages
+pip install -q langgraph langchain-aws langchain-mcp-adapters mcp nest-asyncio \
+    bedrock-agentcore-starter-toolkit bedrock-agentcore pyyaml
+----
+
+== Cleanup
+
+To remove all resources created by the setup script:
+
+[source,bash]
+----
+./setup_agentcore.sh --cleanup
+----
+
+This deletes the execution role, empties and removes the S3 bucket, and removes the deployment policy from all SageMaker execution roles.
+
+WARNING: Run cleanup only after all participants have finished. The cleanup removes IAM roles and the S3 bucket that deployed agents depend on.

@@ -1,0 +1,43 @@
+= Configuration Reference
+
+A `CONFIG.txt` file is provided at the repository root with placeholder values. Fill in your credentials as you progress through the labs — no other configuration is needed. All other settings (`MODEL_ID`, `REGION`) are pre-configured with working defaults.
+
+== Fields
+
+=== Neo4j Aura Database (Required)
+
+These credentials are displayed once when you create your Neo4j Aura instance in xref:lab1.adoc[Lab 1]. Save them immediately — the password cannot be retrieved after the creation dialog closes.
+
+[cols="2,4"]
+|===
+| Field | Description
+
+| `NEO4J_URI`
+| Connection URI for your Aura instance (e.g., `neo4j+s://xxxxxxxx.databases.neo4j.io`)
+
+| `NEO4J_USERNAME`
+| Database username (default: `neo4j`)
+
+| `NEO4J_PASSWORD`
+| Database password — shown once during instance creation
+|===
+
+=== MCP Gateway (Labs 4 and 7)
+
+These credentials connect to the Neo4j MCP Server hosted on Amazon Bedrock AgentCore. Your instructor will provide both values during the workshop.
+
+[cols="2,4"]
+|===
+| Field | Description
+
+| `MCP_GATEWAY_URL`
+| AgentCore Gateway URL for the Neo4j MCP Server
+
+| `MCP_ACCESS_TOKEN`
+| Authentication token for the MCP Gateway
+|===
+
+
+== Security
+
+`CONFIG.txt` is committed to the repository as a template with placeholder values. It is also listed in `.gitignore`, so once you fill in your real credentials, git ignores those changes — your passwords and tokens will not be committed or pushed.

@@ -1,0 +1,33 @@
+= Lab 0: Sign In to AWS
+
+This is Lab 0 of the workshop. You will sign in to your AWS account and verify access to Amazon Bedrock services. The credentials and region you configure here carry through every subsequent lab.
+
+TIP: Ready to start? Jump to the xref:lab0-instructions.adoc[Lab 0 Instructions] for step-by-step setup.
+
+.**At a Glance**
+
+* **AWS Console** — access is required for all labs, either through workshop-provided OneBlink credentials or your own account
+* **Amazon Bedrock** — foundation model access for Claude (generation) and Nova (embeddings)
+* **US East (N. Virginia)** — the recommended region for the widest Bedrock model availability
+* **Model access** — must be explicitly enabled for Claude and Nova in the Bedrock console
+
+== Workshop Credentials (OneBlink)
+
+For instructor-led workshops, participants receive temporary AWS credentials through OneBlink. These accounts are pre-configured with the necessary IAM permissions for Bedrock, SageMaker, and related services. The accounts are terminated at the end of the workshop.
+
+== Using Your Own Account
+
+If you are working independently, you need an IAM user with permissions for Amazon Bedrock (model access and agent creation) and CloudFormation (for CDK deployment in later labs). Create access keys for programmatic access if you plan to complete Labs 4-7.
+
+== Amazon Bedrock
+
+Amazon Bedrock is a managed service that provides API access to foundation models from multiple providers. This workshop uses two model families:
+
+* **Anthropic Claude** (via cross-region inference) for reasoning, tool selection, and response generation
+* **Amazon Nova Multimodal Embeddings** for generating vector representations of text chunks
+
+Model access is not enabled by default. You will request access to both model families in the instructions.
+
+== Next Steps
+
+Continue to xref:lab0-instructions.adoc[Lab 0 Instructions] to sign in and verify Bedrock access. When ready, proceed to xref:lab1.adoc[Lab 1: Neo4j Aura Setup].

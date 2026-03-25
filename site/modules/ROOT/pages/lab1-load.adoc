@@ -14,88 +14,100 @@ These ensure each node has a unique identifier and speed up MERGE lookups during
 
 [source,cypher]
 ----
-CREATE CONSTRAINT company_id IF NOT EXISTS
+CREATE CONSTRAINT companyId IF NOT EXISTS
 FOR (c:Company) REQUIRE c.companyId IS UNIQUE;
 
-CREATE CONSTRAINT company_name IF NOT EXISTS
+CREATE CONSTRAINT companyName IF NOT EXISTS
 FOR (c:Company) REQUIRE c.name IS UNIQUE;
 
-CREATE CONSTRAINT product_id IF NOT EXISTS
+CREATE CONSTRAINT productId IF NOT EXISTS
 FOR (p:Product) REQUIRE p.productId IS UNIQUE;
 
-CREATE CONSTRAINT risk_id IF NOT EXISTS
+CREATE CONSTRAINT riskId IF NOT EXISTS
 FOR (r:RiskFactor) REQUIRE r.riskId IS UNIQUE;
 
-CREATE CONSTRAINT manager_id IF NOT EXISTS
+CREATE CONSTRAINT managerId IF NOT EXISTS
 FOR (m:AssetManager) REQUIRE m.managerId IS UNIQUE;
 
-CREATE CONSTRAINT document_id IF NOT EXISTS
+CREATE CONSTRAINT documentId IF NOT EXISTS
 FOR (d:Document) REQUIRE d.documentId IS UNIQUE;
+
+CREATE CONSTRAINT metricId IF NOT EXISTS
+FOR (fm:FinancialMetric) REQUIRE fm.metricId IS UNIQUE;
 ----
 
 === Step 2: Load Nodes
 
-Each statement reads a CSV file and creates the corresponding nodes.
+Each statement reads a CSV file and creates the corresponding nodes: Companies, Products, Risk Factors, Asset Managers, Documents, and Financial Metrics.
 
 [source,cypher]
 ----
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/companies.csv' AS row
-MERGE (c:Company {companyId: row.company_id})
+MERGE (c:Company {companyId: row.companyId})
 SET c.name = row.name, c.ticker = row.ticker,
     c.cik = row.cik, c.cusip = row.cusip;
 
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/products.csv' AS row
-MERGE (p:Product {productId: row.product_id})
+MERGE (p:Product {productId: row.productId})
 SET p.name = row.name, p.description = row.description;
 
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/risk_factors.csv' AS row
-MERGE (r:RiskFactor {riskId: row.risk_id})
+MERGE (r:RiskFactor {riskId: row.riskId})
 SET r.name = row.name, r.description = row.description;
 
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/asset_managers.csv' AS row
-MERGE (m:AssetManager {managerId: row.manager_id})
+MERGE (m:AssetManager {managerId: row.managerId})
 SET m.name = row.name;
 
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/documents.csv' AS row
-MERGE (d:Document {documentId: row.document_id})
-SET d.accessionNumber = row.accession_number, d.filingType = row.filing_type;
+MERGE (d:Document {documentId: row.documentId})
+SET d.accessionNumber = row.accessionNumber, d.filingType = row.filingType;
+
+LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/financial_metrics.csv' AS row
+MERGE (fm:FinancialMetric {metricId: row.metricId})
+SET fm.name = row.name, fm.value = row.value, fm.period = row.period;
 ----
 
 === Step 3: Load Relationships
 
-Creates relationships between nodes. The last two use MERGE on the target company name since competitors and partners may be companies mentioned in filings that are not in the primary dataset.
+Creates relationships between nodes. The competitor and partner loads use MERGE on the target company name, which creates new Company nodes for names not already in `companies.csv`.
 
 [source,cypher]
 ----
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/company_products.csv' AS row
-MATCH (c:Company {companyId: row.company_id})
-MATCH (p:Product {productId: row.product_id})
+MATCH (c:Company {companyId: row.companyId})
+MATCH (p:Product {productId: row.productId})
 MERGE (c)-[:OFFERS]->(p);
 
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/company_risk_factors.csv' AS row
-MATCH (c:Company {companyId: row.company_id})
-MATCH (r:RiskFactor {riskId: row.risk_id})
+MATCH (c:Company {companyId: row.companyId})
+MATCH (r:RiskFactor {riskId: row.riskId})
 MERGE (c)-[:FACES_RISK]->(r);
 
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/asset_manager_companies.csv' AS row
-MATCH (m:AssetManager {managerId: row.manager_id})
-MATCH (c:Company {companyId: row.company_id})
+MATCH (m:AssetManager {managerId: row.managerId})
+MATCH (c:Company {companyId: row.companyId})
 MERGE (m)-[:OWNS {shares: toInteger(row.shares)}]->(c);
 
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/company_competitors.csv' AS row
-MATCH (a:Company {companyId: row.source_company_id})
-MERGE (b:Company {name: row.target_company_name})
+MATCH (a:Company {companyId: row.sourceCompanyId})
+MERGE (b:Company {name: row.targetCompanyName})
 MERGE (a)-[:COMPETES_WITH]->(b);
 
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/company_partners.csv' AS row
-MATCH (a:Company {companyId: row.source_company_id})
-MERGE (b:Company {name: row.target_company_name})
+MATCH (a:Company {companyId: row.sourceCompanyId})
+MERGE (b:Company {name: row.targetCompanyName})
 MERGE (a)-[:PARTNERS_WITH]->(b);
 
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/company_documents.csv' AS row
-MATCH (c:Company {companyId: row.company_id})
-MATCH (d:Document {documentId: row.document_id})
+MATCH (c:Company {companyId: row.companyId})
+MATCH (d:Document {documentId: row.documentId})
 MERGE (c)-[:FILED]->(d);
+
+LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/company_financial_metrics.csv' AS row
+MATCH (c:Company {companyId: row.companyId})
+MATCH (fm:FinancialMetric {metricId: row.metricId})
+MERGE (c)-[:REPORTS]->(fm);
 ----
 
 === Step 4: Create Fulltext Index
@@ -127,13 +139,14 @@ Expected counts:
 | Label | Count
 
 | AssetManager | 15
-| Company | ~73
+| Company | ~71
 | Document | 7
-| Product | 91
-| RiskFactor | 57
+| FinancialMetric | 874
+| Product | 303
+| RiskFactor | 883
 |===
 
-NOTE: The Company count is higher than the number of companies in the seed CSV because COMPETES_WITH and PARTNERS_WITH relationships reference companies mentioned in filings (e.g., Google, Samsung, OpenAI) that are not themselves in the seed data. The original seed companies have a `companyId` property; the additional companies created by competitor and partner relationships do not.
+NOTE: The Company count is higher than 6 because `company_competitors.csv` and `company_partners.csv` contain competitor and partner names (e.g., Google, Samsung, OpenAI) that are not in `companies.csv`. The relationship loads use `MERGE (b:Company {name: row.targetCompanyName})`, which creates new Company nodes for these names. The resulting nodes have only a `name` property — no `companyId`, `ticker`, or other identifiers.
 
 == Sample Queries
 

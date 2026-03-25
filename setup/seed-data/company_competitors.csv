@@ -1,4 +1,4 @@
-source_company_id,target_company_id,target_company_name
+sourceCompanyId,targetCompanyId,targetCompanyName
 C001,,Alibaba Group
 C001,,Alphabet
 C001,C003,Microsoft Corporation

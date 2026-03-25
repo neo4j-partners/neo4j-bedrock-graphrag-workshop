@@ -1,0 +1,121 @@
+= GraphRAG Workshop: Neo4j, AWS Bedrock & Databricks
+
+== Welcome
+
+This workshop teaches you to build Graph Retrieval-Augmented Generation (GraphRAG) pipelines using Neo4j Aura and Amazon Bedrock. You will work with SEC 10-K financial filing data including companies, products, risk factors, and institutional ownership, progressing from no-code tools to building custom AI agents.
+
+NOTE: This lab is built from the GitHub repository at https://github.com/neo4j-partners/lab-neo4j-aws/tree/main[neo4j-partners/lab-neo4j-aws].
+
+== Graph Intelligence Meets Generative AI
+
+Neo4j Aura is the Graph Intelligence Platform. It makes connections between entities explicit and traversable. Amazon Bedrock provides managed access to foundation models for reasoning and embedding. Databricks is the Data Intelligence Platform. It handles structured and unstructured data at scale through the lakehouse architecture with unified governance. Together they form a complete GraphRAG stack: Databricks aggregates and governs enterprise data, Neo4j makes relationships traversable for retrieval, and Bedrock provides the reasoning and generation layer.
+
+The integration covers four patterns: vector search over embedded chunks stored in Neo4j, graph-enriched retrieval that follows relationships from matched chunks to connected entities, text-to-Cypher generation that translates natural language into graph queries, and agent orchestration that routes questions to the right retrieval strategy.
+
+=== Neo4j: Graph Intelligence Platform
+
+Neo4j is the world's leading Graph Intelligence Platform, built for AI-ready data by design. Neo4j AuraDB, the fully managed graph database as a service, stores data as nodes and relationships with built-in vector indexes that keep embeddings alongside graph data. This design enables GraphRAG: retrieval that combines semantic similarity search with graph traversal in a single query. Neo4j Aura Agent provides a no-code path to build, test, and deploy AI agents directly from AuraDB knowledge graphs. In this workshop, Neo4j stores the SEC financial knowledge graph and serves as the retrieval layer for all agent queries. See xref:lab1.adoc[Lab 1] for graph setup and Cypher basics.
+
+=== Generative AI on AWS
+
+AWS provides the most comprehensive set of generative AI tools and services for building applications at production scale. Amazon Bedrock is the end-to-end platform for building generative AI applications and agents, providing unified API access to foundation models including Anthropic Claude for reasoning and generation and Amazon Nova for embeddings. Amazon Bedrock AgentCore is the agentic platform for building, deploying, and operating agents securely at scale without infrastructure management. Amazon SageMaker AI is the managed service for building, training, and deploying ML and foundation models, including the JupyterLab notebook environment used throughout this workshop. See xref:aws-services.adoc[AWS GenAI Services] for detailed coverage of each service.
+
+=== Databricks: Data Intelligence Platform
+
+Databricks is the Data Intelligence Platform for structured, semi-structured, and unstructured data at scale. The lakehouse architecture, built on Delta Lake with ACID transactions, schema enforcement, and time travel, organizes data through a medallion pattern: bronze (raw ingestion), silver (cleaned and governed), and gold (business-ready outputs). Unity Catalog provides unified governance across all data and AI assets.
+
+Databricks and Neo4j are complementary intelligence systems. Databricks excels at aggregations, time-series analysis, and ML over tables, answering "how much?" and "how often?" Neo4j excels at understanding connections and traversing relationship chains, answering "how is this connected?" and "what is affected?" Most real-world problems have both: numbers that need crunching and relationships that need navigating.
+
+The Neo4j Spark Connector, officially Databricks-certified, provides the bridge between platforms. Governed Delta tables transform into graph nodes and relationships, and graph algorithm results flow back as ML features in gold tables. Unity Catalog JDBC connections allow BI tools to query graph data through standard SQL. For agent workloads, Databricks Mosaic AI and Neo4j MCP Servers enable multi-agent architectures where specialized agents handle SQL and Cypher queries independently under a supervisor. See xref:databricks-platform.adoc[Databricks Intelligence Platform] for the full integration architecture.
+
+== From Knowledge Graph to Agents
+
+Three stages build on each other across the workshop.
+
+**Knowledge Graph Construction.** CSV seed data loads into Neo4j as nodes and relationships, forming the structured layer of companies, products, risk factors, and institutional ownership. Unstructured 10-K filing text is chunked and embedded with Nova, then linked to the structured layer through Document nodes. The result is a searchable knowledge graph that connects semantic text to typed entities.
+
+**GraphRAG Retrieval.** Vector search finds semantically similar chunks. Graph traversal enriches results with connected entities such as the company that filed the document, related products, and shared risk factors. Fulltext search handles keyword queries. Hybrid approaches combine all three.
+
+**Agent Orchestration.** AI agents use the ReAct pattern to select retrieval tools, execute queries, and synthesize answers. The Strands Agents SDK provides the agent framework, and the Neo4j MCP Server exposes schema inspection and read-only Cypher as agent tools. Aura Agents provides a no-code path to the same capabilities.
+
+== The SEC 10-K Dataset
+
+The workshop uses data from SEC 10-K filings, loaded from Databricks into the Neo4j knowledge graph. 10-K filings are the annual reports that publicly traded companies file with the U.S. Securities and Exchange Commission. Each filing contains both structured data (company details, financial metrics, institutional ownership) and unstructured narrative text (risk factor discussions, business descriptions, executive commentary). That combination makes 10-K filings a natural fit for GraphRAG: the structured data forms a queryable graph of entities and relationships, while the narrative text provides the semantic content that embedding-based retrieval searches over.
+
+The dataset covers companies across technology, finance, healthcare, and automotive sectors along with the products they offer, the risk factors they face, and the institutional asset managers that hold their shares. Competitive and partnership relationships connect companies to each other, while document and chunk nodes link the structured graph to embedded filing text. The result is a knowledge graph you can traverse in multiple directions: from an asset manager through portfolio companies to shared risk factors, from a product through its company to competitors offering similar products, or from a semantic text match outward to the entities that surround it. Questions like "Which risk factors expose an asset manager's portfolio across multiple sectors?" require traversing structured relationships. Questions like "What do companies say about supply chain disruption?" require searching unstructured filing text by meaning. GraphRAG handles both, and the combination in a single query is where the architecture earns its complexity.
+
+== Knowledge Graph Schema
+
+The SEC financial dataset includes six entity types connected by typed relationships:
+
+image::financial-data-model.png[SEC 10-K Financial Data Model,800]
+
+== Data Pipeline: Databricks to Neo4j
+
+The SEC 10-K data flows from Databricks to Neo4j through the Neo4j Spark Connector. Governed Delta tables in the lakehouse, refined through the medallion pattern (bronze, silver, gold) and managed by Unity Catalog, serve as the source of record. The Spark Connector reads from silver tables and writes nodes and relationships into the knowledge graph: table rows become nodes, foreign keys become relationships, and shared attributes become shared nodes that make connections explicit.
+
+This workshop's knowledge graph is pre-loaded. The data pipeline has already run, so you work directly with the populated graph from Lab 1 onward. The pipeline pattern itself generalizes to any enterprise dataset where governed tabular data needs to become a connected graph.
+
+image::data-pipeline-v2.png[Databricks to Neo4j Data Pipeline,800]
+
+Beyond the data pipeline, Databricks and Neo4j connect through several additional patterns: the `neo4j-graphrag-python` library for knowledge graph construction (chunking, embedding, entity extraction), Unity Catalog JDBC for federated SQL-to-Cypher access, and multi-agent architectures where Genie handles SQL and Neo4j MCP handles Cypher under a supervisor. See xref:databricks-platform.adoc[Databricks Intelligence Platform] for the full integration architecture and connection patterns.
+
+== Architecture
+
+image::workshop-architecture.png[Workshop Architecture,800]
+
+== Labs
+
+=== Part 1: Setup & Visual Exploration with Neo4j
+
+[cols="1,3,1"]
+|===
+| Lab | Description | Duration
+
+| xref:lab0.adoc[Lab 0]
+| Sign In to AWS and verify Bedrock access
+| 10 min
+
+| xref:lab1.adoc[Lab 1]
+| Neo4j Aura Setup, data loading, and graph exploration
+| 30 min
+
+| xref:lab2.adoc[Lab 2]
+| Build a no-code AI agent using Neo4j Aura Agents
+| 20 min
+|===
+
+=== Part 2: Building GraphRAG Agents
+
+[cols="1,3,1"]
+|===
+| Lab | Description | Duration
+
+| xref:lab3.adoc[Lab 3]
+| Amazon Bedrock, SageMaker setup, Strands agents, and AgentCore deployment
+| 30 min
+
+| xref:lab4.adoc[Lab 4]
+| Graph-enriched search: vector, graph-traversal, and hybrid retrieval over a knowledge graph
+| 30 min
+|===
+
+=== Part 3: Advanced GraphRAG Patterns
+
+[cols="1,3,1"]
+|===
+| Lab | Description | Duration
+
+| xref:lab5.adoc[Lab 5]
+| Complete GraphRAG pipeline with neo4j-graphrag: data loading, embeddings, and four retriever types
+| 45 min
+
+| xref:lab6.adoc[Lab 6]
+| Advanced Agents: Text2Cypher pattern where agents discover the graph schema via MCP and write their own Cypher queries
+| 30 min
+|===
+
+== Prerequisites
+
+* An AWS account with Bedrock access (or workshop credentials via OneBlink)
+* Basic familiarity with SQL and Python (for later labs)

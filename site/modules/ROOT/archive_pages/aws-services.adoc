@@ -1,0 +1,84 @@
+= AWS GenAI Services
+
+Building a GraphRAG agent requires three capabilities: access to foundation models for reasoning and embedding, a development environment for iterating on agent code, and a deployment target for running agents as callable services. Amazon Bedrock provides the models, SageMaker Studio provides the development environment, and AgentCore Runtime provides the deployment target. Each handles one layer of the GenAI stack, and they connect through standard AWS IAM and API patterns.
+
+.**At a Glance**
+
+* **Amazon Bedrock** — unified API access to foundation models for reasoning (Claude) and embeddings (Nova), with cross-region routing for throughput
+* **Amazon Bedrock AgentCore** — serverless agent hosting that packages agent code into isolated microVMs, supporting multiple frameworks and protocols
+* **Amazon SageMaker Studio** — JupyterLab notebook environment with managed compute, where you develop and test agents before deploying them
+
+== Amazon Bedrock
+
+Amazon Bedrock provides a single API endpoint for accessing foundation models from multiple providers. Agent code specifies a model ID and Bedrock handles hosting, scaling, and routing. The workshop uses two model families for two distinct purposes.
+
+**Anthropic Claude** handles reasoning. When an agent receives a question, Claude decides which tools to call, interprets the results, and generates the final answer.
+
+**Amazon Nova Multimodal Embeddings** handles vector representation. It converts text chunks from SEC 10-K filings into 1024-dimensional vectors stored in Neo4j's vector index. When a user asks a question, Nova embeds the query into the same vector space, and Neo4j finds the chunks with the most similar embeddings.
+
+Bedrock uses cross-region inference to route requests across AWS regions for higher throughput. The workshop uses geographic profiles scoped to US regions, so requests can route to whichever region has capacity while data stays within the US boundary. All data remains on the AWS network, encrypted in transit.
+
+== Amazon Bedrock AgentCore
+
+AgentCore bridges the gap between agent code running in a notebook and agent code running as a callable service. It packages agent code into isolated microVMs and exposes them through an API, without requiring Docker, Kubernetes, or custom infrastructure. You write your agent, point the AgentCore toolkit at it, and it handles containerization, networking, and session management.
+
+=== Session Isolation
+
+Each user session runs in a dedicated microVM with isolated CPU, memory, and filesystem resources. After the session completes, the entire microVM is terminated and memory is sanitized. This isolation is significant for agent workloads because agents execute arbitrary tool calls and reason over potentially sensitive data; session isolation prevents cross-session data contamination without requiring the agent developer to implement separation logic.
+
+=== Framework and Protocol Support
+
+AgentCore is framework agnostic. It works with LangGraph, Strands Agents SDK, CrewAI, and custom agent code without a specific framework. It also supports MCP (Model Context Protocol) and A2A (Agent-to-Agent) protocols for inter-agent and agent-to-tool communication. In this workshop, Lab 3 deploys a Strands agent to AgentCore, and Labs 4 and 6 connect to Neo4j MCP Servers hosted on AgentCore.
+
+== Amazon SageMaker Studio
+
+SageMaker Studio is where agent code gets written and tested before deployment. It runs JupyterLab in managed compute instances with pre-configured AWS credentials, eliminating local environment setup as a prerequisite for the workshop.
+
+SageMaker Studio organizes resources into domains, spaces, and applications. The workshop creates a domain per participant, launches a space with a small compute instance, and opens JupyterLab where notebooks run against the Bedrock and Neo4j APIs. Since the notebooks call cloud APIs rather than running models locally, a lightweight instance is sufficient.
+
+== How the Services Connect
+
+The three services form a pipeline from development to deployment:
+
+----
+SageMaker Studio          Amazon Bedrock              AgentCore Runtime
+(develop + test)          (model access)              (deploy + host)
+      |                        |                            |
+  Notebooks  -- Converse API --+-- Claude (reasoning)       |
+      |                        +-- Nova (embeddings)        |
+      |                                                     |
+  agentcore deploy  ------>  S3 bucket  ------>  microVM    |
+      |                                           |         |
+      +-------------------------------------------+---------+
+                              |
+                     Neo4j MCP Server
+                     (hosted on AgentCore)
+----
+
+During development, notebooks call Bedrock directly and iterate on the agent loop locally. Deployment moves the same code to AgentCore, where it runs in an isolated microVM with the same Bedrock API access. Neo4j MCP Servers, also hosted on AgentCore, provide the graph query tools that agents call through MCP. The agent code does not change between local testing and deployed execution; only the hosting layer shifts.
+
+== Where Each Service Appears in the Labs
+
+[cols="1,3"]
+|===
+| Lab | Services Used
+
+| xref:lab0.adoc[Lab 0]
+| Bedrock (model access verification)
+
+| xref:lab3.adoc[Lab 3]
+| SageMaker Studio (environment setup), Bedrock (Converse API, tool use), AgentCore (agent deployment)
+
+| xref:lab4.adoc[Lab 4]
+| Bedrock (Nova embeddings, Claude reasoning), AgentCore (MCP Server hosting)
+
+| xref:lab5.adoc[Lab 5]
+| Bedrock (Nova embeddings, Claude reasoning)
+
+| xref:lab6.adoc[Lab 6]
+| Bedrock (Claude reasoning), AgentCore (MCP Server hosting)
+|===
+
+== Next Steps
+
+Continue to xref:databricks-platform.adoc[Databricks Intelligence Platform] to see how the lakehouse architecture complements Neo4j and Bedrock with governed data pipelines and multi-agent orchestration. Or continue to xref:lab0.adoc[Lab 0: Sign In to AWS] to configure your AWS account and verify Bedrock model access.

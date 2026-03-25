@@ -16,7 +16,7 @@
 * Part 2: Building GraphRAG Agents
 ** xref:lab3.adoc[Lab 3: Bedrock & Agents]
 *** xref:lab3-instructions.adoc[Instructions]
-** xref:lab4.adoc[Lab 4: Graph-Enriched Search]
+** xref:lab4.adoc[Lab 4: GraphRAG Search]
 *** xref:lab4-instructions.adoc[Instructions]
 * Part 3: Advanced GraphRAG Patterns
 ** xref:lab5.adoc[Lab 5: GraphRAG]

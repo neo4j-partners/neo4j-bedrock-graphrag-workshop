@@ -1,0 +1,50 @@
+= Lab 5 Instructions: GraphRAG
+
+TIP: For concepts and background, see xref:lab5.adoc[Lab 5: GraphRAG].
+
+== What You'll Learn
+
+* **Data Loading**: Build Document and Chunk nodes linked by graph relationships
+* **Embeddings**: Generate vector embeddings with Amazon Nova and create a vector index
+* **VectorRetriever**: Pure semantic similarity search over embedded chunks
+* **VectorCypherRetriever**: Vector search enriched with graph traversal to connected entities
+* **Hybrid Search + GraphRAG**: Combined vector and fulltext search with `HybridCypherRetriever` for graph-enriched hybrid retrieval
+
+== Prerequisites
+
+* Completed **Lab 1** (Neo4j Aura instance created and running)
+* Filled in your credentials in `CONFIG.txt` at the project root
+* A running environment (SageMaker Studio or GitHub Codespace)
+
+== Notebooks
+
+Open each notebook in order. Each one builds on the graph state left by the previous notebook.
+
+[cols="1,2,3"]
+|===
+| Notebook | Title | What You Build
+
+| `01_data_loading.ipynb`
+| Data Loading
+| Document and Chunk nodes linked by `FROM_DOCUMENT` and `NEXT_CHUNK` relationships
+
+| `02_embeddings.ipynb`
+| Embeddings
+| Vector embeddings on every Chunk node, plus a `chunkEmbeddings` vector index
+
+| `03_vector_retriever.ipynb`
+| Vector Retriever
+| A `VectorRetriever` wired into a `GraphRAG` pipeline for semantic Q&A
+
+| `04_vector_cypher_retriever.ipynb`
+| VectorCypher Retriever
+| A `VectorCypherRetriever` that enriches each vector match with neighboring chunks and document metadata via Cypher
+
+| `05_hybrid_rag.ipynb`
+| Hybrid Search + GraphRAG
+| `HybridRetriever` with alpha tuning and `HybridCypherRetriever` for graph-enriched hybrid retrieval
+|===
+
+== Next Steps
+
+Continue to xref:lab6.adoc[Lab 6: Advanced Agents] to build autonomous agents that discover the graph schema and write their own Cypher queries.

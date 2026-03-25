@@ -1,0 +1,181 @@
+= Lab 6: Advanced Agents
+
+Lab 4 used pre-written Cypher queries executed through MCP — the **Cypher Templates** pattern from Neo4j's GraphRAG catalog. The agent selected which query to run, but never wrote Cypher itself. This lab takes the next step: the agent discovers the graph schema through MCP, writes its own Cypher from scratch, and executes it. This is the **Text2Cypher** pattern, the most flexible retrieval strategy in the workshop.
+
+TIP: Ready to start? Jump to the xref:lab6-instructions.adoc[Lab 6 Instructions] for step-by-step setup.
+
+.**At a Glance**
+
+* **Text2Cypher pattern** — the agent writes original Cypher queries from a schema and a natural language question
+* **Schema-first approach** — the agent retrieves the graph schema before writing any query, producing more accurate Cypher
+* **Full autonomy** — unlike Lab 4's pre-written templates, the agent reasons about each question and generates queries on the fly
+* **Two framework options** — LangGraph (full-featured, multi-step workflows) and Strands (lightweight, AWS-native)
+
+== GraphRAG Retrieval Patterns
+
+Neo4j's https://graphrag.com/reference/[GraphRAG Patterns Catalog] defines a spectrum of retrieval strategies. This workshop covers three of them, progressing from controlled to autonomous:
+
+[cols="1,2,1,1"]
+|===
+| Pattern | How It Works | Lab | Reliability
+
+| **Cypher Templates**
+| Pre-written, parameterized queries. The agent selects which template to execute.
+| Lab 4
+| High — expert-reviewed queries
+
+| **Graph-Enhanced Vector Search**
+| Vector similarity finds relevant chunks, then graph traversal enriches results with connected entities.
+| Labs 4, 5
+| High — deterministic traversal from vector matches
+
+| **Text2Cypher**
+| The agent reads the schema, reasons about the question, and writes original Cypher from scratch.
+| Lab 6
+| Variable — depends on LLM reasoning quality
+|===
+
+Cypher Templates are the most reliable: queries are reviewed in advance and execute predictably. Text2Cypher is the most flexible: the agent can answer any question the schema supports. The trade-off is that Text2Cypher's query quality depends on the LLM's ability to reason about graph structures, which is why the schema-first approach is critical.
+
+== Lab 4 vs Lab 6
+
+[cols="1,2,2"]
+|===
+| Aspect | Lab 4 (Cypher Templates) | Lab 6 (Text2Cypher)
+
+| **Cypher source**
+| Pre-written in `@tool` functions and system prompts
+| Agent writes from scratch after schema discovery
+
+| **Schema discovery**
+| No — queries are hard-coded with known labels and types
+| Yes — agent calls `get-schema` before every query
+
+| **Flexibility**
+| Limited to the query patterns defined in advance
+| Any question the schema can answer
+
+| **Failure mode**
+| Predictable — expert-reviewed queries return expected results
+| Silent failures possible — wrong labels return empty results without errors
+
+| **MCP role**
+| Transport layer for executing pre-written queries
+| Discovery interface (schema) + execution (queries)
+
+| **Best for**
+| Known query patterns with high reliability requirements
+| Ad-hoc exploration and questions not anticipated during development
+|===
+
+== Model Context Protocol (MCP)
+
+The Model Context Protocol is an open standard that defines how AI agents discover and interact with external tools and data sources. It provides a uniform interface: any MCP-compatible agent connects to any MCP-compatible server without custom integration code.
+
+=== Three-Component Architecture
+
+MCP defines a three-component architecture:
+
+image::mcp-agent-architecture.png[MCP Agent Architecture,700]
+
+**AI Agent (Client)**: The LLM-powered application that needs to access external data. It discovers available tools by asking the MCP server what operations are supported.
+
+**MCP Server**: A lightweight service that exposes data source operations as tools. It translates between the MCP protocol and the data source's native API.
+
+**Data Source**: The underlying system (Neo4j, a REST API, a file system, etc.) that holds the data.
+
+=== Transport Options
+
+MCP supports multiple transport mechanisms:
+
+[cols="1,2,2"]
+|===
+| Transport | Description | Use Case
+
+| **stdio**
+| Standard input/output streams
+| Local development, CLI tools
+
+| **Streamable HTTP**
+| HTTP-based streaming protocol
+| Cloud deployments, remote servers
+|===
+
+This lab uses Streamable HTTP to connect to an MCP Gateway running on AWS.
+
+=== Neo4j MCP Server Tools
+
+The https://github.com/neo4j/mcp[Neo4j MCP Server] is Neo4j's official MCP server. It requires APOC (a standard Neo4j plugin for schema introspection and utility procedures). In this workshop it is deployed in read-only mode, exposing two tools:
+
+[cols="1,3"]
+|===
+| Tool | Description
+
+| **`get-schema`**
+| Uses APOC's `apoc.meta.schema()` to read the graph schema, then simplifies the output to just property names and types (e.g., `"title": "STRING"`). This token-efficient format gives the LLM the structural information it needs for Text2Cypher without wasting context on APOC's full metadata.
+
+| **`read-cypher`**
+| Executes a read-only Cypher query. Before running the query, the server performs an `EXPLAIN` round-trip to verify it contains no write operations (CREATE, MERGE, DELETE, SET). This is a server-side guard independent of the system prompt's instructions.
+|===
+
+The agent discovers these tools automatically through the MCP protocol. It does not need to know about them in advance.
+
+NOTE: The gateway may prefix tool names (e.g., `neo4j-get-schema`). The canonical names from the server itself are `get-schema` and `read-cypher`. The server also exposes `write-cypher` (disabled in read-only mode) and `list-gds-procedures` (registered only when the GDS library is installed). Neither is available in this workshop.
+
+== AWS Deployment Architecture
+
+The MCP infrastructure is pre-deployed on AWS:
+
+----
+Agent (Notebook)  -->  AgentCore Gateway (HTTPS)  -->  Neo4j MCP Server (Container)  -->  Secrets Manager  -->  Neo4j Aura
+----
+
+**Agent (Notebook)**: Your Jupyter notebook running a LangGraph or Strands agent. It connects to the gateway using a URL and access token from `CONFIG.txt`.
+
+**AgentCore Gateway**: An AWS-managed HTTPS endpoint that authenticates requests and routes them to the MCP server.
+
+**Neo4j MCP Server**: Neo4j's official MCP server, deployed here in read-only mode over Streamable HTTP transport. It translates `get-schema` and `read-cypher` tool calls into Neo4j operations and tags every query with `MCP4NEO4J` metadata so database admins can identify MCP-originated traffic.
+
+**Secrets Manager**: Stores the Neo4j Aura connection credentials securely. The MCP server retrieves them at runtime.
+
+**Neo4j Aura**: Your graph database containing SEC financial data.
+
+You do not need to set up any of this infrastructure. The gateway URL and access token are provided in `CONFIG.txt`.
+
+== Schema-First Approach
+
+Both notebooks instruct the agent to follow a schema-first pattern:
+
+1. **Retrieve the schema** before writing any Cypher query. The agent calls `get-schema` to learn what node labels, relationship types, and properties exist in the database.
+2. **Write a Cypher query** based on the actual schema. This prevents the agent from guessing at property names or relationship types that do not exist.
+3. **Execute the query** using `read-cypher` and return the results.
+
+This approach produces more accurate queries because the agent works with the real structure of the data rather than assumptions.
+
+.How schema-first prevents query failures
+[%collapsible]
+====
+Without the schema step, an LLM might generate `MATCH (c:Corp)-[:HAS_PRODUCT]->(p:Product)` when the actual label is `Company` and the relationship type is `OFFERS`. The query executes without error but returns zero results because `Corp` and `HAS_PRODUCT` do not exist in the graph. The agent would then report "no data found" as a confident answer.
+
+With schema retrieval, the agent sees the actual labels (`Company`, `Product`, `RiskFactor`, `AssetManager`) and relationship types (`OFFERS`, `FACES_RISK`, `COMPETES_WITH`, `PARTNERS_WITH`, `OWNS`, `FILED`, `FROM_DOCUMENT`) before writing any query. The generated Cypher uses the correct vocabulary, and empty results genuinely mean no matching data rather than a query targeting non-existent schema elements.
+====
+
+== Why a Specialized Graph Agent
+
+An agent that handles both SQL analytics and graph traversal in a single prompt must hold two query languages, two data models, and two sets of conventions in context simultaneously. SQL operates on rows, filters, and aggregations. Cypher operates on paths, patterns, and traversals. Mixing both dilutes the agent's focus: it may generate Cypher with SQL idioms (using WHERE clauses where pattern matching would be more precise) or SQL with graph assumptions (expecting JOIN-free traversals that relational databases cannot provide).
+
+The architecture in this workshop separates concerns. The MCP agent in this lab handles only graph queries. It inspects the Neo4j schema, writes Cypher, and executes it. It does not need to know about SQL tables, aggregation functions, or relational joins. That focus produces better Cypher because the agent's entire context is graph-shaped.
+
+In production systems, a supervisor or router agent sits above specialized agents and directs questions to the right one based on the data shape the question targets. Relationship traversals go to the graph agent. Time-series aggregations go to a SQL agent. Questions that span both get decomposed into sub-tasks routed to each specialist.
+
+== Two Framework Options
+
+This lab provides two notebook implementations. Both connect to the same MCP server and produce the same results. Choose the one that fits your interest.
+
+**Strands** is the recommended option for this workshop. It is the same AWS-native SDK introduced in Lab 3, with built-in MCP support and a simpler API. Strands requires fewer lines of code to set up and is a good fit when you want a straightforward agent without the overhead of the LangChain ecosystem.
+
+**LangGraph** is the full-featured option. It uses LangChain MCP adapters to load tools from the MCP server and provides fine-grained control over the agent loop. LangGraph is better suited for complex, multi-step workflows where you need to customize how the agent reasons, retries, or chains operations. This option is included for participants with prior LangGraph experience who want to compare the two approaches.
+
+== Next Steps
+
+Continue to xref:lab6-instructions.adoc[Lab 6 Instructions] to run the notebooks and query the knowledge graph through MCP. This is the final lab in the workshop. You have progressed from setup and visual exploration (Labs 0-2) through building GraphRAG agents (Labs 3-4) to advanced GraphRAG patterns including the neo4j-graphrag library (Lab 5) and autonomous Text2Cypher agents that inspect schemas and write their own queries.

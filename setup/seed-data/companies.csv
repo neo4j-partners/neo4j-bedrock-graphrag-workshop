@@ -1,4 +1,4 @@
-company_id,name,ticker,cik,cusip
+companyId,name,ticker,cik,cusip
 C001,"Amazon.com, Inc.",AMZN,1018724,023135106
 C002,Apple Inc.,AAPL,320193,37833950
 C003,Microsoft Corporation,MSFT,789019,594918954

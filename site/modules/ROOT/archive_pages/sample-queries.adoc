@@ -1,0 +1,199 @@
+= Sample Cypher Queries
+
+Copy and paste these queries into the https://console.neo4j.io[Neo4j Aura Query interface] to explore the SEC financial knowledge graph. Queries are organized by retrieval strategy, progressing from direct graph traversals through vector and fulltext search to graph-enriched retrieval.
+
+TIP: Queries in Section 2 require the data loaded in Lab 5 (Chunk nodes, embeddings, and fulltext indexes). They will not return results until those notebooks have been run.
+
+== Cypher Quick Reference
+
+[cols="2,4"]
+|===
+| Concept | What It Does
+
+| `MATCH (n:Label)`
+| Find nodes by label
+
+| `(a)-[:REL]\->(b)`
+| Traverse a relationship between two nodes (direction matters)
+
+| `OPTIONAL MATCH`
+| Like a SQL LEFT JOIN: keeps the row even if the pattern has no match
+
+| `RETURN ... AS alias`
+| Project properties and rename columns
+
+| `WITH`
+| Pipes results between query parts, like a subquery boundary
+
+| `count()`, `collect()`
+| Aggregate functions: count rows or gather values into a list
+
+| `ORDER BY ... DESC`
+| Sort results (ascending by default)
+
+| `LIMIT n`
+| Cap the number of returned rows
+
+| `EXISTS { pattern }`
+| Tests whether a graph pattern exists in the database
+
+| `db.index.fulltext.queryNodes()`
+| Run a keyword search against a named fulltext index
+
+| `db.index.vector.queryNodes()`
+| Run a vector similarity search against a named vector index
+
+| `CALL { ... }`
+| Subquery block for scoping intermediate results or calling procedures
+|===
+
+'''
+
+== Section 1: Structured Graph Queries
+
+These queries run against the structured entity data loaded in Lab 1: Company, Product, RiskFactor, and AssetManager nodes with their typed relationships.
+
+'''
+
+=== Company Products
+
+What products does NVIDIA offer?
+
+[source,cypher]
+----
+MATCH (c:Company {ticker: 'NVDA'})-[:OFFERS]->(p:Product)
+RETURN p.name
+ORDER BY p.name
+----
+
+NOTE: Single-hop traversal from Company to Product via OFFERS. Replace `'NVDA'` with any ticker to explore other companies.
+
+=== Shared Risk Factors
+
+Which risk factors are shared across multiple companies?
+
+[source,cypher]
+----
+MATCH (c:Company)-[:FACES_RISK]->(r:RiskFactor)
+WITH r, collect(c.ticker) AS companies, count(c) AS cnt
+WHERE cnt > 1
+RETURN r.name, companies, cnt
+ORDER BY cnt DESC
+LIMIT 10
+----
+
+NOTE: `collect()` gathers all company tickers sharing each risk factor into a list. `WITH` pipes the aggregation results to the `WHERE` filter, which removes risk factors that only affect one company.
+
+=== Portfolio Exposure
+
+Which risk factors expose an asset manager's portfolio across multiple companies?
+
+[source,cypher]
+----
+MATCH (am:AssetManager {name: 'Berkshire Hathaway Inc.'})-[:OWNS]->(c:Company)-[:FACES_RISK]->(r:RiskFactor)
+WITH am, r, collect(DISTINCT c.name) AS exposedCompanies, count(DISTINCT c) AS cnt
+RETURN r.name AS riskFactor, exposedCompanies, cnt
+ORDER BY cnt DESC
+LIMIT 10
+----
+
+NOTE: Two-hop traversal: AssetManager to Company via OWNS, then Company to RiskFactor via FACES_RISK. This query shows which risks affect the most companies in Berkshire Hathaway's portfolio. `count(DISTINCT c)` avoids double-counting when multiple paths exist.
+
+=== Top Asset Managers
+
+Who are the top asset managers by number of holdings?
+
+[source,cypher]
+----
+MATCH (am:AssetManager)-[o:OWNS]->(c:Company)
+WITH am, count(c) AS holdings, sum(o.shares) AS totalShares
+RETURN am.name, holdings, totalShares
+ORDER BY holdings DESC
+----
+
+NOTE: The OWNS relationship carries a `shares` property. `sum(o.shares)` aggregates across all holdings. The combination of count and sum shows both portfolio breadth and size.
+
+=== Competitive Landscape
+
+Who does NVIDIA compete with, and do any of those competitors also partner with NVIDIA?
+
+[source,cypher]
+----
+MATCH (c:Company {ticker: 'NVDA'})-[:COMPETES_WITH]->(comp)
+RETURN comp.name,
+       EXISTS { (c)-[:PARTNERS_WITH]->(comp) } AS alsoPartner
+ORDER BY comp.name
+----
+
+NOTE: The outer `MATCH` guarantees a COMPETES_WITH relationship exists. `EXISTS` then checks whether a PARTNERS_WITH relationship also connects the same two companies. Results where `alsoPartner` is true represent coopetition: companies that are simultaneously competitors and partners.
+
+=== Supply Chain Partners
+
+What companies does NVIDIA partner with?
+
+[source,cypher]
+----
+MATCH (c:Company {ticker: 'NVDA'})-[:PARTNERS_WITH]->(p)
+RETURN p.name
+ORDER BY p.name
+----
+
+=== Filed Documents
+
+Which companies have filed SEC documents?
+
+[source,cypher]
+----
+MATCH (c:Company)-[:FILED]->(d:Document)
+RETURN c.name, c.ticker, d.accessionNumber, d.filingType
+ORDER BY c.name
+----
+
+NOTE: The FILED relationship bridges the structured entity layer (Company, Product, RiskFactor) to the unstructured document layer (Document, Chunk). Each Document represents a SEC 10-K filing identified by its accession number.
+
+=== Cross-Entity Analysis
+
+Which companies face cybersecurity risks and who owns them?
+
+[source,cypher]
+----
+MATCH (c:Company)-[:FACES_RISK]->(r:RiskFactor), (am:AssetManager)-[:OWNS]->(c)
+WHERE r.name CONTAINS 'Cybersecurity'
+WITH c, r, collect(am.name) AS owners
+RETURN c.name, c.ticker, r.name AS risk, owners
+ORDER BY c.name
+----
+
+NOTE: Pattern matching with directed relationships following the schema: Company to RiskFactor via FACES_RISK, and AssetManager to Company via OWNS. `collect()` gathers all asset managers owning each company into a single row.
+
+=== Schema Introspection
+
+View the complete graph schema:
+
+[source,cypher]
+----
+CALL db.schema.visualization()
+----
+
+List all indexes and constraints:
+
+[source,cypher]
+----
+SHOW INDEXES
+----
+
+Node counts by label:
+
+[source,cypher]
+----
+MATCH (n)
+WITH labels(n)[0] AS label, count(n) AS count
+RETURN label, count
+ORDER BY label
+----
+
+'''
+
+== Fulltext, Vector, and Graph-Enriched Queries
+
+The fulltext search, vector similarity, and graph-enriched retrieval queries require the data structures built in Lab 5 (Document/Chunk nodes, embeddings, and fulltext indexes). See the xref:lab5-sample-queries.adoc[Lab 5: Advanced Sample Queries] page for those queries.

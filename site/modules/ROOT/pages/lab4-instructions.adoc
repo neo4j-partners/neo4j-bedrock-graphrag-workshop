@@ -1,21 +1,22 @@
-= Lab 4 Instructions: Graph-Enriched Search
+= Lab 4 Instructions: GraphRAG Search
 
-Follow these notebooks to search a Neo4j knowledge graph, progressing from vector search to graph-enriched retrieval.
+Follow these notebooks to load chunk embeddings into your knowledge graph and build retrieval pipelines that progress from pure vector search to graph-enriched retrieval.
 
-TIP: For concepts and background, see xref:lab4.adoc[Lab 4: Graph-Enriched Search].
+TIP: For concepts and background, see xref:lab4.adoc[Lab 4: GraphRAG Search].
 
 == What You'll Learn
 
-* **Strands + MCP Basics**: Connect an agent to Neo4j via MCP and query the knowledge graph using natural language (Text2Cypher)
-* **Vector Search**: Embed queries and find semantically similar chunks using Bedrock Nova embeddings
-* **Graph-Enriched Search**: Follow relationships from matched chunks to documents, companies, products, and risk factors
+* **Data Loading**: Add document chunks with pre-computed embeddings to the existing knowledge graph from Lab 1
+* **Vector Search**: Use `VectorRetriever` to find semantically similar chunks and generate answers with `GraphRAG`
+* **Graph-Enriched Search**: Use `VectorCypherRetriever` to combine vector search with Cypher graph traversal for richer context
 
 == Prerequisites
 
-* `CONFIG.txt` at the project root filled in with `MCP_GATEWAY_URL` and `MCP_ACCESS_TOKEN`
+* Completed **Lab 1** — Aura instance created and knowledge graph loaded
+* `CONFIG.txt` at the project root filled in with `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD`, `MODEL_ID`, and `REGION`
 * A running environment (SageMaker Studio or GitHub Codespace)
 
-NOTE: This lab connects to Neo4j through a pre-deployed MCP server. The database, embeddings, and indexes are already set up by the workshop admin. You do not need to complete Lab 1 or load data yourself — everything is ready to query.
+NOTE: This lab uses the same Neo4j Aura instance from Labs 1-2. The structured graph (companies, products, risk factors, asset managers) must already be loaded. Notebook 01 adds the unstructured layer on top — it does not clear existing data.
 
 == Notebooks
 
@@ -23,19 +24,19 @@ NOTE: This lab connects to Neo4j through a pre-deployed MCP server. The database
 |===
 | Notebook | Title | What You Build
 
-| `00_intro_strands_mcp.ipynb`
-| Introduction to Strands + MCP
-| Connect an agent to Neo4j via MCP — the agent discovers tools and writes its own Cypher (Text2Cypher)
+| `01_load_and_query.ipynb`
+| Load Data and Query
+| Load chunk embeddings into the graph, create a vector index, link entities to chunks with `FROM_CHUNK` relationships, and run test queries
 
-| `01_vector_search_mcp.ipynb`
-| Vector Search
-| Semantic vector search with Bedrock Nova embeddings — the foundation for graph-enriched retrieval
+| `02_vector_retriever.ipynb`
+| Vector Retriever
+| Semantic search with `VectorRetriever` and end-to-end question answering with `GraphRAG`
 
-| `02_graph_enriched_search_mcp.ipynb`
-| Graph-Enriched Search
-| Vector search enriched with document metadata, neighboring chunks, and entity traversal (companies, products, risk factors)
+| `03_vector_cypher_retriever.ipynb`
+| VectorCypher Retriever
+| Graph-enriched retrieval using `VectorCypherRetriever` — adds filing metadata, companies, products, and risk factors to vector search results
 |===
 
 == Next Steps
 
-After completing these notebooks, continue to xref:lab5.adoc[Lab 5: GraphRAG] for direct library-based retrieval using the neo4j-graphrag Python library.
+After completing these notebooks, continue to xref:lab5.adoc[Lab 5: Neo4j MCP Server] for agent-based retrieval via MCP, or to xref:lab6.adoc[Lab 6: GraphRAG Pipeline] to build the data loading and embedding pipeline from scratch.

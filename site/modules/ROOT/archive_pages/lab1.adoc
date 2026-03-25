@@ -1,0 +1,135 @@
+= Lab 1: Neo4j Aura Setup
+
+This is Lab 1 of the workshop. The graph database you provision here is the foundation for everything that follows: the agents in Lab 2 query it through a no-code interface, Labs 3-4 build retrieval pipelines against it, Lab 5 adds embeddings and GraphRAG retrieval, and Lab 6 connects MCP agents. Getting Aura running and understanding what the graph contains is the starting point.
+
+TIP: Ready to start? Jump to xref:lab1-instructions.adoc[Aura Setup] for step-by-step instructions.
+
+.**At a Glance**
+
+* **Graph databases** — store data as nodes and relationships, where connections are explicit and traversable rather than hidden in foreign keys and joins
+* **Cypher** — Neo4j's pattern-matching query language, where queries read like the graph patterns they match
+* **The SEC Financial Knowledge Graph** — four entity types (Company, Product, RiskFactor, AssetManager) connected by typed relationships
+* **Neo4j Aura** — managed cloud graph database with built-in vector search, Graph Data Science, and Aura Agents
+* **Aura developer tools** — Query (Cypher editor), Explore (visual graph canvas), and Dashboards (low-code visualization)
+
+== Graph Databases
+
+A graph database models data as nodes and relationships. Nodes represent entities. Relationships represent the connections between them. Both carry properties, which are key-value pairs that describe their attributes.
+
+The notation follows a visual convention. Parentheses denote nodes, brackets denote relationships:
+
+----
+(:Company {name, ticker})-[:FACES_RISK]->(:RiskFactor)
+----
+
+Each Company node carries properties like name and ticker. Each FACES_RISK relationship carries details like severity. The relationship is directional, typed, and stored as a first-class element alongside the nodes it connects.
+
+.How graphs compare to relational databases
+[%collapsible]
+====
+Relational databases represent connections implicitly through foreign keys and join tables. To answer "Which risk factors expose BlackRock's portfolio?", a relational query joins through an ownership junction table to companies, then through a risk factor junction table to risk factors, grouping and counting across both joins. Each hop requires another JOIN clause, and the query structure obscures the question it answers.
+
+In a graph, the same question follows the connections directly:
+
+[source,cypher]
+----
+MATCH (am:AssetManager {name: 'BlackRock'})-[:OWNS]->(c:Company)-[:FACES_RISK]->(r:RiskFactor)
+RETURN r.name, count(DISTINCT c) AS exposedCompanies
+ORDER BY exposedCompanies DESC
+----
+
+The Cypher reads like the traversal pattern it executes: start at BlackRock, follow OWNS to companies, follow FACES_RISK to risk factors, count how many companies share each risk. The graph does not need join tables because the connections are stored as first-class elements alongside the entities they link.
+====
+
+Cypher is the query language for interacting with Neo4j. It uses a pattern-matching syntax that mirrors the visual structure of nodes and relationships:
+
+[source,cypher]
+----
+MATCH (c:Company {ticker: 'NVDA'})-[:OFFERS]->(p:Product)
+RETURN p.name ORDER BY p.name LIMIT 10
+----
+
+.How the query works
+[%collapsible]
+====
+`MATCH` finds nodes and relationships that fit the specified pattern. `(c:Company {ticker: 'NVDA'})` binds a Company node with the property `ticker = 'NVDA'` to the variable `c`. The `-[:OFFERS]\->` arrow follows outbound OFFERS relationships to `(p:Product)` nodes. `RETURN` selects which properties to include in the result set, and `LIMIT` caps the output. Cypher handles multi-hop traversals and path-finding operations natively.
+====
+
+.Why constraints matter for data loading
+[%collapsible]
+====
+Lab 1 creates uniqueness constraints before loading any data. These constraints serve two purposes. First, they ensure that each entity has a unique identifier (Company by ticker, Product by name, and so on), preventing duplicate nodes from appearing in the graph. Second, they enable MERGE operations during data loading. MERGE creates a node if it does not exist and matches it if it does, making the load operation idempotent. Without the constraint, MERGE would need to scan all nodes of a label to check for existence, which is slow. With the constraint, Neo4j uses the index to perform the check efficiently.
+====
+
+== The SEC Financial Knowledge Graph
+
+The workshop builds a knowledge graph from SEC 10-K financial filings. Four core entity types and the relationships between them capture the structure of public companies, their products, risk factors, and institutional ownership:
+
+[cols="1,3"]
+|===
+| Entity Type | Examples
+
+| **Company**
+| NVIDIA, Microsoft, Apple, Amazon, Tesla, JPMorgan Chase, Goldman Sachs, Johnson & Johnson, Pfizer
+
+| **Product**
+| GPUs, Cloud Services, iPhone, AWS, Model S, Investment Banking
+
+| **RiskFactor**
+| Supply Chain Disruption, Regulatory Compliance, Cybersecurity Threats
+
+| **AssetManager**
+| BlackRock, Vanguard, State Street, Fidelity
+|===
+
+These entities connect through typed relationships that reflect real-world structure:
+
+----
+(Company)-[:OFFERS]->(Product)
+(Company)-[:FACES_RISK]->(RiskFactor)
+(Company)-[:COMPETES_WITH]->(Company)
+(Company)-[:PARTNERS_WITH]->(Company)
+(AssetManager)-[:OWNS {shares}]->(Company)
+----
+
+A question like "Which risk factors expose an asset manager's portfolio across multiple companies?" requires traversing from AssetManager through OWNS to Company, then FACES_RISK to RiskFactor, grouping by risk factor. That multi-hop traversal is what the graph handles natively.
+
+.Why this schema design
+[%collapsible]
+====
+Company is the central node because most relationships radiate from it: companies offer products, face risks, compete with each other, partner with each other, and are owned by asset managers. This hub structure means most interesting questions start at or pass through a Company node.
+
+COMPETES_WITH and PARTNERS_WITH are separate relationship types rather than a generic RELATES_TO with a type property. Separate types let Cypher filter by relationship type during traversal, which is indexed and fast. A property filter on a generic relationship requires checking every connection. When traversal patterns follow specific relationship types (as competitive analysis and partnership mapping do), typed relationships are the right design choice.
+
+The Document and Chunk layer connects structured entities to unstructured filing text. A Company node links to its filed Documents via FILED. Each Document links to its Chunks via FROM_DOCUMENT, and adjacent Chunks link to each other via NEXT_CHUNK to preserve reading order. This structure supports GraphRAG retrieval: vector search finds relevant Chunks, then graph traversal follows FROM_DOCUMENT to the Document and FILED back to the Company, pulling in structured entity context alongside the matched text.
+====
+
+== Neo4j Aura
+
+Neo4j Aura is a fully managed cloud graph database service. It provides the Neo4j graph engine without the operational overhead: automatic backups, high availability, and deployment on AWS, GCP, or Azure. Each participant provisions their own Aura instance to hold the SEC financial knowledge graph.
+
+.Vector search, Graph Data Science, and AI capabilities
+[%collapsible]
+====
+Aura provides capabilities beyond the core graph engine that support AI retrieval pipelines. Built-in vector indexes store embeddings alongside graph data, enabling semantic similarity search without a separate vector store. Cypher queries can combine vector search with graph traversal in a single operation. Graph Data Science algorithms like PageRank and community detection run directly within Aura. These capabilities come together in Lab 5 (GraphRAG retrieval) and Lab 6 (advanced agents with Text2Cypher).
+====
+
+.Aura Agents: no-code agent platform
+[%collapsible]
+====
+Aura Agents is Neo4j's no-code agent platform for building conversational interfaces grounded in graph data. Users describe a use case, and the platform auto-generates an agent with tools tailored to the graph's schema: Cypher query templates for deterministic traversals, vector similarity search over embedded content, and text-to-Cypher generation for ad-hoc exploration. Agents deploy as REST API endpoints or MCP server endpoints. See xref:lab1-explore.adoc[Explore the Graph] for visual exploration, and Lab 2 for the full Aura Agents workflow.
+====
+
+== Aura Developer Tools
+
+The Aura console provides three tools you will use throughout the workshop.
+
+**Query** is a developer environment for writing and executing Cypher queries with syntax highlighting, auto-completion, and saved query collections. You will use this to load data and verify results.
+
+**Explore** (powered by Neo4j Bloom) provides visual graph exploration through an interactive canvas. Search for nodes by label or property, expand their relationships, and discover patterns visually.
+
+**Dashboards** offer low-code data visualization including bar charts, geographic maps, and graph visualizations for presenting graph data to non-technical stakeholders.
+
+== Next Steps
+
+Continue to xref:lab1-instructions.adoc[Aura Setup] to sign up for Neo4j Aura and create your database instance, then xref:lab1-load.adoc[Load the Knowledge Graph] to populate it with SEC financial data. See xref:lab1-explore.adoc[Explore the Graph] for visual exploration with Neo4j Explore.
