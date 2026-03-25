@@ -200,7 +200,7 @@ def destroy():
     """Destroy the deployed agent."""
     print("Destroying deployed agent...")
     result = subprocess.run(
-        [AGENTCORE_CLI, "destroy"],
+        [AGENTCORE_CLI, "destroy", "--force"],
         cwd=str(AGENT_DIR),
         capture_output=True,
         text=True,

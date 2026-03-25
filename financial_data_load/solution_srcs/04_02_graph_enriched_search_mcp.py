@@ -12,14 +12,11 @@ Run with: uv run python main.py solutions <N>
 import os
 import sys
 
-import nest_asyncio
 from dotenv import load_dotenv
 from mcp.client.streamable_http import streamablehttp_client
 from strands import Agent, tool
 from strands.models import BedrockModel
 from strands.tools.mcp import MCPClient
-
-nest_asyncio.apply()
 
 # Add financial_data_load to sys.path so local lib imports work
 FINANCIAL_DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
