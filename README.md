@@ -73,7 +73,7 @@ See `CONFIG.txt` for all available settings grouped by lab.
 | **Knowledge Graph** | Neo4j Aura |
 | **Foundation Models** | Amazon Bedrock (Claude Sonnet) |
 | **Embeddings** | Amazon Nova Multimodal Embeddings |
-| **Agent Frameworks** | LangGraph, Strands Agents SDK |
+| **Agent Frameworks** | Strands Agents SDK |
 | **GraphRAG Library** | neo4j-graphrag |
 | **Agent Protocol** | Model Context Protocol (MCP) |
 

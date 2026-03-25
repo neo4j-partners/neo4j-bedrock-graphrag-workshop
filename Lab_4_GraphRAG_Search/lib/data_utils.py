@@ -14,7 +14,6 @@ from pathlib import Path
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
 from neo4j_graphrag.embeddings import BedrockNovaEmbeddings
-from neo4j_graphrag.experimental.components.text_splitters.fixed_size_splitter import FixedSizeSplitter
 from neo4j_graphrag.llm import BedrockLLM
 from neo4j_graphrag.schema import get_schema as _lib_get_schema
 from pydantic import Field
@@ -199,6 +198,8 @@ def split_text(text: str, chunk_size: int = 500, chunk_overlap: int = 50) -> lis
     Returns:
         List of chunk text strings
     """
+    from neo4j_graphrag.experimental.components.text_splitters.fixed_size_splitter import FixedSizeSplitter
+
     splitter = FixedSizeSplitter(
         chunk_size=chunk_size,
         chunk_overlap=chunk_overlap,

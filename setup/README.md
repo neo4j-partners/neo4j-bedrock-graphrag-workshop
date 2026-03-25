@@ -59,14 +59,14 @@ Ensure the following fields are set in `CONFIG.txt` before distributing to parti
 
 | Field | Source | Required By |
 |-------|--------|-------------|
-| `NEO4J_URI` | Lab 1 — Aura instance creation | Labs 2, 5, 6 |
-| `NEO4J_USERNAME` | Lab 1 — Aura instance creation | Labs 2, 5, 6 |
-| `NEO4J_PASSWORD` | Lab 1 — Aura instance creation | Labs 2, 5, 6 |
+| `NEO4J_URI` | Lab 1 — Aura instance creation | Labs 1, 2, 4, 6 |
+| `NEO4J_USERNAME` | Lab 1 — Aura instance creation | Labs 1, 2, 4, 6 |
+| `NEO4J_PASSWORD` | Lab 1 — Aura instance creation | Labs 1, 2, 4, 6 |
 | `MODEL_ID` | Pre-configured default | Labs 3, 4, 5, 6 |
-| `EMBEDDING_DIMENSIONS` | Pre-configured default (1024) | Labs 4, 5 |
+| `EMBEDDING_DIMENSIONS` | Pre-configured default (1024) | Labs 4, 6 |
 | `REGION` | Pre-configured default | Labs 3, 4, 5, 6 |
-| `MCP_GATEWAY_URL` | MCP server deployment | Labs 4, 6 |
-| `MCP_ACCESS_TOKEN` | MCP server deployment | Labs 4, 6 |
+| `MCP_GATEWAY_URL` | MCP server deployment | Lab 5 |
+| `MCP_ACCESS_TOKEN` | MCP server deployment | Lab 5 |
 
 ### 4. SageMaker Lifecycle Configuration (Optional)
 

@@ -56,7 +56,9 @@ Three notebooks covering data loading, embedding generation, and vector-cypher r
 
 `lib/mcp_utils.py`: `MCPConnection` — wraps raw MCP `ClientSession` over Streamable HTTP for persistent connections and `execute_query(cypher)`. Loads config from `CONFIG.txt` by default.
 
-`Lab_4_Graph_Enriched_Search/lib/lab_4_data_utils.py`: Lightweight `BedrockConfig` and `get_embedding()` only — no neo4j or neo4j-graphrag dependency. Used by Lab 4 notebooks. Lab 4 no longer has its own `mcp_utils.py` — all MCP access uses Strands `MCPClient` directly.
+`Lab_4_GraphRAG_Search/lib/data_utils.py`: Copy of root `lib/data_utils.py` used by Lab 4 notebooks for `get_embedder()` and `get_llm()`.
+
+`Lab_5_MCP_Server/lib/lab_5_data_utils.py`: Lightweight `BedrockConfig` and `get_embedding()` only — no neo4j or neo4j-graphrag dependency. Used by Lab 5 MCP notebooks. Lab 5 uses Strands `MCPClient` directly for all MCP access.
 
 `financial_data_load/lib/`: Local copies of `data_utils.py` and `mcp_utils.py` that load from `financial_data_load/.env` instead of the project-root `CONFIG.txt`. These are copied from the root `lib/` to simplify env loading for the test harness. If either copy is changed, the other must be updated to match.
 
@@ -80,4 +82,4 @@ The notebooks are designed for AWS SageMaker Studio but work locally with:
 
 ## Dependencies
 
-Lab 5 uses `pyproject.toml` at `Lab_5_GraphRAG/src/pyproject.toml`: Python 3.11+, neo4j-graphrag[bedrock] (from neo4j-partners fork), python-dotenv, pydantic-settings, nest-asyncio.
+Labs 4 and 6 install neo4j-graphrag via `%pip install` in notebook cells: `neo4j-graphrag[bedrock]` from the neo4j-partners fork (`neo4j-partners/neo4j-graphrag-python@bedrock-embeddings`).
