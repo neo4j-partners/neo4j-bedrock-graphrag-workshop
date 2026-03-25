@@ -45,21 +45,7 @@ The graph you explored in Lab 1 (companies, products, risk factors, asset manage
 
 The `FILED` relationship bridges the two layers: `(Company)-[:FILED]->(Document)`. When graph-enriched search traverses from a chunk to its source document to the company that filed it, it crosses from unstructured text into the structured entities you already know. That traversal chain, `(Chunk)-[:FROM_DOCUMENT]->(Document)<-[:FILED]-(Company)`, is what makes GraphRAG possible.
 
-[source]
-----
-Structured Layer (Lab 1)          Unstructured Layer (Lab 4 Notebook 01)
-┌──────────────────────┐          ┌──────────────────────────────────────┐
-│ (:Company)           │──FILED──▶│ (:Document)◀─FROM_DOCUMENT─(:Chunk) │
-│   ├─OFFERS─▶Product  │          │                 │                   │
-│   ├─FACES_RISK─▶Risk │          │            NEXT_CHUNK               │
-│   └─COMPETES_WITH    │          │                 ▼                   │
-│ (:AssetManager)      │          │             (:Chunk)                │
-│   └─OWNS─▶Company   │          └──────────────────────────────────────┘
-└──────────────────────┘
-         ▲                                    │
-         └────── FROM_CHUNK ──────────────────┘
-         (Products, RiskFactors linked to Chunks)
-----
+image::two-layer-graph.png[The Two-Layer Graph,800]
 
 == Retrieval Strategies
 

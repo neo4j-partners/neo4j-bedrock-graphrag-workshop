@@ -138,20 +138,7 @@ Graph connections turn an isolated text answer into a **contextual, grounded res
 
 ## The Two-Layer Graph
 
-```
-Structured Layer (Lab 1)          Unstructured Layer (Lab 4)
-┌──────────────────────┐          ┌──────────────────────────────────────┐
-│ (:Company)           │──FILED──▶│ (:Document)◀─FROM_DOCUMENT─(:Chunk) │
-│   ├─OFFERS─▶Product  │          │                 │                   │
-│   ├─FACES_RISK─▶Risk │          │            NEXT_CHUNK               │
-│   └─COMPETES_WITH    │          │                 ▼                   │
-│ (:AssetManager)      │          │             (:Chunk)                │
-│   └─OWNS─▶Company   │          └──────────────────────────────────────┘
-└──────────────────────┘
-         ▲                                    │
-         └────── FROM_CHUNK ──────────────────┘
-         (Products, RiskFactors linked to Chunks)
-```
+![bg contain](two-layer-graph.png)
 
 ---
 

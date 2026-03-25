@@ -117,6 +117,8 @@ git clone https://github.com/neo4j-partners/lab-neo4j-aws.git
 
 == Notebook 2: Deploy to AgentCore Runtime
 
+IMPORTANT: During hosted OneBlink workshops, SageMaker roles do not have the IAM permissions required to run this notebook. You can review the code and concepts, but deployment will only work in your own AWS account with the appropriate permissions configured.
+
 1. Open `02_deploy_to_agentcore.ipynb`
 2. The agent code is pre-built in the `agentcore_deploy/` directory
 3. Run through the cells to:

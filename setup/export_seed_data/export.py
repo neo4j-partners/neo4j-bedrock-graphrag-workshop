@@ -188,6 +188,12 @@ def export(driver) -> dict:  # noqa: C901
             d["documentId"] = did
             d["accessionNumber"] = accession
             d["filingType"] = "10-K"
+            # Strip absolute path prefix — keep relative from financial-data/
+            src = d.get("source", "")
+            marker = "financial-data/"
+            idx = src.find(marker)
+            if idx != -1:
+                d["source"] = src[idx + len(marker):]
         write_csv(
             "documents.csv",
             ["documentId", "accessionNumber", "filingType", "source"],
