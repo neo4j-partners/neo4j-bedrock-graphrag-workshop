@@ -35,7 +35,7 @@ This lab applies the pattern above to SEC 10-K filings — annual financial repo
 
 When you ask "What cybersecurity risks does Apple face?", vector search finds the most relevant passages. Graph-enriched search then follows relationships from those passages to return Apple as the filer, the specific products mentioned, and the risk factor classifications — all in a single retrieval step.
 
-This lab covers vector search and graph-enriched retrieval (steps 3 and 4). The chunking and embedding were pre-computed and are loaded in Notebook 01. xref:lab6.adoc[Lab 6] covers building that data pipeline from scratch.
+This lab covers the retrieval side — vector search and graph-enriched retrieval. The chunking and embedding were pre-computed and are loaded in Notebook 01. xref:lab6.adoc[Lab 6] covers building that data pipeline from scratch.
 
 image::graph-enriched-retrieval.png[SEC 10-K GraphRAG Retrieval Flow,800]
 
