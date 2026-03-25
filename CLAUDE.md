@@ -9,8 +9,8 @@ This is a hands-on workshop teaching GraphRAG (Graph Retrieval-Augmented Generat
 ## Workshop Structure
 
 - **Part 1 (Labs 0-2)**: No-code exploration using Neo4j Aura console and Aura Agents visual builder
-- **Part 2 (Labs 3-5)**: Python-based GraphRAG with Strands Agents SDK and neo4j-graphrag library
-- **Part 3 (Lab 6)**: MCP agents
+- **Part 2 (Labs 3-4)**: Python-based GraphRAG with Strands Agents SDK and neo4j-graphrag library
+- **Part 3 (Labs 5-6)**: MCP agents and GraphRAG data pipeline
 
 ## Key Configuration
 
@@ -25,25 +25,30 @@ Two notebooks:
 - `01_basic_strands_agent.ipynb`: Uses `strands.Agent` with `strands.models.BedrockModel` and `@tool` decorator. Defines simple tools (get_current_time, add_numbers), creates an agent, tests it with queries including sample SEC filing data.
 - `02_deploy_to_agentcore.ipynb`: Deploys the agent to AgentCore Runtime via `bedrock-agentcore-starter-toolkit` using `direct_code_deploy`. Agent code is pre-built in `agentcore_deploy/` (agent.py + pyproject.toml).
 
-### Lab 4 - Graph-Enriched Search
-Location: `Lab_4_Graph_Enriched_Search/`
+### Lab 4 - GraphRAG Search
+Location: `Lab_4_GraphRAG_Search/`
+
+Three notebooks using the neo4j-graphrag Python library with direct Python driver connections:
+- `01_load_and_query.ipynb`: Load chunks + embeddings from `setup/seed-embeddings`, create vector index, link entities to chunks via `FROM_CHUNK` relationships, run test queries
+- `02_vector_retriever.ipynb`: `VectorRetriever` + `GraphRAG` pipeline for semantic question answering
+- `03_vector_cypher_retriever.ipynb`: `VectorCypherRetriever` with custom Cypher retrieval query traversing companies, products, risk factors
+
+Uses `lib/data_utils.py` for embedder/LLM helpers. All Neo4j access is via `neo4j.GraphDatabase.driver()` (no MCP). The same Aura instance from Labs 1-2 is used — notebook 01 adds the unstructured layer on top of the existing structured graph.
+
+### Lab 5 - Neo4j MCP Server
+Location: `Lab_5_MCP_Server/`
 
 Three notebooks using Strands Agents SDK with MCP to search a Neo4j knowledge graph:
-- `00_intro_strands_mcp.ipynb`: Introduction to Strands+MCP — agent discovers tools via `list_tools_sync()` and queries the graph directly (Text2Cypher pattern, no `@tool` wrappers)
-- `01_vector_search_mcp.ipynb`: Semantic vector search via `strands.tools.mcp.MCPClient` using Bedrock Nova embeddings
-- `02_graph_enriched_search_mcp.ipynb`: Vector search with graph traversal for enriched context (document metadata, neighboring chunks, connected entities)
+- `01_intro_strands_mcp.ipynb`: MCP tool discovery, schema inspection, simple queries — pure MCP introduction
+- `02_graph_enriched_search.ipynb`: Cypher Templates pattern — `@tool` wrappers with vector search + graph traversal via MCP
+- `03_text2cypher_agent.ipynb`: Text2Cypher pattern — autonomous agent writes its own Cypher
 
-All three notebooks use Strands `MCPClient` with `streamablehttp_client` transport. Notebook 00 passes MCP tools directly to the agent (standard Strands pattern). Notebook 01 uses `lib/lab_4_data_utils.py` for Bedrock embeddings (lightweight — no neo4j dependency) and `MCPClient.call_tool_sync()` inside `@tool` wrappers for direct Cypher execution. Notebook 02 defines its own `get_embedding` inline and uses `MCPClient` in a context-manager-per-query pattern where the agent calls MCP tools directly.
+Uses `lib/lab_5_data_utils.py` for Bedrock embeddings (lightweight — no neo4j or neo4j-graphrag dependency). All MCP access via Strands `MCPClient` with `streamablehttp_client` transport. The MCP server is pre-deployed with full embeddings by the lab administrator.
 
-### Lab 5 - GraphRAG
-Location: `Lab_5_GraphRAG/`
+### Lab 6 - GraphRAG Pipeline
+Location: `Lab_6_GraphRAG_Pipeline/`
 
-Six notebooks covering data loading, embeddings, vector retrieval, graph-enhanced retrieval, full-text search, and hybrid search. Uses a forked neo4j-graphrag with Bedrock support (`neo4j-graphrag[bedrock]` from `neo4j-partners/neo4j-graphrag-python@bedrock-embeddings`).
-
-### Lab 6 - Advanced Agents
-Location: `Lab_6_Advanced_Agents/`
-
-Text2Cypher pattern: the agent discovers the graph schema via MCP and writes its own Cypher from scratch. Distinct from Lab 4's Cypher Templates pattern where queries are pre-written. Two framework implementations: LangGraph + langchain-mcp-adapters, and Strands.
+Three notebooks covering data loading, embedding generation, and vector-cypher retrieval. Wipes the graph and rebuilds from `financial_data.json` (isolated sandbox). Uses neo4j-graphrag with Bedrock support (`neo4j-graphrag[bedrock]` from `neo4j-partners/neo4j-graphrag-python@bedrock-embeddings`).
 
 ## Shared Utilities
 

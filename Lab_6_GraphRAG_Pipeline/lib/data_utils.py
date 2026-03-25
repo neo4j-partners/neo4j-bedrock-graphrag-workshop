@@ -1,5 +1,5 @@
 # ---------------------------------------------------------------------------
-# COPIED from root lib/data_utils.py to simplify imports from Lab_5 notebooks.
+# COPIED from root lib/data_utils.py to simplify imports from Lab_6 notebooks.
 # Loads CONFIG.txt from the project root (two levels up from this file).
 #
 # If you change this file, update the root lib/data_utils.py as well.
@@ -20,7 +20,7 @@ from neo4j_graphrag.schema import get_schema as _lib_get_schema
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# Load configuration from project root (lib/ -> Lab_5_GraphRAG/ -> project root)
+# Load configuration from project root (lib/ -> Lab_6_GraphRAG_Pipeline/ -> project root)
 _config_file = Path(__file__).parent.parent.parent / "CONFIG.txt"
 load_dotenv(_config_file)
 

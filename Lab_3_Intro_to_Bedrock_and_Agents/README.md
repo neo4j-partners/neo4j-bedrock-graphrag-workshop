@@ -147,4 +147,4 @@ As an alternative to invoking the agent via CLI or boto3 in the notebook, you ca
 
 ## Next Steps
 
-Continue to [Lab 4 - Graph-Enriched Search](../Lab_4_Graph_Enriched_Search) to search a Neo4j knowledge graph with vector, graph-enriched, and hybrid retrieval strategies.
+Continue to [Lab 4 - GraphRAG Search](../Lab_4_GraphRAG_Search) to load chunk embeddings and search a Neo4j knowledge graph with vector and vector-cypher retrieval.

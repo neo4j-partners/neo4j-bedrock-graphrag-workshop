@@ -24,7 +24,9 @@ This is a manual console step and cannot be scripted.
 
 ### 2. Set Up AgentCore IAM & Resources (Lab 3 Deployment)
 
-The `setup_agentcore.sh` script creates the IAM roles, S3 bucket, and permissions needed for Lab 3's AgentCore deployment notebook. Run it once per account:
+Lab 3's AgentCore deployment requires IAM roles, an S3 bucket, and a deployment policy. This is a **two-step process** because SageMaker execution roles are auto-created when participants set up their domains (Quick Setup), so the admin cannot attach policies to roles that don't exist yet.
+
+**Step 2a — Run before the workshop:**
 
 ```bash
 cd setup
@@ -34,12 +36,22 @@ cd setup
 This creates:
 - **AgentCore execution role** — `AmazonBedrockAgentCoreLabRuntime-{region}`, the IAM role that deployed agents assume at runtime (Bedrock model access, CloudWatch, X-Ray)
 - **S3 bucket** — `bedrock-agentcore-codebuild-sources-{account}-{region}`, used to upload agent code during deployment
-- **SageMaker role permissions** — Adds an inline policy to all `AmazonSageMaker-ExecutionRole-*` roles granting AgentCore API access, IAM role management (scoped to `*BedrockAgentCore*` roles), `iam:PassRole`, and S3 access. This allows the AgentCore toolkit to create its own execution roles during deployment.
+- **Managed IAM policy** — `BedrockAgentCoreLabDeployPolicy`, a customer-managed policy granting AgentCore API access, IAM role management (scoped to `*BedrockAgentCore*` roles), `iam:PassRole`, and S3 access
 
 To specify a different region:
 ```bash
 ./setup_agentcore.sh --region us-west-2
 ```
+
+**Step 2b — Run after participants create their SageMaker domains:**
+
+```bash
+./grant_sagemaker_access.sh
+```
+
+This finds all `AmazonSageMaker-ExecutionRole-*` roles in the account and attaches the managed policy created in Step 2a. The script is idempotent — re-run it whenever new participants join. If a participant hits a permissions error in Lab 3, this is the fix.
+
+See [sagemaker-roles.md](sagemaker-roles.md) for a detailed explanation of the timing issue.
 
 ### 3. Update CONFIG.txt
 
@@ -73,12 +85,12 @@ pip install -q langgraph langchain-aws langchain-mcp-adapters mcp nest-asyncio \
 
 ### 5. Cleanup
 
-To remove all resources created by the setup script:
+To remove all resources created by the setup scripts:
 
 ```bash
 ./setup_agentcore.sh --cleanup
 ```
 
-This deletes the execution role, S3 bucket, and removes the deployment policy from SageMaker roles.
+This detaches the deployment policy from all SageMaker roles, deletes the managed policy, deletes the execution role, and removes the S3 bucket.
 
 ---

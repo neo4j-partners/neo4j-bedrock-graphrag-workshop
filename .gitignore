@@ -11,8 +11,9 @@ downloads/
 eggs/
 .eggs/
 lib/
-!Lab_4_Graph_Enriched_Search/lib/
-!Lab_5_GraphRAG/lib/
+!Lab_4_GraphRAG_Search/lib/
+!Lab_5_MCP_Server/lib/
+!Lab_6_GraphRAG_Pipeline/lib/
 !financial_data_load/lib/
 lib64/
 parts/

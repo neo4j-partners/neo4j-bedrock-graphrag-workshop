@@ -1,6 +1,6 @@
-"""Lightweight data utilities for Lab 4 notebooks.
+"""Lightweight data utilities for Lab 5 notebooks.
 
-Provides only the Bedrock embedding function needed by the Lab 4 MCP-based
+Provides only the Bedrock embedding function needed by the Lab 5 MCP-based
 search notebooks.  No neo4j or neo4j-graphrag dependencies.
 """
 
@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# Load configuration from project root (lib/ -> Lab_4_Graph_Enriched_Search/ -> project root)
+# Load configuration from project root (lib/ -> Lab_5_MCP_Server/ -> project root)
 _config_file = Path(__file__).parent.parent.parent / "CONFIG.txt"
 load_dotenv(_config_file)
 
