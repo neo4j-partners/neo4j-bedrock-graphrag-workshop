@@ -141,13 +141,22 @@ Lab 6 - GraphRAG Pipeline    (reshuffled from old Lab 5)
 - [x] Copy/adapt `Lab_5_GraphRAG/lib/` utilities needed by the new notebooks
 - [ ] Verify all three notebooks run end-to-end against the same Aura instance used in Labs 1-2
 
-### Lab 5 — Neo4j MCP Server Intro (reshuffled)
+### Lab 5 — Neo4j MCP Server (reshuffled)
 
-- [ ] Create `Lab_5_MCP_Server/` directory
-- [ ] **Notebook 01**: Copy from `Lab_4_Graph_Enriched_Search/00_intro_strands_mcp.ipynb`
-- [ ] **Notebook 02**: Copy from `Lab_4_Graph_Enriched_Search/02_graph_enriched_search_mcp.ipynb`
-- [ ] **Notebook 03**: Copy from `Lab_6_Advanced_Agents/neo4j_strands_mcp_agent.ipynb`
-- [ ] Update internal paths/references in all three notebooks
+- [x] Create `Lab_5_MCP_Server/` directory and `lib/lab_5_data_utils.py`
+- [x] **Notebook 01 — Intro to Strands + MCP**: `01_intro_strands_mcp.ipynb` — trimmed to pure MCP intro (tool discovery, schema inspection, one simple query). Source: `Lab_4_Graph_Enriched_Search/00_intro_strands_mcp.ipynb`.
+- [x] **Notebook 02 — Graph-Enriched Search**: `02_graph_enriched_search.ipynb` — Cypher Templates pattern with vector search + graph traversal via `@tool` functions. Import updated to `lab_5_data_utils`. Source: `Lab_4_Graph_Enriched_Search/02_graph_enriched_search_mcp.ipynb`.
+- [x] **Notebook 03 — Text2Cypher Agent**: `03_text2cypher_agent.ipynb` — autonomous agent writes its own Cypher. Config parsing standardized to `load_dotenv`. Cross-lab framing fixed to reference notebook 02 instead of "Lab 4". LangGraph mentioned as alternative. Source: `Lab_6_Advanced_Agents/neo4j_strands_mcp_agent.ipynb`.
+- [x] `Lab_5_MCP_Server/README.md` created
+- [x] Update internal paths/references in all three notebooks
+- [ ] Verify all three notebooks run end-to-end against the MCP server
+
+### Site Documentation (Lab 5 complete)
+
+- [x] Rewrite `site/modules/ROOT/pages/lab5.adoc` — based on archived lab6.adoc, adapted for three-notebook structure (MCP intro, Cypher Templates, Text2Cypher)
+- [x] Rewrite `site/modules/ROOT/pages/lab5-instructions.adoc` — based on archived lab6-instructions.adoc, three-notebook table, updated prerequisites
+- [x] Delete `site/modules/ROOT/pages/lab5-sample-queries.adoc` — inline queries in lab5-instructions sufficient
+- [x] Update `site/nav.adoc` — Lab 5 title changed from "GraphRAG" to "Neo4j MCP Server", removed sample queries link
 
 ### Lab 6 — Building a GraphRAG Data Pipeline (reshuffled)
 

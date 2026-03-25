@@ -1,181 +1,113 @@
-= Lab 6: Advanced Agents
+= Lab 6: GraphRAG Pipeline
 
-Lab 4 used pre-written Cypher queries executed through MCP — the **Cypher Templates** pattern from Neo4j's GraphRAG catalog. The agent selected which query to run, but never wrote Cypher itself. This lab takes the next step: the agent discovers the graph schema through MCP, writes its own Cypher from scratch, and executes it. This is the **Text2Cypher** pattern, the most flexible retrieval strategy in the workshop.
+In Lab 4 you queried a pre-built knowledge graph — seed data and embeddings were already loaded. This lab builds that graph from scratch. You load raw SEC 10-K filing data, split it into chunks, generate vector embeddings, and then query the graph using the same neo4j-graphrag library from Lab 4 — this time with `VectorCypherRetriever`, which adds graph traversal to enrich every vector search result with connected entities.
 
-TIP: Ready to start? Jump to the xref:lab6-instructions.adoc[Lab 6 Instructions] for step-by-step setup.
+TIP: Ready to start? Jump to the xref:lab6-instructions.adoc[Lab 6 Instructions] for the notebook walkthrough.
 
 .**At a Glance**
 
-* **Text2Cypher pattern** — the agent writes original Cypher queries from a schema and a natural language question
-* **Schema-first approach** — the agent retrieves the graph schema before writing any query, producing more accurate Cypher
-* **Full autonomy** — unlike Lab 4's pre-written templates, the agent reasons about each question and generates queries on the fly
-* **Two framework options** — LangGraph (full-featured, multi-step workflows) and Strands (lightweight, AWS-native)
+* **Three notebooks** — progress from loading raw text into a knowledge graph to running graph-enriched retrieval queries
+* **neo4j-graphrag library** — `VectorCypherRetriever` combines semantic search with Cypher graph traversal
+* **Full data pipeline** — chunking, embedding generation, and index creation from scratch
+* **Standalone dataset** — wipes the graph and rebuilds from `financial_data.json` (Apple 10-K data)
 
-== GraphRAG Retrieval Patterns
+== Embeddings and Vector Search
 
-Neo4j's https://graphrag.com/reference/[GraphRAG Patterns Catalog] defines a spectrum of retrieval strategies. This workshop covers three of them, progressing from controlled to autonomous:
+Lab 4 used pre-loaded embeddings from the setup seed data. This lab generates them from scratch. Amazon Bedrock Nova generates 1024-dimensional embeddings for each chunk of SEC filing text. Those vectors are stored as properties on Chunk nodes in Neo4j and indexed with a vector index (`chunkEmbeddings`) that supports approximate nearest-neighbor lookup. When a retriever receives a question, it embeds the question with the same model, queries the index for the closest chunk vectors, and returns the matched text.
 
-[cols="1,2,1,1"]
-|===
-| Pattern | How It Works | Lab | Reliability
+.How vector search powers RAG
+[%collapsible]
+====
+Vector search is the mechanism that makes Retrieval-Augmented Generation work. The system embeds a question, searches for the closest chunks in vector space, and feeds those chunks to the LLM as context. The LLM generates its answer grounded in the retrieved text rather than relying solely on its training data. The quality of retrieval determines the quality of generation; if vector search surfaces irrelevant chunks, the LLM produces an answer grounded in the wrong context.
+====
 
-| **Cypher Templates**
-| Pre-written, parameterized queries. The agent selects which template to execute.
-| Lab 4
-| High — expert-reviewed queries
+== Chunking
 
-| **Graph-Enhanced Vector Search**
-| Vector similarity finds relevant chunks, then graph traversal enriches results with connected entities.
-| Labs 4, 5
-| High — deterministic traversal from vector matches
+SEC 10-K filings are too long to embed as single documents, so each filing is split into smaller passages. Each chunk becomes a Chunk node in the graph, linked to its source Document via `FROM_DOCUMENT` and to adjacent chunks via `NEXT_CHUNK` to preserve reading order.
 
-| **Text2Cypher**
-| The agent reads the schema, reasons about the question, and writes original Cypher from scratch.
-| Lab 6
-| Variable — depends on LLM reasoning quality
-|===
+.Chunking trade-offs
+[%collapsible]
+====
+Larger chunks give the LLM more context during retrieval, which helps when the answer spans multiple sentences. Smaller chunks produce more precise results, returning only the relevant passage rather than a block of mixed content. A moderate size (500-1000 characters) is a reasonable starting point. The workshop uses `FixedSizeSplitter` from the neo4j-graphrag library, which splits text at fixed character boundaries. Tuning chunk size and overlap is an empirical process: adjust based on whether retrieved results contain too much noise or too little context.
+====
 
-Cypher Templates are the most reliable: queries are reviewed in advance and execute predictably. Text2Cypher is the most flexible: the agent can answer any question the schema supports. The trade-off is that Text2Cypher's query quality depends on the LLM's ability to reason about graph structures, which is why the schema-first approach is critical.
+== From Documents to Knowledge Graph
+
+The pipeline builds both the structured and unstructured layers of the knowledge graph, then connects them:
+
+1. **Load filing text as Document and Chunk nodes.** Each 10-K filing becomes a Document node. The filing text is split into chunks, each stored as a Chunk node linked to its source via FROM_DOCUMENT and to adjacent chunks via NEXT_CHUNK.
+2. **Create structured entities.** Company, Product, and RiskFactor nodes are created from the structured data in the filing, linked by OFFERS, FACES_RISK, and FILED relationships.
+3. **Generate embeddings on every Chunk.** Bedrock Nova embeds each chunk's text into a 1024-dimensional vector, stored as a property on the Chunk node. A vector index (`chunkEmbeddings`) is created over these embeddings.
+
+.Entity extraction and resolution
+[%collapsible]
+====
+The workshop's knowledge graph uses pre-built structured entities from JSON data rather than LLM-based entity extraction. The Company, Product, and RiskFactor nodes exist because they were loaded directly from structured sources, not because an LLM extracted them from filing text.
+
+In a full production pipeline, an LLM reads each chunk and extracts entities mentioned in the text: company names, product references, risk factors. Entity resolution then deduplicates these, merging "NVIDIA Corporation," "Nvidia," and "NVDA" into a single Company node. Cross-linking connects extracted entities to existing graph structure, so a risk factor mentioned in filing text links directly to the RiskFactor node that other companies also reference.
+
+The workshop sidesteps extraction because the SEC dataset already provides clean structured data. The conceptual model is the same: chunks connect to entities, entities connect to each other, and retrieval traverses both layers. Whether entities arrive via JSON loading or LLM extraction, the graph structure and retrieval patterns are identical.
+====
+
+== The Pipeline
+
+The three notebooks form a single arc: create the graph, generate embeddings, then run graph-enriched retrieval queries.
+
+Notebooks 01 and 02 build the foundation. Notebook 01 loads SEC filing text as Document and Chunk nodes linked by `FROM_DOCUMENT` and `NEXT_CHUNK` relationships, and creates the structured layer (Company, Product, RiskFactor) with cross-links (`FILED`, `FROM_CHUNK`). Notebook 02 generates vector embeddings on every Chunk node and creates a `chunkEmbeddings` vector index. Notebook 03 queries the graph using `VectorCypherRetriever`, which combines vector similarity search with Cypher graph traversal to enrich results with connected entities.
+
+== VectorCypherRetriever
+
+The `VectorCypherRetriever` adds a graph traversal step after vector search. It finds semantically similar chunks the same way `VectorRetriever` does, then executes a custom Cypher `retrieval_query` that traverses from each matched chunk to related entities in the graph. The chunk acts as an anchor: vector search determines relevance, then Cypher gathers the structured context around it.
+
+A typical traversal follows FROM_DOCUMENT to the source Document, then FILED back to the Company, and from there to OFFERS, FACES_RISK, or other relationships. The LLM receives both the chunk text and the connected entities.
+
+.How the retrieval_query parameter works
+[%collapsible]
+====
+The `VectorCypherRetriever` accepts a `retrieval_query` parameter: a Cypher query that executes once per matched chunk. The retriever binds the matched Chunk node to a variable (`node`), and the retrieval query traverses from there to gather context. A typical query follows the chain from chunk to document to company:
+
+[source,cypher]
+----
+MATCH (node)-[:FROM_DOCUMENT]->(d:Document)<-[:FILED]-(c:Company)
+OPTIONAL MATCH (c)-[:FACES_RISK]->(r:RiskFactor)
+RETURN node.text AS text, d.source AS document, c.name AS company,
+       collect(r.name) AS riskFactors
+----
+
+This query runs for each chunk that vector search returns. The retriever collects the results and passes them to the LLM as enriched context. The design separates the search step (which chunk is relevant) from the enrichment step (what structured context surrounds it).
+====
+
+.The chunk-as-anchor constraint
+[%collapsible]
+====
+Graph traversal starts from what vector search found. If the question does not surface relevant chunks, no amount of traversal compensates. A question targeting a specific entity by name ("How many products does NVIDIA offer?") may return better results with a direct Cypher query than with vector search, because the answer depends on counting relationships, not finding semantically similar text. VectorCypherRetriever is strongest when the question combines semantic relevance with structural context: the vector search finds the right passage, and the graph traversal enriches it with the entities and relationships that surround it.
+====
 
 == Lab 4 vs Lab 6
 
-[cols="1,2,2"]
-|===
-| Aspect | Lab 4 (Cypher Templates) | Lab 6 (Text2Cypher)
-
-| **Cypher source**
-| Pre-written in `@tool` functions and system prompts
-| Agent writes from scratch after schema discovery
-
-| **Schema discovery**
-| No — queries are hard-coded with known labels and types
-| Yes — agent calls `get-schema` before every query
-
-| **Flexibility**
-| Limited to the query patterns defined in advance
-| Any question the schema can answer
-
-| **Failure mode**
-| Predictable — expert-reviewed queries return expected results
-| Silent failures possible — wrong labels return empty results without errors
-
-| **MCP role**
-| Transport layer for executing pre-written queries
-| Discovery interface (schema) + execution (queries)
-
-| **Best for**
-| Known query patterns with high reliability requirements
-| Ad-hoc exploration and questions not anticipated during development
-|===
-
-== Model Context Protocol (MCP)
-
-The Model Context Protocol is an open standard that defines how AI agents discover and interact with external tools and data sources. It provides a uniform interface: any MCP-compatible agent connects to any MCP-compatible server without custom integration code.
-
-=== Three-Component Architecture
-
-MCP defines a three-component architecture:
-
-image::mcp-agent-architecture.png[MCP Agent Architecture,700]
-
-**AI Agent (Client)**: The LLM-powered application that needs to access external data. It discovers available tools by asking the MCP server what operations are supported.
-
-**MCP Server**: A lightweight service that exposes data source operations as tools. It translates between the MCP protocol and the data source's native API.
-
-**Data Source**: The underlying system (Neo4j, a REST API, a file system, etc.) that holds the data.
-
-=== Transport Options
-
-MCP supports multiple transport mechanisms:
+Lab 4 and Lab 6 use the same neo4j-graphrag library and the same underlying graph pattern. The difference is in what comes pre-built versus what you build yourself.
 
 [cols="1,2,2"]
 |===
-| Transport | Description | Use Case
+| Aspect | Lab 4 (Pre-built Graph) | Lab 6 (Build from Scratch)
 
-| **stdio**
-| Standard input/output streams
-| Local development, CLI tools
+| **Data loading**
+| Seed data and embeddings pre-loaded from `setup/seed-embeddings`
+| Build from raw `financial_data.json` — chunking, entity creation, embedding generation
 
-| **Streamable HTTP**
-| HTTP-based streaming protocol
-| Cloud deployments, remote servers
+| **Graph scope**
+| Multi-company graph (6 companies, asset managers, competitors, partners)
+| Single-company graph (Apple only — 12 products, 5 risk factors)
+
+| **Retriever**
+| VectorRetriever and VectorCypherRetriever
+| VectorCypherRetriever with graph traversal
+
+| **Pipeline ownership**
+| Query only — data pipeline was done for you
+| Full ownership — you build every layer
 |===
-
-This lab uses Streamable HTTP to connect to an MCP Gateway running on AWS.
-
-=== Neo4j MCP Server Tools
-
-The https://github.com/neo4j/mcp[Neo4j MCP Server] is Neo4j's official MCP server. It requires APOC (a standard Neo4j plugin for schema introspection and utility procedures). In this workshop it is deployed in read-only mode, exposing two tools:
-
-[cols="1,3"]
-|===
-| Tool | Description
-
-| **`get-schema`**
-| Uses APOC's `apoc.meta.schema()` to read the graph schema, then simplifies the output to just property names and types (e.g., `"title": "STRING"`). This token-efficient format gives the LLM the structural information it needs for Text2Cypher without wasting context on APOC's full metadata.
-
-| **`read-cypher`**
-| Executes a read-only Cypher query. Before running the query, the server performs an `EXPLAIN` round-trip to verify it contains no write operations (CREATE, MERGE, DELETE, SET). This is a server-side guard independent of the system prompt's instructions.
-|===
-
-The agent discovers these tools automatically through the MCP protocol. It does not need to know about them in advance.
-
-NOTE: The gateway may prefix tool names (e.g., `neo4j-get-schema`). The canonical names from the server itself are `get-schema` and `read-cypher`. The server also exposes `write-cypher` (disabled in read-only mode) and `list-gds-procedures` (registered only when the GDS library is installed). Neither is available in this workshop.
-
-== AWS Deployment Architecture
-
-The MCP infrastructure is pre-deployed on AWS:
-
-----
-Agent (Notebook)  -->  AgentCore Gateway (HTTPS)  -->  Neo4j MCP Server (Container)  -->  Secrets Manager  -->  Neo4j Aura
-----
-
-**Agent (Notebook)**: Your Jupyter notebook running a LangGraph or Strands agent. It connects to the gateway using a URL and access token from `CONFIG.txt`.
-
-**AgentCore Gateway**: An AWS-managed HTTPS endpoint that authenticates requests and routes them to the MCP server.
-
-**Neo4j MCP Server**: Neo4j's official MCP server, deployed here in read-only mode over Streamable HTTP transport. It translates `get-schema` and `read-cypher` tool calls into Neo4j operations and tags every query with `MCP4NEO4J` metadata so database admins can identify MCP-originated traffic.
-
-**Secrets Manager**: Stores the Neo4j Aura connection credentials securely. The MCP server retrieves them at runtime.
-
-**Neo4j Aura**: Your graph database containing SEC financial data.
-
-You do not need to set up any of this infrastructure. The gateway URL and access token are provided in `CONFIG.txt`.
-
-== Schema-First Approach
-
-Both notebooks instruct the agent to follow a schema-first pattern:
-
-1. **Retrieve the schema** before writing any Cypher query. The agent calls `get-schema` to learn what node labels, relationship types, and properties exist in the database.
-2. **Write a Cypher query** based on the actual schema. This prevents the agent from guessing at property names or relationship types that do not exist.
-3. **Execute the query** using `read-cypher` and return the results.
-
-This approach produces more accurate queries because the agent works with the real structure of the data rather than assumptions.
-
-.How schema-first prevents query failures
-[%collapsible]
-====
-Without the schema step, an LLM might generate `MATCH (c:Corp)-[:HAS_PRODUCT]->(p:Product)` when the actual label is `Company` and the relationship type is `OFFERS`. The query executes without error but returns zero results because `Corp` and `HAS_PRODUCT` do not exist in the graph. The agent would then report "no data found" as a confident answer.
-
-With schema retrieval, the agent sees the actual labels (`Company`, `Product`, `RiskFactor`, `AssetManager`) and relationship types (`OFFERS`, `FACES_RISK`, `COMPETES_WITH`, `PARTNERS_WITH`, `OWNS`, `FILED`, `FROM_DOCUMENT`) before writing any query. The generated Cypher uses the correct vocabulary, and empty results genuinely mean no matching data rather than a query targeting non-existent schema elements.
-====
-
-== Why a Specialized Graph Agent
-
-An agent that handles both SQL analytics and graph traversal in a single prompt must hold two query languages, two data models, and two sets of conventions in context simultaneously. SQL operates on rows, filters, and aggregations. Cypher operates on paths, patterns, and traversals. Mixing both dilutes the agent's focus: it may generate Cypher with SQL idioms (using WHERE clauses where pattern matching would be more precise) or SQL with graph assumptions (expecting JOIN-free traversals that relational databases cannot provide).
-
-The architecture in this workshop separates concerns. The MCP agent in this lab handles only graph queries. It inspects the Neo4j schema, writes Cypher, and executes it. It does not need to know about SQL tables, aggregation functions, or relational joins. That focus produces better Cypher because the agent's entire context is graph-shaped.
-
-In production systems, a supervisor or router agent sits above specialized agents and directs questions to the right one based on the data shape the question targets. Relationship traversals go to the graph agent. Time-series aggregations go to a SQL agent. Questions that span both get decomposed into sub-tasks routed to each specialist.
-
-== Two Framework Options
-
-This lab provides two notebook implementations. Both connect to the same MCP server and produce the same results. Choose the one that fits your interest.
-
-**Strands** is the recommended option for this workshop. It is the same AWS-native SDK introduced in Lab 3, with built-in MCP support and a simpler API. Strands requires fewer lines of code to set up and is a good fit when you want a straightforward agent without the overhead of the LangChain ecosystem.
-
-**LangGraph** is the full-featured option. It uses LangChain MCP adapters to load tools from the MCP server and provides fine-grained control over the agent loop. LangGraph is better suited for complex, multi-step workflows where you need to customize how the agent reasons, retries, or chains operations. This option is included for participants with prior LangGraph experience who want to compare the two approaches.
 
 == Next Steps
 
-Continue to xref:lab6-instructions.adoc[Lab 6 Instructions] to run the notebooks and query the knowledge graph through MCP. This is the final lab in the workshop. You have progressed from setup and visual exploration (Labs 0-2) through building GraphRAG agents (Labs 3-4) to advanced GraphRAG patterns including the neo4j-graphrag library (Lab 5) and autonomous Text2Cypher agents that inspect schemas and write their own queries.
+Continue to xref:lab6-instructions.adoc[Lab 6 Instructions] for the notebook walkthrough. This is the final lab in the workshop.

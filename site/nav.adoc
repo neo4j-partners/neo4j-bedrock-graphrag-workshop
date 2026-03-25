@@ -19,9 +19,8 @@
 ** xref:lab4.adoc[Lab 4: GraphRAG Search]
 *** xref:lab4-instructions.adoc[Instructions]
 * Part 3: Advanced GraphRAG Patterns
-** xref:lab5.adoc[Lab 5: GraphRAG]
+** xref:lab5.adoc[Lab 5: Neo4j MCP Server]
 *** xref:lab5-instructions.adoc[Instructions]
-*** xref:lab5-sample-queries.adoc[Advanced Sample Queries]
-** xref:lab6.adoc[Lab 6: Advanced Agents]
+** xref:lab6.adoc[Lab 6: GraphRAG Pipeline]
 *** xref:lab6-instructions.adoc[Instructions]
 * xref:admin-setup.adoc[Admin Setup]

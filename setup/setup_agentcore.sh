@@ -5,7 +5,10 @@
 # Creates:
 #   1. AgentCore Runtime execution role (used by deployed agents)
 #   2. S3 bucket for code deployment
-#   3. Adds AgentCore deployment permissions to the SageMaker execution role
+#   3. Customer-managed IAM policy for AgentCore deployment permissions
+#
+# After participants create their SageMaker domains, run grant_sagemaker_access.sh
+# to attach the managed policy to their execution roles.
 #
 # Usage:
 #   ./setup_agentcore.sh                          # auto-detect region from CONFIG.txt

@@ -21,11 +21,11 @@ Connect a Strands Agent to a Neo4j knowledge graph through the **Model Context P
 
 Open each notebook in order. The progression builds from MCP basics to autonomous agents.
 
-| Notebook | Title | What You Learn |
+| Notebook | Title | What You Build |
 |----------|-------|----------------|
-| `01_intro_strands_mcp.ipynb` | Intro to Strands + MCP | MCP connection, tool discovery, schema inspection |
-| `02_graph_enriched_search.ipynb` | Graph-Enriched Search | Cypher Templates — pre-written vector search + graph traversal via `@tool` functions |
-| `03_text2cypher_agent.ipynb` | Text2Cypher Agent | Text2Cypher — agent discovers schema and writes original Cypher from scratch |
+| `01_intro_strands_mcp.ipynb` | Intro to Strands + MCP | MCP connection via Streamable HTTP, tool discovery with `list_tools_sync()`, graph schema inspection |
+| `02_graph_enriched_search.ipynb` | Graph-Enriched Search | Cypher Templates — pre-written `@tool` functions that combine vector search with graph traversal for document context and entity enrichment |
+| `03_text2cypher_agent.ipynb` | Text2Cypher Agent | An autonomous agent that discovers the graph schema and writes original Cypher from scratch — the Text2Cypher retrieval pattern |
 
 ## Alternative Frameworks
 
@@ -41,4 +41,5 @@ Once your agent is running in notebook 03, try these questions about the SEC fin
 | **Products** | "What products does Apple offer?" |
 | **Ownership** | "Which asset managers own stakes in NVIDIA?" |
 | **Risk** | "What risk factors does Microsoft face?" |
+| **Financials** | "Show me the financial metrics for Tesla." |
 | **Cross-entity** | "Which companies face risk factors related to cybersecurity?" |

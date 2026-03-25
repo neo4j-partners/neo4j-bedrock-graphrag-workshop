@@ -1,50 +1,69 @@
-= Lab 5 Instructions: GraphRAG
+= Lab 5 Instructions: Neo4j MCP Server
 
-TIP: For concepts and background, see xref:lab5.adoc[Lab 5: GraphRAG].
+TIP: For concepts and background, see xref:lab5.adoc[Lab 5: Neo4j MCP Server].
 
 == What You'll Learn
 
-* **Data Loading**: Build Document and Chunk nodes linked by graph relationships
-* **Embeddings**: Generate vector embeddings with Amazon Nova and create a vector index
-* **VectorRetriever**: Pure semantic similarity search over embedded chunks
-* **VectorCypherRetriever**: Vector search enriched with graph traversal to connected entities
-* **Hybrid Search + GraphRAG**: Combined vector and fulltext search with `HybridCypherRetriever` for graph-enriched hybrid retrieval
+* **MCP Fundamentals**: Connect a Strands Agent to a Neo4j MCP Server, discover tools, inspect the graph schema
+* **Cypher Templates**: Pre-written vector search + graph traversal queries in `@tool` functions for reliable, predictable results
+* **Text2Cypher**: The agent discovers the schema and writes original Cypher from scratch — fully autonomous graph querying
 
 == Prerequisites
 
-* Completed **Lab 1** (Neo4j Aura instance created and running)
-* Filled in your credentials in `CONFIG.txt` at the project root
-* A running environment (SageMaker Studio or GitHub Codespace)
+* Completed **Lab 1** (Neo4j Aura instance with SEC financial data loaded)
+* Your `CONFIG.txt` file updated with MCP Gateway credentials (`MCP_GATEWAY_URL` and `MCP_ACCESS_TOKEN`)
+* AWS credentials configured for Amazon Bedrock access
+
+NOTE: The MCP server is pre-configured by the lab administrator with full embeddings and indexes. You do not need to complete Lab 4 before starting this lab.
 
 == Notebooks
 
-Open each notebook in order. Each one builds on the graph state left by the previous notebook.
+Open each notebook in order in the `Lab_5_MCP_Server/` directory. The progression builds from MCP basics to autonomous agents.
 
 [cols="1,2,3"]
 |===
 | Notebook | Title | What You Build
 
-| `01_data_loading.ipynb`
-| Data Loading
-| Document and Chunk nodes linked by `FROM_DOCUMENT` and `NEXT_CHUNK` relationships
+| `01_intro_strands_mcp.ipynb`
+| Intro to Strands + MCP
+| MCP connection via Streamable HTTP, tool discovery with `list_tools_sync()`, graph schema inspection
 
-| `02_embeddings.ipynb`
-| Embeddings
-| Vector embeddings on every Chunk node, plus a `chunkEmbeddings` vector index
+| `02_graph_enriched_search.ipynb`
+| Graph-Enriched Search
+| Cypher Templates — pre-written `@tool` functions that combine vector search with graph traversal for document context and entity enrichment
 
-| `03_vector_retriever.ipynb`
-| Vector Retriever
-| A `VectorRetriever` wired into a `GraphRAG` pipeline for semantic Q&A
+| `03_text2cypher_agent.ipynb`
+| Text2Cypher Agent
+| An autonomous agent that discovers the graph schema and writes original Cypher from scratch — the Text2Cypher retrieval pattern
+|===
 
-| `04_vector_cypher_retriever.ipynb`
-| VectorCypher Retriever
-| A `VectorCypherRetriever` that enriches each vector match with neighboring chunks and document metadata via Cypher
+== Sample Queries
 
-| `05_hybrid_rag.ipynb`
-| Hybrid Search + GraphRAG
-| `HybridRetriever` with alpha tuning and `HybridCypherRetriever` for graph-enriched hybrid retrieval
+Once your agent is running in notebook 03, try these questions about the SEC financial data:
+
+[cols="1,3"]
+|===
+| Category | Example Question
+
+| **Exploration**
+| "How many companies are in the database?"
+
+| **Products**
+| "What products does Apple offer?"
+
+| **Ownership**
+| "Which asset managers own stakes in NVIDIA?"
+
+| **Risk**
+| "What risk factors does Microsoft face?"
+
+| **Financials**
+| "Show me the financial metrics for Tesla."
+
+| **Cross-entity**
+| "Which companies face risk factors related to cybersecurity?"
 |===
 
 == Next Steps
 
-Continue to xref:lab6.adoc[Lab 6: Advanced Agents] to build autonomous agents that discover the graph schema and write their own Cypher queries.
+Continue to xref:lab6.adoc[Lab 6: GraphRAG Pipeline] to build the data pipeline from scratch — chunking, embedding generation, and retrieval using the neo4j-graphrag library.

@@ -196,4 +196,4 @@ ORDER BY label
 
 == Fulltext, Vector, and Graph-Enriched Queries
 
-The fulltext search, vector similarity, and graph-enriched retrieval queries require the data structures built in Lab 5 (Document/Chunk nodes, embeddings, and fulltext indexes). See the xref:lab5-sample-queries.adoc[Lab 5: Advanced Sample Queries] page for those queries.
+The fulltext search, vector similarity, and graph-enriched retrieval queries require Document/Chunk nodes, embeddings, and fulltext indexes. These are built during Lab 4 (GraphRAG Search) and Lab 6 (GraphRAG Pipeline).

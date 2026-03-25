@@ -1,0 +1,33 @@
+{
+  "company": {
+    "name": "Apple Inc.",
+    "ticker": "AAPL",
+    "cik": "320193"
+  },
+  "document": {
+    "name": "Apple Inc 10-K 2024",
+    "source": "SEC EDGAR"
+  },
+  "products": [
+    {"name": "iPhone", "description": "Line of smartphones based on iOS operating system"},
+    {"name": "Mac", "description": "Line of personal computers based on macOS operating system"},
+    {"name": "iPad", "description": "Line of multi-purpose tablets based on iPadOS operating system"},
+    {"name": "Apple Watch", "description": "Wearable smartwatch device"},
+    {"name": "AirPods", "description": "Wireless earbuds and headphones"},
+    {"name": "Apple TV", "description": "Digital media player and streaming device"},
+    {"name": "HomePod", "description": "Smart speaker"},
+    {"name": "App Store", "description": "Digital distribution platform for apps"},
+    {"name": "Apple Music", "description": "Music streaming subscription service"},
+    {"name": "Apple TV+", "description": "Video streaming subscription service"},
+    {"name": "AppleCare", "description": "Fee-based service and support products"},
+    {"name": "Apple Pay", "description": "Mobile and digital payment service"}
+  ],
+  "risk_factors": [
+    {"name": "Macroeconomic and Industry Risks", "description": "Risks from global market conditions including inflation, interest rate changes and currency fluctuations that could materially affect revenue and profitability"},
+    {"name": "Supply Chain Risk", "description": "Supply chain disruptions from geopolitical tensions, natural disasters or public health emergencies that could impact manufacturing and delivery of products"},
+    {"name": "Competitive Market", "description": "Intensely competitive markets with pricing pressure from competitors across all product categories"},
+    {"name": "Customer Demand and Spending", "description": "Changes in consumer demand, economic conditions or buying patterns that could reduce sales volumes"},
+    {"name": "Intellectual Property Risks", "description": "Unauthorized use or infringement of the Company's intellectual property that could harm competitive position"}
+  ],
+  "filing_text": "Apple Inc. (\u201cApple\u201d or the \u201cCompany\u201d) designs, manufactures and markets smartphones, personal computers, tablets, wearables and accessories, and sells a variety of related services. The Company\u2019s fiscal year is the 52- or 53-week period that ends on the last Saturday of September. The Company is a California corporation established in 1977.\n\nProducts\n\niPhone is the Company\u2019s line of smartphones based on its iOS operating system. The iPhone product line includes iPhone 16 Pro, iPhone 16, iPhone 15 and iPhone SE. Mac is the Company\u2019s line of personal computers based on its macOS operating system, including MacBook Air, MacBook Pro, iMac, Mac mini, Mac Studio and Mac Pro. iPad is the Company\u2019s line of multi-purpose tablets based on its iPadOS operating system, including iPad Pro, iPad Air, iPad and iPad mini. Wearables, Home and Accessories includes Apple Watch, AirPods, Apple TV, HomePod and Beats products, as well as Apple-branded and third-party accessories.\n\nServices\n\nThe Company\u2019s services segment includes advertising, AppleCare, cloud services, digital content and payment services. Advertising includes third-party licensing arrangements and the Company\u2019s own advertising platforms. AppleCare offers a portfolio of fee-based service and support products. Cloud Services store and keep customers\u2019 content up-to-date and available across multiple Apple devices. Digital Content operates various platforms, including the App Store, Apple Arcade, Apple Fitness+, Apple Music, Apple News+, Apple TV+ and Apple Books. Payment Services include Apple Card, Apple Cash and Apple Pay.\n\nRisk Factors\n\nThe Company faces significant risks from global market conditions including inflation, interest rate changes and currency fluctuations that could materially affect revenue and profitability. Supply chain disruptions from geopolitical tensions, natural disasters or public health emergencies could impact the Company\u2019s ability to manufacture and deliver products. The Company operates in intensely competitive markets and faces pricing pressure from competitors across all product categories. Changes in consumer demand, economic conditions or buying patterns could reduce sales volumes. The Company\u2019s intellectual property is critical to its business and unauthorized use or infringement could harm competitive position.\n\nFinancial Performance\n\nTotal net revenue for fiscal year 2024 was $391.0 billion, compared to $383.3 billion in fiscal year 2023, an increase of 2%. iPhone revenue was $201.2 billion, representing 51% of total revenue. Services revenue reached $96.2 billion, growing 13% year-over-year and representing the fastest-growing segment. The Company\u2019s gross margin was 46.2%, up from 44.1% in the prior year. Net income was $93.7 billion with diluted earnings per share of $6.08. The Company returned over $110 billion to shareholders through dividends and share repurchases during fiscal year 2024. Cash and cash equivalents totaled $29.9 billion at year end."
+}
