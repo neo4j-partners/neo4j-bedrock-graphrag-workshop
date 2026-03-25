@@ -49,6 +49,8 @@ EXECUTION_ROLE_ARN="arn:aws:iam::${ACCOUNT_ID}:role/${EXECUTION_ROLE_NAME}"
 DEPLOYMENT_POLICY_NAME="BedrockAgentCoreLabDeployPolicy"
 S3_BUCKET="bedrock-agentcore-codebuild-sources-${ACCOUNT_ID}-${REGION}"
 
+DEPLOY_POLICY_ARN="arn:aws:iam::${ACCOUNT_ID}:policy/${DEPLOYMENT_POLICY_NAME}"
+
 echo "=============================================="
 echo "AgentCore Lab Setup"
 echo "=============================================="
@@ -56,6 +58,7 @@ echo "Account:  ${ACCOUNT_ID}"
 echo "Region:   ${REGION}"
 echo "Role:     ${EXECUTION_ROLE_NAME}"
 echo "S3:       ${S3_BUCKET}"
+echo "Policy:   ${DEPLOYMENT_POLICY_NAME}"
 echo "=============================================="
 
 # ---------------------------------------------------------------------------
@@ -75,14 +78,17 @@ if [[ "$CLEANUP" == "true" ]]; then
     echo "  Deleting execution role..."
     aws iam delete-role --role-name "$EXECUTION_ROLE_NAME" 2>/dev/null || true
 
-    # Find and clean up SageMaker role policy
-    echo "  Removing deployment policy from SageMaker roles..."
+    # Detach managed policy from all SageMaker roles, then delete the policy
+    echo "  Detaching deployment policy from SageMaker roles..."
     for role in $(aws iam list-roles --query "Roles[?starts_with(RoleName, 'AmazonSageMaker-ExecutionRole')].RoleName" --output text); do
-        aws iam delete-role-policy \
+        aws iam detach-role-policy \
             --role-name "$role" \
-            --policy-name "$DEPLOYMENT_POLICY_NAME" 2>/dev/null || true
-        echo "    Removed from: $role"
+            --policy-arn "$DEPLOY_POLICY_ARN" 2>/dev/null || true
+        echo "    Detached from: $role"
     done
+
+    echo "  Deleting managed policy..."
+    aws iam delete-policy --policy-arn "$DEPLOY_POLICY_ARN" 2>/dev/null || true
 
     # Empty and delete S3 bucket
     echo "  Deleting S3 bucket..."
@@ -228,10 +234,10 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 3. Add deployment permissions to SageMaker execution role(s)
+# 3. Create customer-managed IAM policy for deployment permissions
 # ---------------------------------------------------------------------------
 echo ""
-echo "3. Adding deployment permissions to SageMaker execution role(s)..."
+echo "3. Creating managed deployment policy..."
 
 DEPLOY_POLICY=$(cat <<EOF
 {
@@ -306,22 +312,15 @@ DEPLOY_POLICY=$(cat <<EOF
 EOF
 )
 
-# Find all SageMaker execution roles and add the policy
-SAGEMAKER_ROLES=$(aws iam list-roles \
-    --query "Roles[?starts_with(RoleName, 'AmazonSageMaker-ExecutionRole')].RoleName" \
-    --output text)
-
-if [[ -z "$SAGEMAKER_ROLES" ]]; then
-    echo "   WARNING: No SageMaker execution roles found."
-    echo "   You may need to manually attach the deployment policy to your role."
+if aws iam get-policy --policy-arn "$DEPLOY_POLICY_ARN" &>/dev/null; then
+    echo "   Policy already exists: ${DEPLOYMENT_POLICY_NAME}"
 else
-    for role in $SAGEMAKER_ROLES; do
-        aws iam put-role-policy \
-            --role-name "$role" \
-            --policy-name "$DEPLOYMENT_POLICY_NAME" \
-            --policy-document "$DEPLOY_POLICY"
-        echo "   Added deployment policy to: ${role}"
-    done
+    aws iam create-policy \
+        --policy-name "$DEPLOYMENT_POLICY_NAME" \
+        --policy-document "$DEPLOY_POLICY" \
+        --tags Key=Purpose,Value=BedrockAgentCoreLab \
+        --output text --query 'Policy.Arn'
+    echo "   Created policy: ${DEPLOYMENT_POLICY_NAME}"
 fi
 
 # ---------------------------------------------------------------------------
@@ -331,5 +330,8 @@ echo ""
 echo "=============================================="
 echo "Setup complete!"
 echo "=============================================="
+echo ""
+echo "NEXT STEP: After participants create their SageMaker domains, run:"
+echo "  ./grant_sagemaker_access.sh"
 echo ""
 echo "To clean up later:  ./setup_agentcore.sh --cleanup"
