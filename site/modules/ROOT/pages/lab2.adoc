@@ -72,7 +72,7 @@ Running the same question twice and comparing results is a practical way to spot
 
 == Connection to Later Labs
 
-Labs 5 and 6 implement these retrieval patterns, including vector similarity search, programmatically using Python and the neo4j-graphrag library. The no-code agent you build here provides a reference point: when you write graph-enriched retrieval and text-to-Cypher pipelines in code, you will already understand how each pattern behaves and what kinds of questions it handles well.
+Labs 4 through 6 implement these retrieval patterns programmatically. Lab 4 builds Cypher Templates and Text2Cypher from scratch using Strands Agents and MCP. Lab 5 replaces the manual plumbing with the neo4j-graphrag library's retriever classes. Lab 6 gives the agent full autonomy to write its own Cypher. The no-code agent you build here provides a reference point: when you write these pipelines in code, you will already understand how each pattern behaves and what kinds of questions it handles well.
 
 == Next Steps
 
