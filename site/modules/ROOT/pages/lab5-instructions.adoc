@@ -8,8 +8,7 @@ TIP: For concepts and background, see xref:lab5.adoc[Lab 5: GraphRAG].
 * **Embeddings**: Generate vector embeddings with Amazon Nova and create a vector index
 * **VectorRetriever**: Pure semantic similarity search over embedded chunks
 * **VectorCypherRetriever**: Vector search enriched with graph traversal to connected entities
-* **Fulltext Search**: Keyword-based search with fuzzy, wildcard, and boolean operators
-* **HybridRetriever**: Combined vector and fulltext search with tunable alpha parameter
+* **Hybrid Search + GraphRAG**: Combined vector and fulltext search with `HybridCypherRetriever` for graph-enriched hybrid retrieval
 
 == Prerequisites
 
@@ -42,12 +41,8 @@ Open each notebook in order. Each one builds on the graph state left by the prev
 | A `VectorCypherRetriever` that enriches each vector match with neighboring chunks and document metadata via Cypher
 
 | `05_hybrid_rag.ipynb`
-| Hybrid RAG
-| `HybridRetriever` + `GraphRAG` comparing vector-only vs hybrid RAG answers with alpha tuning
-
-| `06_hybrid_search.ipynb`
-| Hybrid Search
-| `HybridRetriever` and `HybridCypherRetriever` combining vector and fulltext search with tunable alpha
+| Hybrid Search + GraphRAG
+| `HybridRetriever` with alpha tuning and `HybridCypherRetriever` for graph-enriched hybrid retrieval
 |===
 
 == Next Steps

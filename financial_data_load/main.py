@@ -32,7 +32,7 @@ Usage from financial_data_load directory:
     Workshop solution runner:
         uv run python main.py solutions              # Interactive menu
         uv run python main.py solutions 4            # Run specific solution
-        uv run python main.py solutions A            # Run all from option 4 onwards
+        uv run python main.py solutions A            # Run all
 """
 
 import argparse
@@ -479,14 +479,14 @@ SOLUTIONS = [
     ("solution_srcs.04_00_intro_strands_mcp", "Intro to Strands + MCP (Lab 4)", False, "main"),
     ("solution_srcs.04_01_vector_search_mcp", "Vector Search via MCP (Lab 4)", False, "main"),
     ("solution_srcs.04_02_graph_enriched_search_mcp", "Graph-Enriched Search via MCP (Lab 4)", False, "main"),
-    ("solution_srcs.04_03_fulltext_hybrid_search_mcp", "Fulltext & Hybrid Search via MCP (Lab 4)", False, "main"),
     ("solution_srcs.05_01_data_loading", "Data Loading Fundamentals (Lab 5)", False, "main"),
-    ("solution_srcs.05_02_embeddings", "Embeddings (Lab 5)", True, "main"),
+    ("solution_srcs.05_02_embeddings", "Embeddings (Lab 5)", False, "main"),
     ("solution_srcs.05_03_vector_retriever", "Vector Retriever (Lab 5)", False, "main"),
     ("solution_srcs.05_04_vector_cypher_retriever", "Vector Cypher Retriever (Lab 5)", False, "main"),
     ("solution_srcs.05_05_hybrid_rag", "Hybrid RAG (Lab 5)", False, "main"),
     ("solution_srcs.05_06_hybrid_search", "Hybrid Search (Lab 5)", False, "main"),
 ]
+
 
 AGENT_QUERIES = {}
 
@@ -495,39 +495,21 @@ def _print_solutions_menu():
     print("\n" + "=" * 50)
     print("Workshop Solutions")
     print("=" * 50)
-    print("\nData Pipeline - WARNING! These will delete all data:")
-    print("  1. Data Loading Fundamentals")
-    print("  2. Embeddings")
-    print("  3. Entity Extraction")
-    print("\nExploration:")
-    print("  4. Full Dataset Queries")
-    print("\nRetrievers:")
-    print("  5. Vector Retriever")
-    print("  6. Vector Cypher Retriever")
-    print("  7. Text2Cypher Retriever")
-    print("\nLab 3 - Basic Agent:")
-    print("  8. Basic Strands Agent")
+    print("\nLab 3 - Intro to Bedrock and Agents:")
+    print("  1. Basic Strands Agent")
+    print("  2. Deploy to AgentCore")
     print("\nLab 4 - Graph-Enriched Search:")
-    print("  9. Intro to Strands + MCP")
-    print(" 10. Vector Search via MCP")
-    print(" 11. Graph-Enriched Search via MCP")
-    print(" 12. Fulltext & Hybrid Search via MCP")
-    print("\nAgents:")
-    print(" 13. Simple Agent")
-    print(" 14. Context Provider Intro")
-    print("\nSearch:")
-    print(" 15. Fulltext Search")
-    print(" 16. Hybrid Search")
-    print("\nContext Providers:")
-    print(" 17. Fulltext Context Provider")
-    print(" 18. Vector Context Provider")
-    print(" 19. Graph-Enriched Provider")
-    print("\nAgent Memory:")
-    print(" 20. Memory Context Provider")
-    print(" 21. Entity Extraction Pipeline")
-    print(" 22. Memory Tools Agent")
-    print(" 23. Reasoning Memory")
-    print("\n  A. Run all (from option 4 onwards)")
+    print("  3. Intro to Strands + MCP")
+    print("  4. Vector Search via MCP")
+    print("  5. Graph-Enriched Search via MCP")
+    print("\nLab 5 - GraphRAG (WARNING: 6-7 will delete all data):")
+    print("  6. Data Loading Fundamentals")
+    print("  7. Embeddings")
+    print("  8. Vector Retriever")
+    print("  9. Vector Cypher Retriever")
+    print(" 10. Hybrid RAG")
+    print(" 11. Hybrid Search")
+    print("\n  A. Run all")
     print("  0. Exit")
     print("=" * 50)
 
@@ -571,7 +553,7 @@ def cmd_solutions(args):
         choice = args.choice
         if choice.upper() == "A":
             try:
-                for i in range(4, len(SOLUTIONS) + 1):
+                for i in range(1, len(SOLUTIONS) + 1):
                     _run_solution(i)
                 print("\n>>> All solutions completed!")
             except KeyboardInterrupt:
@@ -588,12 +570,12 @@ def cmd_solutions(args):
     while True:
         _print_solutions_menu()
         try:
-            choice = input("\nSelect solution (0-23, A):").strip()
+            choice = input("\nSelect solution (0-11, A):").strip()
             if not choice:
                 continue
             if choice.upper() == "A":
                 try:
-                    for i in range(4, len(SOLUTIONS) + 1):
+                    for i in range(1, len(SOLUTIONS) + 1):
                         _run_solution(i)
                 except KeyboardInterrupt:
                     print("\n\nExiting.")
@@ -775,7 +757,7 @@ def main():
     p_solutions = subparsers.add_parser(
         "solutions", help="Workshop solution runner")
     p_solutions.add_argument(
-        "choice", nargs="?", help="Solution number (1-20) or A for all")
+        "choice", nargs="?", help="Solution number (1-11) or A for all")
     p_solutions.set_defaults(func=cmd_solutions)
 
     args = parser.parse_args()

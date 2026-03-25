@@ -1,1 +1,1 @@
-"""Workshop solutions using Microsoft Agent Framework with Neo4j GraphRAG."""
+"""Workshop solutions for Neo4j GraphRAG on AWS."""

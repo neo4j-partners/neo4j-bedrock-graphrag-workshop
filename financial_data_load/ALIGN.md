@@ -56,4 +56,4 @@ Decision: **delete** (user confirmed)
 - `01_test_full_data_load.py` — standalone test, not a solution. Left as-is.
 - `config.py`, `test_connection.py`, `__init__.py` — utilities. Left as-is.
 - Lab 3 files (`03_01_`, `03_02_`) already matched notebooks. No changes needed.
-- Lab 4 files (`04_00_`, `04_01_`, `04_02_`, `04_03_`) already matched notebooks. No changes needed.
+- Lab 4 files (`04_00_`, `04_01_`, `04_02_`) already matched notebooks. `04_03_` was removed (notebook deleted).

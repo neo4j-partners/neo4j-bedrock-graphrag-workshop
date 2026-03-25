@@ -49,16 +49,9 @@ This is the notebook equivalent of `05_01_fulltext_search.py` which was rewritte
 
 **Fix:** Rewrite to mirror the new `05_01_hybrid_rag.py` solution — HybridRetriever + GraphRAG comparing vector-only vs hybrid RAG answers. Rename to `05_hybrid_rag.ipynb`.
 
-### 3. Lab 4: `03_fulltext_hybrid_search_mcp.ipynb`, cell `h6i7j8k9l0` — String interpolation in fulltext Cypher
+### 3. Lab 4: `03_fulltext_hybrid_search_mcp.ipynb` — REMOVED
 
-Same issue fixed in `solution_srcs/04_03_fulltext_hybrid_search_mcp.py`. The `fulltext_search_tool()` uses:
-
-```python
-safe_term = term.replace("\\", "\\\\").replace("'", "\\'")
-cypher = f"""CALL db.index.fulltext.queryNodes('search_chunks', '{safe_term}')..."""
-```
-
-**Fix:** Use parameterized `$search_term` via `params` dict, matching the solution file fix.
+Notebook and solution file deleted. Fulltext/hybrid search is covered properly in Lab 5 using `HybridRetriever`.
 
 ### 4. `main.py:493` and `README.md:250` — Stale references to renamed solution file
 
@@ -72,7 +65,7 @@ cypher = f"""CALL db.index.fulltext.queryNodes('search_chunks', '{safe_term}')..
 |---|------|--------|--------|
 | 1 | `Lab_5_GraphRAG/02_embeddings.ipynb` cell `test-search` | Replace raw vector Cypher with `VectorRetriever.search()`. Updated `search-header` markdown to reference retriever. | DONE |
 | 2 | `Lab_5_GraphRAG/05_fulltext_search.ipynb` | Full rewrite to HybridRetriever + GraphRAG. Renamed to `05_hybrid_rag.ipynb`. | DONE |
-| 3 | `Lab_4_Graph_Enriched_Search/03_fulltext_hybrid_search_mcp.ipynb` cell `h6i7j8k9l0` | Parameterized fulltext Cypher `$search_term` via params dict | DONE |
+| 3 | `Lab_4_Graph_Enriched_Search/03_fulltext_hybrid_search_mcp.ipynb` | REMOVED — notebook deleted, fulltext/hybrid covered in Lab 5 | REMOVED |
 | 4 | `financial_data_load/main.py:493` | Updated module path and description to `05_01_hybrid_rag` / "Hybrid RAG" | DONE |
 | 5 | `financial_data_load/README.md:250` | Updated filename and description | DONE |
 | 6 | `Lab_5_GraphRAG/04_vector_cypher_retriever.ipynb` cell `summary` | Updated "Next" link and text from fulltext_search to hybrid_rag | DONE |

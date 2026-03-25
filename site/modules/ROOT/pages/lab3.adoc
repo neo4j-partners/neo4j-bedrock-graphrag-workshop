@@ -42,45 +42,6 @@ bedrock_model = BedrockModel(model_id=MODEL_ID, region_name=REGION)
 ----
 ====
 
-== AI Agents
-
-The agent in this lab has two simple tools: one that returns the current time and one that adds numbers. The architecture is the same regardless of what the tools do. The agent decides which tool to call, the framework executes it, and the result feeds back into the next reasoning step. This creates a loop where the model breaks down complex tasks into steps and executes them autonomously. Labs 4 through 7 replace these simple tools with graph queries, vector search, and MCP server connections.
-
-== Strands Agent Architecture
-
-Strands takes a model-driven approach: the model decides what to do at each step rather than following a developer-defined workflow. You provide a model, a system prompt, and a list of tools. The agent decides when to use tools and when to respond directly.
-
-Strands is model-agnostic, supporting Bedrock, Anthropic, OpenAI, Ollama, and other providers through swappable model classes. This workshop uses `BedrockModel` throughout, but the agent code itself is independent of the provider. Strands also has native support for MCP (Model Context Protocol), which Labs 4 and 6 use to connect agents to the Neo4j knowledge graph through MCP servers rather than locally defined tools.
-
-[source,python]
-----
-from strands import Agent, tool
-from strands.models import BedrockModel
-
-agent = Agent(
-    model=bedrock_model,
-    system_prompt="You are a helpful assistant. Use the available tools when needed.",
-    tools=[get_current_time, add_numbers],
-)
-----
-
-The `Agent` constructor wires up the full reasoning loop. When you invoke the agent with a question, it:
-
-1. Sends the question and tool definitions to Bedrock via the Converse API
-2. Receives a response that may include tool calls
-3. Executes any requested tools and feeds results back
-4. Repeats until the model produces a final text response
-
-Strands manages the orchestration internally, which makes it a good fit for agent patterns where the primary complexity is in the tools, not in the routing logic.
-
-.Why model-driven and why now
-[%collapsible]
-====
-Early agent frameworks (2023-era) compensated for weaker model capabilities with complex orchestration: hand-tuned prompt chains, custom response parsers, and explicit control flow graphs that routed the agent through predetermined steps. Building a production agent often took months of tuning.
-
-Current foundation models can plan multi-step tool use, recover from errors, and adapt their approach mid-task without developer-defined routing. The orchestration that earlier frameworks enforced in code is now handled by the model itself. Strands leans into this shift: rather than defining every possible execution path, the developer defines capabilities as tools and the model coordinates their use. The tradeoff is less fine-grained control over execution order in exchange for faster development and more adaptive behavior at runtime.
-====
-
 == The ReAct Pattern
 
 ReAct stands for Reason + Act. The loop works as follows:
@@ -101,6 +62,45 @@ Each cycle follows the same pattern: reason about what information is missing, a
 ====
 
 This loop is the foundation for every agent in the workshop. Labs 4 and 5 add retrieval tools (vector search, graph traversal). Lab 6 gives the agent full autonomy to discover the graph schema and write its own Cypher through MCP. The orchestration pattern stays the same.
+
+== Strands Agent Architecture
+
+The agent in this lab has two simple tools: one that returns the current time and one that adds numbers. The architecture is the same regardless of what the tools do — Labs 4 through 6 replace these simple tools with graph queries, vector search, and MCP server connections.
+
+Strands takes a model-driven approach: the model decides what to do at each step rather than following a developer-defined workflow. You provide a model, a system prompt, and a list of tools. The agent implements the ReAct loop internally: it reasons about the question, calls tools, observes results, and repeats until it reaches an answer.
+
+Tools are defined with the `@tool` decorator. The decorator converts a Python function into a tool the LLM can call. The docstring becomes the tool description that the LLM reads when deciding which tool to use.
+
+[source,python]
+----
+@tool
+def get_current_time() -> str:
+    """Get the current date and time."""
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+----
+
+The `Agent` constructor wires the model, system prompt, and tools into a complete ReAct loop:
+
+[source,python]
+----
+agent = Agent(
+    model=bedrock_model,
+    system_prompt="You are a helpful assistant.",
+    tools=[get_current_time, add_numbers],
+)
+
+result = agent("What time is it and what is 42 + 17?")
+----
+
+Strands is model-agnostic, supporting Bedrock, Anthropic, OpenAI, Ollama, and other providers through swappable model classes. This workshop uses `BedrockModel` throughout, but the agent code itself is independent of the provider. Strands also has native support for MCP (Model Context Protocol), which Labs 4 and 6 use to connect agents to the Neo4j knowledge graph through MCP servers rather than locally defined tools.
+
+.Why model-driven and why now
+[%collapsible]
+====
+Early agent frameworks (2023-era) compensated for weaker model capabilities with complex orchestration: hand-tuned prompt chains, custom response parsers, and explicit control flow graphs that routed the agent through predetermined steps. Building a production agent often took months of tuning.
+
+Current foundation models can plan multi-step tool use, recover from errors, and adapt their approach mid-task without developer-defined routing. The orchestration that earlier frameworks enforced in code is now handled by the model itself. Strands leans into this shift: rather than defining every possible execution path, the developer defines capabilities as tools and the model coordinates their use. The tradeoff is less fine-grained control over execution order in exchange for faster development and more adaptive behavior at runtime.
+====
 
 == AgentCore Deployment
 
@@ -147,44 +147,6 @@ response = client.invoke_agent_runtime(
 
 Each invocation creates an isolated session in a dedicated microVM. The agent processes the request using the same Converse API it used in the notebook, but now running on managed infrastructure.
 ====
-
-== Key Code Patterns
-
-Three patterns from this lab appear throughout the remaining labs.
-
-**Defining tools with the `@tool` decorator.** The decorator converts a Python function into a tool the LLM can call. The docstring becomes the tool description that the LLM reads when deciding which tool to use.
-
-[source,python]
-----
-@tool
-def get_current_time() -> str:
-    """Get the current date and time."""
-    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-----
-
-**Creating the model.** `BedrockModel` connects to Amazon Bedrock and handles the Converse API protocol.
-
-[source,python]
-----
-bedrock_model = BedrockModel(
-    model_id=MODEL_ID,
-    region_name=REGION,
-    temperature=0,
-)
-----
-
-**Building the agent.** The `Agent` constructor wires the model, system prompt, and tools into a complete ReAct loop.
-
-[source,python]
-----
-agent = Agent(
-    model=bedrock_model,
-    system_prompt="You are a helpful assistant.",
-    tools=[get_current_time, add_numbers],
-)
-
-result = agent("What time is it and what is 42 + 17?")
-----
 
 == Next Steps
 

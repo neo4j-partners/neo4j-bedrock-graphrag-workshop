@@ -1,21 +1,19 @@
 = Lab 5: GraphRAG
 
-In Lab 4 you wrote every retrieval query by hand — vector search Cypher, graph traversal joins, fulltext lookups — and saw exactly how each strategy works at the query level. This lab replaces that manual plumbing with the neo4j-graphrag library. `VectorRetriever` replaces your hand-written vector Cypher. `VectorCypherRetriever` replaces your graph traversal joins. `HybridRetriever` replaces your agent-driven combination with proper score normalization and alpha tuning. You also build the data pipeline from scratch — chunking, embedding generation — that was pre-built for you in Lab 4.
+In Lab 4 you wrote every retrieval query by hand — vector search Cypher and graph traversal joins — and saw exactly how each strategy works at the query level. This lab replaces that manual plumbing with the neo4j-graphrag library. `VectorRetriever` replaces your hand-written vector Cypher. `VectorCypherRetriever` replaces your graph traversal joins. The library also adds capabilities Lab 4 did not cover: `HybridRetriever` combines vector similarity with fulltext keyword search, and `HybridCypherRetriever` layers graph traversal on top of that. You also build the data pipeline from scratch — chunking, embedding generation — that was pre-built for you in Lab 4.
 
 TIP: Ready to start? Jump to the xref:lab5-instructions.adoc[Lab 5 Instructions] for the notebook walkthrough.
 
 .**At a Glance**
 
-* **Six notebooks** — progress from loading raw text into a knowledge graph to running hybrid retrieval queries
+* **Five notebooks** — progress from loading raw text into a knowledge graph to running hybrid retrieval queries
 * **neo4j-graphrag library** — four retriever classes, each suited to a different query shape
 * **Retrieval pipeline** — vector similarity, keyword matching, and graph traversal combine into a single pipeline
 * **Alpha tuning** — the `alpha` parameter controls the balance between semantic and keyword search
 
 == Embeddings and Vector Search
 
-Embedding models read text and produce numerical vectors that capture what the text means, not just what it says. "Supply chain disruption" and "logistics bottleneck risk" produce similar vectors because they describe related concepts, even though they share no keywords. This is what enables semantic similarity search: given a question, the system embeds it, searches for stored vectors whose meaning is closest, and returns the matching text.
-
-In this workshop, Amazon Bedrock Nova generates 1024-dimensional embeddings for each chunk of SEC filing text. Those vectors are stored as properties on Chunk nodes in Neo4j and indexed with a vector index (`chunkEmbeddings`) that supports approximate nearest-neighbor lookup. When a retriever receives a question, it embeds the question with the same model, queries the index for the closest chunk vectors, and returns the matched text.
+Lab 4 introduced embeddings and vector search conceptually. This lab builds them from scratch. Amazon Bedrock Nova generates 1024-dimensional embeddings for each chunk of SEC filing text. Those vectors are stored as properties on Chunk nodes in Neo4j and indexed with a vector index (`chunkEmbeddings`) that supports approximate nearest-neighbor lookup. When a retriever receives a question, it embeds the question with the same model, queries the index for the closest chunk vectors, and returns the matched text.
 
 .How vector search powers RAG
 [%collapsible]
@@ -25,9 +23,7 @@ Vector search is the mechanism that makes Retrieval-Augmented Generation work. T
 
 == Chunking
 
-SEC 10-K filings are too long to embed as single documents. A full filing can run tens of thousands of words, well beyond what an embedding model can capture in one vector and too broad for precise retrieval. Chunking splits each filing into smaller passages that can be individually embedded and retrieved.
-
-Each chunk becomes a Chunk node in the graph, linked to its source Document via `FROM_DOCUMENT` and to adjacent chunks via `NEXT_CHUNK` to preserve reading order. The embedding model converts each chunk's text into a vector. The vector index over those embeddings enables semantic search by meaning rather than keyword matching.
+SEC 10-K filings are too long to embed as single documents, so each filing is split into smaller passages. Each chunk becomes a Chunk node in the graph, linked to its source Document via `FROM_DOCUMENT` and to adjacent chunks via `NEXT_CHUNK` to preserve reading order.
 
 .Chunking trade-offs
 [%collapsible]
@@ -37,15 +33,11 @@ Larger chunks give the LLM more context during retrieval, which helps when the a
 
 == From Documents to Knowledge Graph
 
-The knowledge graph in this workshop combines two layers of data. The first layer is structured: CSV seed data loaded in Lab 1 creates Company, Product, RiskFactor, and AssetManager nodes with typed relationships between them. The second layer is unstructured: SEC 10-K filing text is chunked, embedded, and linked to the structured layer through Document nodes.
-
-The pipeline that builds the unstructured layer follows three stages:
+Lab 4 explained how the structured layer (companies, products, risk factors) connects to the unstructured layer (documents and chunks) through the `FILED` relationship. This lab builds that unstructured layer from scratch in three stages:
 
 1. **Load filing text as Document and Chunk nodes.** Each 10-K filing becomes a Document node. The filing text is split into chunks, each stored as a Chunk node linked to its source via FROM_DOCUMENT and to adjacent chunks via NEXT_CHUNK.
 2. **Generate embeddings on every Chunk.** Bedrock Nova embeds each chunk's text into a 1024-dimensional vector, stored as a property on the Chunk node. A vector index (`chunkEmbeddings`) is created over these embeddings.
 3. **Create fulltext indexes.** Lucene-backed indexes on Chunk text and entity names enable keyword search alongside vector search.
-
-The structured and unstructured layers connect through the FILED relationship: a Company node links to the Document it filed via `(Company)-[:FILED]->(Document)`. This connection is what makes GraphRAG possible. Vector search finds a relevant Chunk, traversal follows FROM_DOCUMENT to the Document, then FILED to the Company, and from there to any structured relationship (OFFERS, FACES_RISK, OWNS). The unstructured text and the structured graph become one queryable system.
 
 image::graphrag-retrieval-flow.png[GraphRAG Retrieval Flow,700]
 
@@ -61,17 +53,11 @@ The workshop sidesteps extraction because the SEC dataset already provides clean
 
 == The Pipeline
 
-The six notebooks form a single arc: create the graph, generate embeddings, then layer increasingly sophisticated retrieval strategies on top. Notebooks 01 and 02 build the data foundation. Notebooks 03 through 06 each demonstrate a different retriever that queries the same graph.
+The five notebooks form a single arc: create the graph, generate embeddings, then layer increasingly sophisticated retrieval strategies on top.
 
 image::data-pipeline.png[Data Pipeline,700]
 
-By the end, you will have built four different retriever configurations and understand when each one applies.
-
-== How the Notebooks Connect
-
-Notebooks 01 and 02 build the foundation. Notebook 01 loads SEC filing text as Document and Chunk nodes linked by `FROM_DOCUMENT` and `NEXT_CHUNK` relationships. Notebook 02 generates vector embeddings on every Chunk node and creates a `chunkEmbeddings` vector index.
-
-Every notebook from 03 onward queries that same graph using a different retrieval strategy. Notebook 03 introduces the simplest retriever: pure vector similarity. Notebook 04 adds graph traversal to pull in surrounding context. Notebook 05 steps back from vectors entirely to show keyword-based fulltext search. Notebook 06 combines both approaches and shows how the `alpha` parameter controls the balance.
+Notebooks 01 and 02 build the foundation. Notebook 01 loads SEC filing text as Document and Chunk nodes linked by `FROM_DOCUMENT` and `NEXT_CHUNK` relationships. Notebook 02 generates vector embeddings on every Chunk node and creates a `chunkEmbeddings` vector index. Every notebook from 03 onward queries that same graph using a different retriever. Notebook 03 introduces pure vector similarity. Notebook 04 adds graph traversal to pull in surrounding context. Notebook 05 introduces hybrid search — combining vector and fulltext — and layers graph traversal on top with `HybridCypherRetriever`, showing how the `alpha` parameter controls the balance.
 
 == Four Retrievers Explained
 
@@ -106,12 +92,6 @@ RETURN node.text AS text, d.source AS document, c.name AS company,
 
 This query runs for each chunk that vector search returns. The retriever collects the results and passes them to the LLM as enriched context. The design separates the search step (which chunk is relevant) from the enrichment step (what structured context surrounds it).
 ====
-
-== Fulltext Search
-
-Vector search finds text by meaning. Fulltext search finds text by keywords. Neo4j's fulltext indexes are backed by Lucene and support operators that vector search cannot: fuzzy matching (`cybersecur~` catches misspellings), wildcard matching (`supply*` matches "supply chain" and "supplier"), and boolean operators (`risk AND regulatory` requires both terms). The workshop creates two fulltext indexes: `search_chunks` on Chunk text and `search_entities` on Company, Product, and RiskFactor names.
-
-Fulltext search handles queries with specific terms, tickers, or identifiers that vector search may rank lower because those terms carry little semantic weight in embedding space. "NVDA" is a ticker, not a concept; fulltext search matches it exactly while vector search treats it as a low-information token. The HybridRetriever combines both approaches so that neither exact terms nor semantic meaning is lost.
 
 == Retriever Selection Guide
 
@@ -170,10 +150,6 @@ Lab 4 and Lab 5 query the same underlying Neo4j indexes and graph structure. The
 | **Embedding**
 | Client-side (Bedrock Nova), wrapped in `@tool`
 | Retriever calls embedder internally
-
-| **Hybrid search**
-| Agent runs both queries and combines results
-| `HybridRetriever` handles score normalization and alpha tuning
 
 | **Graph traversal**
 | Cypher in `@tool` functions

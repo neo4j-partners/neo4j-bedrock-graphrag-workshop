@@ -225,7 +225,6 @@ Strands Agents SDK with MCP to search a Neo4j knowledge graph:
 | 3 | `04_00_intro_strands_mcp.py` | Intro to Strands + MCP |
 | 4 | `04_01_vector_search_mcp.py` | Vector search via MCP |
 | 5 | `04_02_graph_enriched_search_mcp.py` | Graph-enriched search via MCP |
-| 6 | `04_03_fulltext_hybrid_search_mcp.py` | Fulltext & hybrid search via MCP |
 
 ### Lab 5: GraphRAG (05_xx)
 
@@ -233,12 +232,12 @@ Data pipeline and GraphRAG patterns using neo4j-graphrag:
 
 | # | Solution | Description |
 |---|----------|-------------|
-| 7 | `05_01_data_loading.py` | Load financial documents into Neo4j |
-| 8 | `05_02_embeddings.py` | Generate and store vector embeddings |
-| 9 | `05_03_vector_retriever.py` | Basic vector search |
-| 10 | `05_04_vector_cypher_retriever.py` | Vector search + custom Cypher |
-| 11 | `05_05_hybrid_rag.py` | Hybrid RAG: HybridRetriever + GraphRAG |
-| 12 | `05_06_hybrid_search.py` | Hybrid vector + keyword search |
+| 6 | `05_01_data_loading.py` | Load financial documents into Neo4j |
+| 7 | `05_02_embeddings.py` | Generate and store vector embeddings |
+| 8 | `05_03_vector_retriever.py` | Basic vector search |
+| 9 | `05_04_vector_cypher_retriever.py` | Vector search + custom Cypher |
+| 10 | `05_05_hybrid_rag.py` | Hybrid RAG: HybridRetriever + GraphRAG |
+| 11 | `05_06_hybrid_search.py` | Hybrid vector + keyword search |
 
 ## AI Provider
 

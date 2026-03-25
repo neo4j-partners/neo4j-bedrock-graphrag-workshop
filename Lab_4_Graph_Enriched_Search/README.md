@@ -1,13 +1,12 @@
 # Lab 4 - Graph-Enriched Search
 
-Run four notebooks that explore graph-enriched search — retrieval strategies that take advantage of the knowledge graph's structure. You start with the basics of connecting a Strands Agent to Neo4j via MCP, then progress from vector search, to graph-enriched search that follows relationships to connected entities, to hybrid search that combines semantic and keyword matching.
+Run three notebooks that explore graph-enriched search — retrieval strategies that take advantage of the knowledge graph's structure. You start with the basics of connecting a Strands Agent to Neo4j via MCP, then progress from vector search to graph-enriched search that follows relationships to connected entities.
 
 ## What You'll Learn
 
 - **Strands + MCP Basics**: Connect an agent to Neo4j via MCP and query the knowledge graph using natural language (Text2Cypher)
 - **Vector Search**: Embed queries and find semantically similar chunks using Bedrock Nova embeddings
 - **Graph-Enriched Search**: Follow relationships from matched chunks to documents, companies, products, and risk factors
-- **Hybrid Search**: Combine fulltext keyword search with vector similarity using custom `@tool` wrappers
 
 ## Prerequisites
 
@@ -25,7 +24,6 @@ Before starting this lab, make sure you have:
 | [00_intro_strands_mcp.ipynb](00_intro_strands_mcp.ipynb) | Introduction to Strands + MCP | Connect an agent to Neo4j via MCP — the agent discovers tools and writes its own Cypher |
 | [01_vector_search_mcp.ipynb](01_vector_search_mcp.ipynb) | Vector Search | Semantic vector search with Bedrock Nova embeddings — the foundation for graph-enriched retrieval |
 | [02_graph_enriched_search_mcp.ipynb](02_graph_enriched_search_mcp.ipynb) | Graph-Enriched Search | Vector search enriched with document metadata, neighboring chunks, and entity traversal |
-| [03_fulltext_hybrid_search_mcp.ipynb](03_fulltext_hybrid_search_mcp.ipynb) | Fulltext and Hybrid Search | Keyword search with Lucene operators and agent-driven hybrid search via custom `@tool` wrappers |
 
 ## Next Steps
 

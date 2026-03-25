@@ -1,6 +1,6 @@
 = Lab 4 Instructions: Graph-Enriched Search
 
-Follow these notebooks to search a Neo4j knowledge graph, progressing from vector search to graph-enriched retrieval to hybrid search.
+Follow these notebooks to search a Neo4j knowledge graph, progressing from vector search to graph-enriched retrieval.
 
 TIP: For concepts and background, see xref:lab4.adoc[Lab 4: Graph-Enriched Search].
 
@@ -9,7 +9,6 @@ TIP: For concepts and background, see xref:lab4.adoc[Lab 4: Graph-Enriched Searc
 * **Strands + MCP Basics**: Connect an agent to Neo4j via MCP and query the knowledge graph using natural language (Text2Cypher)
 * **Vector Search**: Embed queries and find semantically similar chunks using Bedrock Nova embeddings
 * **Graph-Enriched Search**: Follow relationships from matched chunks to documents, companies, products, and risk factors
-* **Hybrid Search**: Combine fulltext keyword search with vector similarity using custom `@tool` wrappers
 
 == Prerequisites
 
@@ -35,10 +34,6 @@ NOTE: This lab connects to Neo4j through a pre-deployed MCP server. The database
 | `02_graph_enriched_search_mcp.ipynb`
 | Graph-Enriched Search
 | Vector search enriched with document metadata, neighboring chunks, and entity traversal (companies, products, risk factors)
-
-| `03_fulltext_hybrid_search_mcp.ipynb`
-| Fulltext and Hybrid Search
-| Keyword search with Lucene operators and agent-driven hybrid search combining vector and fulltext via custom `@tool` wrappers
 |===
 
 == Next Steps

@@ -80,7 +80,7 @@ Delete: `get_embedding()`, `_NovaEmbedding`, `_NovaEmbeddingResponse`, `_bedrock
 |---|------|--------|--------|
 | 1 | `config.py` | Delete dead code: `get_embedding()`, `_NovaEmbedding`, `_NovaEmbeddingResponse`, `_bedrock_client`, unused `json`/`boto3`/`BaseModel` imports. Clean stale docstring referencing `get_embedding()`. | DONE |
 | 2 | `05_04_vector_cypher_retriever.py` | Replace `OpenAIEmbeddings`/`OpenAILLM` imports and type hints (lines 13-14, 60, 81) with `BedrockNovaEmbeddings`/`BedrockLLM` | DONE |
-| 3 | `04_03_fulltext_hybrid_search_mcp.py` | Parameterize fulltext Cypher — `$search_term` via `params` dict, removed `safe_term` string interpolation | DONE |
+| 3 | `04_03_fulltext_hybrid_search_mcp.py` | REMOVED — notebook and solution file deleted | REMOVED |
 | 4 | `05_02_embeddings.py` | Batch embedding storage with `UNWIND` (single session/transaction). Replaced custom `vector_search()`/`demo_search()` with `VectorRetriever` | DONE |
 | 5 | `05_05_hybrid_rag.py` | Full rewrite — Option A: HybridRetriever + GraphRAG. Compares vector-only vs hybrid RAG answers, includes alpha sweep demo | DONE |
 | 6 | `05_05_hybrid_rag.py` | **Rename file** from `05_01_fulltext_search.py` to `05_05_hybrid_rag.py` | DONE |
@@ -91,6 +91,6 @@ All 5 changes reviewed. Findings:
 
 - **config.py** — Clean. Dead code removed, `pydantic.Field` import correctly retained (used by config classes), stale docstring fixed.
 - **05_04_vector_cypher_retriever.py** — All 4 references updated (2 imports, 2 type hints). No remaining OpenAI references.
-- **04_03_fulltext_hybrid_search_mcp.py** — `fulltext_search_tool` now passes `$search_term` via params dict. `limit` remains f-string interpolated as `int` — consistent with `top_k` in the vector tools in the same file and safe since it's cast to `int`.
+- **04_03_fulltext_hybrid_search_mcp.py** — REMOVED. Notebook and solution file deleted; fulltext/hybrid search covered properly in Lab 5.
 - **05_02_embeddings.py** — Embedding generation loop still iterates (necessary since `embed_query` is single-item), but storage is now batched in one `UNWIND` transaction. `demo_search()` uses `VectorRetriever` with `return_properties=["text", "index"]` and handles both string and dict content defensively.
 - **05_05_hybrid_rag.py** — Clean rewrite. Uses `GraphRAG` with both `VectorRetriever` (baseline) and `HybridRetriever` (comparison). Alpha sweep shows 5 values. Complementary to `05_06` which focuses on retrieval mechanics without GraphRAG. Index existence checks included.
