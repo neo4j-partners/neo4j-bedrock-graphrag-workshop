@@ -2,8 +2,9 @@ source_company_id,target_company_id,target_company_name
 C001,,Alibaba Group
 C001,,Alphabet
 C001,C003,Microsoft Corporation
-C001,,eBay
-C002,,Alphabet
+C001,,Shopify Inc.
+C001,,Walmart Inc.
+C002,,Google
 C002,C003,Microsoft Corporation
 C002,,Nintendo
 C002,,Samsung Electronics Co. Ltd
@@ -15,7 +16,7 @@ C003,,BMC
 C003,,CA Technologies
 C003,,"Cisco Systems, Inc."
 C003,,Dell
-C003,,Alphabet
+C003,,Google
 C003,,Hewlett-Packard
 C003,,IBM
 C003,,Intel Security Group
@@ -68,7 +69,11 @@ C004,,SoftBank Group Corp.
 C004,,"Tesla, Inc."
 C004,,Texas Instruments Incorporated
 C005,,CAISO
+C005,,Pacific Power
 C005,,San Diego Gas & Electric Company
+C005,,Sempra Energy
+C005,,Southern California Edison
+C006,,Adyen N.V.
 C006,,"Block, Inc."
+C006,,Stripe Inc.
 C006,,eBay
-C006,C002,Apple Inc.

@@ -1,0 +1,875 @@
+metric_id,name,value,period
+FM001,2015 GT&S Revenue Requirement Recovery,$356M,FY2022
+FM002,2017 Wildfire Claims Costs Securitization,$7.5B,FY2017
+FM003,2018 CEMA Application Total Cost Recovery Request,$763M,FY2018
+FM004,2018 CEMA Interim Rate Relief Approved,$373M,FY2019
+FM005,2018 CEMA Revenue Requirement Requested,$763M,FY2018
+FM006,2018 CEMA Settlement Authorized Collection,$683M plus interest,FY2022
+FM007,2018 CEMA Settlement Recovery Amount,$683M plus interest,approved March 2022
+FM008,2018 CEMA Settlement Revenue Requirement,$683M plus interest,FY2022
+FM009,2020 Utility Term Loan Prepayment,$298M,FY2022
+FM010,2020 WMCE Amortization Recovery,$591M,24-month period beginning March 2023
+FM011,2020 WMCE CEMA Amount,$251M,FY2020
+FM012,2020 WMCE Capital Expenditures,$801M,FY2020
+FM013,2020 WMCE Expense,$1.18B,FY2020
+FM014,2020 WMCE FHPMA Amount,$293M,FY2020
+FM015,2020 WMCE FRMMA and WMPMA Amount,$740M,FY2020
+FM016,2020 WMCE Interim Rate Relief,$447M,FY2020
+FM017,2020 WMCE Revenue Requirement,$1.04B,FY2020
+FM018,2020 WMCE Revenue Requirement Requested,$1.28B,FY2020
+FM019,2020 WMCE Settlement Recovery Amount,$1.04B,FY2023
+FM020,2021 WMCE Capital Expenditures,$197M,FY2020
+FM021,2021 WMCE Expenses,$1.4B,FY2020
+FM022,2021 WMCE Partial Settlement Recovery Amount,$721M,FY2022
+FM023,2021 WMCE Proposed Revenue Requirement,$1.47B,FY2021
+FM024,2021 WMCE Recorded Expenditures,$1.6B,FY2021
+FM025,2021 WMCE Revenue Requirement Requested,$1.47B,FY2021
+FM026,2021 WMCE Settlement Revenue Requirement,$720.7M,January 2023
+FM027,2021 WMCE Unaddressed VMBA,$591.9M,FY2021
+FM028,2021 WMCE VMBA Revenue Requirement Excluded from Settlement,$591M,FY2021
+FM029,2022 Cost of Capital ROE,pre-2022 levels,FY2022
+FM030,2022 WMCE Capital Expenditures,$136M,FY2021
+FM031,2022 WMCE Expenses,$1.2B,FY2021
+FM032,2022 WMCE Interim Rate Relief,$1.1B,"12 months beginning June 1, 2023"
+FM033,2022 WMCE Proposed Revenue Requirement,$1.29B,FY2022
+FM034,2022 WMCE Recorded Expenditures,$1.36B,FY2022
+FM035,2022 WMCE Remaining Recovery,$224M,After CPUC final decision
+FM036,2022 WMCE Requested Cost Recovery,$1.36B,FY2022
+FM037,2022 WMCE Revenue Requirement Requested,$1.36B,FY2022
+FM038,2022A Utility Term Loan Credit Agreement,$500M,FY2022
+FM039,2022B Utility Term Loan - 2-Year Tranche,$400M,"maturity April 19, 2024"
+FM040,2022B Utility Term Loan - 364-Day Tranche,$125M,"maturity April 19, 2023"
+FM041,2023 Cost of Capital ROE,10.0%,FY2023
+FM042,2023 Cost of Debt,4.31% (requested),FY2023
+FM043,2023 GRC Revenue Requirement,$15.82B,FY2023
+FM044,2023 GRC Weighted-Average Rate Base,$50.41B,FY2023
+FM045,AWS Net Sales,"$62,202M",FY2021
+FM046,AWS Operating Income,"$18,532M",FY2021
+FM047,AWS Sales Growth,29%,FY2022
+FM048,Accounts Receivable Balances Over 30 Days Outstanding,~$1.1B,FY2022
+FM049,Accounts Receivable Over 30 Days Outstanding Increase vs 2019,$890M,FY2022 vs FY2019
+FM050,"Accounts Receivable, Net of Allowance for Doubtful Accounts",$751M,FY2021
+FM051,Accruals for Undiscounted Gross Environmental Liabilities,$1.3B,FY2021
+FM052,Accrued Interest Expense on Uncertain Tax Positions,$4.3B,FY2021
+FM053,Accrued Legal Liabilities,$617M,FY2023
+FM054,Accumulated Deficit,$16.03M,FY2023
+FM055,Accumulated Goodwill Impairment,$11.3B,FY2023
+FM056,Accumulated Other Comprehensive Income (Loss) Impact - Foreign Exchange Contracts (10% USD strengthening),~$103M lower,FY2022
+FM057,"Accumulated other comprehensive income (loss), end of period","$1,822M",FY2021
+FM058,Accumulated other comprehensive loss,"-$6,343M",FY2023
+FM059,Acquisition Prepayment Write-off,$1.35B,FY2023
+FM060,Acquisition Purchase Price - Activision Blizzard,$68.7B,FY2022
+FM061,Acquisition Purchase Price per Share - Activision Blizzard,$95.00,FY2022
+FM062,Acquisition Termination Charge (Arm),$1.35B,FY2023
+FM063,Acquisition Termination Cost,"$1,353M",FY2023
+FM064,Acquisitions Net of Cash Acquired,$3.6B,FY2020
+FM065,Active Accounts,426M,FY2021
+FM066,Activision Blizzard Acquisition Agreement Value,$68.7B,January 2022
+FM067,Additional Borrowing Capacity - PG&E Corporation (Corporation Revolving Credit Agreement),$500M,FY2022
+FM068,Additional Borrowing Capacity - Utility (Utility Revolving Credit Agreement),$1.5B,FY2022
+FM069,Additional Credit Activity Funding Approved,$1.1B,FY2022
+FM070,Additional Finance Leases Not Yet Commenced,$34.4B,FY2023
+FM071,Additional Incremental CAPP Funding Authorization,$958M,FY2022
+FM072,Additional Operating Leases Not Yet Commenced,$7.7B,FY2023
+FM073,Additional Shareholder Contributions (Tax Benefits),up to $7.59B,FY2022
+FM074,Additional Stock Repurchase Authorization,$15.0B,June 2022
+FM075,Additions to property and equipment,"-$28,107M",FY2023
+FM076,Adverse Impact on Income Before Taxes - Balance Sheet Hedging Contracts (10% adverse FX change),~$41M,FY2022
+FM077,Advertising Expense,$1.5B,FY2021
+FM078,Aggregate Cash Deposits Under Cash Pooling Arrangement,$1.7B,FY2022
+FM079,"Aggregate Costs in Memorandum and Balancing Accounts (CEMA, WEMA, FHPMA, FRMMA, WMPMA, VMBA, WMBA, MGMA, RTBA)",$6.2B,FY2022
+FM080,Aggregate Debt - Due in Five to Ten Years,"$4,000M","as of January 29, 2023"
+FM081,Aggregate Debt - Due in Greater Than Ten Years,$3.5B,FY2023
+FM082,Aggregate Debt - Due in One Year,"$1,250M","as of January 29, 2023"
+FM083,Aggregate Debt - Due in One to Five Years,"$2,250M","as of January 29, 2023"
+FM084,Aggregate Principal Amount of Fixed Rate Notes,$12.0B,"May 2022, May 2020, September 2019"
+FM085,Aggregate Recorded Liability - 2020 Zogg Fire,$400M,FY2022
+FM086,Aggregate Tax Benefit from Fire Victim Trust Share Sales,$870M,FY2022
+FM087,All-in ROE,10.45%,TO20 settlement
+FM088,Allowance Increase per 1% Principal and Interest Coverage Ratio,~$80M,FY2022
+FM089,Allowance for Doubtful Accounts - Balance End of Period,$798M,FY2021
+FM090,Americas Net Sales,$162.6B,FY2023
+FM091,Amortization and Accretion Expense - Wildfire Fund,$517M,FY2021
+FM092,Annual Core Market Demand Coverage,~85%,FY2022
+FM093,Annual Wage Increase Rate,3.75%,2022 through 2025
+FM094,Annual Wildfire Fund Contribution,~$193M per year,Annual
+FM095,Approved Capital Expenditure Recovery (Settlement),$127M,FY2023
+FM096,Approved Expense Recovery (Settlement),$183M,FY2023
+FM097,Approved Storage Capacity (2022-2023),"1,100 MW",FY2022-FY2023
+FM098,Arm Acquisition Termination Cost,"$1,350M",FY2023
+FM099,Asset Impairment Charges,$26M,FY2021
+FM100,Asset Retirement Obligation (ARO),$5.9B,FY2022
+FM101,Assumed Return on Pension Plan Assets,6.1%,FY2022
+FM102,At the Market Equity Distribution Program Aggregate Gross Sales Price Cap,$400M,FY2021
+FM103,Authorized revenue requirement (settlement),$356M,2015 to 2022
+FM104,Automotive Revenue,$903M,FY2023
+FM105,Automotive Revenue Growth,60.0%,FY2023
+FM106,Available Borrowing Capacity (Paidy Credit Agreement),¥25.7B (~$195M),FY2022
+FM107,Average Annual Capital Investments,$9.69B,FY2023-FY2026
+FM108,Average Annual Residential Usage,"6,179 kWh",FY2020
+FM109,Average Annual Statewide Claims or Settlements (12-year data),~$2.9B,Historical
+FM110,Average Annual Statewide Claims or Settlements (5-year data),~$6.5B,Historical
+FM111,Average Customers,"4,545,700",FY2020
+FM112,Average Number of Customers,"5,498,044",FY2020
+FM113,Average Price of Natural Gas Purchased,$2.02/Mcf,FY2020
+FM114,Backbone and Local Transmission Pipeline Miles,"6,300+ miles",FY2022
+FM115,Base ROE (FERC Determined),9.26%,FY2022
+FM116,Basic EPS,$8.12,FY2021
+FM117,Basic Earnings Per Share,$9.72,FY2023
+FM118,Battery Energy Storage Contracts Awarded,>3.3 GW,FY2022
+FM119,Biopower % of Customer Retail Sales,5%,FY2022
+FM120,Borrowings outstanding under commercial paper programs,$6.8B,FY2022
+FM121,Borrowings outstanding under secured revolving credit facility,$1.0B,FY2022
+FM122,Borrowings under Financing Arrangements,$3.5B,FY2022
+FM123,Bundled Gas Revenues,"$3,175M",FY2020
+FM124,CAPP Funding Received,$200M,FY2022
+FM125,CAPP Incremental Funding Authorization (AB 205),$958M,FY2022
+FM126,CEMA Amount (2021 WMCE),$535M,FY2021
+FM127,CMP Revenue,$550M,FY2022
+FM128,CO2 Emissions Rate (Electricity to Retail Customers),99 lbs CO2/MWh,FY2021
+FM129,CPPMA Total,$26M,FY2022
+FM130,CPUC Approved Securitization Amount,$1.4B,"August 5, 2022"
+FM131,CPUC-Authorized Long-Term Capital Structure - Debt and Preferred Stock,48%,FY2022
+FM132,CPUC-Authorized Long-Term Capital Structure - Equity,52%,FY2022
+FM133,CUDA Developer Base,3.8 million developers worldwide,current
+FM134,California Net Operating Loss Carryforward,$25.2B,FY2022
+FM135,Capital Expenditures Increase,$1.9B increase,FY2022
+FM136,Capital Expenditures with Certified Diverse Suppliers,$4.0B,FY2021
+FM137,Capital Investments - Property and Equipment,$1.10B to $1.30B,FY2024
+FM138,Capital Structure - Common Stock,49.75%,TO20 settlement
+FM139,Capital Structure - Debt,49.75%,TO20 settlement
+FM140,Capital Structure - Preferred Stock,0.5%,TO20 settlement
+FM141,Capital spending subject to audit,$576M,2011 to 2014
+FM142,Carbon-Free Energy Portfolio,>13.5 GW,FY2022
+FM143,Cash,"$141,206",FY2022
+FM144,Cash Equivalents and Marketable Fixed Income Securities,"$56,016M",FY2022
+FM145,Cash Flows from Financing Activities,"$4,882,334",FY2022
+FM146,Cash Flows used in Investing Activities,"-$5,679,020",FY2022
+FM147,Cash Flows used in Operating Activities,"-$1,150,005",FY2022
+FM148,Cash Paid for Income Taxes (Net),$565M,FY2020
+FM149,Cash Paid for Interest,$2.0B,FY2021
+FM150,Cash Used for Operating Activities,$1.15M,FY2022
+FM151,Cash Withdrawals Under Cash Pooling Arrangement,$1.7B,FY2022
+FM152,Cash and Cash Equivalents Portfolio Percentage,40%,FY2021
+FM153,"Cash and cash equivalents, end of period","$34,704M",FY2023
+FM154,Cash capital expenditures,$58.3B,FY2022
+FM155,Cash dividends declared per common share,$2.24,Two years prior
+FM156,Cash from Investing Activities,-$5.68M,FY2022
+FM157,Cash held by foreign subsidiaries,$7.4B (57%),FY2021
+FM158,Cash inflows from financing activities,$62.7B,FY2022
+FM159,Cash outflows from financing activities,$53.0B,FY2022
+FM160,Cash payments for acquisitions and investments (net of acquired cash),$8.3B,FY2022
+FM161,Cash provided by financing activities,$9.7B,FY2022
+FM162,Cash provided by operating activities,$46.752B,FY2022
+FM163,Cash taxes paid (net of refunds),$6.0B,FY2022
+FM164,"Cash, Cash Equivalents and Marketable Securities",$13.30B,FY2023
+FM165,"Cash, Cash Equivalents and Unrestricted Marketable Securities",$148.3B,FY2023
+FM166,"Cash, Cash Equivalents, and Investments",$12.981B,FY2021
+FM167,"Cash, Cash Equivalents, and Marketable Securities",$73.1 billion,"December 31, 2015"
+FM168,"Cash, Cash Equivalents, and Marketable Securities Held Outside U.S.",$1.38B,FY2023
+FM169,"Cash, cash equivalents, and marketable securities",$70.0B,FY2022
+FM170,"Cash, cash equivalents, and marketable securities held by foreign subsidiaries",$4.7B,FY2022
+FM171,Certificates of Deposit,"$2,701M",FY2023
+FM172,Certificates of Deposit Fair Value,$2.1B,FY2023
+FM173,Changes in Funds Payable and Amounts Due to Customers,$10.6B,FY2020
+FM174,Commercial Paper,"$2,500M",FY2022
+FM175,Commercial Paper Fair Value,$2.5B,FY2023
+FM176,Commercial Paper Outstanding,$2.0B,FY2015
+FM177,Commercial Paper Program Size,$575M,FY2023
+FM178,Commercial Revenue - Remaining Performance Obligations,$224.0B,FY2023
+FM179,Committed Capital for Construction,$13.5B,FY2023
+FM180,Common Equity Capital Structure (2022),52.00%,FY2022
+FM181,Common Equity Capital Structure (2023),52.00%,FY2023
+FM182,Common Equity Component,52.0%,FY2020
+FM183,Common Equity ROE (2022),10.25%,FY2022
+FM184,Common Equity ROE (2023),10.00%,FY2023
+FM185,Common Stock Dividend (December 2022),$425M,FY2022
+FM186,Common Stock Dividend (June 2022),$425M,FY2022
+FM187,Common Stock Dividend (September 2022),$425M,FY2022
+FM188,Common Stock Repurchase,$1.6B,FY2020
+FM189,Common stock and paid-in capital,"$93,718M",FY2023
+FM190,Common stock cash dividends paid,"-$19,800M",FY2023
+FM191,Common stock repurchased,"-$22,245M",FY2023
+FM192,Comprehensive Income,$59.9B,FY2021
+FM193,Compute & Networking Revenue,$11.0B,FY2022
+FM194,Consolidated Net Sales,"$469,822M",FY2021
+FM195,Consolidated Net Sales Year-over-Year Growth,9%,FY2022
+FM196,Consolidated Operating Income,"$24,879M",FY2021
+FM197,Consumer Active Accounts,400M,FY2022
+FM198,Consumer Loans Net Charge-Off Rate,4.3%,FY2021
+FM199,Consumer Loans Year-over-Year Growth,53%,FY2022
+FM200,Consumer Loans and Interest Receivable Balance,$3.8B,FY2021
+FM201,Contingent Supplemental Shareholder Contribution,up to $775M,FY2040
+FM202,Contractual Compensation from Sellers,$82M,FY2021
+FM203,Core Customers Receiving Bundled Service,>96%,FY2022
+FM204,Corporate Alternative Minimum Tax (CAMT) Rate,15%,FY2023
+FM205,Corporate Notes and Bonds,$10.4B,FY2023
+FM206,Corporate Notes and Bonds Fair Value,$9.7B,FY2023
+FM207,Corporation Revolving Credit Agreement Maturity Date Extension,"June 22, 2025","October 4, 2022"
+FM208,Cost of Capital,,Periodic CPUC Proceedings
+FM209,Cost of Electricity,"$2.8B (2022), $3.2B (2021)","FY2022, FY2021"
+FM210,Cost of Natural Gas,"$2.1B (2022), $1.1B (2021)","FY2022, FY2021"
+FM211,Cost of Natural Gas Sold,$1.0B,FY2021
+FM212,"Cost of Purchased Power, Net",$2.9B,FY2021
+FM213,Cost of Sales,"$272,344M",FY2021
+FM214,Costs Authorized for Recovery,$856M,FY2022
+FM215,Credit Losses,$606M,FY2020
+FM216,Cumulative Amount Designated for Credit Activities,$3.8B,FY2022
+FM217,Cumulative Unpaid Preferred Stock Dividends,$59.1M,FY2022
+FM218,Current Assets,"$295,873",FY2022
+FM219,Current Assets - Wildfire Fund Asset,$460M,FY2022
+FM220,Current Authorized Recovery Amount,$856M,FY2022
+FM221,Current Liabilities,"$1,453,145",FY2022
+FM222,Current Taxes,"$9,981M",FY2021
+FM223,Customer Credit Trust Cash Contribution,$1.0B,FY2024
+FM224,Customer Credit Trust Investment Purchase,$1.0B,FY2022
+FM225,Customer Natural Gas Use Emissions,"41,563,483 metric tons CO2e",FY2021
+FM226,Customer Savings Share,80% of savings below 99% of benchmark,Annual
+FM227,Customer Support and Operations,"$1,778M",FY2020
+FM228,Customer Support and Operations Cost Increase,$45M (2%),FY2022 vs FY2021
+FM229,Customers with Battery Storage Installed,">50,000",FY2022
+FM230,Cybersecurity workforce recruitment goal,"250,000 people",by 2025
+FM231,DART Rate,0.67,FY2022
+FM232,DOE Civil Nuclear Credit Program Funding,up to $1.1B,FY2022
+FM233,DOE Conditional Funding,$1.1B,FY2022
+FM234,DOE Funding,up to $1.1B,2022-2023
+FM235,DWR Loan Agreement,up to $1.4B,FY2022
+FM236,DWR Loan Authorization,up to $1.4B,FY2022
+FM237,DWR Support Contract Authorization,$75M,FY2022
+FM238,Data Center Revenue,$15.01B,FY2023
+FM239,Debt Investment Total Adjusted Cost Basis,$99.9B,FY2023
+FM240,Debt Investment Total Estimated Fair Value,"$95,332M",FY2023
+FM241,Debt Reduction Goal,>=$2.0B,by end of 2026
+FM242,Debt Repayment Due,$1.25B,FY2024
+FM243,Decrease in Net Repayments of Short-Term Debt,$850M decrease,FY2022
+FM244,Deemed Repatriation Tax Payable,$22.0B,FY2023
+FM245,Deemed Repatriation Tax Payable Within 12 Months,$6.5B,FY2023
+FM246,Deferral of Revenue,$123.935B,FY2023
+FM247,Deferred Income Tax Assets,$23.571B,FY2022
+FM248,"Deferred Income Tax Assets, Net of Valuation Allowance",$22.559B,FY2022
+FM249,Deferred Income Tax Liabilities,$9.274B,FY2022
+FM250,Deferred Taxes,-$150M,FY2021
+FM251,Depletion Expenses,reclassified to conform current period standards,current reporting period
+FM252,Depreciation Expense,$9.3B,FY2021
+FM253,Depreciation and Amortization,$1.2B,FY2020
+FM254,Depreciation and amortization,$1.3B,FY2022
+FM255,"Depreciation, Amortization, and Decommissioning",+$453M (13%),FY2022
+FM256,Derivative Assets,$356.0M,FY2022
+FM257,Derivative Assets - Equity Contracts (Not Designated),$5M,FY2022
+FM258,Derivative Assets - Foreign Exchange Contracts (Designated),$0M,FY2022
+FM259,Derivative Assets - Foreign Exchange Contracts (Not Designated),$333M,FY2022
+FM260,Derivative Assets - Interest Rate Contracts (Designated),$3M,FY2022
+FM261,Derivative Assets - Other Contracts (Not Designated),$15M,FY2022
+FM262,Derivative Liabilities,$551.0M,FY2022
+FM263,Derivative Liabilities - Equity Contracts (Not Designated),-$95M,FY2022
+FM264,Derivative Liabilities - Foreign Exchange Contracts (Designated),-$77M,FY2022
+FM265,Derivative Liabilities - Foreign Exchange Contracts (Not Designated),-$362M,FY2022
+FM266,Derivative Liabilities - Other Contracts (Not Designated),-$17M,FY2022
+FM267,Derivatives Accumulated OCI Balance,-$27M,FY2023
+FM268,Derivatives Net,$8M,FY2023
+FM269,"Derivatives, Net",$6M,FY2023
+FM270,Diablo Canyon Average Capacity Factor,84%,FY2021
+FM271,Diluted EPS,$8.05,FY2021
+FM272,Diluted Earnings Per Share,$9.68,FY2023
+FM273,Direct Channel Net Sales Share,37%,FY2023
+FM274,Discount Rate Sensitivity - Increase in Accumulated Benefit Obligation,$81M,FY2022
+FM275,Discount Rate Sensitivity - Increase in Other Postretirement Benefit Costs,$11M,FY2022
+FM276,Discount Rate Sensitivity - Increase in Pension Costs,$5M,FY2022
+FM277,Discount Rate Sensitivity - Increase in Projected Benefit Obligation,"$1,038M",FY2022
+FM278,Dividends and Dividend Equivalents Paid,$15.0B,FY2023
+FM279,Drawn Down Under Paidy Credit Agreement,¥64.3B (~$491M),FY2022
+FM280,ESPP Shares Purchased,8M shares at $207.88 avg. price,FY2021
+FM281,Earnings per share increase from change in useful life estimate,$0.40,FY2023
+FM282,Effective Income Tax Rate,-2%,FY2021
+FM283,Effective Tax Rate,17.0%,FY2015
+FM284,Electric Generation and Distribution Revenue Requirement Decrease,~$23M,FY2023
+FM285,Electric Operating Revenues,"$15.1B (2022), $15.1B (2021)","FY2022, FY2021"
+FM286,Electric Operating Revenues - Total Utility,$15.131B,FY2021
+FM287,Employee Severance Expenses,$800M,Q2 FY2023
+FM288,Employer-Funded Retirement Benefits,$1.2B,FY2021
+FM289,Energy Procurement Credit Exposure,$570M,FY2021
+FM290,Energy Resource Recovery Account,,Annual
+FM291,Energy Storage Procurement Requirement,580 MW,End of 2020
+FM292,Equipment Acquired Under Finance Leases,-$299M,FY2022
+FM293,Equity Contracts Purchased (Not Designated),"$1,131M",FY2022
+FM294,Equity Contracts Sold (Not Designated),$0M,FY2022
+FM295,Equity Investments (Level 1),$10.1B,FY2023
+FM296,Equity Investments (Other),$7.2B,FY2023
+FM297,Equity Investments in Publicly Traded Companies,$5.0B,FY2022
+FM298,Equity Investments without Readily Determinable Fair Values,$3.8B,FY2022
+FM299,Equity and Equity Warrant Investments,$7.2B,FY2022
+FM300,Estimated Capital Expenditures,$7.9B to $11.2B,FY2023
+FM301,Estimated Fair Value of Long-term Debt,$50.9B,FY2022
+FM302,Estimated Future Amortization Expense,$652M,FY2028
+FM303,Estimated Reduction in Annualized Employee-Related Costs,$265M,FY2022
+FM304,Europe Net Sales,$94.3B,FY2023
+FM305,European Customer Balances Designated Percentage,37%,FY2022
+FM306,Excluded rate base capital spending,$696M,FY2011-FY2014
+FM307,Expected Net Sales Q1 2023,$121.0B - $126.0B,Q1 FY2023
+FM308,Fair Value of Stock Awards Vested,$13.4B,FY2021
+FM309,Fatalities,3,FY2022
+FM310,Favorable Impact to Net Revenues (exclusive of hedging),$440M,FY2021
+FM311,Federal Capital Loss Carryforwards,$456M,FY2023
+FM312,Federal Net Operating Loss Carryforwards,$509M,FY2023
+FM313,Federal Statutory Income Tax Rate,21.0%,FY2022
+FM314,Finance Lease Weighted Average Discount Rate,3.4%,FY2023
+FM315,Finance Lease Weighted Average Remaining Lease Term,11 years,FY2023
+FM316,Financial Results Impact from Disruptions,,ongoing
+FM317,"Financing Receivables, Net",$4.1B,FY2022
+FM318,Finished Goods,"$2,516.0M",FY2022
+FM319,Fire Risk Mitigation Capital Expenditures Allocation,$3.21B,AB 1054
+FM320,Fire Risk Mitigation Capital Expenditures Excluded from Equity Rate Base,$3.2B,FY2022
+FM321,Fire Risk Mitigation Capital Expenditures Exclusion (AB 1054),$5.0B,FY2022
+FM322,Fire Risk Mitigation Capital Expenditures Securitization,$1.4B,FY2022
+FM323,Fire Risk Mitigation Securitization Application,$1.7B,"March 11, 2022"
+FM324,Fire Victim Trust Share Sales,"230,000,000 shares",FY2022
+FM325,Fire Victim Trust payment,$758M,FY2021
+FM326,First Mortgage Bonds 3.25%,$1.0B at 3.25%,due 2024
+FM327,First Mortgage Bonds 4.20% due 2029,$400M,FY2022
+FM328,First Mortgage Bonds 4.40% due 2032,$450M,FY2022
+FM329,First Mortgage Bonds 4.950% due 2025,$450M,FY2022
+FM330,First Mortgage Bonds 5.25% due 2052,$550M,FY2022
+FM331,First Mortgage Bonds 5.450% due 2027,$450M,FY2022
+FM332,First Mortgage Bonds 5.90% due 2032,$600M,FY2022
+FM333,First Mortgage Bonds 6.150% due 2033,$750M,FY2023
+FM334,First Mortgage Bonds 6.750% due 2053,$750M,FY2023
+FM335,Fixed Lease Payment Obligations,$15.8B,FY2023
+FM336,Fixed Payment per Unit per Year,$50M per unit per year (2022 dollars),Extended operations period
+FM337,Fixed Rate Debt,$9.0B,FY2021
+FM338,Fixed Rate Debt Outstanding,$10.4B,FY2022
+FM339,Forecasted Capital Expenditures,$8.1B - $13.8B,FY2027
+FM340,Forecasted Network Transmission Rate Base,$6.7B,FY2017
+FM341,Foreign Currency Exchange Rate Impact on Cash,+$169M,FY2020
+FM342,Foreign Currency Impact on International Net Sales,-$15.0B,FY2022
+FM343,Foreign Exchange Contracts Purchased (Designated as Hedging),$635M,FY2022
+FM344,Foreign Exchange Contracts Purchased (Not Designated),"$10,322M",FY2022
+FM345,Foreign Exchange Contracts Sold (Not Designated),"$21,606M",FY2022
+FM346,Foreign Exchange Rate Impact,~210 bps unfavorable,Q1 FY2023
+FM347,Foreign Exchange Rate Impact on Cost of Sales,-$10.8B,FY2022
+FM348,Foreign Exchange Rate Impact on Fulfillment Costs,-$2.5B,FY2022
+FM349,Foreign Exchange Rate Impact on Net Sales,-$15.5B,FY2022
+FM350,Foreign Funds Balance,$18.3B,FY2022
+FM351,Foreign Government Bonds,$475M,FY2023
+FM352,Foreign Income Before Tax Generated by Ireland Operating Center,81.0%,FY2023
+FM353,Foreign Income Before Tax Generated by Ireland and Puerto Rico Operating Centers,82%,FY2021
+FM354,Foreign Net Operating Loss Carryforwards,$2.3B,FY2023
+FM355,Fossil Fuel-Fired Plants Emissions,"2,485,379 metric tons CO2e",FY2021
+FM356,Free Cash Flow,-$12.786B,FY2021
+FM357,Free Cash Flow Less Principal Repayments of Finance Leases and Financing Obligations,-$19.758B,FY2022
+FM358,Fuel Used in Own Generation Facilities,$349M,FY2021
+FM359,Fulfillment Expense,"$75,111M",FY2021
+FM360,Full-time Equivalent Employees,"~161,000",FY2023
+FM361,Full-time and Part-time Employees,"1,541,000",FY2023
+FM362,Funds Receivable and Customer Accounts,$36.1B,FY2021
+FM363,GHG-Free Resources Percentage,96%,FY2022
+FM364,Gaming Revenue,$9.07B,FY2023
+FM365,Gas Distribution Revenue Requirement Decrease,~$10M,FY2023
+FM366,Gas Operations SIF-A Incidents,2,FY2022
+FM367,Gas Transmission and Storage Capital Expenditures,$129M,FY2015-FY2021
+FM368,Gas Transmission and Storage Recorded Expenses,$206M,FY2015-FY2021
+FM369,Gas Transmission and Storage Revenue Decrease,~$7M,FY2023
+FM370,General and Administrative,$2.1B,FY2020
+FM371,General and Administrative Expense,$8.823B,FY2021
+FM372,General and Administrative Expense Decrease,$15M (1%),FY2022 vs FY2021
+FM373,Goodwill - Intelligent Cloud,"$30,469.0M",FY2023
+FM374,Goodwill - More Personal Computing,"$12,642.0M",FY2023
+FM375,Goodwill - Productivity and Business Processes,"$24,775.0M",FY2023
+FM376,Goodwill - Total,"$49,711.0M",FY2021
+FM377,Goodwill Allocated - ZeniMax,"$5,510M",FY2021
+FM378,Graphics Revenue,$15.9B,FY2022
+FM379,Greater China Net Sales,$72.6B,FY2023
+FM380,Gross Derivative Assets Subject to Netting Agreements,$343.0M,FY2022
+FM381,Gross Derivative Liabilities Subject to Netting Agreements,$550.0M,FY2022
+FM382,Gross Margin,64.9%,FY2022
+FM383,Gross Margin Unfavorable Impact,0.9%,FY2022
+FM384,Gross Unrecognized Tax Benefits,$14.6B,FY2021
+FM385,Health Care Cost Trend Rate,6.5%,FY2023
+FM386,Health Care Cost Trend Rate Sensitivity - Increase in Accumulated Benefit Obligation,$38M,FY2022
+FM387,Health Care Cost Trend Rate Sensitivity - Increase in Other Postretirement Benefit Costs,$8M,FY2022
+FM388,Hedging Impact to Net Revenues,-$190M,FY2021
+FM389,Hydroelectric Net Operating Capacity,"3,857 MW",FY2022
+FM390,Hypothetical Fair Value Decrease (100bps increase),$272M,FY2021
+FM391,IRS Audit Settlement Payment,$1.7B,FY2021 Q2
+FM392,Incentive Revenue Cap,1.5% of total natural gas commodity costs,Annual
+FM393,Income Attributable to Common Stock,"$2.2B (2022), $124M (2021)","FY2022, FY2021"
+FM394,Income Before Income Taxes,"$1,020M (2022), $1,038M (2021)","FY2022, FY2021"
+FM395,Income Tax Benefit,$187M,FY2023
+FM396,Income Tax Benefit Increase,$2.1B,FY2022 vs FY2021
+FM397,Income Tax Expense,$189M,FY2022
+FM398,Income Tax Expense Sensitivity,$34M increase per 1% tax rate increase,FY2022
+FM399,Income Taxes Paid,$13.4B,FY2021
+FM400,Income from Operations,$5.4B,Q4 2015
+FM401,Income from Operations Margin,37.3%,FY2022
+FM402,Income tax benefits related to stock-based compensation,"$1,065M",FY2021
+FM403,Indirect Channel Net Sales Share,63%,FY2023
+FM404,Initial Shareholder Contribution,$2.0B,2022-2024
+FM405,Initial Wildfire Fund Contribution,~$4.8B,Emergence Date
+FM406,Insurance Receivable - 2019 Kincade Fire,$430M,FY2022
+FM407,Insurance Receivable - 2020 Zogg Fire,$370M,FY2022
+FM408,Insurance Receivable - 2021 Dixie Fire,$530M,FY2022
+FM409,Insurance Receivable - 2022 Mosquito Fire,$45M,FY2022
+FM410,Intangible Assets Acquired - ZeniMax Total,"$1,968M",FY2021
+FM411,Intangible Assets Amortization Expense,$1.6B,FY2021
+FM412,Intelligent Cloud Operating Income,"$26,471M",FY2021
+FM413,Intelligent Cloud Revenue,"$59,728M",FY2021
+FM414,Intent to Stay Score,78%,FY2022
+FM415,Intercompany Note Payable,$145M,FY2021
+FM416,Interest Expense,$236M,FY2022
+FM417,Interest Income,$29M,FY2022
+FM418,Interest Rate Contracts Purchased (Designated as Hedging),"$1,139M",FY2022
+FM419,Interest and Dividends Income,"$2,131M",FY2021
+FM420,Interest and Finance Charges,"$236,748",FY2022
+FM421,Interest and Penalties on Tax Benefits,$95M,FY2023
+FM422,International Net Revenues Share,49%,FY2020
+FM423,International Net Sales,"$127,787M",FY2021
+FM424,International Operating Loss,-$924M,FY2021
+FM425,International Revenue Share,84%,FY2022
+FM426,International Sales Growth,-8%,FY2022
+FM427,International Segment Net Sales Change,-$15.0B,FY2022
+FM428,International Segment Net Sales Share,23%,FY2022
+FM429,Inventory Charges,$2.17B,FY2023
+FM430,Inventory Provisions,$354M,FY2022
+FM431,Inventory Valuation Allowance Sensitivity,$390M additional cost of sales per 1% increase in inventory valuation allowance,FY2022
+FM432,Investment Portfolio Decline in Fair Value (Hypothetical 100bps increase),$4.0B,FY2022
+FM433,Investment Portfolio Fair Value Sensitivity,$17M per +/- 0.5% yield curve shift,FY2023
+FM434,Investment in Inclusion,$150M,by 2025
+FM435,Investments Accumulated OCI Balance,"-$2,138M",FY2023
+FM436,Japan Net Sales,$24.3B,FY2023
+FM437,Largest Individual Supplier Share,~47%,FY2022
+FM438,Liquidated Damages Balancing Account (LDBA),$300M,FY2022-FY2023
+FM439,Long-Term Debt,$42.0B,FY2023
+FM440,Long-Term Debt Payments Increase,$5.9B increase,FY2022 vs FY2021
+FM441,Long-Term RA Agreements Energy Storage Capacity,"1,598.7 MW",2023-2024
+FM442,Long-Term Regulatory Account Costs,$5.3B,FY2022
+FM443,Long-term Accounts Receivable,$3.8B,FY2022
+FM444,Long-term Debt,$67.1B,FY2022
+FM445,Long-term Debt Cost (2022),4.17%,FY2022
+FM446,Long-term Debt Cost (2023),4.31%,FY2023
+FM447,Long-term Debt Face Value,$70.5B,FY2022
+FM448,Long-term Debt Obligations,"$15,053M",FY2022
+FM449,Long-term Lease Liabilities,$73.0B,FY2022
+FM450,Loss Per Share,$0.00,FY2023
+FM451,Mac Net Sales,$29.4B,FY2023
+FM452,Manufacturing Purchase Obligations,$53.1B,FY2023
+FM453,Manufacturing Purchase Obligations Payable Within 12 Months,$52.9B,FY2023
+FM454,Marketable Equity Securities Valuation Gain (Loss) - Rivian,-$12.7B,FY2022
+FM455,Marketable Securities,"$19,218M","January 30, 2022"
+FM456,Maturities and Sales of Investments,$30.9B,FY2020
+FM457,"Maximum One-Day Loss in Fair Value (VAR, 95% confidence)",$1.0B,FY2022
+FM458,Merchant Active Accounts,35M,FY2022
+FM459,Merchant Loans Net Charge-Off Rate,4.7%,FY2021
+FM460,Merchant Loans Year-over-Year Growth,48%,FY2022
+FM461,"Merchant Loans, Advances, and Interest and Fees Receivable",$1.4B,FY2021
+FM462,Microsoft Cloud Revenue,$69.1B,FY2021
+FM463,Miles Undergrounded,180 miles,FY2022
+FM464,Military Veterans Employees Percentage,7%,FY2022
+FM465,Minimum Liquidity Requirement,$1.0B,FY2023
+FM466,Minority Employees Percentage,49%,FY2022
+FM467,Mission-driven banks program,$100M,FY2023
+FM468,Money Market Funds,"$27,899M",FY2022
+FM469,More Personal Computing Operating Income,"$19,094M",FY2021
+FM470,More Personal Computing Revenue,"$54,445M",FY2021
+FM471,Mortgage- and Asset-Backed Securities,$786M,FY2023
+FM472,Municipal Securities,$355M,FY2023
+FM473,NOx Emissions Rate,0.01 lbs/MWh,FY2021
+FM474,Natural Gas Compressor Stations and Storage Facilities Emissions,"322,047 metric tons CO2e",FY2021
+FM475,Natural Gas Operating Revenues,"$6.6B (2022), $5.5B (2021)","FY2022, FY2021"
+FM476,Natural Gas Operating Revenues - Total Utility,$5.511B,FY2021
+FM477,Natural Gas Purchase Cost Tolerance Band,99% to 102% of commodity benchmark,12-month fixed period
+FM478,Natural Gas Purchased,"296,000 MMcf",FY2022
+FM479,Net Carrying Amount of Debt,$10.953B,FY2023
+FM480,Net Cash Generated from Financing Activities,$12.5B,FY2020
+FM481,Net Cash Provided by Financing Activities,$1.865B,FY2022
+FM482,Net Cash Provided by Financing Activities Increase,$2.5B increase,FY2022 vs FY2021
+FM483,Net Cash Provided by Investing Activities,$7.375B,FY2023
+FM484,Net Cash Provided by Operating Activities,$6.219B,FY2020
+FM485,Net Cash Used in Financing Activities,$557M,FY2021
+FM486,Net Cash Used in Investing Activities,$16.5B,FY2020
+FM487,Net Cash Used in Investing Activities Increase,$3.0B increase,FY2022 vs FY2021
+FM488,Net Cash from Operating Activities,$6.2B,FY2020
+FM489,Net Charge-offs,$310M,FY2020
+FM490,Net Credit Exposure to Wholesale Customers >10%,$63M,FY2021
+FM491,Net Deferred Income Tax Assets,$13.285B,FY2022
+FM492,Net Derivative Assets,$226.0M,FY2022
+FM493,Net Derivative Liabilities,$493.0M,FY2022
+FM494,Net Favorable Impact to Operating Income,$5M to $69M,Current reporting period
+FM495,Net Favorable Impact to Operating Income from FX,$69M,FY2021
+FM496,Net Gains (Losses) on Derivatives,$17M,FY2021
+FM497,Net Gains (Losses) on Foreign Currency Remeasurements,$54M,FY2021
+FM498,Net Income,21.9%,FY2015
+FM499,Net Income (Loss),$4.20B,FY2020
+FM500,Net Income (Loss) Available for Common Shareholders - Consolidated Total,-$102M,FY2021
+FM501,Net Income - Utility,$124M,FY2021
+FM502,Net Income Available for Common Shareholders,"$61,271M",FY2021
+FM503,Net Income Change,"-$1.8B, -42%",FY2022
+FM504,Net Income Margin,36.2%,FY2022
+FM505,Net Income Per Diluted Share,$2.09,FY2022
+FM506,Net Income Tax Benefit from India Supreme Court Decision,$620M,Q3 FY2021
+FM507,Net Income Tax Benefit from Intangible Property Transfer,$3.3B,Q1 FY2022
+FM508,Net Income per Diluted Share,$1.74,FY2023
+FM509,Net Loss,$1.77M,FY2023
+FM510,Net Loss - PG&E Corporation,-$226M,FY2021
+FM511,Net Negative Impact on Income Before Income Taxes (Foreign Currency),~-$29M,FY2022
+FM512,Net Operating Loss Carryforward (U.S. Federal),$26.6B,FY2022
+FM513,Net Plant Investment Per Customer,"$3,794",FY2020
+FM514,Net Positive Impact on Income Before Income Taxes (Foreign Currency),~$7M,FY2021
+FM515,Net Recognized Gains on Investments,"$1,232M",FY2021
+FM516,Net Revenues,$21.45B,FY2020
+FM517,Net Revenues Growth,"$2.1B, +8%",FY2022
+FM518,Net Revenues from EU,17%,FY2022
+FM519,Net Revenues from U.K.,8%,FY2022
+FM520,Net Sales,"$513,983M",FY2022
+FM521,Net cash from investing activities,-$16.545B,FY2020
+FM522,Net cash from operations,"$87,582M",FY2023
+FM523,Net cash provided by financing activities,"$4,379M",FY2021
+FM524,Net cash used in financing,"-$43,935M",FY2023
+FM525,Net cash used in investing,"-$22,680M",FY2023
+FM526,Net cash used in investing activities,"-$23,711M",FY2015
+FM527,"Net change in cash, cash equivalents, and restricted cash",-$223M,FY2021
+FM528,Net income,"$72,361M",FY2023
+FM529,Net income increase from change in useful life estimate,$3.0B,FY2023
+FM530,Net increase (decrease) in Cash During Year,"-$1,946,691",FY2022
+FM531,"Net increase (decrease) in cash, cash equivalents, and restricted cash",$2.297B,FY2020
+FM532,Non-Current Assets - Wildfire Fund Asset,$4.8B,FY2022
+FM533,Non-GAAP Core Earnings Threshold for Dividends,$6.2B,Post-Emergence Date
+FM534,Non-GAAP Core Earnings threshold for dividend payments,$6.2B,Post-Emergence
+FM535,Non-fuel Operating and Maintenance Cost Reduction Target,2% per year,Ongoing
+FM536,North America Net Sales,"$279,833M",FY2021
+FM537,North America Operating Income,"$7,271M",FY2021
+FM538,North America Operating Income (Loss),"-$2,847M",FY2022
+FM539,Notes Repurchased and Redeemed,$1.6B,May 2022
+FM540,Nuance Acquisition Purchase Price,$18.8B,"March 4, 2022"
+FM541,Nuance Communications Acquisition Cost,$18.8B,March 2022
+FM542,Nuance Goodwill,"$16,326.0M","March 4, 2022"
+FM543,Nuance Intangible Assets,"$4,365.0M","March 4, 2022"
+FM544,Nuclear Net Operating Capacity - Diablo Canyon,"2,240 MW",FY2022
+FM545,Number of Payment Transactions,19.3B,FY2021
+FM546,Number of Payment Transactions per Active Account,45.4,FY2021
+FM547,Office products and cloud services Revenue,$48.7B,FY2023
+FM548,Operating Expenses,"$3,870,118",FY2022
+FM549,Operating Income,$3.3B,FY2020
+FM550,Operating Income Change,"-$425M, -10%",FY2022
+FM551,Operating Income Guidance,$0 - $4.0B,Q1 FY2023
+FM552,Operating Income Increase (Projected),$133M,FY2024
+FM553,Operating Income Increase from Change in Accounting Estimate,$133M,FY2024
+FM554,Operating Lease Cost,"$2,127M",FY2021
+FM555,Operating Lease Right-of-Use Assets,"$13,148M",FY2022
+FM556,Operating Lease Weighted Average Discount Rate,2.9%,FY2023
+FM557,Operating Lease Weighted Average Remaining Lease Term,8 years,FY2023
+FM558,Operating Leases Obligations,$790M,FY2022
+FM559,Operating Margin,17%,FY2021
+FM560,Operating Revenues,"$719,998",FY2022
+FM561,Operating and Maintenance,"$9.7B (2022), $10.2B (2021)","FY2022, FY2021"
+FM562,Operating income,$3.8B,FY2022
+FM563,Operating income increase from change in useful life estimate,$3.7B,FY2023
+FM564,Other Contracts Purchased (Not Designated),"$1,642M",FY2022
+FM565,Other Contracts Sold (Not Designated),$544M,FY2022
+FM566,Other Current Liabilities - Wildfire Fund,$193M,FY2022
+FM567,"Other Income (Expense), Net",$496M,FY2013
+FM568,"Other Income, Net","$595M (2022), $512M (2021)","FY2022, FY2021"
+FM569,Other Non-Current Liabilities - Wildfire Fund,$935M,FY2022
+FM570,"Other Operating Expense (Income), Net",$1.3B,FY2022
+FM571,Other Purchase Obligations,$21.9B,FY2023
+FM572,Other Purchase Obligations Payable Within 12 Months,$5.6B,FY2023
+FM573,Other Receivables (Server Components),$6.1B,FY2022
+FM574,Outstanding Credit Facilities Borrowings,¥11.3B (~$98M),FY2021
+FM575,Outstanding Fixed-Rate Notes Principal,$106.6B,FY2023
+FM576,Outstanding Indebtedness - PG&E Corporation,$4.68B,FY2022
+FM577,Outstanding Indebtedness - Utility,$45.6B,FY2022
+FM578,Outstanding Preferred Stock Aggregate Liquidation Preference - Utility,$252M,FY2022
+FM579,Overall Emissions Decline,-0.5%,FY2022
+FM580,PG&E Corporation Cash,$125M,FY2022
+FM581,Paidy Credit Agreement Borrowing Capacity,¥90.0B (~$686M),FY2022
+FM582,Paidy Credit Agreement Drawdown,¥64.3B (~$491M),FY2022
+FM583,Pay Equity - Racial and Ethnic Minorities vs White (U.S.),$1.008 per $1.000,FY2022
+FM584,Pay Equity - Women vs Men (Outside U.S.),$1.002 per $1.000,FY2022
+FM585,Pay Equity - Women vs Men (U.S.),$1.007 per $1.000,FY2022
+FM586,Paycheck Protection Program Loan Servicing Revenue,$157M,FY2021
+FM587,Percent of Consumer Loans Current,97.0%,FY2021
+FM588,Percent of Merchant Loans Current,91.8%,FY2021
+FM589,Performance-Based Disbursement,$7/MWh,Prior to extended operations
+FM590,Permanently disallowed capital spending,$120M,2011 to 2014
+FM591,Potential Maximum Undiscounted Future Environmental Costs,$2.3B,Future Estimate
+FM592,Pre-tax Impact on Net Income from 1% Interest Rate Change,$76M,FY2021
+FM593,Preferred Stock Component,0.5%,FY2020
+FM594,Preferred Stock Cost,5.52%,FY2022-FY2023
+FM595,Preferred Stock Dividends Declared,$3.5M,FY2022
+FM596,Preferred Stock Dividends Paid on Redeemable Preferred Stock,$11M,FY2022
+FM597,Principal Repayment of Loans Receivable,$6.4B,FY2020
+FM598,Principal Repayments of All Other Finance Leases,-$670M,FY2022
+FM599,Principal Repayments of Finance Leases,-$7.941B,FY2022
+FM600,Principal Repayments of Financing Obligations,-$248M,FY2022
+FM601,Principal and Interest Coverage Ratio,9%,FY2021
+FM602,Proceeds from Financing Activities,$4.88M,FY2022
+FM603,Product Revenue,$64.7B,FY2023
+FM604,Productivity and Business Processes Operating Income,"$24,351M",FY2021
+FM605,Productivity and Business Processes Revenue,"$53,915M",FY2021
+FM606,Products Gross Margin,$108.8B,FY2023
+FM607,Products Gross Margin Percentage,36.5%,FY2023
+FM608,Professional Visualization Revenue,$1.54B,FY2023
+FM609,Professional Visualization Revenue Growth,-27.0%,FY2023
+FM610,"Property and Equipment, Net",$74.4B,FY2022
+FM611,"Property and Equipment, Net (Finance Leases)","$15,891M",FY2023
+FM612,Property and equipment acquired under finance leases,$675M,FY2022
+FM613,Proposed Revenue Requirement (GT&S Second Track),$241M,FY2023
+FM614,Provision (Benefit) for Income Taxes,-$3.2B,FY2022
+FM615,Provision for Transaction and Credit Losses,$1.7B,FY2020
+FM616,Provision for transaction and credit losses,$1.6B,FY2022
+FM617,Purchase Obligations,"$2,331M",FY2022
+FM618,Purchases and Originations of Loans Receivable,$6.1B,FY2020
+FM619,Purchases of Investments,$41.5B,FY2020
+FM620,Purchases of Property and Equipment,$866M,FY2020
+FM621,Quarterly Cash Dividend Per Share,$0.24,FY2023
+FM622,Quarterly Cash Dividends,$398M,FY2023
+FM623,ROE incentive adder refund obligation (TO16),$1M,TO16
+FM624,ROE incentive adder refund obligation (TO17),$8.5M,TO17
+FM625,RPS-Eligible Small Hydroelectric % of Customer Retail Sales,2%,FY2022
+FM626,Rate of Compensation Increase Sensitivity - Increase in Pension Costs,$44M,FY2022
+FM627,Rate of Compensation Increase Sensitivity - Increase in Projected Benefit Obligation,$207M,FY2022
+FM628,Rate of Return Sensitivity - Increase in Other Postretirement Benefit Costs,$15M,FY2022
+FM629,Rate of Return Sensitivity - Increase in Pension Costs,$108M,FY2022
+FM630,Raw Materials,"$1,144.0M",FY2022
+FM631,Receivables Securitization Program Facility Limit,$1.5B,FY2022
+FM632,Recognition of Unearned Revenue,-$118.530B,FY2023
+FM633,Recorded capital expenditures,$512M,2015 to 2022
+FM634,Regulatory Assets,$20.0B,FY2022
+FM635,Regulatory Assets Recorded,$258M,FY2022
+FM636,Regulatory Liabilities,$20.4B,FY2022
+FM637,Regulatory Liabilities Increase (Common Plant Allocation),$416M,2017 to 2022
+FM638,Regulatory Liability Increase for TO18 Refund,$30M,FY2022
+FM639,Regulatory Liability Increase for TO19 Refund,$32M,Q1 2022
+FM640,Regulatory Recovery Receivable - 2021 Dixie Fire,$503M,FY2022
+FM641,Regulatory Recovery Receivable - 2022 Mosquito Fire,$60M,FY2022
+FM642,Remaining Share Repurchase Authorization,$7.23B,FY2023
+FM643,Remaining Stock Repurchase Availability (July 2018 Program),$861M,FY2022
+FM644,Remaining Stock Repurchase Availability (June 2022 Program),$15.0B,FY2022
+FM645,Renewable Procurement as % of Total Annual Retail Sales,40%,FY2022
+FM646,Repayments of Borrowings under Financing Arrangements,$1.7B,FY2022
+FM647,Requested Additional Storage Capacity,"1,600 MW",Summer 2024
+FM648,Requested Revenue Requirement,$17.43B,FY2026
+FM649,Requested Weighted-Average GRC Rate Base,$63.68B,FY2026
+FM650,Research and Development,$27.2B,FY2023
+FM651,Research and Development Expense,$1.4B,FY2020
+FM652,Research and Development Expenses,"$12,282M",FY2015
+FM653,Research and Development Investment,>$37.0B,since inception
+FM654,Reserve Build (Release),$296M,FY2020
+FM655,Residential Customer Under-collections (RUBA),$126M,FY2020–FY2022
+FM656,Residential Revenue,"$5,523M",FY2020
+FM657,Rest of Asia Pacific Net Sales,$29.6B,FY2023
+FM658,"Restricted cash, cash equivalents, and marketable securities",$365M,FY2022
+FM659,Restructuring Charges,$27M,FY2021
+FM660,Restructuring and Other Charges,$139M,FY2020
+FM661,Restructuring and Other Charges Increase,$145M,FY2022 vs FY2021
+FM662,Resulting ROE with Incentive Component,9.76%,FY2022
+FM663,Retail Electric Transmission Revenue Requirement,$1.33B,FY2016
+FM664,Retained Earnings,"$118,848M",FY2023
+FM665,Return on Equity (ROE),10.25%,FY2020-FY2022
+FM666,Return on Equity (ROE) 2023,10.0%,FY2023
+FM667,Return on Equity (ROE) Requested,10.9%,FY2017
+FM668,Revenue,$21.3B,Q4 2015
+FM669,Revenue Allocated to Remaining Performance Obligations,$229B,FY2023
+FM670,Revenue Requirement 2022 (as adopted),$12.21B,FY2022
+FM671,Revenue from International Sales,69%,FY2023
+FM672,Revenue recovery application,$416M,2015 to 2022
+FM673,Revenues amortized over 12 months,$43M,FY2022
+FM674,Revenues amortized over 60 months,$313M,2015 to 2021
+FM675,Revenues from Other Value Added Services Growth,"$343M, +17%",FY2022
+FM676,Revolving Credit Facilities,~$5.2B,FY2021
+FM677,Revolving Credit Facilities Availability,$2.2B,FY2022
+FM678,Revolving Credit Facility - PG&E Corporation,$500M,FY2022
+FM679,Revolving Credit Facility - Utility,$1.5B,FY2022
+FM680,SB 901 Recovery Bonds Issuance,$7.5B,FY2022
+FM681,SB 901 Regulatory Asset,$5.4B,FY2022
+FM682,"SB 901 Securitization Charges, Net",+$608M (100%),FY2022
+FM683,SIF-A Incidents,7,FY2022
+FM684,SIF-P Rate,0.11,FY2022
+FM685,SO2 Emissions Rate,0.001 lbs/MWh,FY2021
+FM686,Sales and Marketing,$1.9B,FY2020
+FM687,Sales and Marketing Employees,"19,082",FY2015
+FM688,Sales and Marketing Expense,"$32,551M",FY2021
+FM689,Sales and Marketing Expense Decrease,$188M (8%),FY2022 vs FY2021
+FM690,Sales of Previously Written-Off Inventory,$111M,FY2022
+FM691,"Sales, General and Administrative Expenses","$2,166M",FY2022
+FM692,Scope 1 and 2 GHG Emissions,4.6M metric tons CO2e,FY2021
+FM693,Scope 3 GHG Emissions,42.0 MMT CO2e,FY2021
+FM694,Second Track Settlement Capital Expenditures,$127M,FY2023
+FM695,Second Track Settlement Expense,$183M,FY2023
+FM696,Secured Term Loan Agreement - PG&E Corporation,$2.75B,FY2020
+FM697,Self-Insurance Cap,$1.0B,ongoing
+FM698,Self-Insurance Deductible Cap,$50M,annual
+FM699,Self-Insurance Funding Rate,$400M,FY2023
+FM700,"Selling, General and Administrative Expense",$22.0B,FY2021
+FM701,Senior Notes Outstanding,$11.0B,FY2023
+FM702,Senior Secured Notes Due 2028 - PG&E Corporation,$1.0B,FY2022
+FM703,Senior Secured Notes Due 2030 - PG&E Corporation,$1.0B,FY2022
+FM704,Senior Secured Recovery Bonds Issuance,$860M,"November 12, 2021"
+FM705,Series 2022-A Recovery Bonds,$3.6B,2022-05-10
+FM706,Series 2022-A Senior Secured Recovery Bonds,$983M,FY2022
+FM707,Series 2022-A Tranche 1,~$215M at 5.045%,"due July 15, 2034"
+FM708,Series 2022-A Tranche 2,~$200M at 5.256%,"due January 15, 2040"
+FM709,Series 2022-A Tranche 3,~$568M at 5.536%,"due July 15, 2049"
+FM710,Series 2022-B Recovery Bonds,$3.9B,2022-07-20
+FM711,Serious Injuries,4,FY2022
+FM712,Server products and cloud services Revenue,"$79,970M",FY2023
+FM713,Service and Other Revenue,$147.2B,FY2023
+FM714,Services Gross Margin,$60.3B,FY2023
+FM715,Services Gross Margin Percentage,70.8%,FY2023
+FM716,Services Net Sales,$85.2B,FY2023
+FM717,Share Repurchase,$76.6B,FY2023
+FM718,Share Repurchase Program Authorization,$60.0B,FY2022
+FM719,Share Repurchase Program Authorized,$90.0B,FY2023
+FM720,Share Repurchases,$10.04B,FY2023
+FM721,Shareholder Returns (Repurchases and Dividends),$10.44B,FY2023
+FM722,Shares Outstanding,"2,466,208,388",FY2023
+FM723,Shares Repurchased - Employee Tax Withholding,$4.4B,FY2021
+FM724,Shipping Costs,$83.5B,FY2022
+FM725,Short-Term Unearned Revenue,$50.9B,FY2023
+FM726,Short-term financing cost recovery increase,$69M,FY2021-FY2022
+FM727,Solar % of Customer Retail Sales,24%,FY2022
+FM728,Spending with Black- and African American-owned suppliers,$500M,FY2023
+FM729,Spent Fuel Storage Reimbursement Claim,$10.5M,"June 1, 2021 through May 31, 2022"
+FM730,State Net Operating Loss Carryforwards,$1.2B,FY2023
+FM731,Stock Repurchased,$4.2B,FY2022
+FM732,Stock-Based Compensation,$3.127B,FY2013
+FM733,Stock-Based Compensation Reduction,$100M,FY2022
+FM734,Stock-based compensation,$1.3B,FY2022
+FM735,Stock-based compensation expense,"$6,118M",FY2021
+FM736,Strategic Investments,$3.2B,FY2021
+FM737,Strategic Investments Carrying Value Hypothetical Adverse Change,-$215M (10% adverse change),FY2022
+FM738,Stress Test Costs Eligible for Securitization,$7.5B,FY2022
+FM739,Subsidy Reduction - Commercial Customers,~35%,FY2023
+FM740,Subsidy Reduction - Solar-Paired Storage,~45%,FY2023
+FM741,Subsidy Reduction - Standalone Solar,~60%,FY2023
+FM742,TO19 Revenue Requirement,98.85% of TO18 revenue requirement,FY2018
+FM743,TPV Generated Outside U.S.,40%,FY2020
+FM744,Tax Benefits (Non-current Income Tax Payable),$1.02B,FY2023
+FM745,Tax Withholdings from Equity Awards,$521M,FY2020
+FM746,Technology and Content Expense,"$56,052M",FY2021
+FM747,Technology and Development,$2.642B,FY2020
+FM748,Technology and Development Expense Increase,$215M (7%),FY2022 vs FY2021
+FM749,Ten-Year Actual Return on Pension Plan Assets,5.8%,FY2022
+FM750,Term Debt Increase in Annual Interest Expense (Hypothetical 100bps increase),$201M,FY2022
+FM751,Total Assets,"$5,085,057",FY2022
+FM752,Total Assets (Cash and Investments),$111.6B,FY2023
+FM753,Total Capital Expenditures,$9.6B,FY2022
+FM754,"Total Cash, Cash Equivalents, and Short-Term Investments",$104.8B,FY2022
+FM755,Total Cost of Revenue,$65.9B,FY2023
+FM756,Total Current Assets,$169.7B,FY2022
+FM757,Total Debt,"$49,781M",FY2022
+FM758,Total Debt Investments,"$95,357M",FY2023
+FM759,Total Dividends Amount,"$18,550M",FY2022
+FM760,Total Dividends Per Share,$2.48,FY2022
+FM761,Total Equity Investments,"$8,025M",FY2023
+FM762,Total Face Value of Debt,"$55,511M",FY2022
+FM763,Total Fair Value of Investments with Unrealized Losses,$72.8B,FY2022
+FM764,Total Finance Lease Cost,"$1,307M",FY2021
+FM765,Total Finance Lease Liabilities,"$17,067M",FY2023
+FM766,Total Future Obligations,"$19,024M",FY2022
+FM767,Total Gross Margin,$169.1B,FY2023
+FM768,Total Gross Margin Percentage,44.1%,FY2023
+FM769,Total Intangible Assets Acquired,"$5,681M",FY2022
+FM770,Total Intangible Assets Gross Carrying Amount,"$23,577M",FY2022
+FM771,Total Intangible Assets Net Carrying Amount,"$11,298M",FY2022
+FM772,Total Inventories,"$3,742.0M",FY2022
+FM773,Total Inventory,"$3,742.0M",FY2022
+FM774,Total Investments and Cash,"$121,141M",FY2023
+FM775,Total Liabilities,"$1,474,482",FY2022
+FM776,Total Liquidity,~$2.9B,FY2022
+FM777,Total Long-Term Debt Portion,$9.703B,FY2023
+FM778,Total Long-lived Assets,$187.2B,FY2023
+FM779,Total Net Sales,$365.8B,FY2021
+FM780,Total Operating Expenses,$18.2B,FY2020
+FM781,Total Operating Expenses Increase,"$2.6B, +12%",FY2022
+FM782,Total Operating Income,"$69,916M",FY2021
+FM783,Total Operating Lease Liabilities,"$15,137M",FY2023
+FM784,Total Operating Revenues,"$21,680M (2022), $20,642M (2021)","FY2022, FY2021"
+FM785,Total Operating Revenues - Utility,$20.6B,FY2021
+FM786,"Total Other Income (Expense), Net","$1,186M",FY2021
+FM787,Total Outstanding Notes,$11.0B,FY2023
+FM788,Total Payment Volume (TPV),$1.25T,FY2021
+FM789,Total Payment Volume Growth,9%,FY2022
+FM790,"Total Regulatory Account Costs (CEMA, WEMA, FHPMA, FRMMA, WMPMA, VMBA, WMBA, MGMA, RTBA)",$6.2B,FY2022
+FM791,Total Renewable Deliveries,"12,163 GWh",FY2022
+FM792,Total Renewable Energy Resources Percentage,40%,FY2022
+FM793,Total Revenue,$26.9B,FY2022
+FM794,Total SO2 Emissions,15 tons,FY2020
+FM795,Total Shares Outstanding plus Outstanding Stock Awards,10.6B,FY2022
+FM796,Total Shares Repurchased Amount,"$22,970M",FY2021
+FM797,Total Stockholders' Equity,$166.5B,FY2022
+FM798,Total Unearned Revenue,$48.408B,FY2022
+FM799,Total Unrealized Losses,$2.8B,FY2022
+FM800,Total stockholders' equity,"$206,223M",FY2023
+FM801,Total unrecognized compensation costs related to stock awards,$18.6B,FY2023
+FM802,Transaction Expense,"$7,934M",FY2020
+FM803,Transaction Expense Rate,0.85%,FY2020
+FM804,Transaction Loss Rate,0.09% to 0.12% of TPV,Periods presented in consolidated financial statements
+FM805,Transaction Losses,$1.2B,FY2022
+FM806,Transaction Revenues Growth,"$1.8B, +8%",FY2022
+FM807,Transaction and Credit Loss Rate,0.19%,FY2020
+FM808,Transaction and Credit Losses,"+$512M, +48%",FY2022
+FM809,Transition Tax,$850M,FY2022
+FM810,Transmission Circuit Miles,"18,000 circuit miles",FY2022
+FM811,Transportation Cost of Natural Gas Sold,$139M,FY2021
+FM812,Transportation Service Only Revenue,"$1,211M",FY2020
+FM813,U.S. Agency Securities,$2.7B,FY2023
+FM814,U.S. Government Securities,$61.4B,FY2023
+FM815,U.S. Government Securities Fair Value,$77.5B,FY2023
+FM816,U.S. Government and Agency Securities Fair Value,"$53,223M",FY2023
+FM817,US Employees,"120,000",FY2023
+FM818,Ultimate Health Care Cost Trend Rate,4.5%,FY2031
+FM819,Unadjusted Median Pay - Racial and Ethnic Minorities vs White (U.S.),89.9%,FY2022
+FM820,Unadjusted Median Pay - Women vs Men (Outside U.S.),86.2%,FY2022
+FM821,Unadjusted Median Pay - Women vs Men (U.S.),89.6%,FY2022
+FM822,Uncommitted Credit Facilities Borrowing Capacity,~$80M,FY2022
+FM823,Unearned Revenue - Intelligent Cloud,$19.371B,FY2022
+FM824,Unearned Revenue - More Personal Computing,$4.479B,FY2022
+FM825,Unearned Revenue - Productivity and Business Processes,$24.558B,FY2022
+FM826,Unfavorable Impact to Net Revenues (exclusive of hedging),-$949M,FY2022
+FM827,United States Revenue,"$83,953M",FY2021
+FM828,Unrecognized Tax Benefits,$1.02B,FY2023
+FM829,Unrecognized Tax Benefits (Non-current Liabilities),$1.9B,FY2022
+FM830,Unrecognized Tax Benefits - Interest and Penalties,$95M,FY2023
+FM831,Unrecovered Investment in Diablo Canyon,$840M,FY2022
+FM832,Unsecured Revolving Credit Facility (Credit Agreement),$5.0B,September 2019
+FM833,Unused Credit Available (UK),$4.1B,FY2021
+FM834,Utility Cash,~$609M,FY2022
+FM835,Utility Debt Redemption Planned,$1.0B,FY2022
+FM836,Utility Debt Retired,$5.0B,FY2022
+FM837,Utility Debt Retirement,$6.0B,FY2022
+FM838,Utility Revolving Credit Agreement Aggregate Commitments,$4.4B,FY2022
+FM839,VMBA Amount (2021 WMCE),$592M,FY2021
+FM840,Valuation Allowance,$907M,FY2022
+FM841,Value-at-Risk (Natural Gas Transportation and Storage),$5M,FY2021
+FM842,Volumetric Payment,$13/MWh (2022 dollars),Extended operations period
+FM843,WMBA Amount (2021 WMCE),$149M,FY2021
+FM844,"Wearables, Home and Accessories Net Sales",$39.8B,FY2023
+FM845,Weighted Average Cost of Capital (2022),7.34%,FY2022
+FM846,Weighted Average Cost of Capital (2023),7.28%,FY2023
+FM847,Weighted Average Grant-Date Fair Value of Stock Awards,$221.13,FY2021
+FM848,Weighted Average Outstanding Shares of Common Stock,"7,547M shares",FY2021
+FM849,Wildfire Claims Recovery (Securitization),$7.5B,"2017 Northern California wildfires / filed April 30, 2020"
+FM850,Wildfire Fund Accelerated Amortization Expense,$43M,FY2021
+FM851,Wildfire Fund Allocation Metric,64.2%,FY2022
+FM852,Wildfire Fund Annual IOU Contributions,$300M per year,10-year period
+FM853,Wildfire Fund DWR Bond Proceeds,$10.5B,15-year extension
+FM854,Wildfire Fund Expense,-$40M (8%),FY2022
+FM855,Wildfire Fund IOU Initial Contributions,$7.5B,Initial
+FM856,Wildfire Fund Receivable - 2021 Dixie Fire,$175M,FY2022
+FM857,Wildfire Fund Receivables (Other Noncurrent Assets),$175M,FY2022
+FM858,Wildfire Fund participation cost,$6.7B+,ten-year contribution period
+FM859,Wildfire Liability - 2019 Kincade Fire,$1.025B,FY2022
+FM860,Wildfire Liability - 2020 Zogg Fire,$400M,FY2022
+FM861,Wildfire Liability - 2021 Dixie Fire,$1.175B,FY2022
+FM862,Wildfire Liability - 2022 Mosquito Fire,$100M,FY2022
+FM863,"Wildfire-Related Claims, Net of Insurance Recoveries","$237M (2022), $258M (2021)","FY2022, FY2021"
+FM864,"Wildfire-Related Claims, Net of Recoveries",-$21M (8%),FY2022
+FM865,Wildfire-related loss recovery threshold,$1.0B,annual
+FM866,Wind % of Customer Retail Sales,9%,FY2022
+FM867,Women Employees Percentage,26%,FY2022
+FM868,Workforce Reduction,"10,000 jobs",Through Q3 FY2023
+FM869,Working Capital (Deficit),"-$1,157,272",FY2022
+FM870,Working Capital Deficit,$1.74M,FY2023
+FM871,ZeniMax Acquisition Cost,$8.1B,March 2021
+FM872,ZeniMax Acquisition Purchase Price,$8.1B,"March 9, 2021"
+FM873,iPad Net Sales,$28.3B,FY2023
+FM874,iPhone Net Sales,$200.6B,FY2023
