@@ -11,7 +11,7 @@ NOTE: This lab is built from the GitHub repository at https://github.com/neo4j-p
 * **Neo4j Aura**: graph database with built-in vector search that stores the SEC financial knowledge graph
 * **Amazon Bedrock**: foundation models (Claude for reasoning, Nova for embeddings) and AgentCore for agent deployment
 * **Databricks**: lakehouse platform that governs and pipelines enterprise data into the knowledge graph
-* **What you'll build**: GraphRAG agents that combine vector search, graph traversal, and MCP-based tool use to answer questions over financial filings
+* **What you'll build**: GraphRAG agents that combine vector search, graph traversal, and agent-based tool use to answer questions over financial filings
 
 == Graph Intelligence Meets Generative AI
 
@@ -39,7 +39,7 @@ Five steps build on each other across the workshop.
 * **Loading and Exploring with Neo4j Aura** — Load the SEC financial data into your own Aura instance, explore it visually, and build a no-code AI agent using Aura Agents. See xref:lab1.adoc[Lab 1] and xref:lab2.adoc[Lab 2].
 * **Building Agents with AWS Bedrock AgentCore** — Move from no-code to code, building agents with the Strands Agents SDK and deploying them to AgentCore Runtime. See xref:lab3.adoc[Lab 3].
 * **Graph-Enriched Retrieval** — Add an unstructured layer of chunked and embedded 10-K filing text, then combine vector search with graph traversal to enrich results with connected companies, products, and risk factors. See xref:lab4.adoc[Lab 4].
-* **Strands Agents with Neo4j MCP Server** — Connect agents to the knowledge graph through the Model Context Protocol, using Cypher Templates for deterministic queries and Text2Cypher for autonomous query generation. See xref:lab5.adoc[Lab 5].
+* **Strands Agents with Neo4j GraphRAG Library** — Connect agents to the knowledge graph using the neo4j-graphrag library, with Cypher Templates for deterministic queries and Text2Cypher for autonomous query generation. See xref:lab5.adoc[Lab 5].
 
 == The SEC 10-K Dataset
 
@@ -63,7 +63,7 @@ image::data-pipeline-v2.png[Databricks to Neo4j Data Pipeline,800]
 
 == Workshop Architecture
 
-These five steps produce the architecture below. Amazon Bedrock AgentCore is the agentic platform at the center: it hosts the Strands agents that reason over questions, the MCP servers that expose Neo4j as agent tools, and the runtime that manages deployment and scaling. Bedrock provides the foundation models for reasoning and embedding. Neo4j Aura provides the knowledge graph that agents retrieve from. SageMaker Studio is the development environment where you build and test before deploying to AgentCore.
+These five steps produce the architecture below. Amazon Bedrock AgentCore is the agentic platform at the center: it hosts the Strands agents that reason over questions and the runtime that manages deployment and scaling. Bedrock provides the foundation models for reasoning and embedding. Neo4j Aura provides the knowledge graph that agents retrieve from. SageMaker Studio is the development environment where you build and test before deploying to AgentCore.
 
 image::workshop-architecture.png[Workshop Architecture,800]
 
@@ -103,7 +103,7 @@ image::workshop-architecture.png[Workshop Architecture,800]
 | 30 min
 
 | xref:lab5.adoc[Lab 5]
-| Strands Agents with MCP: tool discovery, Cypher Templates, and Text2Cypher patterns
+| Strands Agents with neo4j-graphrag: Cypher Templates and Text2Cypher patterns
 | 45 min
 |===
 
