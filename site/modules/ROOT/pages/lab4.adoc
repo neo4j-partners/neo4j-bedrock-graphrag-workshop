@@ -68,6 +68,35 @@ OPTIONAL MATCH (product:Product)-[:FROM_CHUNK]->(node)
 
 The LLM now receives the matched chunk alongside the filing accession number, company name, product list, and risk factor labels, producing answers grounded in both unstructured text and structured knowledge graph relationships.
 
+=== Strands GraphRAG Agent
+
+In Notebooks 02 and 03 the developer hardcodes which retriever to use. Notebook 04 shifts that decision to the model by wrapping both retrievers as Strands `@tool` functions and giving them to an agent. The agent reads the tool docstrings, reasons about which retrieval strategy fits the question, and calls the appropriate tool. This is the same `Agent` + `BedrockModel` + `@tool` pattern from Lab 3, now with meaningful tools that search a knowledge graph.
+
+The progression clarifies the role each layer plays:
+
+[cols="1,2,2"]
+|===
+| Notebook | Pattern | Who decides what to retrieve?
+
+| 02 — VectorRetriever
+| `GraphRAG` pipeline
+| Developer (hardcoded)
+
+| 03 — VectorCypherRetriever
+| `GraphRAG` pipeline
+| Developer (hardcoded)
+
+| 04 — Strands Agent
+| Agent with both retrievers as tools
+| The model
+
+| Lab 5 (next)
+| Agent with MCP tools
+| The model, via MCP transport
+|===
+
+The shift from 03 to 04 is _who picks the retrieval strategy_. The shift from 04 to Lab 5 is _how the tools are delivered_: local `@tool` functions here become remote tools served over MCP.
+
 == What the Library Does Under the Hood
 
 The neo4j-graphrag retrievers handle several steps internally so you can focus on the query rather than the plumbing. When you call a retriever, it:
