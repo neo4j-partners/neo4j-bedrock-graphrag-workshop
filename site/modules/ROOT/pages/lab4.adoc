@@ -1,6 +1,6 @@
 = Lab 4: GraphRAG Retrievers
 
-In Lab 3 you built an agent that calls simple tools. Now you connect directly to your knowledge graph using the neo4j-graphrag Python library and build retrieval pipelines that progress from pure vector search to graph-enriched search. This lab uses the same Neo4j Aura instance from Labs 1 and 2. You load the unstructured layer (document chunks with embeddings) on top of the structured graph you already built.
+In Lab 3 you built an agent that calls simple tools. Now you connect directly to your knowledge graph using the neo4j-graphrag Python library and build retrieval pipelines that progress from pure vector search to graph-enriched search, then wrap both retrievers as Strands agent tools so the model picks the right strategy per question. This lab uses the same Neo4j Aura instance from Labs 1 and 2. You load the unstructured layer (document chunks with embeddings) on top of the structured graph you already built.
 
 TIP: Ready to start? Jump to the xref:lab4-instructions.adoc[Lab 4 Instructions] for step-by-step notebook walkthroughs.
 

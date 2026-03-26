@@ -83,7 +83,7 @@ image::lab3-create-folder.png[Create Folder]
 
 === Step 8: Clone the Git Repository
 
-1. With the `labs` folder open, click the **Git icon** in the left sidebar (it looks like a diamond/branch symbol)
+1. Click the **Git icon** in the left sidebar (it looks like a diamond/branch symbol)
 2. If a **Clone a Repository** button is visible, click it and enter the repository URL:
 +
 ----
@@ -93,11 +93,10 @@ https://github.com/neo4j-partners/lab-neo4j-aws.git
 If the clone button is not available, open a terminal instead:
 +
 a. In the JupyterLab Launcher, click **Terminal** under the **Other** section
-b. Run these commands to clone the repository into your labs folder:
+b. Run these commands to clone the repository:
 +
 [source,bash]
 ----
-cd labs
 git clone https://github.com/neo4j-partners/lab-neo4j-aws.git
 ----
 +

@@ -92,7 +92,7 @@ agent = Agent(
 result = agent("What time is it and what is 42 + 17?")
 ----
 
-Strands is model-agnostic, supporting Bedrock, Anthropic, OpenAI, Ollama, and other providers through swappable model classes. This workshop uses `BedrockModel` throughout, but the agent code itself is independent of the provider. Strands also has native support for MCP (Model Context Protocol), which Labs 4 and 6 use to connect agents to the Neo4j knowledge graph through MCP servers rather than locally defined tools.
+Strands is model-agnostic, supporting Bedrock, Anthropic, OpenAI, Ollama, and other providers through swappable model classes. This workshop uses `BedrockModel` throughout, but the agent code itself is independent of the provider. Strands also has native support for MCP (Model Context Protocol), which Labs 5 and 6 use to connect agents to the Neo4j knowledge graph through MCP servers rather than locally defined tools.
 
 .Why model-driven and why now
 [%collapsible]

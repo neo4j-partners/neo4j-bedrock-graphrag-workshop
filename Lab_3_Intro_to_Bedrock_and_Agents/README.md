@@ -80,7 +80,6 @@ This lab sets up your SageMaker development environment, walks through building 
    1. In the JupyterLab Launcher, click **Terminal** under the **Other** section
    2. Run these commands to clone the repository into your labs folder:
       ```bash
-      cd labs
       git clone https://github.com/neo4j-partners/lab-neo4j-aws.git
       ```
 3. Once the clone completes, click the **file browser icon** (folder icon) in the left sidebar to navigate into the `labs/lab-neo4j-aws` directory

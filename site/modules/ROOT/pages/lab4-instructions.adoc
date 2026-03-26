@@ -1,6 +1,6 @@
 = Lab 4 Instructions: GraphRAG Retrievers
 
-Follow these notebooks to load chunk embeddings into your knowledge graph and build retrieval pipelines that progress from pure vector search to graph-enriched retrieval.
+Follow these notebooks to load chunk embeddings into your knowledge graph, build retrieval pipelines that progress from pure vector search to graph-enriched retrieval, then combine both retrievers in a Strands agent that chooses the right strategy per question.
 
 TIP: For concepts and background, see xref:lab4.adoc[Lab 4: GraphRAG Retrievers].
 
@@ -49,6 +49,10 @@ NEO4J_PASSWORD=your-password-from-lab-1
 | `03_vector_cypher_retriever.ipynb`
 | VectorCypher Retriever
 | Graph-enriched retrieval using `VectorCypherRetriever`, adding filing metadata, companies, products, and risk factors to vector search results
+
+| `04_strands_graphrag_agent.ipynb`
+| Strands GraphRAG Agent
+| A Strands agent with both retrievers as `@tool` functions that decides which retrieval strategy to use based on the question
 |===
 
 == Next Steps
