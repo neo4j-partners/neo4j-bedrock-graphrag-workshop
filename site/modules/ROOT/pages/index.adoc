@@ -30,13 +30,17 @@ The Neo4j Spark Connector, officially Databricks-certified, provides the bridge 
 
 == From Knowledge Graph to Agents
 
-Three stages build on each other across the workshop.
+Five steps build on each other across the workshop.
 
-**Knowledge Graph Construction.** CSV seed data loads into Neo4j as nodes and relationships, forming the structured layer of companies, products, risk factors, and institutional ownership. Unstructured 10-K filing text is chunked and embedded with Nova, then linked to the structured layer through Document nodes. The result is a searchable knowledge graph that connects semantic text to typed entities.
+**Data Pipeline: Databricks to Neo4j.** Governed enterprise data flows from Databricks into Neo4j through the Spark Connector, producing the structured knowledge graph that all subsequent labs build on. See <<Data Pipeline: Databricks to Neo4j>> below.
 
-**GraphRAG Retrieval.** Vector search finds semantically similar chunks. Graph traversal enriches results with connected entities such as the company that filed the document, related products, and shared risk factors. Fulltext search handles keyword queries. Hybrid approaches combine all three.
+**Loading and Exploring with Neo4j Aura.** With the knowledge graph populated, you load the SEC financial data into your own Aura instance, explore it visually with Neo4j Explore, and build a no-code AI agent using Aura Agents. These labs establish graph fundamentals: Cypher pattern matching, relationship traversal, and the intuition for how connected data answers questions that tables cannot. See xref:lab1.adoc[Lab 1] and xref:lab2.adoc[Lab 2].
 
-**Agent Orchestration.** AI agents use the ReAct pattern to select retrieval tools, execute queries, and synthesize answers. The Strands Agents SDK provides the agent framework, and the Neo4j MCP Server exposes schema inspection and read-only Cypher as agent tools. Aura Agents provides a no-code path to the same capabilities.
+**Building Agents with AWS Bedrock AgentCore.** You move from no-code to code, building agents with the Strands Agents SDK and Amazon Bedrock. The ReAct pattern drives agent behavior: the model reasons about a question, selects a tool, observes the result, and repeats until it has an answer. Agents deploy to AgentCore Runtime, which hosts them as managed services without infrastructure management. See xref:lab3.adoc[Lab 3].
+
+**Graph-Enriched Retrieval.** The knowledge graph gains an unstructured layer: 10-K filing text chunked and embedded with Amazon Nova, linked to the structured entities through Document nodes. Vector search finds semantically similar chunks, and graph traversal enriches results with connected companies, products, and risk factors. The neo4j-graphrag library provides VectorRetriever for pure semantic search and VectorCypherRetriever for vector plus graph traversal in a single query. See xref:lab4.adoc[Lab 4].
+
+**Strands Agents with Neo4j MCP Server.** Agents connect to the knowledge graph through the Model Context Protocol. The Neo4j MCP Server, hosted on AgentCore, exposes graph schema inspection and read-only Cypher execution as agent tools. Two retrieval patterns emerge: Cypher Templates provide pre-written, parameterized queries for high reliability, while Text2Cypher gives agents full autonomy to discover the schema and write original Cypher. See xref:lab5.adoc[Lab 5].
 
 == The SEC 10-K Dataset
 
@@ -60,7 +64,9 @@ image::data-pipeline-v2.png[Databricks to Neo4j Data Pipeline,800]
 
 Beyond the data pipeline, Databricks and Neo4j connect through several additional patterns: the `neo4j-graphrag-python` library for knowledge graph construction (chunking, embedding, entity extraction), Unity Catalog JDBC for federated SQL-to-Cypher access, and multi-agent architectures where Genie handles SQL and Neo4j MCP handles Cypher under a supervisor. See xref:databricks-platform.adoc[Databricks Intelligence Platform] for the full integration architecture and connection patterns.
 
-== Architecture
+== Workshop Architecture
+
+These five steps produce the architecture below. Amazon Bedrock AgentCore is the agentic platform at the center: it hosts the Strands agents that reason over questions, the MCP servers that expose Neo4j as agent tools, and the runtime that manages deployment and scaling. Bedrock provides the foundation models for reasoning and embedding. Neo4j Aura provides the knowledge graph that agents retrieve from. SageMaker Studio is the development environment where you build and test before deploying to AgentCore.
 
 image::workshop-architecture.png[Workshop Architecture,800]
 
