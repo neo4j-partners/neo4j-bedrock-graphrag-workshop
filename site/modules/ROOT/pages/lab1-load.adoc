@@ -126,6 +126,22 @@ NOTE: This statement will return "No changes, no records." That is expected. Ind
 
 === Step 5: Verify the Load
 
+View the complete graph schema:
+
+[source,cypher]
+----
+CALL db.schema.visualization()
+----
+
+List all indexes and constraints:
+
+[source,cypher]
+----
+SHOW INDEXES
+----
+
+Node counts by label:
+
 [source,cypher]
 ----
 MATCH (n)

@@ -2,7 +2,7 @@
 
 == Welcome
 
-This workshop teaches you to build Graph Retrieval-Augmented Generation (GraphRAG) pipelines using Neo4j Aura and Amazon Bedrock. You will work with SEC 10-K financial filing data including companies, products, risk factors, and institutional ownership, progressing from no-code tools to building custom AI agents.
+This workshop teaches you to build Graph Retrieval-Augmented Generation (GraphRAG) pipelines using Neo4j Aura, Amazon Bedrock, and Databricks. You will work with SEC 10-K financial filing data including companies, products, risk factors, and institutional ownership, progressing from no-code tools to building custom AI agents.
 
 NOTE: This lab is built from the GitHub repository at https://github.com/neo4j-partners/lab-neo4j-aws/tree/main[neo4j-partners/lab-neo4j-aws].
 
@@ -10,7 +10,7 @@ NOTE: This lab is built from the GitHub repository at https://github.com/neo4j-p
 
 Neo4j Aura is the Graph Intelligence Platform. It makes connections between entities explicit and traversable. Amazon Bedrock provides managed access to foundation models for reasoning and embedding. Databricks is the Data Intelligence Platform. It handles structured and unstructured data at scale through the lakehouse architecture with unified governance. Together they form a complete GraphRAG stack: Databricks aggregates and governs enterprise data, Neo4j makes relationships traversable for retrieval, and Bedrock provides the reasoning and generation layer.
 
-The integration covers four patterns: vector search over embedded chunks stored in Neo4j, graph-enriched retrieval that follows relationships from matched chunks to connected entities, text-to-Cypher generation that translates natural language into graph queries, and agent orchestration that routes questions to the right retrieval strategy.
+The workshop follows the full architecture flow: Databricks governs and pipelines SEC filing data into Neo4j, where you load and explore the knowledge graph in Aura. From there you build agents with AWS Bedrock and AgentCore, implement graph-enriched retrieval that combines vector search with graph traversal, and connect Strands agents to the Neo4j MCP Server for schema-aware query generation.
 
 === Neo4j: Graph Intelligence Platform
 

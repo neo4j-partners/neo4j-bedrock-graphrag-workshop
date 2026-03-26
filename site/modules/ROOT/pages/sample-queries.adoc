@@ -55,34 +55,6 @@ These queries run against the structured entity data loaded in Lab 1: Company, P
 
 '''
 
-=== Schema Introspection
-
-View the complete graph schema:
-
-[source,cypher]
-----
-CALL db.schema.visualization()
-----
-
-List all indexes and constraints:
-
-[source,cypher]
-----
-SHOW INDEXES
-----
-
-Node counts by label:
-
-[source,cypher]
-----
-MATCH (n)
-WITH labels(n)[0] AS label, count(n) AS count
-RETURN label, count
-ORDER BY label
-----
-
-'''
-
 === Company Products
 
 What products does NVIDIA offer?
