@@ -9,6 +9,7 @@ TIP: For concepts and background, see xref:lab4.adoc[Lab 4: GraphRAG Retrievers]
 * **Data Loading**: Add document chunks with pre-computed embeddings to the existing knowledge graph from Lab 1
 * **Vector Search**: Use `VectorRetriever` to find semantically similar chunks and generate answers with `GraphRAG`
 * **Graph-Enriched Search**: Use `VectorCypherRetriever` to combine vector search with Cypher graph traversal for richer context
+* **Agent-Driven Retrieval**: Wrap both retrievers as Strands `@tool` functions and let the agent choose the right strategy per question
 
 == Prerequisites
 
