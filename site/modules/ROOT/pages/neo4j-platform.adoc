@@ -123,4 +123,4 @@ The database stores the knowledge graph and maintains its indexes. The tools pro
 
 == Next Steps
 
-Continue to xref:aws-services.adoc[AWS GenAI Services] to see how Amazon Bedrock, AgentCore, and SageMaker Studio provide the model access, hosting, and development environment that connect to this knowledge graph. Or continue to xref:databricks-platform.adoc[Databricks Intelligence Platform] to see how the lakehouse architecture governs enterprise data and feeds it into graph projections through the Spark Connector.
+Continue to xref:aws-services.adoc[AWS GenAI Services] to see how Amazon Bedrock, AgentCore, and SageMaker Studio provide the model access, hosting, and development environment that connect to this knowledge graph.

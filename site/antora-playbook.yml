@@ -1,5 +1,5 @@
 site:
-  title: 'GraphRAG Workshop: Neo4j, AWS Bedrock & Databricks'
+  title: 'GraphRAG Workshop: Neo4j & AWS Bedrock'
   url: https://neo4j-partners.github.io/lab-neo4j-aws
   start_page: lab-neo4j-aws::index.adoc
 

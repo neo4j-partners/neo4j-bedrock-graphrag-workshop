@@ -1,8 +1,8 @@
-= GraphRAG Workshop: Neo4j, AWS Bedrock & Databricks
+= GraphRAG Workshop: Neo4j & AWS Bedrock
 
 == Welcome
 
-This workshop teaches you to build Graph Retrieval-Augmented Generation (GraphRAG) pipelines using Neo4j Aura, Amazon Bedrock, and Databricks. You will work with SEC 10-K financial filing data including companies, products, risk factors, and institutional ownership, progressing from no-code tools to building custom AI agents.
+This workshop teaches you to build Graph Retrieval-Augmented Generation (GraphRAG) pipelines using Neo4j Aura and Amazon Bedrock. You will work with SEC 10-K financial filing data including companies, products, risk factors, and institutional ownership, progressing from no-code tools to building custom AI agents.
 
 NOTE: This lab is built from the GitHub repository at https://github.com/neo4j-partners/lab-neo4j-aws/tree/main[neo4j-partners/lab-neo4j-aws].
 
@@ -10,12 +10,11 @@ NOTE: This lab is built from the GitHub repository at https://github.com/neo4j-p
 
 * **Neo4j Aura**: graph database with built-in vector search that stores the SEC financial knowledge graph
 * **Amazon Bedrock**: foundation models (Claude for reasoning, Nova for embeddings) and AgentCore for agent deployment
-* **Databricks**: lakehouse platform that governs and pipelines enterprise data into the knowledge graph
 * **What you'll build**: GraphRAG agents that combine vector search, graph traversal, and agent-based tool use to answer questions over financial filings
 
 == Graph Intelligence Meets Generative AI
 
-Neo4j Aura is the Graph Intelligence Platform. It makes connections between entities explicit and traversable. Amazon Bedrock provides managed access to foundation models for reasoning and embedding. Databricks is the Data Intelligence Platform. It handles structured and unstructured data at scale through the lakehouse architecture with unified governance. Together they form a complete GraphRAG stack: Databricks aggregates and governs enterprise data, Neo4j makes relationships traversable for retrieval, and Bedrock provides the reasoning and generation layer.
+Neo4j Aura is the Graph Intelligence Platform. It makes connections between entities explicit and traversable. Amazon Bedrock provides managed access to foundation models for reasoning and embedding. Together they form a complete GraphRAG stack: Neo4j makes relationships traversable for retrieval, and Bedrock provides the reasoning and generation layer.
 
 The <<From Knowledge Graph to Agents>> section below traces the full architecture flow.
 
@@ -27,15 +26,10 @@ Neo4j AuraDB stores data as nodes and relationships with built-in vector indexes
 
 Amazon Bedrock provides unified API access to foundation models including Anthropic Claude for reasoning and Amazon Nova for embeddings. Amazon Bedrock AgentCore hosts and scales agents without infrastructure management. Amazon SageMaker AI provides the JupyterLab notebook environment used throughout this workshop. See xref:aws-services.adoc[AWS GenAI Services] for detailed coverage of each service.
 
-=== Databricks: Data Intelligence Platform
-
-Databricks is the Data Intelligence Platform, organizing data through a lakehouse architecture with the medallion pattern (bronze, silver, gold) and Unity Catalog governance. The Databricks-certified Neo4j Spark Connector bridges the two platforms, transforming governed Delta tables into graph nodes and relationships. See xref:databricks-platform.adoc[Databricks Intelligence Platform] for the full integration architecture.
-
 == From Knowledge Graph to Agents
 
-Five steps build on each other across the workshop.
+Four steps build on each other across the workshop.
 
-* **Data Pipeline: Databricks to Neo4j** — Governed enterprise data flows from Databricks into Neo4j through the Spark Connector, producing the structured knowledge graph that all subsequent labs build on. See <<Data Pipeline: Databricks to Neo4j>> below.
 * **Loading and Exploring with Neo4j Aura** — Load the SEC financial data into your own Aura instance, explore it visually, and build a no-code AI agent using Aura Agents. See xref:lab1.adoc[Lab 1] and xref:lab2.adoc[Lab 2].
 * **Building Agents with AWS Bedrock AgentCore** — Move from no-code to code, building agents with the Strands Agents SDK and deploying them to AgentCore Runtime. See xref:lab3.adoc[Lab 3].
 * **Graph-Enriched Retrieval** — Add an unstructured layer of chunked and embedded 10-K filing text, then combine vector search with graph traversal to enrich results with connected companies, products, and risk factors. See xref:lab4.adoc[Lab 4].
@@ -43,7 +37,7 @@ Five steps build on each other across the workshop.
 
 == The SEC 10-K Dataset
 
-The workshop uses data from SEC 10-K filings, loaded from Databricks into the Neo4j knowledge graph. 10-K filings are the annual reports that publicly traded companies file with the U.S. Securities and Exchange Commission. Each filing contains both structured data (company details, financial metrics, institutional ownership) and unstructured narrative text (risk factor discussions, business descriptions, executive commentary). That combination makes 10-K filings a natural fit for GraphRAG: the structured data forms a queryable graph of entities and relationships, while the narrative text provides the semantic content that embedding-based retrieval searches over.
+The workshop uses data from SEC 10-K filings loaded into the Neo4j knowledge graph. 10-K filings are the annual reports that publicly traded companies file with the U.S. Securities and Exchange Commission. Each filing contains both structured data (company details, financial metrics, institutional ownership) and unstructured narrative text (risk factor discussions, business descriptions, executive commentary). That combination makes 10-K filings a natural fit for GraphRAG: the structured data forms a queryable graph of entities and relationships, while the narrative text provides the semantic content that embedding-based retrieval searches over.
 
 == Knowledge Graph Schema
 
@@ -53,17 +47,9 @@ image::financial-data-model.png[SEC 10-K Financial Data Model,800]
 
 This diagram shows the structured layer loaded in Lab 1. In xref:lab4.adoc[Lab 4], you add the unstructured layer: Document and Chunk nodes with embeddings that connect filing text back to these entities, enabling graph-enriched retrieval.
 
-== Data Pipeline: Databricks to Neo4j
-
-The SEC 10-K data flows from Databricks to Neo4j through the Neo4j Spark Connector. Governed Delta tables in the lakehouse, refined through the medallion pattern (bronze, silver, gold) and managed by Unity Catalog, serve as the source of record. The Spark Connector reads from silver tables and writes nodes and relationships into the knowledge graph: table rows become nodes, foreign keys become relationships, and shared attributes become shared nodes that make connections explicit.
-
-This workshop's knowledge graph is pre-loaded. The data pipeline has already run, so you work directly with the populated graph from Lab 1 onward. The pipeline pattern itself generalizes to any enterprise dataset where governed tabular data needs to become a connected graph.
-
-image::data-pipeline-v2.png[Databricks to Neo4j Data Pipeline,800]
-
 == Workshop Architecture
 
-These five steps produce the architecture below. Amazon Bedrock AgentCore is the agentic platform at the center: it hosts the Strands agents that reason over questions and the runtime that manages deployment and scaling. Bedrock provides the foundation models for reasoning and embedding. Neo4j Aura provides the knowledge graph that agents retrieve from. SageMaker Studio is the development environment where you build and test before deploying to AgentCore.
+These four steps produce the architecture below. Amazon Bedrock AgentCore is the agentic platform at the center: it hosts the Strands agents that reason over questions and the runtime that manages deployment and scaling. Bedrock provides the foundation models for reasoning and embedding. Neo4j Aura provides the knowledge graph that agents retrieve from. SageMaker Studio is the development environment where you build and test before deploying to AgentCore.
 
 image::workshop-architecture.png[Workshop Architecture,800]
 

@@ -81,4 +81,4 @@ During development, notebooks call Bedrock directly and iterate on the agent loo
 
 == Next Steps
 
-Continue to xref:databricks-platform.adoc[Databricks Intelligence Platform] to see how the lakehouse architecture complements Neo4j and Bedrock with governed data pipelines and multi-agent orchestration. Or continue to xref:lab0.adoc[Lab 0: Sign In to AWS] to configure your AWS account and verify Bedrock model access.
+Continue to xref:neo4j-platform.adoc[Neo4j Graph Intelligence Platform] to see how AuraDB, vector indexes, and MCP Server connectivity provide the graph layer. Or continue to xref:lab0.adoc[Lab 0: Sign In to AWS] to configure your AWS account and verify Bedrock model access.

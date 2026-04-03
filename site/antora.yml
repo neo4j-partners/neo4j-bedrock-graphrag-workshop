@@ -1,5 +1,5 @@
 name: lab-neo4j-aws
-title: 'GraphRAG Workshop: Neo4j, AWS Bedrock & Databricks'
+title: 'GraphRAG Workshop: Neo4j & AWS Bedrock'
 version: '1.0'
 start_page: ROOT:index.adoc
 nav:
