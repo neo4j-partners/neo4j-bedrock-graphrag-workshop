@@ -1,4 +1,4 @@
-# Neo4j Aura Free Trial Signup
+# Neo4j Aura Free Signup
 
 Follow these steps to create a free Neo4j Aura account and database instance:
 
@@ -8,13 +8,9 @@ Follow these steps to create a free Neo4j Aura account and database instance:
 
 3. Follow the sign-up process to create your Neo4j Aura account. You will need to provide your email address, create a password, and agree to the terms of service.
 
-4. When prompted "Where do you want your instance deployed?", configure the following:
-   - **Cloud provider:** AWS
-   - **Region:** US East (N. Virginia)
+4. When prompted to create your instance, select the **AuraDB Free** tier. This is a permanent free instance with no expiry.
 
-   Click **Start 14-day free trial** to continue.
-
-   ![Instance deployment configuration showing AWS cloud provider and US East region](images/FREE_01_WHERE.png)
+   ![Instance creation showing the free tier option](images/FREE_01_WHERE.png)
 
 5. Your free Aura instance will be created automatically. **Save your credentials immediately** - click **Download to continue** to save the credentials file. The password is only shown once.
 

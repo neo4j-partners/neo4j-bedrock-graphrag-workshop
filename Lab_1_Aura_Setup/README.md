@@ -5,66 +5,14 @@ In this lab, you will set up your Neo4j Aura database, load a financial knowledg
 ## Prerequisites
 
 - Completed **Lab 0** (environment setup)
-- For **Workshop SSO Login**: Access to OneBlink credentials page (provided by your organizer)
-- For **Free Trial Signup**: A valid email address
+- A valid email address
 
 ## Part 1: Neo4j Aura Signup
 
-There are two signup options for this lab. **Please follow the signup process provided by your workshop organizer.**
-
-### Option A: Workshop SSO Login (Recommended for organized workshops)
-
-If your organizer has provided OneBlink credentials, use the SSO login process:
-
-- Follow the [Neo4j Aura SSO Login](SSO_Neo4j_Aura_Signup.md) guide to log in using your organization's SSO credentials
-- This option uses pre-configured workshop accounts
-
-### Option B: Free Trial Signup (For self-paced learning)
-
-If you're completing this lab independently or your organizer has instructed you to create a free trial:
-
-- Follow the [Neo4j Aura Free Trial Signup](Aura_Free_Trial.md) guide to create your own account
-- This option provides a 14-day free trial with an automatically created instance
-
-## Part 2: Create Your Database Instance
-
-> **Note:** If you signed up using the **Free Trial** option (Option B), your instance was already created during the signup process. You can skip ahead to [Part 3: Load the Knowledge Graph](#part-3-load-the-knowledge-graph).
-
-1. After logging in, click on **Instances** in the left sidebar under "Data services", then click the **Create instance** button.
-
-   ![Neo4j Aura Console showing Instances menu and Create instance button](images/07_create_instance.png)
-
-   If you already have existing instances, click the **Create instance** button in the top-right corner of the Instances page.
-
-   ![Instances page with Create instance button for existing instances](images/07_alternative_create_instance.png)
-
-2. Configure your new instance:
-
-   > **IMPORTANT:** 3 key settings to watch when creating your instance!
-   > 1. Select **Professional** — do *not* select Business Critical
-   > 2. Set **Graph Analytics** to **Plugin**
-   > 3. Enable **Vector-optimized** (under Additional settings)
-
-   | Setting | Value |
-   |---|---|
-   | **Tier** | Professional |
-   | **Instance name** | A unique name based on your name (e.g., `ryans-lab-instance`) |
-   | **Sizing** | 4 GB RAM / 1 CPU |
-   | **Graph Analytics** | Plugin |
-   | **Vector-optimized** | Enabled (under Additional settings) |
-
-3. Click **Create** to provision your database instance
-
-   ![Create instance configuration page showing Professional tier, naming, sizing, and vector optimization options](images/lab1-configure-instance.png)
-
-4. **Save your connection credentials immediately.** When your instance is created, a dialog will appear showing your database credentials (Username and Password). Click **Download and continue** to save the credentials file.
-
-   ![Credentials dialog showing username and password with download option](images/09_Download_Credentails.png)
-
-> **CRITICAL:** The password is only shown once and will not be available after you close this dialog. Download the credentials file and store it somewhere safe. You will need the **URI**, **Username**, and **Password** to fill in `CONFIG.txt` when you set up the coding environment in Lab 3.
+Follow the [Neo4j Aura Free Signup](Aura_Free_Trial.md) guide to create your free Aura account and database instance.
 
 
-## Part 3: Load the Knowledge Graph
+## Part 2: Load the Knowledge Graph
 
 ![SEC 10-K Financial Data Model](images/financial-data-model.png)
 
@@ -265,7 +213,7 @@ MATCH (c:Company {ticker: 'NVDA'})-[:PARTNERS_WITH]->(p)
 RETURN p.name ORDER BY p.name;
 ```
 
-## Part 4: Explore the Knowledge Graph
+## Part 3: Explore the Knowledge Graph
 
 Follow [EXPLORE.md](EXPLORE.md) to:
 
