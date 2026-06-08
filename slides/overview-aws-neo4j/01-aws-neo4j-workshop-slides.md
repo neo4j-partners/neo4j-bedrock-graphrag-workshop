@@ -27,7 +27,7 @@ ol > li {
 }
 </style>
 
-# GraphRAG with Neo4j, AWS Bedrock & Databricks
+# GraphRAG with Neo4j & AWS
 
 Building Knowledge Graph-Powered AI Agents
 
@@ -35,7 +35,7 @@ Building Knowledge Graph-Powered AI Agents
 
 ## What You Will Build
 
-- A **knowledge graph** from SEC 10-K financial filings, loaded from governed Databricks tables via the Spark Connector
+- A **knowledge graph** from SEC 10-K financial filings, loaded from a governed S3 lakehouse (Apache Iceberg) via AWS Glue and the Neo4j Spark Connector
 - **GraphRAG retrieval pipelines** that combine vector search with graph traversal
 - **AI agents** that query the knowledge graph
 
@@ -43,17 +43,15 @@ By the end, an agent can answer: "Which risk factors expose BlackRock's portfoli
 
 ---
 
-## Why Neo4j + AWS + Databricks?
+## Why Neo4j + AWS?
 
-Three platforms solve **different problems well**.
+Two platforms solve **different problems well**.
 
-**AWS** provides managed foundation models (Bedrock), development environments (SageMaker), and serverless agent hosting (AgentCore).
+**AWS** provides managed foundation models (Bedrock), development environments (SageMaker), serverless agent hosting (AgentCore), and the data foundation: an Amazon S3 + Apache Iceberg lakehouse, governed by AWS Lake Formation and the Glue Data Catalog, with AWS Glue (or Amazon EMR) Spark pipelines that refine and load enterprise data into the graph.
 
 **Neo4j** provides a native graph database that stores entities and relationships as first-class structures, with built-in vector search and graph traversal.
 
-**Databricks** provides the lakehouse platform that governs and pipelines enterprise data into the knowledge graph through the Neo4j Spark Connector.
-
-Together: Databricks aggregates and governs enterprise data, Neo4j makes relationships traversable for retrieval, and Bedrock provides the reasoning and generation layer.
+Together: AWS aggregates and governs enterprise data in the lakehouse and provides the reasoning and generation layer, while Neo4j makes relationships traversable for retrieval.
 
 ---
 
@@ -61,12 +59,12 @@ Together: Databricks aggregates and governs enterprise data, Neo4j makes relatio
 
 ---
 
-## Data Pipeline: Databricks to Neo4j
+## Data Pipeline: AWS Lakehouse to Neo4j
 
-The SEC 10-K data flows from **Databricks** to **Neo4j** through the Neo4j Spark Connector:
+The SEC 10-K data flows from the **AWS lakehouse** to **Neo4j** through AWS Glue (Spark) and the Neo4j Spark Connector:
 
-- Governed Delta tables in the lakehouse, refined through the **medallion pattern** (bronze, silver, gold)
-- The Spark Connector reads from silver tables and writes nodes and relationships into the knowledge graph
+- Governed Apache Iceberg tables on Amazon S3, refined through the **medallion pattern** (bronze, silver, gold), cataloged in the Glue Data Catalog and secured with Lake Formation
+- An AWS Glue (or Amazon EMR) Spark job runs the Neo4j Spark Connector, reading from the silver/gold tables and writing nodes and relationships into the knowledge graph
 - Table rows become nodes, foreign keys become relationships, shared attributes become shared nodes
 
 This workshop's knowledge graph is **pre-loaded**. You work directly with the populated graph from Lab 1 onward.
@@ -108,7 +106,7 @@ Four entity types connected by typed relationships that reflect real-world struc
 
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
-| **Data Pipeline** | Databricks + Neo4j Spark Connector | Govern, refine, and load enterprise data into the graph |
+| **Data Pipeline** | AWS Glue / EMR + S3 Iceberg lakehouse (Lake Formation) + Neo4j Spark Connector | Govern, refine, and load enterprise data into the graph |
 | **Knowledge Graph** | Neo4j Aura | Store entities, relationships, vector embeddings |
 | **Reasoning** | Anthropic Claude (via Bedrock) | Tool selection, response generation |
 | **Embeddings** | Amazon Nova (via Bedrock) | Vector representations for semantic search |
@@ -163,12 +161,12 @@ Each step gives the agent more autonomy. The trade-off: more flexibility means l
 
 ## What Each Platform Brings
 
-| | AWS | Neo4j | Databricks |
-|---|-----|-------|------------|
-| **Provides** | Models, compute, hosting | Graph storage, vector index, query engine | Data governance, pipelines, lakehouse |
-| **Answers** | "Generate a response" and "Deploy this agent" | "How is this connected?" and "What is semantically similar?" | "How much?" and "How often?" |
-| **AI capability** | Bedrock (Claude, Nova), AgentCore | Vector indexes, GraphRAG, MCP Server | Mosaic AI, Genie (natural language SQL) |
-| **Strength** | Scale, managed services, security | Relationships, traversal, pattern matching | Aggregations, governance, data pipelines |
+| | AWS | Neo4j |
+|---|-----|-------|
+| **Provides** | Models, compute, hosting, lakehouse + data pipelines | Graph storage, vector index, query engine |
+| **Answers** | "Generate a response", "Deploy this agent", "How much?" and "How often?" | "How is this connected?" and "What is semantically similar?" |
+| **AI capability** | Bedrock (Claude, Nova), AgentCore, Athena / Amazon Q (natural language SQL) | Vector indexes, GraphRAG, MCP Server |
+| **Strength** | Scale, managed services, security, governance + data pipelines | Relationships, traversal, pattern matching |
 
 ---
 

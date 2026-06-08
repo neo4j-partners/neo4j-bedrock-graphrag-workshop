@@ -1,9 +1,13 @@
 {
   "scripts": {
     "build": "node scripts/build-slides.mjs",
-    "serve": "npm run build && python3 -m http.server 8080 --directory build"
+    "serve": "npm run build && python3 -m http.server 8080 --directory build",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@marp-team/marp-cli": "^4.2.3"
+  },
+  "devDependencies": {
+    "patch-package": "^8.0.0"
   }
 }

@@ -4,7 +4,7 @@ Presentation-ready slides formatted for [Marp](https://marp.app/).
 
 ## Quick Start
 
-Requires Node.js 20 or 22 (`brew install node@22`) and a one-time `npm install` in this directory.
+Requires Node.js 22 LTS (`brew install node@22`) and a one-time `npm install` in this directory.
 
 ```bash
 npm install
@@ -41,7 +41,7 @@ done
 ## Troubleshooting
 
 **`require is not defined in ES module scope` error?**
-- Marp CLI is incompatible with Node.js 25+. Use Node 20 or 22 LTS: `brew install node@22`
+- Marp CLI is incompatible with Node.js 25+. Use Node 22 LTS: `brew install node@22`
 
 **Images not showing?**
 - The build script copies each deck's images next to its HTML and uses
