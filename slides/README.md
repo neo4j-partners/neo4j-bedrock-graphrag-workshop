@@ -4,30 +4,48 @@ Presentation-ready slides formatted for [Marp](https://marp.app/).
 
 ## Quick Start
 
-Requires Node.js 22 LTS (`brew install node@22`) and a one-time `npm install` in this directory.
+Requires Node.js 20 or 22 (`brew install node@22`) and a one-time `npm install` in this directory.
 
 ```bash
-/opt/homebrew/opt/node@22/bin/node ./node_modules/.bin/marp overview-aws-neo4j --server
+npm install
+npm run build   # render all decks + the gallery into build/
+npm run serve   # build, then serve the gallery at http://localhost:8080/
 ```
 
-Opens at http://localhost:8080/. Replace `overview-aws-neo4j` with any slide deck directory name.
+`npm run build` renders each deck to `build/<deck>/index.html`, copies its images
+alongside, and generates `build/index.html` — a gallery linking to every deck.
 
-## Export All Presentations
+When published, the slides live at `/slides/`, the workshop site at `/workshop/`,
+and the landing page (in `../landing/index.html`) at the site root `/`. The
+GitHub Pages workflow (`.github/workflows/deploy-antora.yml`) builds all three
+and deploys them as a single site.
+
+## Develop a Single Deck
 
 ```bash
-cd slides
+npx marp overview-aws-neo4j --server
+```
+
+Opens at http://localhost:8080/. Replace `overview-aws-neo4j` with any slide deck
+directory name. If Node defaults to v25+, run Marp under Node 22, e.g.
+`/opt/homebrew/opt/node@22/bin/node ./node_modules/.bin/marp overview-aws-neo4j --server`.
+
+## Export to PDF
+
+```bash
 for dir in overview-*/; do
-  /opt/homebrew/opt/node@22/bin/node ./node_modules/.bin/marp "$dir" --pdf --allow-local-files
+  npx marp "$dir" --pdf --allow-local-files
 done
 ```
 
 ## Troubleshooting
 
 **`require is not defined in ES module scope` error?**
-- Marp CLI is incompatible with Node.js 25+. Install Node 22 LTS: `brew install node@22`
+- Marp CLI is incompatible with Node.js 25+. Use Node 20 or 22 LTS: `brew install node@22`
 
 **Images not showing?**
-- Use `--allow-local-files` flag with Marp CLI
+- The build script copies each deck's images next to its HTML and uses
+  `--allow-local-files`. For ad-hoc Marp commands, pass `--allow-local-files`.
 
 ---
 

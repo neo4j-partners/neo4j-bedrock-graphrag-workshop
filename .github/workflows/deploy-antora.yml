@@ -1,4 +1,4 @@
-name: Deploy Antora Site to GitHub Pages
+name: Deploy Site to GitHub Pages
 
 on:
   push:
@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build Antora Site
+    name: Build Site
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -30,9 +30,11 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: site/package-lock.json
+          cache-dependency-path: |
+            site/package-lock.json
+            slides/package-lock.json
 
-      - name: Install dependencies
+      - name: Install Antora dependencies
         run: npm ci
         working-directory: site
 
@@ -40,10 +42,26 @@ jobs:
         run: npm run build
         working-directory: site
 
+      - name: Install slide dependencies
+        run: npm ci
+        working-directory: slides
+
+      - name: Build slides
+        run: npm run build
+        working-directory: slides
+
+      - name: Assemble combined site
+        run: |
+          mkdir -p _site
+          cp -r site/build/site _site/workshop
+          cp -r slides/build _site/slides
+          cp landing/index.html _site/index.html
+          touch _site/.nojekyll
+
       - name: Upload artifact for GitHub Pages
         uses: actions/upload-pages-artifact@v3
         with:
-          path: site/build/site
+          path: _site
 
   deploy:
     name: Deploy to GitHub Pages

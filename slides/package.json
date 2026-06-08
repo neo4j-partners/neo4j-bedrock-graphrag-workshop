@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "build:html": "/opt/homebrew/opt/node@22/bin/node ./node_modules/.bin/marp -I overview-aws-neo4j/ -o ../site/modules/ROOT/attachments/slides/overview/ --allow-local-files && /opt/homebrew/opt/node@22/bin/node ./node_modules/.bin/marp -I overview-knowledge-graph/ -o ../site/modules/ROOT/attachments/slides/knowledge-graph/ --allow-local-files && /opt/homebrew/opt/node@22/bin/node ./node_modules/.bin/marp -I overview-graphrag/ -o ../site/modules/ROOT/attachments/slides/graphrag/ --allow-local-files && /opt/homebrew/opt/node@22/bin/node ./node_modules/.bin/marp -I overview-retrievers/ -o ../site/modules/ROOT/attachments/slides/retrievers/ --allow-local-files && /opt/homebrew/opt/node@22/bin/node ./node_modules/.bin/marp -I overview-agents-mcp/ -o ../site/modules/ROOT/attachments/slides/agents-mcp/ --allow-local-files"
+    "build": "node scripts/build-slides.mjs",
+    "serve": "npm run build && python3 -m http.server 8080 --directory build"
   },
   "dependencies": {
     "@marp-team/marp-cli": "^4.2.3"

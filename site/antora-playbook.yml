@@ -1,6 +1,6 @@
 site:
   title: 'GraphRAG Workshop: Neo4j & AWS Bedrock'
-  url: https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop
+  url: https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/workshop
   start_page: neo4j-bedrock-graphrag-workshop::index.adoc
 
 content:

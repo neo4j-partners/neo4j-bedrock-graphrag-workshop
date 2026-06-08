@@ -1,3 +1,6 @@
+# Assembled GitHub Pages output (landing + slides + workshop)
+_site/
+
 # Python
 __pycache__/
 *.py[cod]
@@ -141,3 +144,6 @@ secrets.json
 .env.gold
 .env.gold.copy
 .env.final
+
+# MCP credentials (contains secrets - never commit)
+.mcp.json
