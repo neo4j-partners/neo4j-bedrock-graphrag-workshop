@@ -7,7 +7,7 @@ instead of LOAD CSV from CloudFront URLs.
 Uses the empty test database from .env.gold.
 
 Usage:
-    cd setup/export_seed_data
+    cd financial_data_load/export_seed_data
     uv run test_load.py
 """
 
@@ -21,7 +21,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
 
-ROOT = Path(__file__).resolve().parent.parent          # setup/
+ROOT = Path(__file__).resolve().parent.parent          # financial_data_load/
 SEED_DIR = ROOT / "seed-data"
 ENV_FILE = ROOT / ".env.gold"
 

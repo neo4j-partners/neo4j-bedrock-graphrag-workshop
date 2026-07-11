@@ -1,4 +1,4 @@
-"""Export Neo4j graph data to setup/seed-data/.
+"""Export Neo4j graph data to financial_data_load/seed-data/.
 
 Exports the full knowledge graph: structured layer (companies, products,
 risk factors, asset managers, documents, financial metrics, and all their
@@ -9,11 +9,11 @@ Filters to filing companies (those with a FILED relationship to a Document
 node) and their directly-connected entities.
 
 Usage:
-    cd setup/export_seed_data
+    cd financial_data_load/export_seed_data
     uv run export.py
 
-Reads credentials from ../setup/.env
-Writes all output to ../setup/seed-data/
+Reads credentials from ../.env
+Writes all output to ../seed-data/
 """
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
 
-ROOT = Path(__file__).resolve().parent.parent          # setup/
+ROOT = Path(__file__).resolve().parent.parent          # financial_data_load/
 EXPORT_DIR = ROOT / "seed-data"
 ENV_FILE = ROOT / ".env"
 

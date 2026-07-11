@@ -1,273 +1,68 @@
-= Lab 0 Instructions: Sign Up and Load Data
+= Lab 0 Instructions: Sign In to AWS
 
-Follow these steps to sign up for Neo4j Aura, create your database instance, and load the SEC financial knowledge graph.
+Follow these steps to sign in to AWS and enable Amazon Bedrock model access for the coding labs.
 
-TIP: For concepts and background, see xref:lab0.adoc[Lab 0: Neo4j Aura Sign-Up and Data Load].
+TIP: For concepts and background, see xref:lab0.adoc[Lab 0: Sign In to AWS].
+
+There are two sign-in paths depending on your situation:
+
+* <<Option A: Workshop Event (OneBlink)>>: for instructor-led workshop participants with an event code
+* <<Option B: Using Your Own AWS Account>>: for self-paced learners using a personal or company AWS account
 
 == Prerequisites
 
-* A valid email address (no prior AWS setup is needed for Lab 0)
-* For **Workshop SSO Login**: access to the OneBlink credentials page (provided by your organizer)
+* For **Workshop Event**: An event code from your instructor and the email you registered with
+* For **Own Account**: An AWS account with IAM permissions for Bedrock
 
-== Part 1: Neo4j Aura Signup
+== Option A: Workshop Event (OneBlink)
 
-There are two signup options for this lab. **Follow the signup process provided by your workshop organizer.** If you are working through the workshop on your own, use the free trial signup.
+If you are attending an instructor-led workshop:
 
-=== Option A: Workshop SSO Login (Recommended for organized workshops)
+1. Visit https://events.oneblink.ai[events.oneblink.ai]
+2. Enter the email you used to register along with the 7-digit event code
+3. Check the box to agree to the Terms and Conditions, then click **Register**
 
-If your organizer has provided OneBlink credentials, use the SSO login process:
+image::lab0-oneblink-register.png[OneBlink Registration]
 
-1. Navigate to the OneBlink credentials page to retrieve your SSO login information (Org ID, Email, Password)
-+
-image::lab1-oneblink-credentials.png[OneBlink credentials page]
-2. Go to https://console-preview.neo4j.io/[console-preview.neo4j.io]
-3. Click **Continue with Organization SSO**
-+
-image::lab1-continue-sso.png[Continue with Organization SSO]
-4. Enter your **Org ID** from the OneBlink credentials page and click **Submit**
-+
-image::01_Login_w_Org_SSO.png[Login with Organization SSO]
-5. Click **Continue with OneBlink SSO**
-+
-image::lab1-oneblink-sso.png[Continue with OneBlink SSO]
-6. Enter your **Email** and **Password** from the OneBlink credentials page
-+
-WARNING: The email field may be pre-populated with an incorrect address. Be sure to clear it and enter the email from your OneBlink credentials.
+Check your mailbox for the OneBlink validation code.
 
-=== Option B: Free Trial Signup (For self-paced learning)
+image::lab0-validation-email.png[Validation Email]
 
-If you are completing this lab independently or your organizer has instructed you to create a free trial:
+Enter your email, the event code, and the validation code from your email, then click **Access Sandbox**.
 
-1. Navigate to https://console-preview.neo4j.io/[console-preview.neo4j.io]
-2. Click **Don't have an account? Sign up**
-3. Follow the sign-up process to create your Neo4j Aura account
-4. When prompted, select **AWS** as the cloud provider and **US East (N. Virginia)** as the region
-+
-image::lab1-free-trial-region.png[Free trial region selection]
-5. Click **Start 14-day free trial**
-6. **Save your credentials immediately.** Click **Download to continue**. The password is only shown once.
-+
-image::lab1-free-trial-credentials.png[Free trial credentials]
+image::lab0-access-sandbox.png[Access Sandbox]
 
-NOTE: If you signed up using the Free Trial option, your instance was already created during signup. Skip ahead to <<Part 3: Load the Knowledge Graph>>.
+Once validated, you will receive your AWS credentials. **Save this information.** You will need it for all subsequent labs. These accounts are terminated at the end of the workshop.
 
-== Part 2: Create Your Database Instance
+== Option B: Using Your Own AWS Account
 
-1. After logging in, click on **Instances** in the left sidebar under "Data services", then click **Create instance**
-+
-image::lab1-create-instance.png[Create Instance]
-2. Configure your new instance:
-+
-IMPORTANT: 3 key settings to watch when creating your instance! +
-**1.** Select **Professional**. Do _not_ select Business Critical +
-**2.** Set **Graph Analytics** to **Plugin** +
-**3.** Enable **Vector-optimized** (under Additional settings)
-+
-[cols="1,2"]
-|===
-| Setting | Value
+1. Ensure you have an IAM user with permissions for:
+** Amazon Bedrock (model access and agent creation)
+** CloudFormation (for CDK deployment)
+2. Create access keys for programmatic access if needed for later labs
 
-| **Tier** | Professional
-| **Instance name** | A unique name based on your name (e.g., `ryans-lab-instance`)
-| **Sizing** | 4 GB RAM / 1 CPU
-| **Graph Analytics** | Plugin
-| **Vector-optimized** | Enabled (under Additional settings)
-|===
+== Sign into AWS Console
 
-3. Click **Create** to provision your database instance
-+
-image::lab1-configure-instance.png[Configure Instance]
+1. Open the AWS Console at https://console.aws.amazon.com/[console.aws.amazon.com]
+2. Enter your Account ID (or account alias) and click **Next**
+3. Enter your IAM username and password, then click **Sign in**
 
-=== Save Your Credentials
+image::lab0-aws-console-home.png[AWS Console Home]
 
-IMPORTANT: After clicking Create, a credentials dialog appears with your Connection URI, Username, and Password. **Save this information immediately.** The password will not be shown again.
+== Select the Correct Region
 
-image::lab1-save-credentials.png[Save Credentials]
-
-Click **Download and continue** to save the credentials file. You will need these in Labs 3 through 6 for the `CONFIG.txt` notebook configuration.
+Amazon Bedrock is available in select regions. For this workshop, use **US East (N. Virginia) - us-east-1** for the widest model availability.
 
-== Part 3: Load the Knowledge Graph
-
-Open **Query** from the left sidebar in the https://console.neo4j.io[Aura Console] and run the following Cypher statements in order.
+1. Click the region selector in the top-right corner of the console
+2. Select **US East (N. Virginia)**
 
-NOTE: The seed dataset populates both layers of the graph. The Cypher steps below create the structured entities and their relationships. The seed dataset also ships the unstructured layer: Document and Chunk nodes, Amazon Titan Text Embeddings V2 embeddings (1024 dimensions) on each chunk, and the `chunkEmbeddings` vector index. Because the seed dataset includes the unstructured layer, the downstream labs work without running the optional data pipeline in Lab 2. See <<Step 5: The Unstructured Layer>> for details.
-
-=== Step 1: Create Constraints
-
-These ensure each node has a unique identifier and speed up MERGE lookups during loading.
-
-[source,cypher]
-----
-CREATE CONSTRAINT companyId IF NOT EXISTS
-FOR (c:Company) REQUIRE c.companyId IS UNIQUE;
+== Enable Bedrock Model Access
 
-CREATE CONSTRAINT companyName IF NOT EXISTS
-FOR (c:Company) REQUIRE c.name IS UNIQUE;
-
-CREATE CONSTRAINT productId IF NOT EXISTS
-FOR (p:Product) REQUIRE p.productId IS UNIQUE;
+1. In the AWS Console search bar, type **Bedrock** and select **Amazon Bedrock**
+2. In the left sidebar, click **Model access** to verify which models are available
 
-CREATE CONSTRAINT riskId IF NOT EXISTS
-FOR (r:RiskFactor) REQUIRE r.riskId IS UNIQUE;
-
-CREATE CONSTRAINT managerId IF NOT EXISTS
-FOR (m:AssetManager) REQUIRE m.managerId IS UNIQUE;
-
-CREATE CONSTRAINT documentId IF NOT EXISTS
-FOR (d:Document) REQUIRE d.documentId IS UNIQUE;
-
-CREATE CONSTRAINT metricId IF NOT EXISTS
-FOR (fm:FinancialMetric) REQUIRE fm.metricId IS UNIQUE;
-----
-
-=== Step 2: Load Nodes
-
-Each statement reads a CSV file and creates the corresponding nodes: Companies, Products, Risk Factors, Asset Managers, Documents, and Financial Metrics.
-
-[source,cypher]
-----
-LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/companies.csv' AS row
-MERGE (c:Company {companyId: row.companyId})
-SET c.name = row.name, c.ticker = row.ticker,
-    c.cik = row.cik, c.cusip = row.cusip;
-
-LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/products.csv' AS row
-MERGE (p:Product {productId: row.productId})
-SET p.name = row.name, p.description = row.description;
-
-LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/risk_factors.csv' AS row
-MERGE (r:RiskFactor {riskId: row.riskId})
-SET r.name = row.name, r.description = row.description;
-
-LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/asset_managers.csv' AS row
-MERGE (m:AssetManager {managerId: row.managerId})
-SET m.name = row.name;
-
-LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/documents.csv' AS row
-MERGE (d:Document {documentId: row.documentId})
-SET d.accessionNumber = row.accessionNumber, d.filingType = row.filingType,
-    d.source = row.source;
-
-LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/financial_metrics.csv' AS row
-MERGE (fm:FinancialMetric {metricId: row.metricId})
-SET fm.name = row.name, fm.value = row.value, fm.period = row.period;
-----
-
-=== Step 3: Load Relationships
-
-Creates relationships between nodes. The competitor and partner loads use MERGE on the target company name, which creates new Company nodes for names not already in `companies.csv`.
-
-[source,cypher]
-----
-LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/company_products.csv' AS row
-MATCH (c:Company {companyId: row.companyId})
-MATCH (p:Product {productId: row.productId})
-MERGE (c)-[:OFFERS]->(p);
-
-LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/company_risk_factors.csv' AS row
-MATCH (c:Company {companyId: row.companyId})
-MATCH (r:RiskFactor {riskId: row.riskId})
-MERGE (c)-[:FACES_RISK]->(r);
-
-LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/asset_manager_companies.csv' AS row
-MATCH (m:AssetManager {managerId: row.managerId})
-MATCH (c:Company {companyId: row.companyId})
-MERGE (m)-[:OWNS {shares: toInteger(row.shares)}]->(c);
-
-LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/company_competitors.csv' AS row
-MATCH (a:Company {companyId: row.sourceCompanyId})
-MERGE (b:Company {name: row.targetCompanyName})
-MERGE (a)-[:COMPETES_WITH]->(b);
-
-LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/company_partners.csv' AS row
-MATCH (a:Company {companyId: row.sourceCompanyId})
-MERGE (b:Company {name: row.targetCompanyName})
-MERGE (a)-[:PARTNERS_WITH]->(b);
-
-LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/company_documents.csv' AS row
-MATCH (c:Company {companyId: row.companyId})
-MATCH (d:Document {documentId: row.documentId})
-MERGE (c)-[:FILED]->(d);
-
-LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/company_financial_metrics.csv' AS row
-MATCH (c:Company {companyId: row.companyId})
-MATCH (fm:FinancialMetric {metricId: row.metricId})
-MERGE (c)-[:REPORTS]->(fm);
-----
-
-=== Step 4: Create Fulltext Index
-
-Enables keyword search across entity names and descriptions.
-
-[source,cypher]
-----
-CREATE FULLTEXT INDEX search_entities IF NOT EXISTS
-FOR (n:Company|Product|RiskFactor)
-ON EACH [n.name, n.description];
-----
-
-NOTE: This statement will return "No changes, no records." That is expected. Index creation is a schema operation and does not return rows. To confirm the index was created, run `SHOW FULLTEXT INDEXES`.
-
-=== Step 5: The Unstructured Layer
-
-The seed dataset also includes an unstructured layer that connects the filing text to the structured entities. This layer ships with the seed data, so you do not load it by hand and you do not need the optional pipeline in xref:lab2.adoc[Lab 2: Data Pipeline].
-
-The unstructured layer provides:
-
-* **Document and Chunk nodes**: each Document links to Chunk nodes that hold passages of filing text, connected by `FROM_DOCUMENT` and ordered by `NEXT_CHUNK`.
-* **Embeddings**: each Chunk carries a 1024-dimension vector produced by Amazon Titan Text Embeddings V2 (`amazon.titan-embed-text-v2:0`).
-* **The `chunkEmbeddings` vector index**: a cosine-similarity vector index over `Chunk.embedding` so semantic search works immediately in the later labs.
-
-With this layer in place, the graph is complete after Lab 0. Labs 3 through 6 run without any further loading. To confirm the layer is present, check the chunk count and the vector index:
-
-[source,cypher]
-----
-MATCH (ch:Chunk) RETURN count(ch) AS chunks;
-
-SHOW VECTOR INDEXES
-----
-
-=== Step 6: Verify the Load
-
-View the complete graph schema:
-
-[source,cypher]
-----
-CALL db.schema.visualization()
-----
-
-List all indexes and constraints:
-
-[source,cypher]
-----
-SHOW INDEXES
-----
-
-Node counts by label:
-
-[source,cypher]
-----
-MATCH (n)
-WITH labels(n)[0] AS label, count(n) AS count
-RETURN label, count ORDER BY label
-----
-
-Expected counts:
-
-[cols="1,1"]
-|===
-| Label | Count
-
-| AssetManager | 15
-| Company | ~71
-| Document | 7
-| FinancialMetric | 874
-| Product | 303
-| RiskFactor | 883
-|===
-
-NOTE: The Company count is higher than 6 because `company_competitors.csv` and `company_partners.csv` contain competitor and partner names (e.g., Google, Samsung, OpenAI) that are not in `companies.csv`. The relationship loads use `MERGE (b:Company {name: row.targetCompanyName})`, which creates new Company nodes for these names. The resulting nodes have only a `name` property, with no `companyId`, `ticker`, or other identifiers.
+NOTE: If this is your first time using Bedrock, you may need to request access to specific models. Click **Manage model access**, enable **Amazon Titan Text Embeddings V2** (usually approved instantly) and **Anthropic Claude** (may take a few minutes), then click **Save changes**.
 
 == Next Steps
 
-Continue to xref:lab1.adoc[Lab 1: Explore the Knowledge Graph] to query the graph with Cypher and explore it visually with Neo4j Explore.
+With AWS sign-in complete and Bedrock model access enabled, continue to xref:lab1.adoc[Lab 1: Neo4j Aura Setup and Exploration].

@@ -14,7 +14,7 @@ from pathlib import Path
 
 from config import get_neo4j_driver, get_embedder
 
-SEED_DIR = Path(__file__).parent.parent.parent / "setup" / "seed-data"
+SEED_DIR = Path(__file__).parent.parent / "seed-data"
 
 
 def load_seed_data():

@@ -1,8 +1,8 @@
 = Lab 3: Sample Queries
 
-These queries let you explore the unstructured layer loaded by the Lab 0 seed load: Document and Chunk nodes, the `chunkEmbeddings` vector index, and `FROM_CHUNK` cross-links. They return results once the seed load has been run.
+These queries let you explore the unstructured layer loaded by the Lab 1 seed load: Document and Chunk nodes, the `chunkEmbeddings` vector index, and `FROM_CHUNK` cross-links. They return results once the seed load has been run.
 
-TIP: For structured graph queries against the entity data from the Lab 0 seed load, see the xref:sample-queries.adoc[Sample Cypher Queries] page.
+TIP: For structured graph queries against the entity data from the Lab 1 seed load, see the xref:sample-queries.adoc[Sample Cypher Queries] page.
 
 == Document-Chunk Structure
 
@@ -48,7 +48,7 @@ NOTE: `OPTIONAL MATCH` on NEXT_CHUNK keeps the last chunk in the chain (which ha
 
 == Vector Similarity Search
 
-IMPORTANT: Requires the `chunkEmbeddings` vector index (created by the Lab 0 seed load).
+IMPORTANT: Requires the `chunkEmbeddings` vector index (created by the Lab 1 seed load).
 
 Find chunks similar to a random seed chunk (no API key needed):
 
@@ -174,7 +174,7 @@ NOTE: NEXT_CHUNK relationships form a linked list that preserves the original re
 
 == Fulltext Keyword Search
 
-Fulltext indexes enable keyword-based search alongside vector similarity. The `search_entities` index was already created by the xref:lab0.adoc[Lab 0 seed load]. The queries below also require a `search_chunks` index on Chunk text, which is not created until you run the setup query below.
+Fulltext indexes enable keyword-based search alongside vector similarity. The `search_entities` index was already created by the xref:lab1.adoc[Lab 1 seed load]. The queries below also require a `search_chunks` index on Chunk text, which is not created until you run the setup query below.
 
 === Setup: Create Fulltext Index on Chunks
 
@@ -274,4 +274,4 @@ RETURN name, type, labelsOrTypes, properties
 ORDER BY type, name
 ----
 
-NOTE: Expected indexes include `chunkEmbeddings` (VECTOR), `search_entities` (FULLTEXT, created by the Lab 0 seed load), and `search_chunks` (FULLTEXT, created above).
+NOTE: Expected indexes include `chunkEmbeddings` (VECTOR), `search_entities` (FULLTEXT, created by the Lab 1 seed load), and `search_chunks` (FULLTEXT, created above).

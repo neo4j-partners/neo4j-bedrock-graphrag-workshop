@@ -10,7 +10,7 @@ TIP: For concepts and background, see xref:lab2.adoc[Lab 2: Data Pipeline].
 
 == Prerequisites
 
-* Completed **Lab 0** (Neo4j Aura instance created and running with the seed data load)
+* Completed **Lab 1** (Neo4j Aura instance created and running with the seed data load)
 * Completed the Part 2 environment setup (xref:part2-setup-instructions.adoc[Part 2 Setup Instructions])
 * A running environment (SageMaker Studio or GitHub Codespace)
 

@@ -10,7 +10,7 @@ TIP: For concepts and background, see xref:lab6.adoc[Lab 6: Neo4j MCP Agent].
 
 == Prerequisites
 
-* Completed **Lab 0** (Neo4j Aura instance with SEC financial data seeded)
+* Completed **Lab 1** (Neo4j Aura instance with SEC financial data seeded)
 * Completed the **Part 2 environment setup** (Python environment and dependencies)
 * Your `CONFIG.txt` file updated with MCP Gateway credentials (`MCP_GATEWAY_URL` and `MCP_ACCESS_TOKEN`)
 * AWS credentials configured for Amazon Bedrock access

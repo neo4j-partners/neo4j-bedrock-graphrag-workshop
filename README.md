@@ -37,7 +37,7 @@ A hands-on workshop teaching Graph Retrieval-Augmented Generation (GraphRAG) pat
 
 | Section | Title | Description |
 |---------|-------|-------------|
-| [Appendix](Appendix_What_Is_An_Agent/README.md) | What Is an Agent? | Strands Agents SDK basics, tool binding, the ReAct pattern, and AgentCore deployment |
+| [Appendix](zz_Appendix_What_Is_An_Agent/README.md) | What Is an Agent? | Strands Agents SDK basics, tool binding, the ReAct pattern, and AgentCore deployment |
 
 ## Prerequisites
 
@@ -48,7 +48,7 @@ A hands-on workshop teaching Graph Retrieval-Augmented Generation (GraphRAG) pat
 
 ### Option 1: AWS SageMaker Studio (Recommended for workshops)
 
-Follow the [Appendix — What Is an Agent?](Appendix_What_Is_An_Agent/README.md) to set up SageMaker Studio and clone the repository.
+Follow the [Appendix — What Is an Agent?](zz_Appendix_What_Is_An_Agent/README.md) to set up SageMaker Studio and clone the repository.
 
 ### Option 2: Local Development
 

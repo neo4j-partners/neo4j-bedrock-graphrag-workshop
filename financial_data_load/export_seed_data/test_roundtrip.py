@@ -4,7 +4,7 @@ Uses the empty test database from .env.gold. Tests the full load path:
 chunks.jsonl + chunk_documents.csv + chunk_sequence.csv + entity_chunks.csv.
 
 Usage:
-    cd setup/export_seed_data
+    cd financial_data_load/export_seed_data
     uv run test_roundtrip.py
 """
 
@@ -19,7 +19,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
 
-ROOT = Path(__file__).resolve().parent.parent          # setup/
+ROOT = Path(__file__).resolve().parent.parent          # financial_data_load/
 SEED_DIR = ROOT / "seed-data"
 ENV_FILE = ROOT / ".env.gold"
 

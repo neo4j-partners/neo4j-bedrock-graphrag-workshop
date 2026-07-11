@@ -94,11 +94,8 @@ The database stores the knowledge graph and maintains its indexes. The tools pro
 |===
 | Lab | Neo4j Capabilities Used
 
-| xref:lab0.adoc[Lab 0]
-| AuraDB (database provisioning), Data Import (seed load of structured entities, chunks, embeddings, and vector index)
-
 | xref:lab1.adoc[Lab 1]
-| Browser and Explore (Cypher queries, visual graph exploration), fulltext index (keyword search)
+| AuraDB (database provisioning), Data Import (seed load of structured entities, chunks, embeddings, and vector index), Browser and Explore (Cypher queries, visual graph exploration), fulltext index (keyword search)
 
 | xref:lab3.adoc[Lab 3]
 | Vector index (semantic search), Cypher (graph traversal for context enrichment with the neo4j-graphrag library)

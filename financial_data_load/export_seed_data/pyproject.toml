@@ -1,7 +1,7 @@
 [project]
 name = "export-seed-data"
 version = "0.1.0"
-description = "Export Neo4j graph data to setup/seed-data CSVs"
+description = "Export Neo4j graph data to financial_data_load/seed-data CSVs"
 requires-python = ">=3.11"
 dependencies = [
     "neo4j>=5.0.0",

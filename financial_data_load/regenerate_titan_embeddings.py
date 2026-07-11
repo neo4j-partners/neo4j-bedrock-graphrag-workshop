@@ -13,7 +13,7 @@ stored vectors must be regenerated with Titan to stay in the same vector space
 as the query-time embedder. Run this once after the Nova to Titan code swap.
 
 Usage:
-    uv run setup/regenerate_titan_embeddings.py [--region us-east-1]
+    uv run financial_data_load/regenerate_titan_embeddings.py [--region us-east-1]
 """
 
 from __future__ import annotations

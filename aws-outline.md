@@ -328,7 +328,7 @@ Directory renames run in an order that avoids collisions with existing names:
 
 1. `Lab_6_GraphRAG_Pipeline` to `Lab_2_Data_Pipeline` (frees Lab_6, the headline move).
 2. `Lab_5_MCP_Server` to `Lab_6_MCP_Server`.
-3. `Lab_3_Intro_to_Bedrock_and_Agents` to `Appendix_What_Is_An_Agent` (frees Lab_3).
+3. `Lab_3_Intro_to_Bedrock_and_Agents` to `zz_Appendix_What_Is_An_Agent` (frees Lab_3).
 4. `Lab_4_GraphRAG_Search` split: notebooks 02 and 03 to `Lab_3_GraphRAG_Search`, notebook 04 to `Lab_4_GraphRAG_Agent`, notebook 01's chunk/embedding/index logic folds into the Lab 0 seed load.
 5. Reconstitute Lab 0 and Lab 1 from `Lab_0_Sign_In` and `Lab_1_Aura_Setup`: Lab 0 becomes Aura sign-up plus full seed load, Lab 1 becomes graph exploration.
 6. Author `Lab_5_Agent_Memory` as net-new.
@@ -343,7 +343,7 @@ Status as of 2026-07-10, from a review of the working tree against the plan abov
 
 ### Done
 
-* **Directory renames complete (staged).** All moves in the Renaming Execution Order are on disk and staged: `Lab_6_GraphRAG_Pipeline` to `Lab_2_Data_Pipeline`, `Lab_5_MCP_Server` to `Lab_6_MCP_Server`, `Lab_3_Intro_to_Bedrock_and_Agents` to `Appendix_What_Is_An_Agent`, and `Lab_4_GraphRAG_Search` split into `Lab_3_GraphRAG_Search` (nb 01 vector retriever, nb 02 vector-cypher retriever) and `Lab_4_GraphRAG_Agent` (nb 01 strands agent). `Lab_5_Agent_Memory` exists as a new directory. The old `Lab_4_GraphRAG_Search` directory has since been removed.
+* **Directory renames complete (staged).** All moves in the Renaming Execution Order are on disk and staged: `Lab_6_GraphRAG_Pipeline` to `Lab_2_Data_Pipeline`, `Lab_5_MCP_Server` to `Lab_6_MCP_Server`, `Lab_3_Intro_to_Bedrock_and_Agents` to `zz_Appendix_What_Is_An_Agent`, and `Lab_4_GraphRAG_Search` split into `Lab_3_GraphRAG_Search` (nb 01 vector retriever, nb 02 vector-cypher retriever) and `Lab_4_GraphRAG_Agent` (nb 01 strands agent). `Lab_5_Agent_Memory` exists as a new directory. The old `Lab_4_GraphRAG_Search` directory has since been removed.
 * **Antora site restructured to the four-part layout.** `site/nav.adoc` matches the target: Part 1 (Lab 0, Lab 1), Part 2 (Lab 2 optional, Lab 3, Lab 4), Part 3 (Lab 5 Agent Memory), Part 4 (Lab 6 MCP), plus the Appendix. `lab2.adoc`, `lab5.adoc`, and `lab6.adoc` all exist with matching instruction pages.
 * **Documentation migrated to Titan embeddings.** Every `.adoc` page consistently references Amazon Titan Text Embeddings V2 (`amazon.titan-embed-text-v2:0`) at 1024 dimensions. No `nova` or `1536` references remain in the docs.
 * **Dimensions standardized at 1024 in code.** Every config defaults `embedding_dimensions` to 1024. No `1536` reference exists anywhere in code or notebooks; the dimension half of the embedding decision is effectively done.

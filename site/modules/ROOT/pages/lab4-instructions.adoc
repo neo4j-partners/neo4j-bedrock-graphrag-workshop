@@ -13,7 +13,7 @@ TIP: For concepts and background, see xref:lab4.adoc[Lab 4: Strands GraphRAG Age
 
 == Prerequisites
 
-* Completed **Lab 3** (or at least the Lab 0 seed load, which provides the chunks, Titan v2 embeddings, and the `chunkEmbeddings` index the agent's tool queries)
+* Completed **Lab 3** (or at least the Lab 1 seed load, which provides the chunks, Titan v2 embeddings, and the `chunkEmbeddings` index the agent's tool queries)
 * Completed the **Part 2 environment setup**: see xref:part2-setup-instructions.adoc[Part 2 Setup Instructions]
 * `CONFIG.txt` filled in with your Neo4j credentials; `MODEL_ID` and `REGION` use working defaults
 

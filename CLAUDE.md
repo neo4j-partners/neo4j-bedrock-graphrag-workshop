@@ -59,7 +59,7 @@ Three notebooks using Strands Agents SDK with MCP to search a Neo4j knowledge gr
 Uses `lib/data_utils.py` for Bedrock embeddings (lightweight — no neo4j or neo4j-graphrag dependency). All MCP access via Strands `MCPClient` with `streamablehttp_client` transport. The MCP server is pre-deployed with full embeddings by the lab administrator.
 
 ### Appendix - What Is an Agent?
-Location: `Appendix_What_Is_An_Agent/`
+Location: `zz_Appendix_What_Is_An_Agent/`
 
 Two notebooks (reference material, moved out of the main path):
 - `01_basic_strands_agent.ipynb`: Uses `strands.Agent` with `strands.models.BedrockModel` and `@tool` decorator. Defines simple tools (get_current_time, add_numbers), creates an agent, tests it with queries including sample SEC filing data.
@@ -86,7 +86,7 @@ Two notebooks (reference material, moved out of the main path):
 
 ## Financial Data
 
-Structured CSV seed data lives in `setup/seed-data/`: entity tables (companies, products, risk_factors, asset_managers), junction tables (company_products, company_risk_factors, asset_manager_companies), and relationship tables (company_competitors, company_partners).
+Structured CSV seed data lives in `financial_data_load/seed-data/`: entity tables (companies, products, risk_factors, asset_managers), junction tables (company_products, company_risk_factors, asset_manager_companies), and relationship tables (company_competitors, company_partners).
 
 ## Running Notebooks
 

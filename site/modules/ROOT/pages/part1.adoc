@@ -1,6 +1,6 @@
 = Part 1: Getting Started with Neo4j Aura and the Dataset
 
-Part 1 gets everyone connected and oriented on the data in under 30 minutes. You will sign up for a Neo4j Aura free trial, load the SEC 10-K financial knowledge graph, and explore it with Cypher and Neo4j Explore. There is no AWS Marketplace walkthrough here: everyone uses the Neo4j Aura free trial.
+Part 1 gets everyone connected and oriented on the data in under 30 minutes. You will sign in to AWS and enable Amazon Bedrock model access, then sign up for a Neo4j Aura free trial, load the SEC 10-K financial knowledge graph, and explore it with Cypher and Neo4j Explore. There is no AWS Marketplace walkthrough here: everyone uses the Neo4j Aura free trial.
 
 By the end of Part 1 you will have a running knowledge graph, loaded with both structured entities and the unstructured document layer, ready for the GraphRAG labs that follow.
 
@@ -8,5 +8,5 @@ image::financial-data-model.png[SEC 10-K Financial Data Model,800]
 
 == Labs
 
-* xref:lab0.adoc[Lab 0: Neo4j Aura Sign-Up and Data Load]: sign up for the Aura free trial and load the seed dataset, including the structured graph and the unstructured layer with embeddings.
-* xref:lab1.adoc[Lab 1: Explore the Knowledge Graph]: explore the graph with Cypher and Neo4j Explore.
+* xref:lab0.adoc[Lab 0: Sign In to AWS]: sign in to AWS and enable Amazon Bedrock model access.
+* xref:lab1.adoc[Lab 1: Neo4j Aura Setup and Exploration]: sign up for the Aura free trial, load the complete seed dataset (structured graph plus the unstructured chunk/embedding layer), and explore it with Cypher and Neo4j Explore.

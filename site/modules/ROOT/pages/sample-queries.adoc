@@ -2,7 +2,7 @@
 
 Copy and paste these queries into the https://console.neo4j.io[Neo4j Aura Query interface] to explore the SEC financial knowledge graph. Queries are organized by retrieval strategy, progressing from direct graph traversals through vector and fulltext search to graph-enriched retrieval.
 
-TIP: The fulltext, vector, and graph-enriched queries require the unstructured layer (Chunk nodes, embeddings, and the `chunkEmbeddings` vector index), which is loaded in xref:lab0-instructions.adoc[Lab 0].
+TIP: The fulltext, vector, and graph-enriched queries require the unstructured layer (Chunk nodes, embeddings, and the `chunkEmbeddings` vector index), which is loaded in xref:lab1-instructions.adoc[Lab 1].
 
 == Cypher Quick Reference
 
@@ -51,7 +51,7 @@ TIP: The fulltext, vector, and graph-enriched queries require the unstructured l
 
 == Section 1: Structured Graph Queries
 
-These queries run against the structured entity data loaded in Lab 0: Company, Product, RiskFactor, and AssetManager nodes with their typed relationships.
+These queries run against the structured entity data loaded in Lab 1: Company, Product, RiskFactor, and AssetManager nodes with their typed relationships.
 
 '''
 
@@ -170,4 +170,4 @@ NOTE: Pattern matching with directed relationships following the schema: Company
 
 == Fulltext, Vector, and Graph-Enriched Queries
 
-The fulltext search, vector similarity, and graph-enriched retrieval queries require the Document/Chunk nodes and embeddings loaded in Lab 0. See the xref:lab3-sample-queries.adoc[Lab 3: Sample Queries] page for those queries.
+The fulltext search, vector similarity, and graph-enriched retrieval queries require the Document/Chunk nodes and embeddings loaded in Lab 1. See the xref:lab3-sample-queries.adoc[Lab 3: Sample Queries] page for those queries.

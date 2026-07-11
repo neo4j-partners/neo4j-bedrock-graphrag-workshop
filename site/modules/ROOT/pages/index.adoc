@@ -20,7 +20,7 @@ The <<From Knowledge Graph to Agents>> section below traces the full architectur
 
 === Neo4j: Graph Intelligence Platform
 
-Neo4j AuraDB stores data as nodes and relationships with built-in vector indexes, enabling GraphRAG queries that combine semantic similarity search with graph traversal. See xref:lab0.adoc[Lab 0] for graph setup and xref:lab1.adoc[Lab 1] for Cypher basics.
+Neo4j AuraDB stores data as nodes and relationships with built-in vector indexes, enabling GraphRAG queries that combine semantic similarity search with graph traversal. See xref:lab1.adoc[Lab 1] for graph setup and Cypher basics.
 
 === Generative AI on AWS
 
@@ -30,7 +30,7 @@ Amazon Bedrock provides unified API access to foundation models including Anthro
 
 Four stages build on each other across the workshop.
 
-* **Getting Started with Neo4j Aura.** Sign up for Aura and load the SEC financial data, which arrives as a complete graph: structured entities plus chunks, Titan Text Embeddings V2 embeddings, and a vector index. Explore it visually with graph visualization and Cypher. See xref:lab0.adoc[Lab 0] and xref:lab1.adoc[Lab 1].
+* **Getting Started with Neo4j Aura.** Sign up for Aura and load the SEC financial data, which arrives as a complete graph: structured entities plus chunks, Titan Text Embeddings V2 embeddings, and a vector index. Explore it visually with graph visualization and Cypher. See xref:lab1.adoc[Lab 1].
 * **Semantic Search and GraphRAG.** Use the neo4j-graphrag library to combine vector search with graph traversal, enriching retrieved passages with connected companies, products, and risk factors. See xref:lab3.adoc[Lab 3].
 * **Strands GraphRAG Agent on AgentCore.** Wrap the retrievers as Strands agent tools and deploy the agent to Amazon Bedrock AgentCore Runtime for production hosting. See xref:lab4.adoc[Lab 4].
 * **Agent Memory and MCP.** Add persistent memory across conversation turns with neo4j-agent-memory, and connect agents to the graph through the Neo4j MCP Server. See xref:lab5.adoc[Lab 5] and xref:lab6.adoc[Lab 6].
@@ -45,7 +45,7 @@ The SEC financial dataset includes six entity types connected by typed relations
 
 image::financial-data-model.png[SEC 10-K Financial Data Model,800]
 
-This diagram shows the structured layer. The Lab 0 seed load also brings in the unstructured layer: Document and Chunk nodes with Titan Text Embeddings V2 embeddings that connect filing text back to these entities. xref:lab3.adoc[Lab 3] uses both layers for graph-enriched retrieval, and xref:lab2.adoc[Lab 2] shows how the pipeline builds them from scratch.
+This diagram shows the structured layer. The Lab 1 seed load also brings in the unstructured layer: Document and Chunk nodes with Titan Text Embeddings V2 embeddings that connect filing text back to these entities. xref:lab3.adoc[Lab 3] uses both layers for graph-enriched retrieval, and xref:lab2.adoc[Lab 2] shows how the pipeline builds them from scratch.
 
 == Workshop Architecture
 
@@ -62,12 +62,12 @@ image::workshop-architecture.png[Workshop Architecture,800]
 | Lab | Description | Duration
 
 | xref:lab0.adoc[Lab 0]
-| Sign up for Neo4j Aura and load the seed dataset: structured graph, chunks, Titan V2 embeddings, and vector index
-| 20 min
+| Sign in to AWS and enable Amazon Bedrock model access
+| 10 min
 
 | xref:lab1.adoc[Lab 1]
-| Explore the knowledge graph with Cypher and Neo4j Explore
-| 20 min
+| Sign up for Neo4j Aura, load the seed dataset (structured graph, chunks, Titan V2 embeddings, and vector index), and explore it with Cypher and Neo4j Explore
+| 30 min
 |===
 
 === Part 2: AWS ETL, Semantic Search, and GraphRAG

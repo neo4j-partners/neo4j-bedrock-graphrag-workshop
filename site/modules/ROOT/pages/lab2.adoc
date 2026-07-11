@@ -1,10 +1,10 @@
 = Lab 2: Data Pipeline (Optional)
 
-NOTE: This lab is optional and audience-dependent. Skip it for non-technical audiences or when short on time. The Lab 0 seed load already provides the full graph, including chunks, Amazon Titan Text Embeddings V2 embeddings, and the `chunkEmbeddings` vector index, so the rest of Part 2 works without running this lab.
+NOTE: This lab is optional and audience-dependent. Skip it for non-technical audiences or when short on time. The Lab 1 seed load already provides the full graph, including chunks, Amazon Titan Text Embeddings V2 embeddings, and the `chunkEmbeddings` vector index, so the rest of Part 2 works without running this lab.
 
-Lab 0 loaded a pre-built knowledge graph where seed data and embeddings were already in place. This lab builds that graph from scratch. You load raw SEC 10-K filing data, split it into chunks, generate vector embeddings, and then query the graph using the neo4j-graphrag library with `VectorCypherRetriever`, which adds graph traversal to enrich every vector search result with connected entities.
+Lab 1 loaded a pre-built knowledge graph where seed data and embeddings were already in place. This lab builds that graph from scratch. You load raw SEC 10-K filing data, split it into chunks, generate vector embeddings, and then query the graph using the neo4j-graphrag library with `VectorCypherRetriever`, which adds graph traversal to enrich every vector search result with connected entities.
 
-This lab wipes and rebuilds the shared workshop Aura instance from `financial_data.json`, reproducing the complete graph: structured entities, chunks, Amazon Titan Text Embeddings V2 embeddings, and the vector index. The rest of Part 2 still works afterward because the rebuilt graph matches what the Lab 0 seed load produced.
+This lab wipes and rebuilds the shared workshop Aura instance from `financial_data.json`, reproducing the complete graph: structured entities, chunks, Amazon Titan Text Embeddings V2 embeddings, and the vector index. The rest of Part 2 still works afterward because the rebuilt graph matches what the Lab 1 seed load produced.
 
 TIP: Ready to start? Jump to the xref:lab2-instructions.adoc[Lab 2 Instructions] for the notebook walkthrough.
 
@@ -17,7 +17,7 @@ TIP: Ready to start? Jump to the xref:lab2-instructions.adoc[Lab 2 Instructions]
 
 == Embeddings and Vector Search
 
-The Lab 0 seed load used pre-built embeddings. This lab generates them from scratch. Amazon Titan Text Embeddings V2 generates 1024-dimensional embeddings for each chunk of SEC filing text. Those vectors are stored as properties on Chunk nodes in Neo4j and indexed with a vector index (`chunkEmbeddings`) that supports approximate nearest-neighbor lookup. When a retriever receives a question, it embeds the question with the same model, queries the index for the closest chunk vectors, and returns the matched text.
+The Lab 1 seed load used pre-built embeddings. This lab generates them from scratch. Amazon Titan Text Embeddings V2 generates 1024-dimensional embeddings for each chunk of SEC filing text. Those vectors are stored as properties on Chunk nodes in Neo4j and indexed with a vector index (`chunkEmbeddings`) that supports approximate nearest-neighbor lookup. When a retriever receives a question, it embeds the question with the same model, queries the index for the closest chunk vectors, and returns the matched text.
 
 .How vector search powers RAG
 [%collapsible]
@@ -87,13 +87,13 @@ This query runs for each chunk that vector search returns. The retriever collect
 Graph traversal starts from what vector search found. If the question does not surface relevant chunks, no amount of traversal compensates. A question targeting a specific entity by name ("How many products does NVIDIA offer?") may return better results with a direct Cypher query than with vector search, because the answer depends on counting relationships, not finding semantically similar text. VectorCypherRetriever is strongest when the question combines semantic relevance with structural context: the vector search finds the right passage, and the graph traversal enriches it with the entities and relationships that surround it.
 ====
 
-== Lab 0 Seed Load vs Lab 2 Pipeline
+== Lab 1 Seed Load vs Lab 2 Pipeline
 
-The Lab 0 seed load and this lab produce the same knowledge graph using the same neo4j-graphrag library and graph pattern. The difference is in what comes pre-built versus what you build yourself.
+The Lab 1 seed load and this lab produce the same knowledge graph using the same neo4j-graphrag library and graph pattern. The difference is in what comes pre-built versus what you build yourself.
 
 [cols="1,2,2"]
 |===
-| Aspect | Lab 0 Seed Load (Pre-built Graph) | Lab 2 Pipeline (Build from Scratch)
+| Aspect | Lab 1 Seed Load (Pre-built Graph) | Lab 2 Pipeline (Build from Scratch)
 
 | **Data loading**
 | Full graph pre-loaded from seed data, including chunks and embeddings

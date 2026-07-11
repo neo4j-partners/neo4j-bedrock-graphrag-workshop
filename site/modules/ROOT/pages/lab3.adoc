@@ -1,6 +1,6 @@
 = Lab 3: Semantic Search and GraphRAG
 
-This lab connects directly to your knowledge graph using the neo4j-graphrag Python library and builds retrieval pipelines that progress from pure vector search to graph-enriched search. It uses the same Neo4j Aura instance from Part 1. The unstructured layer (document chunks, Titan v2 embeddings, and the `chunkEmbeddings` vector index) is already present from the Lab 0 seed load, so this lab starts directly with retrieval.
+This lab connects directly to your knowledge graph using the neo4j-graphrag Python library and builds retrieval pipelines that progress from pure vector search to graph-enriched search. It uses the same Neo4j Aura instance from Part 1. The unstructured layer (document chunks, Titan v2 embeddings, and the `chunkEmbeddings` vector index) is already present from the Lab 1 seed load, so this lab starts directly with retrieval.
 
 TIP: Ready to start? Jump to the xref:lab3-instructions.adoc[Lab 3 Instructions] for step-by-step notebook walkthroughs.
 
@@ -12,7 +12,7 @@ TIP: Ready to start? Jump to the xref:lab3-instructions.adoc[Lab 3 Instructions]
 
 == The Two-Layer Graph
 
-The graph you explored in Part 1 (companies, products, risk factors, asset managers) is the **structured layer**. The Lab 0 seed load also added the **unstructured layer**: Document and Chunk nodes with embeddings, linked by `FROM_DOCUMENT` and `NEXT_CHUNK` relationships. Cross-links (`FROM_CHUNK`) connect entities like Products and RiskFactors to the Chunks that mention them.
+The graph you explored in Part 1 (companies, products, risk factors, asset managers) is the **structured layer**. The Lab 1 seed load also added the **unstructured layer**: Document and Chunk nodes with embeddings, linked by `FROM_DOCUMENT` and `NEXT_CHUNK` relationships. Cross-links (`FROM_CHUNK`) connect entities like Products and RiskFactors to the Chunks that mention them.
 
 The `FILED` relationship bridges the two layers: `(Company)-[:FILED]->(Document)`. When graph-enriched search traverses from a chunk to its source document to the company that filed it, it crosses from unstructured text into the structured entities you already know. That traversal chain, `(Chunk)-[:FROM_DOCUMENT]->(Document)<-[:FILED]-(Company)`, is what makes GraphRAG possible.
 
@@ -55,7 +55,7 @@ This lab applies the pattern above to SEC 10-K filings, the annual financial rep
 
 When you ask "What cybersecurity risks does Apple face?", vector search finds the most relevant passages. Graph-enriched search then follows relationships from those passages to return Apple as the filer, the specific products mentioned, and the risk factor classifications, all in a single retrieval step.
 
-This lab covers the retrieval side: vector search and graph-enriched retrieval. The chunking and embedding were pre-computed and loaded by the Lab 0 seed load. xref:lab2.adoc[Lab 2] covers building that data pipeline from scratch.
+This lab covers the retrieval side: vector search and graph-enriched retrieval. The chunking and embedding were pre-computed and loaded by the Lab 1 seed load. xref:lab2.adoc[Lab 2] covers building that data pipeline from scratch.
 
 image::graph-enriched-retrieval.png[SEC 10-K GraphRAG Retrieval Flow,800]
 

@@ -71,7 +71,7 @@ MCP_GATEWAY_URL=your-gateway-url-here
 MCP_ACCESS_TOKEN=your-access-token-here
 ----
 
-The MCP Gateway URL and access token come from the Neo4j MCP Server deployment on AgentCore. Lab 6 requires these values. Participants fill in their own `NEO4J_URI`, `NEO4J_USERNAME`, and `NEO4J_PASSWORD` after completing xref:lab0.adoc[Lab 0].
+The MCP Gateway URL and access token come from the Neo4j MCP Server deployment on AgentCore. Lab 6 requires these values. Participants fill in their own `NEO4J_URI`, `NEO4J_USERNAME`, and `NEO4J_PASSWORD` after completing xref:lab1.adoc[Lab 1].
 
 == Step 4: SageMaker Lifecycle Configuration (Optional)
 

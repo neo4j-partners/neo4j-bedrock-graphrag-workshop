@@ -6,7 +6,7 @@ Synthesis of `aws-outline.md`, `proposed-outline.md`, and `FIX.md` against the c
 
 ## What Has Been Implemented and Changed
 
-- **Directory renames:** Complete. `Appendix_What_Is_An_Agent`, `Lab_2_Data_Pipeline`, `Lab_3_GraphRAG_Search`, `Lab_4_GraphRAG_Agent`, `Lab_5_Agent_Memory`, and `Lab_6_MCP_Server` all exist on disk alongside `Lab_0_Sign_In` and `Lab_1_Aura_Setup`.
+- **Directory renames:** Complete. `zz_Appendix_What_Is_An_Agent`, `Lab_2_Data_Pipeline`, `Lab_3_GraphRAG_Search`, `Lab_4_GraphRAG_Agent`, `Lab_5_Agent_Memory`, and `Lab_6_MCP_Server` all exist on disk alongside `Lab_0_Sign_In` and `Lab_1_Aura_Setup`.
 - **Nova to Titan code swap:** Done. No `nova` references remain in any notebook or first-party `.py` file. `Lab_6_MCP_Server/lib/lab_5_data_utils.py` now calls `amazon.titan-embed-text-v2:0`, and the lib `data_utils.py` copies reference Titan.
 - **Embedding regeneration script:** Added. `setup/regenerate_titan_embeddings.py` regenerates the seed `chunks.jsonl` vectors with Titan so stored and query-time embeddings share one vector space. This resolves the open question in `aws-outline.md`: regenerate, do not keep the Nova vectors.
 - **Dimensions standardized:** 1024 across all config; no `1536` references remain.
@@ -44,7 +44,7 @@ Also completed in the same pass (not previously tracked):
 
 ### Lab 4 — Missing AgentCore Deployment
 - **Problem:** `Lab_4_GraphRAG_Agent/` has only `01_strands_graphrag_agent.ipynb`, no `agentcore_deploy/` and no `bedrock-agentcore-starter-toolkit` references.
-- **Required change:** Add the AgentCore deployment notebook and `agentcore_deploy/` artifact so attendees deploy and invoke over REST the exact agent shown in the opening demo. Reference material lives in `Appendix_What_Is_An_Agent/agentcore_deploy/`.
+- **Required change:** Add the AgentCore deployment notebook and `agentcore_deploy/` artifact so attendees deploy and invoke over REST the exact agent shown in the opening demo. Reference material lives in `zz_Appendix_What_Is_An_Agent/agentcore_deploy/`.
 
 ### Lab 5 — Agent Memory Notebooks Unauthored
 - **Problem:** `Lab_5_Agent_Memory/` contains only a `README.md`.

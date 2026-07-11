@@ -31,7 +31,7 @@ REGION = config.region
 AGENT_NAME = "basic_strands_agent"
 AGENT_DIR = (
     Path(__file__).resolve().parent.parent.parent
-    / "Appendix_What_Is_An_Agent"
+    / "zz_Appendix_What_Is_An_Agent"
     / "agentcore_deploy"
 )
 

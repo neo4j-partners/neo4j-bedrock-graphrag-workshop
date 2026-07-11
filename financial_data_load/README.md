@@ -142,6 +142,8 @@ Per-label defaults (used by the cleanse pipeline):
 | `main.py restore [--backup PATH]` | Restore database from backup |
 | `main.py cleanse [--phase validate\|dedup]` | Generate cleanse plan (does not modify Neo4j) |
 | `main.py apply-cleanse [--plan PATH] [--skip-normalize]` | Apply cleanse plan (removals, merges, normalize) |
+| `main.py normalize` | Run normalization standalone (rewrite descriptions/fields via LLM) |
+| `main.py fix-companies` | Merge known company name variants that dedup missed |
 | `main.py finalize` | Constraints, indexes, asset managers, verify |
 | `main.py verify` | Counts + enrichment checks + end-to-end search validation |
 | `main.py clean` | Clear all data |
@@ -151,6 +153,8 @@ Per-label defaults (used by the cleanse pipeline):
 | `main.py resolve [--snapshot PATH] [--strategy ...] [--threshold ...]` | LLM entity resolution on snapshot (Company only) |
 | `main.py compare` | Compare resolution runs, score against ground truth |
 | `main.py apply-merges [--plan PATH]` | Apply merge plan from resolve |
+| `main.py export-model <model>` | Export current graph state tagged by model name (for A/B extraction comparison) |
+| `main.py compare-models [--a PATH --b PATH]` | Compare two model extraction snapshots |
 
 ### 7. Run Sample Queries
 
@@ -205,9 +209,11 @@ Use the test script to validate all solutions against a given `.env` file:
 ./test_solutions.sh .env.gold 8-11
 ```
 
-Each solution runs with a 5-minute timeout. Solutions 3-6 (Lab 4 MCP) require `MCP_GATEWAY_URL` and `MCP_ACCESS_TOKEN` in the env file — they are skipped if not configured. The env file is sourced into the shell environment; your `.env` is not modified.
+Each solution runs with a 5-minute timeout. `test_solutions.sh` uses its own solution numbering (1-22), separate from the `main.py solutions` menu (1-12). Solutions 9-11 (MCP) require `MCP_GATEWAY_URL` and `MCP_ACCESS_TOKEN` in the env file; they are skipped if not configured. The env file is sourced into the shell environment; your `.env` is not modified.
 
 ## Workshop Solutions
+
+Solution numbers below match the `main.py solutions` menu and the `SOLUTIONS` list in `main.py`. Files live in `solution_srcs/`.
 
 ### Lab 3: Intro to Bedrock and Agents (03_xx)
 
@@ -216,28 +222,36 @@ Each solution runs with a 5-minute timeout. Solutions 3-6 (Lab 4 MCP) require `M
 | 1 | `03_01_basic_strands_agent.py` | Basic Strands agent with tools |
 | 2 | `03_02_deploy_to_agentcore.py` | Deploy agent to AgentCore |
 
-### Lab 4: Graph-Enriched Search (04_xx)
+### Lab 4: neo4j-graphrag Library (04_xx)
+
+Data loading and GraphRAG retrieval patterns using neo4j-graphrag:
+
+| # | Solution | Description |
+|---|----------|-------------|
+| 3 | `04_01_load_and_query.py` | Load data and query |
+| 4 | `04_02_vector_retriever.py` | Vector retriever |
+| 5 | `04_03_vector_cypher_retriever.py` | VectorCypher retriever |
+| 6 | `04_04_strands_graphrag_agent.py` | Strands GraphRAG agent |
+
+### Lab 5: MCP Server (05_xx)
 
 Strands Agents SDK with MCP to search a Neo4j knowledge graph:
 
 | # | Solution | Description |
 |---|----------|-------------|
-| 3 | `04_00_intro_strands_mcp.py` | Intro to Strands + MCP |
-| 4 | `04_01_vector_search_mcp.py` | Vector search via MCP |
-| 5 | `04_02_graph_enriched_search_mcp.py` | Graph-enriched search via MCP |
+| 7 | `05_01_intro_strands_mcp.py` | Intro to Strands + MCP |
+| 8 | `05_02_graph_enriched_search.py` | Graph-enriched search via MCP |
+| 9 | `05_03_text2cypher_agent.py` | Text2Cypher agent |
 
-### Lab 5: GraphRAG (05_xx)
+### Lab 6: GraphRAG Pipeline (06_xx)
 
-Data pipeline and GraphRAG patterns using neo4j-graphrag:
+Data pipeline patterns using neo4j-graphrag. **Solution 10 deletes all data.**
 
 | # | Solution | Description |
 |---|----------|-------------|
-| 6 | `05_01_data_loading.py` | Load financial documents into Neo4j |
-| 7 | `05_02_embeddings.py` | Generate and store vector embeddings |
-| 8 | `05_03_vector_retriever.py` | Basic vector search |
-| 9 | `05_04_vector_cypher_retriever.py` | Vector search + custom Cypher |
-| 10 | `05_05_hybrid_rag.py` | Hybrid RAG: HybridRetriever + GraphRAG |
-| 11 | `05_06_hybrid_search.py` | Hybrid vector + keyword search |
+| 10 | `06_01_data_loading.py` | Load financial documents into Neo4j |
+| 11 | `06_02_embeddings.py` | Generate and store vector embeddings |
+| 12 | `06_03_vector_cypher_retriever.py` | Vector search + custom Cypher |
 
 ## AI Provider
 
@@ -263,6 +277,8 @@ financial_data_load/
 ├── pyproject.toml          # Dependencies (uv sync)
 ├── main.py                 # CLI entry point (load, cleanse, apply-cleanse, finalize, etc.)
 ├── test_solutions.sh       # Test runner for workshop solutions
+├── run_cleanse.sh          # Dev script: full load-to-finalize pipeline against an env file
+├── run_all_configs.sh      # Dev script: run all entity-resolution configs and compare
 ├── financial-data/         # SEC 10-K data files
 │   ├── Company_Filings.csv
 │   ├── Asset_Manager_Holdings.csv
@@ -283,14 +299,16 @@ financial_data_load/
 │   ├── normalize.py        # LLM description normalization (cleans up text in place)
 │   ├── snapshot.py         # Entity snapshot export (Neo4j → JSON)
 │   ├── compare.py          # Compare resolution runs, ground truth scoring
+│   ├── model_compare.py    # Export/compare graph extraction snapshots across LLMs
 │   ├── backup.py           # Full database backup and restore
 │   ├── samples.py          # Sample queries
 │   └── embeddings/         # Embedding provider
 │       ├── __init__.py     # get_embedder(), get_embedding_dimensions()
 │       └── bedrock.py      # AWS Bedrock (Titan via neo4j-graphrag)
-└── solution_srcs/          # Workshop solution files
+└── solution_srcs/          # Workshop solution + test scripts
     ├── config.py           # Shared config for solutions
-    └── ...                 # 01_xx through 07_xx solution scripts
+    ├── test_connection.py  # Connection test helper
+    └── ...                 # 01_/03_/04_/05_/06_ solution and test scripts
 ```
 
 ## Environment Variables
@@ -306,6 +324,19 @@ AWS_REGION=us-east-1
 MODEL_ID=us.anthropic.claude-sonnet-4-6
 # EMBEDDING_DIMENSIONS=1024                               # optional (default: 1024)
 ```
+
+### Env files
+
+Several `.env` variants live at the project root:
+
+| File | Tracked | Purpose |
+|------|---------|---------|
+| `.env` | No | Your active config, read by `main.py` and `src/config.py`. |
+| `.env.sample` | Yes | Template. Copy to `.env` and fill in credentials. |
+| `.env.gold` | No | Credentials fixture for `test_solutions.sh` (the "gold" workshop instance). |
+| `.env.final` | No | Credentials fixture for the `run_cleanse.sh` end-to-end pipeline. |
+
+Only `.env.sample` is committed. `.env`, `.env.gold`, and `.env.final` hold real credentials and are git-ignored. Passing an env file to `test_solutions.sh` or `run_cleanse.sh` sources it into that command's environment; it does not modify your `.env`.
 
 ## Entity Resolution Experimentation Results
 
@@ -361,6 +392,67 @@ The net effect is indexes make the pipeline significantly **faster** for writes,
 In Neo4j, a **range index** (created with `CREATE INDEX ... FOR (n:Label) ON (n.property)`) is the standard B-tree index for property lookups. It speeds up equality checks (`WHERE n.name = $value`), range comparisons (`<`, `>`), prefix matching, and — critically — `MERGE` operations that need to find-or-create a node by property value.
 
 A **uniqueness constraint** (`CREATE CONSTRAINT ... REQUIRE n.prop IS UNIQUE`) automatically creates a backing range index *plus* enforces that no two nodes share the same value. During the pipeline run we can't use uniqueness constraints because `SimpleKGPipeline` may create duplicate entities across chunks that get resolved later. So we use plain range indexes for the MERGE speedup without the uniqueness enforcement, then swap to constraints in the `finalize` step.
+
+## Seed Data Export (Admin)
+
+The pipeline above builds a live graph from the raw PDFs in `financial-data/`. The distributable **seed data** that participants load in Lab 1 lives in `seed-data/` — the filtered, exported snapshot of that graph. Regenerating it is an admin-only workflow; participants never run it, they only load the CloudFront-hosted copies. Uploading the seed data to S3/CloudFront is handled by `setup/setup_s3_seed_data.sh` (see [`../setup/README.md`](../setup/README.md)).
+
+The `seed-data/` files are the source of truth for the SEC 10-K knowledge graph — both the structured CSVs and `chunks.csv`/`chunks.jsonl` (chunks with Titan embeddings).
+
+### `export_seed_data/export.py` — Export the graph to `seed-data/`
+
+Exports the full knowledge graph from a live Neo4j instance to `../seed-data/`:
+
+- **Structured layer**: companies, products, risk factors, financial metrics, asset managers, and documents, plus their relationship and junction tables (OFFERS, FACES_RISK, REPORTS, OWNS, COMPETES_WITH, PARTNERS_WITH, FILED).
+- **Unstructured layer**: chunks with Titan embeddings (`chunks.jsonl`) and their FROM_DOCUMENT, NEXT_CHUNK, and FROM_CHUNK relationships.
+
+The export filters to filing companies, those with a `FILED` relationship to a `Document` node, and their directly connected entities. Stable string IDs are assigned per node (`C001`, `P001`, `CH001`, etc.) so the CSVs are portable across databases.
+
+```bash
+cd financial_data_load/export_seed_data
+uv run export.py
+```
+
+Reads Neo4j credentials from `financial_data_load/.env` and writes all output to `financial_data_load/seed-data/`.
+
+### `chunks_jsonl_to_csv.py` — Convert chunks to CSV for Lab 1
+
+Lab 1 loads chunks via `LOAD CSV`, so the exported `chunks.jsonl` must be converted to `chunks.csv`. Each row carries its embedding as a semicolon-delimited float string, which the Lab 1 Cypher rebuilds with `split()`/`toFloat()` (no APOC required).
+
+```bash
+cd financial_data_load
+python chunks_jsonl_to_csv.py
+```
+
+Writes `financial_data_load/seed-data/chunks.csv` (~9 MB, 346 rows). Re-run this whenever `chunks.jsonl` changes.
+
+### `regenerate_titan_embeddings.py` — Regenerate seed embeddings with Titan
+
+Regenerates the stored `seed-data/chunks.jsonl` vectors with Amazon Titan Text Embeddings V2 so they stay in the same vector space as the query-time embedder.
+
+```bash
+uv run financial_data_load/regenerate_titan_embeddings.py [--region us-east-1]
+```
+
+### `export_seed_data/test_load.py` — Verify the structured load
+
+Loads the structured CSVs into a clean database using the same Cypher pattern as Lab 1's README (constraints, nodes, relationships, fulltext index), reading local CSVs via `UNWIND` instead of `LOAD CSV` from CloudFront. Confirms the committed CSVs load cleanly before distribution.
+
+```bash
+cd financial_data_load/export_seed_data
+uv run test_load.py
+```
+
+### `export_seed_data/test_roundtrip.py` — Verify the full load path
+
+Round-trip test that loads every seed file (`chunks.jsonl` + `chunk_documents.csv` + `chunk_sequence.csv` + `entity_chunks.csv`), reads the data back, and verifies it matches. Exercises the complete load path including embeddings.
+
+```bash
+cd financial_data_load/export_seed_data
+uv run test_roundtrip.py
+```
+
+Both test scripts use the empty test database configured in `financial_data_load/.env.gold`, keeping the production Aura instance untouched.
 
 ## Cleanup
 

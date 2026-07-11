@@ -18,7 +18,7 @@ CLEANUP=false
 REFRESH=false
 OAC_NAME="neo4j-workshop-oac"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SEED_DATA_DIR="${SCRIPT_DIR}/seed-data"
+SEED_DATA_DIR="${SCRIPT_DIR}/../financial_data_load/seed-data"
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
