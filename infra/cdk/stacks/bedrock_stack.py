@@ -47,8 +47,8 @@ class BedrockStack(Stack):
                 resources=[
                     # Claude models
                     f"arn:aws:bedrock:{self.region}::foundation-model/anthropic.claude-*",
-                    # Nova models
-                    f"arn:aws:bedrock:{self.region}::foundation-model/amazon.nova-*",
+                    # Titan embedding models
+                    f"arn:aws:bedrock:{self.region}::foundation-model/amazon.titan-*",
                 ],
             )
         )

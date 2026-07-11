@@ -95,7 +95,7 @@ The retriever's job is finding the right context. The LLM's job is generating a 
 ## VectorRetriever
 
 **How it works:**
-- Converts your question to an embedding (Bedrock Nova)
+- Converts your question to an embedding (Bedrock Titan)
 - Queries the `chunkEmbeddings` vector index
 - Returns chunks ranked by cosine similarity
 
@@ -151,7 +151,7 @@ Starting from the matched chunk (`node`), the query traverses:
 
 When you call a retriever, it:
 
-1. **Embeds your question**: sends text to Bedrock Nova, gets a 1024-dimensional vector
+1. **Embeds your question**: sends text to Bedrock Titan, gets a 1024-dimensional vector
 2. **Queries the vector index**: runs Cypher against the `chunkEmbeddings` index
 3. **Traverses the graph** (Cypher retrievers only): executes the `retrieval_query`
 4. **Formats results for the LLM**: packages text and metadata into prompt-ready format

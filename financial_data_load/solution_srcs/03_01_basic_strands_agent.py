@@ -89,7 +89,7 @@ def load_financial_data() -> str:
     """Load sample SEC financial filing data from Lab 3."""
     data_path = (
         Path(__file__).resolve().parent.parent.parent
-        / "Lab_3_Intro_to_Bedrock_and_Agents"
+        / "Appendix_What_Is_An_Agent"
         / "sample_financial_data.txt"
     )
     with open(data_path, "r") as f:

@@ -67,7 +67,7 @@ def process_all_pdfs(
     embedder = get_embedder()
     agent_config = AgentConfig()
     print(f"  LLM: {agent_config.llm_model_id}")
-    print(f"  Embeddings: amazon.nova-2-multimodal-embeddings-v1:0 ({agent_config.embedding_dimensions or 1024} dims)")
+    print(f"  Embeddings: amazon.titan-embed-text-v2:0 ({agent_config.embedding_dimensions or 1024} dims)")
     if agent_config.aws_region:
         print(f"  Region: {agent_config.aws_region}")
 

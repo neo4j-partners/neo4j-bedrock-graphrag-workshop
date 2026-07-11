@@ -1,90 +1,117 @@
-= Lab 2: Aura Agents
+= Lab 2: Data Pipeline (Optional)
 
-This is Lab 2 of the workshop. You have a running knowledge graph from Lab 1 loaded with SEC 10-K filing data. Before writing any code, you will see what an AI agent can do with this graph through Neo4j's no-code platform: Aura Agents.
+NOTE: This lab is optional and audience-dependent. Skip it for non-technical audiences or when short on time. The Lab 0 seed load already provides the full graph, including chunks, Amazon Titan Text Embeddings V2 embeddings, and the `chunkEmbeddings` vector index, so the rest of Part 2 works without running this lab.
 
-TIP: Ready to start? Jump to the xref:lab2-instructions.adoc[Lab 2 Instructions] for step-by-step setup.
+Lab 0 loaded a pre-built knowledge graph where seed data and embeddings were already in place. This lab builds that graph from scratch. You load raw SEC 10-K filing data, split it into chunks, generate vector embeddings, and then query the graph using the neo4j-graphrag library with `VectorCypherRetriever`, which adds graph traversal to enrich every vector search result with connected entities.
+
+This lab wipes and rebuilds the shared workshop Aura instance from `financial_data.json`, reproducing the complete graph: structured entities, chunks, Amazon Titan Text Embeddings V2 embeddings, and the vector index. The rest of Part 2 still works afterward because the rebuilt graph matches what the Lab 0 seed load produced.
+
+TIP: Ready to start? Jump to the xref:lab2-instructions.adoc[Lab 2 Instructions] for the notebook walkthrough.
 
 .**At a Glance**
 
-* **Aura Agents**: combine graph traversal and natural language queries in one conversational interface
-* **"Create with AI"**: analyzes your graph schema and auto-generates tools with no Cypher to write manually
-* **Three retrieval patterns**: Cypher Templates (deterministic traversals), Text2Cypher (ad-hoc natural language queries), and Similarity Search (vector-based, not yet enabled for this dataset)
-* **Optional deployment**: expose the agent as a REST API endpoint or MCP server for integration with external clients
+* **Three notebooks**: progress from loading raw text into a knowledge graph to running graph-enriched retrieval queries
+* **neo4j-graphrag library**: `VectorCypherRetriever` combines semantic search with Cypher graph traversal
+* **Full data pipeline**: chunking, embedding generation, and index creation from scratch
+* **Rebuilds the shared instance**: wipes the graph and rebuilds from `financial_data.json`, reproducing the full workshop graph
 
-== What Are Aura Agents?
+== Embeddings and Vector Search
 
-Aura Agents is Neo4j's no-code platform for building conversational AI interfaces grounded in graph data. Rather than writing retrieval logic by hand, you describe a use case in natural language and the platform generates an agent with tools tailored to your graph's schema. The agent then uses those tools to answer questions by combining graph traversals and dynamically generated Cypher queries.
+The Lab 0 seed load used pre-built embeddings. This lab generates them from scratch. Amazon Titan Text Embeddings V2 generates 1024-dimensional embeddings for each chunk of SEC filing text. Those vectors are stored as properties on Chunk nodes in Neo4j and indexed with a vector index (`chunkEmbeddings`) that supports approximate nearest-neighbor lookup. When a retriever receives a question, it embeds the question with the same model, queries the index for the closest chunk vectors, and returns the matched text.
 
-The "Create with AI" workflow inspects the node labels, relationship types, and indexes in your knowledge graph and produces a fully configured agent. For the SEC financial dataset, this means the agent automatically understands how to look up company details, traverse ownership chains, compare risk factors, and search filing text, all without manual configuration.
-
-== Three Retrieval Patterns
-
-The generated agent uses three categories of tools, each suited to different question types.
-
-=== Cypher Templates
-
-Cypher Templates are pre-built graph traversal patterns mapped to specific questions. Each template targets a known pattern in the graph (company details, risk factors, ownership relationships) and executes a precise, deterministic Cypher query. Because the query structure is fixed, results are predictable and fast.
-
-.Example
+.How vector search powers RAG
 [%collapsible]
 ====
-"What products does NVIDIA Corporation offer?" triggers a template that traverses `(Company)-[:OFFERS]->(Product)` and returns the product list. No query generation is needed. The template maps directly to the graph pattern.
+Vector search is the mechanism that makes Retrieval-Augmented Generation work. The system embeds a question, searches for the closest chunks in vector space, and feeds those chunks to the LLM as context. The LLM generates its answer grounded in the retrieved text rather than relying solely on its training data. The quality of retrieval determines the quality of generation; if vector search surfaces irrelevant chunks, the LLM produces an answer grounded in the wrong context.
 ====
 
-=== Text2Cypher
+== Chunking
 
-Text2Cypher translates arbitrary natural language questions into Cypher queries at runtime. This is the most flexible retrieval pattern, able to answer questions the template authors did not anticipate, but it is also the least deterministic, since the generated query depends on the LLM's interpretation.
+SEC 10-K filings are too long to embed as single documents, so each filing is split into smaller passages. Each chunk becomes a Chunk node in the graph, linked to its source Document via `FROM_DOCUMENT` and to adjacent chunks via `NEXT_CHUNK` to preserve reading order.
 
-.Example
+.Chunking trade-offs
 [%collapsible]
 ====
-"How many products does NVIDIA Corporation mention?" generates a Cypher query like `MATCH (c:Company {name: 'NVIDIA Corporation'})-[:OFFERS]->(p:Product) RETURN count(p)` and executes it against the graph.
+Larger chunks give the LLM more context during retrieval, which helps when the answer spans multiple sentences. Smaller chunks produce more precise results, returning only the relevant passage rather than a block of mixed content. A moderate size (500-1000 characters) is a reasonable starting point. The workshop uses `FixedSizeSplitter` from the neo4j-graphrag library, which splits text at fixed character boundaries. Tuning chunk size and overlap is an empirical process: adjust based on whether retrieved results contain too much noise or too little context.
 ====
 
-=== Similarity Search
+== From Documents to Knowledge Graph
 
-Similarity Search uses vector embeddings (numerical fingerprints of meaning, covered in detail in xref:lab4.adoc[Lab 4]) to find nodes whose content is similar in meaning to a query, even when they use different words. Aura Agents offers this as a tool type, but it requires a vector index with pre-computed embeddings on the target nodes. The current SEC 10-K dataset does not have embeddings loaded at this stage, so the Similarity Search tool is not enabled for this lab. You will add embeddings and use vector search in Lab 4.
+The pipeline builds both the structured and unstructured layers of the knowledge graph, then connects them:
 
-NOTE: If you see Similarity Search listed as an available tool type when creating your agent, you can skip it for now; there are no embeddings in the graph to search against yet.
+1. **Load filing text as Document and Chunk nodes.** Each 10-K filing becomes a Document node. The filing text is split into chunks, each stored as a Chunk node linked to its source via FROM_DOCUMENT and to adjacent chunks via NEXT_CHUNK.
+2. **Create structured entities.** Company, Product, and RiskFactor nodes are created from the structured data in the filing, linked by OFFERS, FACES_RISK, and FILED relationships.
+3. **Generate embeddings on every Chunk.** Amazon Titan Text Embeddings V2 embeds each chunk's text into a 1024-dimensional vector, stored as a property on the Chunk node. A vector index (`chunkEmbeddings`) is created over these embeddings.
 
-== Tool Type Comparison
+.Entity extraction and resolution
+[%collapsible]
+====
+The workshop's knowledge graph uses pre-built structured entities from JSON data rather than LLM-based entity extraction. The Company, Product, and RiskFactor nodes exist because they were loaded directly from structured sources, not because an LLM extracted them from filing text.
 
-[cols="1,2,2,1"]
+In a full production pipeline, an LLM reads each chunk and extracts entities mentioned in the text: company names, product references, risk factors. Entity resolution then deduplicates these, merging "NVIDIA Corporation," "Nvidia," and "NVDA" into a single Company node. Cross-linking connects extracted entities to existing graph structure, so a risk factor mentioned in filing text links directly to the RiskFactor node that other companies also reference.
+
+The workshop sidesteps extraction because the SEC dataset already provides clean structured data. The conceptual model is the same: chunks connect to entities, entities connect to each other, and retrieval traverses both layers. Whether entities arrive via JSON loading or LLM extraction, the graph structure and retrieval patterns are identical.
+====
+
+== The Pipeline
+
+The three notebooks form a single arc: create the graph, generate embeddings, then run graph-enriched retrieval queries.
+
+Notebooks 01 and 02 build the foundation. Notebook 01 loads SEC filing text as Document and Chunk nodes linked by `FROM_DOCUMENT` and `NEXT_CHUNK` relationships, and creates the structured layer (Company, Product, RiskFactor) with cross-links (`FILED`, `FROM_CHUNK`). Notebook 02 generates vector embeddings on every Chunk node and creates a `chunkEmbeddings` vector index. Notebook 03 queries the graph using `VectorCypherRetriever`, which combines vector similarity search with Cypher graph traversal to enrich results with connected entities.
+
+== VectorCypherRetriever
+
+The `VectorCypherRetriever` adds a graph traversal step after vector search. It finds semantically similar chunks the same way `VectorRetriever` does, then executes a custom Cypher `retrieval_query` that traverses from each matched chunk to related entities in the graph. The chunk acts as an anchor: vector search determines relevance, then Cypher gathers the structured context around it.
+
+A typical traversal follows FROM_DOCUMENT to the source Document, then FILED back to the Company, and from there to OFFERS, FACES_RISK, or other relationships. The LLM receives both the chunk text and the connected entities.
+
+.How the retrieval_query parameter works
+[%collapsible]
+====
+The `VectorCypherRetriever` accepts a `retrieval_query` parameter: a Cypher query that executes once per matched chunk. The retriever binds the matched Chunk node to a variable (`node`), and the retrieval query traverses from there to gather context. A typical query follows the chain from chunk to document to company:
+
+[source,cypher]
+----
+MATCH (node)-[:FROM_DOCUMENT]->(d:Document)<-[:FILED]-(c:Company)
+OPTIONAL MATCH (c)-[:FACES_RISK]->(r:RiskFactor)
+RETURN node.text AS text, d.source AS document, c.name AS company,
+       collect(r.name) AS riskFactors
+----
+
+This query runs for each chunk that vector search returns. The retriever collects the results and passes them to the LLM as enriched context. The design separates the search step (which chunk is relevant) from the enrichment step (what structured context surrounds it).
+====
+
+.The chunk-as-anchor constraint
+[%collapsible]
+====
+Graph traversal starts from what vector search found. If the question does not surface relevant chunks, no amount of traversal compensates. A question targeting a specific entity by name ("How many products does NVIDIA offer?") may return better results with a direct Cypher query than with vector search, because the answer depends on counting relationships, not finding semantically similar text. VectorCypherRetriever is strongest when the question combines semantic relevance with structural context: the vector search finds the right passage, and the graph traversal enriches it with the entities and relationships that surround it.
+====
+
+== Lab 0 Seed Load vs Lab 2 Pipeline
+
+The Lab 0 seed load and this lab produce the same knowledge graph using the same neo4j-graphrag library and graph pattern. The difference is in what comes pre-built versus what you build yourself.
+
+[cols="1,2,2"]
 |===
-| Tool Type | Purpose | Best For | Reliability
+| Aspect | Lab 0 Seed Load (Pre-built Graph) | Lab 2 Pipeline (Build from Scratch)
 
-| **Cypher Templates**
-| Controlled, precise graph traversals
-| Specific lookups, comparisons
-| Deterministic
+| **Data loading**
+| Full graph pre-loaded from seed data, including chunks and embeddings
+| Build from raw `financial_data.json`: chunking, entity creation, embedding generation
 
-| **Text2Cypher**
-| Flexible natural language to Cypher
-| Ad-hoc questions about the data
-| Variable
+| **Embeddings**
+| Titan Text Embeddings V2 vectors and `chunkEmbeddings` index already in place
+| Generate Titan Text Embeddings V2 vectors and create the `chunkEmbeddings` index yourself
 
-| **Similarity Search**
-| Vector-based semantic matching
-| Finding related content by meaning (requires embeddings)
-| Not available (dataset has no embeddings yet)
+| **Retriever**
+| Query the pre-built graph directly
+| VectorCypherRetriever with graph traversal
+
+| **Pipeline ownership**
+| Query only; the data pipeline was done for you
+| Full ownership; you build every layer
 |===
-
-== Tool Reliability
-
-Templates and Text2Cypher sit at opposite ends of a reliability spectrum. Templates always return the same result for the same input but only cover questions someone anticipated. Text2Cypher handles everything else at the cost of predictability. The agent uses both: templates for known patterns, Text2Cypher for the long tail.
-
-.Why Text2Cypher needs cross-checking
-[%collapsible]
-====
-Because Text2Cypher generates a different query each invocation, subtle variations can produce incorrect answers silently. A query that filters on `"cybersecurity"` instead of `"Cybersecurity Threats"` returns no results for case-sensitive property values, and the agent may present that empty result confidently rather than flagging a possible query issue.
-
-Running the same question twice and comparing results is a practical way to spot this variability.
-====
-
-== Connection to Later Labs
-
-Labs 4 through 6 implement these retrieval patterns programmatically. Lab 4 builds Cypher Templates and Text2Cypher from scratch using Strands Agents and MCP. Lab 5 replaces the manual plumbing with the neo4j-graphrag library's retriever classes. Lab 6 gives the agent full autonomy to write its own Cypher. The no-code agent you build here provides a reference point: when you write these pipelines in code, you will already understand how each pattern behaves and what kinds of questions it handles well.
 
 == Next Steps
 
-Continue to xref:lab2-instructions.adoc[Lab 2 Instructions] to create your Aura Agent, or proceed to xref:lab3.adoc[Lab 3: Bedrock and Agents] to begin the coding labs.
+Continue to xref:lab3.adoc[Lab 3: Semantic Search and GraphRAG] for vector search and GraphRAG retrieval on the graph.

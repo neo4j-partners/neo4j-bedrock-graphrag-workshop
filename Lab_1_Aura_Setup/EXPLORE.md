@@ -114,4 +114,4 @@ Click on a specific RiskFactor node and expand to see which companies share that
 
 ## Next Steps
 
-Return to the [main lab instructions](README.md) to proceed to Lab 2, where you'll build an AI agent using this knowledge graph.
+Return to the [main lab instructions](README.md) to proceed to Lab 3, where you'll begin the coding labs and build agents over this knowledge graph.

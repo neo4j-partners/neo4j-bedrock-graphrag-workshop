@@ -1,9 +1,11 @@
-= Part 3: Build Your Own Pipeline
+= Part 3: Agent Memory (Optional)
 
-This bonus part takes you behind the scenes to build a GraphRAG data pipeline from scratch.
+Part 3 gives the Part 2 GraphRAG agent a memory. It is an optional part, designed for all-day sessions or take-home completion after the workshop.
 
-You will wipe the graph, reload structured data from JSON, generate embeddings with Amazon Nova, and wire up vector-cypher retrieval — giving you a complete, end-to-end view of how a GraphRAG pipeline comes together.
+The agent you built in xref:lab4.adoc[Lab 4] answers each question in isolation. A stateless agent starts every invocation from zero context: it has no record of what was asked a moment ago or what it answered. In a multi-turn conversation that breaks down quickly. Ask a follow-up like "What about their competitors?" and the agent has no way to resolve "their," because the previous turn is gone.
+
+This part adds a memory layer so the agent remembers across turns. It stores conversation history and extracted facts in the same Neo4j Aura instance that already holds the SEC 10-K knowledge graph, so one database serves both retrieval and agent state.
 
 == Labs
 
-* xref:lab6.adoc[Lab 6: GraphRAG Pipeline] — Data loading, embedding generation, and vector-cypher retrieval
+* xref:lab5.adoc[Lab 5: Agent Memory with Neo4j]: add short-term and long-term memory to the Lab 4 Strands agent using the neo4j-agent-memory library, then watch it resolve references and summarize across a multi-turn conversation.

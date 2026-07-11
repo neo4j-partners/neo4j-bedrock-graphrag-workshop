@@ -109,7 +109,7 @@ Four entity types connected by typed relationships that reflect real-world struc
 | **Data Pipeline** | AWS Glue / EMR + S3 Iceberg lakehouse (Lake Formation) + Neo4j Spark Connector | Govern, refine, and load enterprise data into the graph |
 | **Knowledge Graph** | Neo4j Aura | Store entities, relationships, vector embeddings |
 | **Reasoning** | Anthropic Claude (via Bedrock) | Tool selection, response generation |
-| **Embeddings** | Amazon Nova (via Bedrock) | Vector representations for semantic search |
+| **Embeddings** | Amazon Titan Text Embeddings V2 (via Bedrock) | Vector representations for semantic search |
 | **Development** | SageMaker Studio | JupyterLab notebooks |
 | **Agent Hosting** | AgentCore Runtime | Serverless agent deployment |
 | **Tool Protocol** | MCP (Model Context Protocol) | Agent-to-graph connectivity |
@@ -118,8 +118,8 @@ Four entity types connected by typed relationships that reflect real-world struc
 
 ## Workshop Roadmap
 
-**Part 1: Setup & Visual Exploration** (Labs 0-2)
-Sign in to AWS, provision Neo4j Aura, load the knowledge graph, build a no-code agent with Aura Agents
+**Part 1: Setup & Visual Exploration** (Labs 0-1)
+Sign in to AWS, provision Neo4j Aura, load the knowledge graph, and explore it with Cypher
 
 **Part 2: Building GraphRAG Agents** (Labs 3-5)
 Amazon Bedrock and Strands SDK, vector search and graph-enriched retrieval with neo4j-graphrag, MCP agents with Cypher Templates and Text2Cypher
@@ -135,7 +135,6 @@ Build the GraphRAG data pipeline from scratch: data loading, embeddings, and vec
 |-----|-------|-------------|
 | **0** | AWS sign-in, Bedrock access | Foundation model access |
 | **1** | Neo4j Aura setup, data loading | Graph databases, Cypher |
-| **2** | Aura Agents (no-code) | Retrieval patterns preview |
 | **3** | Strands SDK, Bedrock agents | ReAct pattern, tool use |
 | **4** | neo4j-graphrag retrievers | Vector + graph-enriched search |
 | **5** | MCP server, Text2Cypher | Schema-first agent queries |
@@ -143,12 +142,11 @@ Build the GraphRAG data pipeline from scratch: data loading, embeddings, and vec
 
 ---
 
-## From No-Code to Full Autonomy
+## From Code-First to Full Autonomy
 
 The labs progress along a **control spectrum**:
 
 ```
-Lab 2: Aura Agents        → No code, auto-generated tools
 Lab 3: Strands SDK         → Code-first agents, @tool decorator
 Lab 4: neo4j-graphrag      → Pre-built retriever classes
 Lab 5: Cypher Templates    → Pre-written queries, MCP transport
@@ -165,7 +163,7 @@ Each step gives the agent more autonomy. The trade-off: more flexibility means l
 |---|-----|-------|
 | **Provides** | Models, compute, hosting, lakehouse + data pipelines | Graph storage, vector index, query engine |
 | **Answers** | "Generate a response", "Deploy this agent", "How much?" and "How often?" | "How is this connected?" and "What is semantically similar?" |
-| **AI capability** | Bedrock (Claude, Nova), AgentCore, Athena / Amazon Q (natural language SQL) | Vector indexes, GraphRAG, MCP Server |
+| **AI capability** | Bedrock (Claude, Titan), AgentCore, Athena / Amazon Q (natural language SQL) | Vector indexes, GraphRAG, MCP Server |
 | **Strength** | Scale, managed services, security, governance + data pipelines | Relationships, traversal, pattern matching |
 
 ---

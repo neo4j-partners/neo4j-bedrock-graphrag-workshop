@@ -6,7 +6,7 @@ A GraphRAG agent needs more than a database. It needs a knowledge layer that sto
 
 * **Database and Analytics**: a native graph database (AuraDB) for storing and querying the knowledge graph, plus Graph Data Science (GDS) for running graph algorithms like community detection and similarity scoring
 * **AI-Powered Graph Tools**: Browser for Cypher queries, Bloom for visual exploration, NeoDash for dashboards, Data Import for loading, and a GraphQL API
-* **Graph-Powered AI**: Document Intelligence, Aura Agents, Ontology modeling, Agentic Brain for agent memory, and MCP Server connectivity that turn the knowledge graph into a reasoning substrate for AI agents
+* **Graph-Powered AI**: Document Intelligence, Ontology modeling, Agentic Brain for agent memory, and MCP Server connectivity that turn the knowledge graph into a reasoning substrate for AI agents
 
 == Database and Analytics
 
@@ -50,10 +50,6 @@ The top tier of the platform turns the knowledge graph into infrastructure for A
 
 Document Intelligence converts unstructured documents into knowledge graph structures. The process parses documents, splits text into chunks, extracts entities and relationships, generates vector embeddings, and stores everything as connected graph elements. The workshop's knowledge graph demonstrates the output of this pipeline: SEC 10-K filings become Document nodes linked to Chunk nodes (carrying text and embeddings), which connect to extracted Company, Product, and RiskFactor entities through typed relationships. The NEXT_CHUNK relationship preserves document ordering, so retrieval can reconstruct passages in sequence.
 
-=== Aura Agents
-
-Aura Agents is a no-code agent builder integrated into the AuraDB console. It generates a GraphRAG agent from the graph's ontology: point it at a database, and it creates tools, prompts, and retrieval strategies grounded in the actual schema. Lab 2 uses Aura Agents to build and test a conversational agent over the SEC filing knowledge graph without writing any code. Agents built in Aura can be deployed with a single click to a hosted MCP Server endpoint, making them accessible to external AI clients.
-
 === Ontology
 
 Neo4j treats data modeling as a first-class capability, not a preliminary step that disappears after import. The Ontology tool provides a visual modeling workspace with a repository of domain-specific templates and schema enforcement. The data model for this workshop (Company, Product, RiskFactor, AssetManager, Document, Chunk and their connecting relationships) is itself an ontology that defines what the graph can represent and what questions agents can answer.
@@ -76,13 +72,12 @@ The three tiers form a stack where each layer builds on the one below:
 Graph-Powered AI              AI-Powered Tools         Database & Analytics
 (agent services)              (query + explore)        (store + compute)
       |                             |                        |
-  Aura Agents ---+            Browser (Cypher)          AuraDB
-  MCP Server  ---+            Bloom (visual)              |
-      |          |            NeoDash (dashboard)     Vector Index
-  Document    ---+                  |                 Fulltext Index
-  Intelligence   |                  |                     |
-      |          |                  |                  GDS (algorithms)
-  Agentic     ---+                  |                     |
+  MCP Server  ---+            Browser (Cypher)          AuraDB
+      |          |            Bloom (visual)              |
+  Document    ---+            NeoDash (dashboard)     Vector Index
+  Intelligence   |                  |                 Fulltext Index
+      |          |                  |                     |
+  Agentic     ---+                  |                  GDS (algorithms)
   Brain (memory) |                  |                     |
       |          +------------------+---------------------+
       |                             |
@@ -99,17 +94,20 @@ The database stores the knowledge graph and maintains its indexes. The tools pro
 |===
 | Lab | Neo4j Capabilities Used
 
-| xref:lab1.adoc[Lab 1]
-| AuraDB (database provisioning), Data Import (seed data loading), Browser (Cypher queries, graph exploration)
+| xref:lab0.adoc[Lab 0]
+| AuraDB (database provisioning), Data Import (seed load of structured entities, chunks, embeddings, and vector index)
 
-| xref:lab2.adoc[Lab 2]
-| Aura Agents (no-code agent builder, MCP Server deployment)
+| xref:lab1.adoc[Lab 1]
+| Browser and Explore (Cypher queries, visual graph exploration), fulltext index (keyword search)
+
+| xref:lab3.adoc[Lab 3]
+| Vector index (semantic search), Cypher (graph traversal for context enrichment with the neo4j-graphrag library)
 
 | xref:lab4.adoc[Lab 4]
-| Vector index (semantic search), fulltext index (keyword search), MCP Server (agent-to-graph connectivity), Cypher (graph traversal for context enrichment)
+| Vector index and Cypher exposed as Strands agent tools for GraphRAG question answering
 
 | xref:lab5.adoc[Lab 5]
-| Vector index (retrieval), Cypher (graph-enhanced retrieval with neo4j-graphrag library)
+| One Aura instance serving as both knowledge graph and agent memory store (Conversation, Message, and Entity nodes)
 
 | xref:lab6.adoc[Lab 6]
 | MCP Server (schema discovery, Text2Cypher), Cypher (agent-generated queries)

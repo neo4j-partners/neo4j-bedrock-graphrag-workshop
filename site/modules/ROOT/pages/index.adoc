@@ -2,14 +2,14 @@
 
 == Welcome
 
-This workshop teaches you to build Graph Retrieval-Augmented Generation (GraphRAG) pipelines using Neo4j Aura and Amazon Bedrock. You will work with SEC 10-K financial filing data including companies, products, risk factors, and institutional ownership, progressing from no-code tools to building custom AI agents.
+This workshop teaches you to build Graph Retrieval-Augmented Generation (GraphRAG) pipelines using Neo4j Aura and Amazon Bedrock. You will work with SEC 10-K financial filing data including companies, products, risk factors, and institutional ownership, progressing from visual graph exploration to building and deploying custom AI agents.
 
 NOTE: This lab is built from the GitHub repository at https://github.com/neo4j-partners/neo4j-bedrock-graphrag-workshop/tree/main[neo4j-partners/neo4j-bedrock-graphrag-workshop].
 
 .**At a Glance**
 
 * **Neo4j Aura**: graph database with built-in vector search that stores the SEC financial knowledge graph
-* **Amazon Bedrock**: foundation models (Claude for reasoning, Nova for embeddings) and AgentCore for agent deployment
+* **Amazon Bedrock**: foundation models (Claude for reasoning, Titan Text Embeddings V2 for embeddings) and AgentCore for agent deployment
 * **What you'll build**: GraphRAG agents that combine vector search, graph traversal, and agent-based tool use to answer questions over financial filings
 
 == Graph Intelligence Meets Generative AI
@@ -20,20 +20,20 @@ The <<From Knowledge Graph to Agents>> section below traces the full architectur
 
 === Neo4j: Graph Intelligence Platform
 
-Neo4j AuraDB stores data as nodes and relationships with built-in vector indexes, enabling GraphRAG queries that combine semantic similarity search with graph traversal. Neo4j Aura Agents provides a no-code path to build and deploy AI agents directly from knowledge graphs. See xref:lab1.adoc[Lab 1] for graph setup and Cypher basics.
+Neo4j AuraDB stores data as nodes and relationships with built-in vector indexes, enabling GraphRAG queries that combine semantic similarity search with graph traversal. See xref:lab0.adoc[Lab 0] for graph setup and xref:lab1.adoc[Lab 1] for Cypher basics.
 
 === Generative AI on AWS
 
-Amazon Bedrock provides unified API access to foundation models including Anthropic Claude for reasoning and Amazon Nova for embeddings. Amazon Bedrock AgentCore hosts and scales agents without infrastructure management. Amazon SageMaker AI provides the JupyterLab notebook environment used throughout this workshop. See xref:aws-services.adoc[AWS GenAI Services] for detailed coverage of each service.
+Amazon Bedrock provides unified API access to foundation models including Anthropic Claude for reasoning and Amazon Titan Text Embeddings V2 for embeddings. Amazon Bedrock AgentCore hosts and scales agents without infrastructure management. Amazon SageMaker AI provides the JupyterLab notebook environment used throughout this workshop. See xref:aws-services.adoc[AWS GenAI Services] for detailed coverage of each service.
 
 == From Knowledge Graph to Agents
 
-Four steps build on each other across the workshop.
+Four stages build on each other across the workshop.
 
-* **Loading and Exploring with Neo4j Aura** — Load the SEC financial data into your own Aura instance, explore it visually, and build a no-code AI agent using Aura Agents. See xref:lab1.adoc[Lab 1] and xref:lab2.adoc[Lab 2].
-* **Building Agents with AWS Bedrock AgentCore** — Move from no-code to code, building agents with the Strands Agents SDK and deploying them to AgentCore Runtime. See xref:lab3.adoc[Lab 3].
-* **Graph-Enriched Retrieval** — Add an unstructured layer of chunked and embedded 10-K filing text, then combine vector search with graph traversal to enrich results with connected companies, products, and risk factors. See xref:lab4.adoc[Lab 4].
-* **Strands Agents with Neo4j GraphRAG Library** — Connect agents to the knowledge graph using the neo4j-graphrag library, with Cypher Templates for deterministic queries and Text2Cypher for autonomous query generation. See xref:lab5.adoc[Lab 5].
+* **Getting Started with Neo4j Aura.** Sign up for Aura and load the SEC financial data, which arrives as a complete graph: structured entities plus chunks, Titan Text Embeddings V2 embeddings, and a vector index. Explore it visually with graph visualization and Cypher. See xref:lab0.adoc[Lab 0] and xref:lab1.adoc[Lab 1].
+* **Semantic Search and GraphRAG.** Use the neo4j-graphrag library to combine vector search with graph traversal, enriching retrieved passages with connected companies, products, and risk factors. See xref:lab3.adoc[Lab 3].
+* **Strands GraphRAG Agent on AgentCore.** Wrap the retrievers as Strands agent tools and deploy the agent to Amazon Bedrock AgentCore Runtime for production hosting. See xref:lab4.adoc[Lab 4].
+* **Agent Memory and MCP.** Add persistent memory across conversation turns with neo4j-agent-memory, and connect agents to the graph through the Neo4j MCP Server. See xref:lab5.adoc[Lab 5] and xref:lab6.adoc[Lab 6].
 
 == The SEC 10-K Dataset
 
@@ -45,7 +45,7 @@ The SEC financial dataset includes six entity types connected by typed relations
 
 image::financial-data-model.png[SEC 10-K Financial Data Model,800]
 
-This diagram shows the structured layer loaded in Lab 1. In xref:lab4.adoc[Lab 4], you add the unstructured layer: Document and Chunk nodes with embeddings that connect filing text back to these entities, enabling graph-enriched retrieval.
+This diagram shows the structured layer. The Lab 0 seed load also brings in the unstructured layer: Document and Chunk nodes with Titan Text Embeddings V2 embeddings that connect filing text back to these entities. xref:lab3.adoc[Lab 3] uses both layers for graph-enriched retrieval, and xref:lab2.adoc[Lab 2] shows how the pipeline builds them from scratch.
 
 == Workshop Architecture
 
@@ -55,53 +55,75 @@ image::workshop-architecture.png[Workshop Architecture,800]
 
 == Labs
 
-=== Part 1: Setup & Visual Exploration with Neo4j (Labs 0-2)
+=== Part 1: Getting Started with Neo4j Aura and the Dataset
 
 [cols="1,3,1"]
 |===
 | Lab | Description | Duration
 
 | xref:lab0.adoc[Lab 0]
-| AWS Console sign-in and Bedrock access verification
-| 10 min
+| Sign up for Neo4j Aura and load the seed dataset: structured graph, chunks, Titan V2 embeddings, and vector index
+| 20 min
 
 | xref:lab1.adoc[Lab 1]
-| Sign up for Neo4j Aura, load knowledge graph via Cypher, explore graph
-| 30 min
-
-| xref:lab2.adoc[Lab 2]
-| Build a no-code AI agent using Neo4j Aura Agents
+| Explore the knowledge graph with Cypher and Neo4j Explore
 | 20 min
 |===
 
-=== Part 2: Building GraphRAG Agents (Labs 3-5)
+=== Part 2: AWS ETL, Semantic Search, and GraphRAG
 
 [cols="1,3,1"]
 |===
 | Lab | Description | Duration
 
+| xref:part2-setup.adoc[Environment Setup]
+| AWS sign-in, Bedrock model access, and SageMaker Studio setup
+| 15 min
+
+| xref:lab2.adoc[Lab 2] (Optional)
+| Build the data pipeline from scratch: loading, Titan V2 embeddings, and vector index
+| 30 min
+
 | xref:lab3.adoc[Lab 3]
-| SageMaker setup, Strands Agents SDK, tool binding, ReAct pattern, AgentCore deployment
+| Semantic search and GraphRAG with VectorRetriever and VectorCypherRetriever
 | 30 min
 
 | xref:lab4.adoc[Lab 4]
-| Load chunk embeddings, vector retrieval, and vector-cypher retrieval over a knowledge graph
+| Build a Strands GraphRAG agent and deploy it to AgentCore Runtime
 | 30 min
-
-| xref:lab5.adoc[Lab 5]
-| Strands Agents with neo4j-graphrag: Cypher Templates and Text2Cypher patterns
-| 45 min
 |===
 
-=== Part 3: Bonus — Build Your Own Pipeline
+=== Part 3: Agent Memory (Optional)
+
+[cols="1,3,1"]
+|===
+| Lab | Description | Duration
+
+| xref:lab5.adoc[Lab 5]
+| Add persistent memory across conversation turns with neo4j-agent-memory
+| 30 min
+|===
+
+=== Part 4: Neo4j MCP Server (Optional)
 
 [cols="1,3,1"]
 |===
 | Lab | Description | Duration
 
 | xref:lab6.adoc[Lab 6]
-| Build a GraphRAG data pipeline from scratch: data loading, embeddings, and vector-cypher retrieval
-| 30 min
+| Connect agents to Neo4j through MCP: schema discovery, Cypher Templates, and Text2Cypher
+| 45 min
+|===
+
+=== Appendix
+
+[cols="1,3,1"]
+|===
+| Reference | Description | Duration
+
+| xref:appendix-agent.adoc[What Is an Agent?]
+| Strands agent fundamentals and a basic AgentCore deployment, for attendees who want the foundations
+| Optional
 |===
 
 == Prerequisites

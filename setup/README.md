@@ -2,6 +2,8 @@
 
 CLI tools and admin scripts for the GraphRAG workshop.
 
+See [Regenerating Seed Data](#regenerating-seed-data) for how the `seed-data/` files are produced from a live Neo4j graph.
+
 ## Prerequisites
 
 - Python 3.11+
@@ -18,7 +20,7 @@ These steps must be completed by the workshop admin before participants begin.
 
 In the AWS Console, navigate to **Amazon Bedrock > Model access** and enable:
 - `us.anthropic.claude-sonnet-4-5-20250929-v1:0` (or your preferred Claude model)
-- `amazon.nova-2-multimodal-embeddings-v1:0`
+- `amazon.titan-embed-text-v2:0`
 
 This is a manual console step and cannot be scripted.
 
@@ -92,5 +94,72 @@ To remove all resources created by the setup scripts:
 ```
 
 This detaches the deployment policy from all SageMaker roles, deletes the managed policy, deletes the execution role, and removes the S3 bucket.
+
+---
+
+## Regenerating Seed Data
+
+The workshop's `seed-data/` files are the source of truth for the SEC 10-K knowledge graph. Participants load them in Lab 1 with `LOAD CSV` from the CloudFront-hosted copies — both the structured CSVs and `chunks.csv` (chunks with embeddings). The `export_seed_data/` directory holds the tooling that produces and verifies those files from a live Neo4j graph.
+
+This is an admin-only workflow. Participants never run it; they only load the hosted `seed-data/` files via Lab 1's Cypher.
+
+### `export.py` — Export the graph to `seed-data/`
+
+Exports the full knowledge graph from a live Neo4j instance to `../seed-data/`:
+
+- **Structured layer**: companies, products, risk factors, financial metrics, asset managers, and documents, plus their relationship and junction tables (OFFERS, FACES_RISK, REPORTS, OWNS, COMPETES_WITH, PARTNERS_WITH, FILED).
+- **Unstructured layer**: chunks with Titan embeddings (`chunks.jsonl`) and their FROM_DOCUMENT, NEXT_CHUNK, and FROM_CHUNK relationships.
+
+The export filters to filing companies, those with a `FILED` relationship to a `Document` node, and their directly connected entities. Stable string IDs are assigned per node (`C001`, `P001`, `CH001`, etc.) so the CSVs are portable across databases.
+
+```bash
+cd setup/export_seed_data
+uv run export.py
+```
+
+Reads Neo4j credentials from `setup/.env` and writes all output to `setup/seed-data/`.
+
+### `chunks_jsonl_to_csv.py` — Convert chunks to CSV for Lab 1
+
+Lab 1 loads chunks via `LOAD CSV`, so the exported `chunks.jsonl` must be converted to `chunks.csv`. Each row carries its embedding as a semicolon-delimited float string, which the Lab 1 Cypher rebuilds with `split()`/`toFloat()` (no APOC required).
+
+```bash
+cd setup
+python chunks_jsonl_to_csv.py
+```
+
+Writes `setup/seed-data/chunks.csv` (~9 MB, 346 rows). Re-run this whenever `chunks.jsonl` changes.
+
+### Host seed data on S3/CloudFront
+
+Lab 1's Cypher reads every seed file from CloudFront, so the CSVs must be uploaded. `setup_s3_seed_data.sh` creates a private S3 bucket fronted by CloudFront (OAC) and uploads every `*.csv` in `seed-data/` — including `chunks.csv` and the chunk-relationship files (`chunk_documents.csv`, `chunk_sequence.csv`, `entity_chunks.csv`).
+
+```bash
+cd setup
+./setup_s3_seed_data.sh              # first-time: create bucket + CloudFront, upload CSVs
+./setup_s3_seed_data.sh --refresh    # re-upload CSVs and invalidate the CloudFront cache
+```
+
+After regenerating any seed file (including `chunks.csv`), run `--refresh` so participants load the current data. The base URL it prints must match the `https://…cloudfront.net/sec-filings/` prefix used in `Lab_1_Aura_Setup/README.md`.
+
+### `test_load.py` — Verify the structured load
+
+Loads the structured CSVs into a clean database using the same Cypher pattern as Lab 1's README (constraints, nodes, relationships, fulltext index), reading local CSVs via `UNWIND` instead of `LOAD CSV` from CloudFront. Confirms the committed CSVs load cleanly before distribution.
+
+```bash
+cd setup/export_seed_data
+uv run test_load.py
+```
+
+### `test_roundtrip.py` — Verify the full load path
+
+Round-trip test that loads every seed file (`chunks.jsonl` + `chunk_documents.csv` + `chunk_sequence.csv` + `entity_chunks.csv`), reads the data back, and verifies it matches. Exercises the complete load path including embeddings.
+
+```bash
+cd setup/export_seed_data
+uv run test_roundtrip.py
+```
+
+Both test scripts use the empty test database configured in `setup/.env.gold`, keeping the production Aura instance untouched.
 
 ---

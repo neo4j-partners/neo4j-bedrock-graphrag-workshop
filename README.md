@@ -6,38 +6,49 @@ A hands-on workshop teaching Graph Retrieval-Augmented Generation (GraphRAG) pat
 
 ## Workshop Structure
 
-### Part 1: Setup & Visual Exploration with Neo4j (Labs 0-2)
+### Part 1: Getting Started with Neo4j Aura and the Dataset (Labs 0-1)
 
 | Lab | Title | Description |
 |-----|-------|-------------|
 | [Lab 0](Lab_0_Sign_In/README.md) | Sign In | AWS Console sign-in and Bedrock access verification |
 | [Lab 1](Lab_1_Aura_Setup/README.md) | Neo4j Aura Setup | Sign up for Neo4j Aura, load knowledge graph via Cypher, explore graph |
-| [Lab 2](Lab_2_Aura_Agents/README.md) | Aura Agents | Build a no-code AI agent using Neo4j Aura Agent platform |
 
-### Part 2: Building GraphRAG Agents (Labs 3-5)
-
-| Lab | Title | Description |
-|-----|-------|-------------|
-| [Lab 3](Lab_3_Intro_to_Bedrock_and_Agents/README.md) | Intro to Bedrock and Agents | SageMaker setup, Strands Agents SDK, tool binding, ReAct pattern, AgentCore deployment |
-| [Lab 4](Lab_4_GraphRAG_Search/README.md) | neo4j-graphrag Library | Load chunk embeddings, vector retrieval, and vector-cypher retrieval over a knowledge graph |
-| [Lab 5](Lab_5_MCP_Server/README.md) | Neo4j MCP Server | Strands Agents with MCP: tool discovery, Cypher Templates, and Text2Cypher patterns |
-
-### Part 3: Bonus — Build Your Own Pipeline
+### Part 2: AWS ETL, Semantic Search, and GraphRAG (Labs 2-4)
 
 | Lab | Title | Description |
 |-----|-------|-------------|
-| [Lab 6](Lab_6_GraphRAG_Pipeline/README.md) | GraphRAG Pipeline (Bonus) | Build a GraphRAG data pipeline from scratch: data loading, embeddings, and vector-cypher retrieval |
+| [Lab 2](Lab_2_Data_Pipeline/README.md) | Data Pipeline (Optional) | Load chunks, generate Titan embeddings, create a vector index, and link chunks to graph entities |
+| [Lab 3](Lab_3_GraphRAG_Search/README.md) | Semantic Search and GraphRAG | Vector retrieval and vector-cypher retrieval over the knowledge graph with the neo4j-graphrag library |
+| [Lab 4](Lab_4_GraphRAG_Agent/) | Strands GraphRAG Agent | Wrap the retrievers as Strands tools and let the agent choose the retrieval strategy per question |
+
+### Part 3: Agent Memory (Optional / Advanced)
+
+| Lab | Title | Description |
+|-----|-------|-------------|
+| [Lab 5](Lab_5_Agent_Memory/README.md) | Agent Memory with Neo4j | Add persistent memory across conversation turns with neo4j-agent-memory |
+
+### Part 4: Neo4j MCP Server (Optional / Advanced)
+
+| Lab | Title | Description |
+|-----|-------|-------------|
+| [Lab 6](Lab_6_MCP_Server/README.md) | Neo4j MCP Server | Strands Agents with MCP: tool discovery, Cypher Templates, and Text2Cypher patterns |
+
+### Appendix
+
+| Section | Title | Description |
+|---------|-------|-------------|
+| [Appendix](Appendix_What_Is_An_Agent/README.md) | What Is an Agent? | Strands Agents SDK basics, tool binding, the ReAct pattern, and AgentCore deployment |
 
 ## Prerequisites
 
 - AWS Account with Bedrock access (or workshop credentials via OneBlink)
-- Basic Python knowledge (for Labs 3-6)
+- Basic Python knowledge (for Labs 2-6)
 
 ## Quick Start
 
 ### Option 1: AWS SageMaker Studio (Recommended for workshops)
 
-Follow [Lab 3](Lab_3_Intro_to_Bedrock_and_Agents/README.md) to set up SageMaker Studio and clone the repository.
+Follow the [Appendix — What Is an Agent?](Appendix_What_Is_An_Agent/README.md) to set up SageMaker Studio and clone the repository.
 
 ### Option 2: Local Development
 
@@ -72,7 +83,7 @@ See `CONFIG.txt` for all available settings grouped by lab.
 |-----------|------------|
 | **Knowledge Graph** | Neo4j Aura |
 | **Foundation Models** | Amazon Bedrock (Claude Sonnet) |
-| **Embeddings** | Amazon Nova Multimodal Embeddings |
+| **Embeddings** | Amazon Titan Text Embeddings V2 |
 | **Agent Frameworks** | Strands Agents SDK |
 | **GraphRAG Library** | neo4j-graphrag |
 | **Agent Protocol** | Model Context Protocol (MCP) |
@@ -86,7 +97,7 @@ User Query → AI Agent → Tool Selection
         ↓                     ↓                         ↓
   Vector Search         Text2Cypher              Cypher Template
         ↓                     ↓                         ↓
-  Nova Embeddings        Claude LLM                Direct Query
+  Titan Embeddings       Claude LLM                Direct Query
         ↓                     ↓                         ↓
         └─────────────────────┴─────────────────────────┘
                               ↓

@@ -4,8 +4,8 @@ These steps must be completed by the workshop admin before participants begin. T
 
 .**At a Glance**
 
-* **Bedrock model access**: enable Claude and Nova in the Bedrock console (manual, cannot be scripted)
-* **AgentCore IAM and resources**: run `setup_agentcore.sh` to create the execution role, S3 bucket, and SageMaker permissions needed for Lab 3 deployment
+* **Bedrock model access**: enable Claude and Titan Text Embeddings V2 in the Bedrock console. This is a manual step and cannot be scripted
+* **AgentCore IAM and resources**: run `setup_agentcore.sh` to create the execution role, S3 bucket, and SageMaker permissions needed for Lab 4 deployment
 * **CONFIG.txt preparation**: fill in MCP Gateway credentials and verify defaults before distributing to participants
 * **SageMaker lifecycle configuration** (optional): pre-install packages so notebooks start faster
 
@@ -14,13 +14,13 @@ These steps must be completed by the workshop admin before participants begin. T
 In the AWS Console, navigate to **Amazon Bedrock > Model access** and enable:
 
 * `us.anthropic.claude-sonnet-4-5-20250929-v1:0` (or your preferred Claude model)
-* `amazon.nova-2-multimodal-embeddings-v1:0`
+* `amazon.titan-embed-text-v2:0`
 
-This is a manual console step. Nova models are usually approved instantly; Claude may take a few minutes. Participants also verify model access in xref:lab0-instructions.adoc[Lab 0], but enabling it in advance avoids delays.
+This is a manual console step. Titan Text Embeddings V2 is usually approved instantly; Claude may take a few minutes. Participants also verify model access in xref:part2-setup-instructions.adoc[the Part 2 environment setup], but enabling it in advance avoids delays.
 
 == Step 2: Set Up AgentCore IAM and Resources
 
-The `setup_agentcore.sh` script creates the IAM roles, S3 bucket, and permissions needed for Lab 3's AgentCore deployment. Run it once per AWS account:
+The `setup_agentcore.sh` script creates the IAM roles, S3 bucket, and permissions needed for Lab 4's AgentCore deployment. Run it once per AWS account:
 
 [source,bash]
 ----
@@ -71,11 +71,11 @@ MCP_GATEWAY_URL=your-gateway-url-here
 MCP_ACCESS_TOKEN=your-access-token-here
 ----
 
-The MCP Gateway URL and access token come from the Neo4j MCP Server deployment on AgentCore. Labs 4 and 6 require these values. Participants fill in their own `NEO4J_URI`, `NEO4J_USERNAME`, and `NEO4J_PASSWORD` after completing xref:lab1.adoc[Lab 1].
+The MCP Gateway URL and access token come from the Neo4j MCP Server deployment on AgentCore. Lab 6 requires these values. Participants fill in their own `NEO4J_URI`, `NEO4J_USERNAME`, and `NEO4J_PASSWORD` after completing xref:lab0.adoc[Lab 0].
 
 == Step 4: SageMaker Lifecycle Configuration (Optional)
 
-If you pre-create SageMaker domains for participants, a lifecycle configuration script can pre-install packages so notebooks run faster. If participants create their own domains (as described in xref:lab3-instructions.adoc[Lab 3 Instructions]), this step is not needed because the `%pip install` cells in each notebook handle dependencies.
+If you pre-create SageMaker domains for participants, a lifecycle configuration script can pre-install packages so notebooks run faster. If participants create their own domains (as described in xref:part2-setup-instructions.adoc[the Part 2 environment setup]), this step is not needed because the `%pip install` cells in each notebook handle dependencies.
 
 Example lifecycle config script for JupyterLab (attach to the space's default app):
 

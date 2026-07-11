@@ -43,7 +43,7 @@ AWS_REGION=us-east-1
 MODEL_ID=us.anthropic.claude-sonnet-4-6
 ```
 
-The LLM uses the model specified by `MODEL_ID` (required). Embeddings use Amazon Nova Multimodal Embeddings (1024 dimensions by default) — override with `EMBEDDING_DIMENSIONS` if needed.
+The LLM uses the model specified by `MODEL_ID` (required). Embeddings use Amazon Titan Text Embeddings V2 (1024 dimensions by default) — override with `EMBEDDING_DIMENSIONS` if needed.
 
 AWS credentials are resolved by the standard boto3 credential chain (env vars, `~/.aws/credentials`, IAM role).
 
@@ -241,18 +241,18 @@ Data pipeline and GraphRAG patterns using neo4j-graphrag:
 
 ## AI Provider
 
-Uses `BedrockLLM` and `BedrockNovaEmbeddings` from [neo4j-graphrag-python](https://github.com/neo4j-partners/neo4j-graphrag-python). AWS credentials are resolved by the standard boto3 credential chain (env vars, `~/.aws/credentials`, IAM role).
+Uses `BedrockLLM` and `BedrockEmbeddings` from [neo4j-graphrag-python](https://github.com/neo4j-partners/neo4j-graphrag-python). AWS credentials are resolved by the standard boto3 credential chain (env vars, `~/.aws/credentials`, IAM role).
 
 | Component | Default model | Override env var |
 |-----------|---------------|------------------|
 | LLM | (none — `MODEL_ID` required) | `MODEL_ID` |
-| Embeddings | amazon.nova-2-multimodal-embeddings-v1:0 | `EMBEDDING_DIMENSIONS` |
+| Embeddings | amazon.titan-embed-text-v2:0 | `EMBEDDING_DIMENSIONS` |
 
-Embedding dimensions default to 1024 (Nova default is 3072 but we use 1024 to match existing vector indexes).
+Embedding dimensions default to 1024. Titan Text Embeddings V2 supports 256, 512, or 1024; 1024 matches the existing vector indexes.
 
 ## Architecture
 
-- **AWS Bedrock** — LLM (Claude) and embeddings (Nova)
+- **AWS Bedrock** — LLM (Claude) and embeddings (Titan)
 - **neo4j-graphrag-python** — Graph retrieval capabilities
 - **Neo4j** — Graph database with vector search
 
@@ -287,7 +287,7 @@ financial_data_load/
 │   ├── samples.py          # Sample queries
 │   └── embeddings/         # Embedding provider
 │       ├── __init__.py     # get_embedder(), get_embedding_dimensions()
-│       └── bedrock.py      # AWS Bedrock (Nova via neo4j-graphrag)
+│       └── bedrock.py      # AWS Bedrock (Titan via neo4j-graphrag)
 └── solution_srcs/          # Workshop solution files
     ├── config.py           # Shared config for solutions
     └── ...                 # 01_xx through 07_xx solution scripts

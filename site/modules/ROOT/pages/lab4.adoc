@@ -1,136 +1,68 @@
-= Lab 4: neo4j-graphrag Library
+= Lab 4: Strands GraphRAG Agent and AgentCore
 
-In Lab 3 you built an agent that calls simple tools. Now you connect directly to your knowledge graph using the neo4j-graphrag Python library and build retrieval pipelines that progress from pure vector search to graph-enriched search, then wrap both retrievers as Strands agent tools so the model picks the right strategy per question. This lab uses the same Neo4j Aura instance from Labs 1 and 2. You load the unstructured layer (document chunks with embeddings) on top of the structured graph you already built.
+In Lab 3 you built retrieval pipelines where the developer decided which retriever to run for each question. This lab hands that decision to the model. You wrap the `VectorCypherRetriever` from Lab 3 as a Strands `@tool` function, build a Strands agent around it, and then deploy that agent to Amazon Bedrock AgentCore Runtime so every attendee has their own REST-invokable GraphRAG agent. This is the agent behind the workshop's opening hero-question demo.
 
-TIP: Ready to start? Jump to the xref:lab4-instructions.adoc[Lab 4 Instructions] for step-by-step notebook walkthroughs.
+TIP: Ready to start? Jump to the xref:lab4-instructions.adoc[Lab 4 Instructions] for the step-by-step notebook walkthrough.
 
 .**At a Glance**
 
-* **Data loading**: add pre-computed chunk embeddings and cross-links to the existing knowledge graph
-* **Vector search**: find text passages whose meaning is closest to your question using `VectorRetriever`
-* **Graph-enriched search**: after finding matching passages, follow graph relationships to pull in companies, products, and risk factors using `VectorCypherRetriever`
-* **Agent-driven retrieval**: wrap both retrievers as Strands `@tool` functions and let the agent choose the right strategy per question
+* **Wrap retrieval as a tool**: expose the Lab 3 `VectorCypherRetriever` as a Strands `@tool` function
+* **Build the agent**: combine `Agent`, `BedrockModel`, and the retrieval tool into a ReAct loop that answers SEC 10-K questions
+* **Deploy to AgentCore**: use `direct_code_deploy` to host the agent on Bedrock AgentCore Runtime
+* **Invoke remotely**: call the deployed agent through a REST endpoint via boto3 or the agentcore CLI
 
-== The Two-Layer Graph
+== From Retriever to Agent
 
-The graph you explored in Lab 1 (companies, products, risk factors, asset managers) is the **structured layer**. Notebook 01 adds the **unstructured layer**: Document and Chunk nodes with embeddings, linked by `FROM_DOCUMENT` and `NEXT_CHUNK` relationships. Cross-links (`FROM_CHUNK`) connect entities like Products and RiskFactors to the Chunks that mention them.
+The `GraphRAG` pipeline in Lab 3 runs one retriever per call and returns an answer. It works well when you already know the retrieval strategy. Real questions are more varied. Some need a single passage, others need the company, its products, and its risk factors traversed from that passage.
 
-The `FILED` relationship bridges the two layers: `(Company)-[:FILED]->(Document)`. When graph-enriched search traverses from a chunk to its source document to the company that filed it, it crosses from unstructured text into the structured entities you already know. That traversal chain, `(Chunk)-[:FROM_DOCUMENT]->(Document)<-[:FILED]-(Company)`, is what makes GraphRAG possible.
+A Strands agent moves that choice into a reasoning loop. You give the agent a tool and a description of what it does, and the model decides when to call it, reads the results, and either answers or calls again. This is the same `Agent` plus `BedrockModel` plus `@tool` pattern from the agent fundamentals material, now backed by a tool that searches your knowledge graph.
 
-image::two-layer-graph.png[The Two-Layer Graph,800]
+To wrap the retriever, you define a Python function that takes a natural-language query, runs the `VectorCypherRetriever` against the `chunkEmbeddings` index, traverses the graph to companies, products, and risk factors, and returns the formatted context. The `@tool` decorator turns that function into a tool the agent can call. The function's docstring tells the model what the tool retrieves and when to use it, so write it as instructions to the model rather than notes to a developer.
 
-== The neo4j-graphrag Library
+image::agent_tools.png[Strands agent with a GraphRAG tool,800]
 
-This lab uses the https://github.com/neo4j/neo4j-graphrag-python[neo4j-graphrag] Python library, which provides the building blocks for GraphRAG applications on Neo4j:
+When the agent receives a question like "What cybersecurity risks does Apple face?", the ReAct loop reasons that graph-enriched retrieval fits, calls the tool, reads the chunk text along with the filing company, products, and risk factors, and composes a grounded answer. The agent traverses the graph without any hardcoded retrieval logic in the caller.
 
-* **Retrievers**: `VectorRetriever` and `VectorCypherRetriever` handle embedding the query, running the vector search, and (for Cypher retrievers) traversing the graph to enrich results with structured context
-* **GraphRAG pipeline**: combines a retriever with an LLM to go from a natural-language question to a grounded answer in a single call
-* **LLM and Embedder abstractions**: pluggable providers including Bedrock, OpenAI, Anthropic, Cohere, and Vertex AI
-* **Knowledge Graph Construction**: `SimpleKGPipeline` for building graphs from text and PDFs (used in xref:lab6.adoc[Lab 6])
-* **Vector index utilities**: `create_vector_index` and `upsert_vectors` for managing Neo4j vector indexes
+For agent fundamentals (the ReAct loop, tools, and the Bedrock model wiring), see xref:appendix-agent.adoc[the agent fundamentals appendix].
 
-The library handles the plumbing so you can focus on retrieval strategy rather than low-level Cypher and embedding management.
+== Deploying to Amazon Bedrock AgentCore Runtime
 
-== Chunks, Embeddings, and Graph-Enriched Search
+A local agent runs only while your notebook is open. To make it a service that other applications can call, you deploy it to Amazon Bedrock AgentCore Runtime.
 
-Most documents are too long for an LLM to process in a single pass. Retrieval-Augmented Generation (RAG) solves this by finding the most relevant pieces of a document and feeding only those to the model. The building blocks are:
+=== What AgentCore Runtime Provides
 
-**Chunks.** A long document is split into smaller passages called chunks (think of them as paragraphs or short sections). Each chunk is small enough for the system to process individually, but long enough to carry useful context. Chunks are stored as nodes in the graph and linked in sequence so the original reading order is preserved.
+AgentCore Runtime is serverless hosting for agents. Each agent session runs in its own isolated microVM, so sessions do not share memory or state. The runtime auto-scales with demand, exposes the agent through a REST endpoint, and leaves you with no servers, containers, or clusters to manage. You deploy agent code and get back an invokable endpoint.
 
-**Embeddings.** An embedding model reads a chunk's text and produces a list of numbers, called a vector, that acts as a fingerprint for the meaning of the text, not just the words it contains. Texts that describe similar ideas get similar fingerprints. For example, "supply chain disruption" and "logistics bottleneck risk" produce nearly identical vectors because they describe related concepts, even though they share no keywords.
+=== Deploying with direct_code_deploy
 
-**Vector search.** Given a natural-language question, the system converts it into a vector using the same embedding model and then compares that vector against all the stored chunk vectors to find the closest matches. This is called semantic similarity search; it matches on meaning rather than exact keywords. The results are text passages ranked by how closely their meaning matches your question.
+This lab uses the `direct_code_deploy` path from the https://github.com/aws/bedrock-agentcore-starter-toolkit[bedrock-agentcore-starter-toolkit]. It packages your agent from source, with no Dockerfile to write:
 
-**The limitation of vector search alone.** Vector search returns isolated passages. You get the chunk text and a similarity score, but nothing about where the passage came from, what entities it mentions, or how it relates to other information in the corpus.
+* **The deployment package** is your agent code (`agent.py`) plus a `pyproject.toml` that declares its dependencies.
+* **A `.bedrock_agentcore.yaml` config** specifies the entrypoint, the runtime, and the IAM execution role the agent assumes at run time.
+* **Running the deploy** packages the code, uploads it to S3, and creates the AgentCore runtime for you.
 
-**Graph-enriched search.** A knowledge graph connects chunks to structured entities (documents, companies, products, risk factors) through typed relationships. After vector search finds relevant chunks, graph traversal follows those relationships to pull in structured context. The result is not just "here's a matching passage" but "here's a matching passage, filed by this company, mentioning these products, linked to these risk factors." That additional context grounds the LLM's answer in verified, structured data.
+Once the runtime is created, you invoke the agent through its REST endpoint. From Python that is the `bedrock-agentcore` boto3 client calling `invoke_agent_runtime` with the agent ARN and your prompt. You can also invoke it from the `agentcore` CLI. Every attendee ends up with their own deployed agent ARN they can call on demand.
 
-=== Example: SEC 10-K Filings
+=== IAM and Hosted Environments
 
-This lab applies the pattern above to SEC 10-K filings, the annual financial reports that public companies file with the Securities and Exchange Commission. A single filing can run tens of thousands of words covering business operations, risk factors, financial results, and more.
+The AgentCore deployment depends on IAM resources that the workshop administrator provisions ahead of time, including the execution role the runtime assumes. See xref:admin-setup.adoc[the admin setup guide] for what is created.
 
-. Each filing is split into chunks and stored as `(:Chunk)` nodes linked by `NEXT_CHUNK` relationships.
-. Each chunk is encoded into a 1024-dimensional embedding vector using Amazon Bedrock Nova.
-. A vector index (`chunkEmbeddings`) enables semantic similarity search across all chunks.
-. Graph relationships connect chunks back to their source `(:Document)`, which is linked to the `(:Company)` that filed it, and cross-links (`FROM_CHUNK`) tie chunks to the `(:Product)` and `(:RiskFactor)` entities they mention.
+NOTE: In hosted OneBlink environments the deploy step may lack the permissions to create the runtime. If that happens, review the deployment code in the notebook to understand each step, then run the full deploy later in your own AWS account where you hold the required permissions.
 
-When you ask "What cybersecurity risks does Apple face?", vector search finds the most relevant passages. Graph-enriched search then follows relationships from those passages to return Apple as the filer, the specific products mentioned, and the risk factor classifications, all in a single retrieval step.
+== Notebook
 
-This lab covers the retrieval side: vector search and graph-enriched retrieval. The chunking and embedding were pre-computed and are loaded in Notebook 01. xref:lab6.adoc[Lab 6] covers building that data pipeline from scratch.
+This lab has a single notebook in `Lab_4_GraphRAG_Agent/`:
 
-image::graph-enriched-retrieval.png[SEC 10-K GraphRAG Retrieval Flow,800]
-
-== Retrieval Strategies
-
-=== VectorRetriever
-
-Notebook 02 introduces the `VectorRetriever` from the neo4j-graphrag library. It wraps the vector index and handles embedding the query, running the similarity search, and formatting the results. Connected to an LLM via `GraphRAG`, it builds a complete question-answering pipeline. The results are chunk text ranked by cosine similarity: isolated passages with no graph context.
-
-=== VectorCypherRetriever
-
-Notebook 03 extends vector search with the `VectorCypherRetriever`. After the vector index finds matching chunks, a custom Cypher retrieval query runs on each match to traverse the graph and pull in structured context:
-
-[source,cypher]
-----
-MATCH (node)-[:FROM_DOCUMENT]->(doc:Document)
-OPTIONAL MATCH (doc)<-[:FILED]-(company:Company)
-OPTIONAL MATCH (company)-[:FACES_RISK]->(risk:RiskFactor)
-OPTIONAL MATCH (product:Product)-[:FROM_CHUNK]->(node)
-----
-
-The LLM now receives the matched chunk alongside the filing accession number, company name, product list, and risk factor labels, producing answers grounded in both unstructured text and structured knowledge graph relationships.
-
-=== Strands GraphRAG Agent
-
-In Notebooks 02 and 03 the developer hardcodes which retriever to use. Notebook 04 shifts that decision to the model by wrapping both retrievers as Strands `@tool` functions and giving them to an agent. The agent reads the tool docstrings, reasons about which retrieval strategy fits the question, and calls the appropriate tool. This is the same `Agent` + `BedrockModel` + `@tool` pattern from Lab 3, now with meaningful tools that search a knowledge graph.
-
-The progression clarifies the role each layer plays:
-
-[cols="1,2,2"]
+[cols="1,2,3"]
 |===
-| Notebook | Pattern | Who decides what to retrieve?
+| Notebook | Title | What You Build
 
-| 02 — VectorRetriever
-| `GraphRAG` pipeline
-| Developer (hardcoded)
-
-| 03 — VectorCypherRetriever
-| `GraphRAG` pipeline
-| Developer (hardcoded)
-
-| 04 — Strands Agent
-| Agent with both retrievers as tools
-| The model
-
-| Lab 5 (next)
-| Agent with MCP tools
-| The model, via MCP transport
+| `01_strands_graphrag_agent.ipynb`
+| Strands GraphRAG Agent
+| A Strands agent that wraps the Lab 3 `VectorCypherRetriever` as a `@tool`, tested locally, then deployed to Bedrock AgentCore Runtime and invoked over REST
 |===
-
-The shift from 03 to 04 is _who picks the retrieval strategy_. The shift from 04 to Lab 5 is _how the tools are delivered_: local `@tool` functions here become remote tools served over MCP.
-
-== What the Library Does Under the Hood
-
-The neo4j-graphrag retrievers handle several steps internally so you can focus on the query rather than the plumbing. When you call a retriever, it:
-
-1. **Embeds your question**: sends the text to the embedding model (Bedrock Nova) and gets back a 1024-dimensional vector.
-2. **Queries the vector index**: runs a Cypher query against the `chunkEmbeddings` index using that vector.
-3. **Traverses the graph** (Cypher retrievers only): executes the `retrieval_query` you provide to follow relationships from matched chunks to connected entities.
-4. **Formats results for the LLM**: packages the retrieved text and metadata into a prompt-ready format.
-
-In xref:lab5.adoc[Lab 5], you will do each of these steps yourself through MCP: writing the Cypher by hand, managing embeddings in `@tool` functions, and wiring the results back to the agent. Understanding what the library automates here will make the manual approach in Lab 5 clearer.
-
-== What Is Covered Here vs Other Labs
-
-This lab focuses on the neo4j-graphrag library's retriever classes and direct Python driver connections. For related topics, see:
-
-* **MCP-based agent retrieval**: connecting agents to Neo4j via MCP, Text2Cypher pattern → xref:lab5.adoc[Lab 5]
-* **Building the data pipeline from scratch**: chunking, embedding generation, data loading → xref:lab6.adoc[Lab 6] (bonus)
-
-== Pattern Reference
-
-This lab covers the **Cypher Templates** pattern from Neo4j's https://graphrag.com/reference/[GraphRAG Patterns Catalog]: pre-written retrieval queries (the `RETRIEVAL_QUERY` in Notebook 03) that the library executes after vector search. The `VectorCypherRetriever` is the library's implementation of this pattern.
 
 == Next Steps
 
-Continue to xref:lab4-instructions.adoc[Lab 4 Instructions] to work through the notebooks. After completing this lab, proceed to xref:lab5.adoc[Lab 5: Neo4j MCP Server] for agent-based retrieval via MCP.
+Continue to xref:lab4-instructions.adoc[Lab 4 Instructions] to work through the notebook. After completing this lab, move on to Part 3, xref:lab5.adoc[Lab 5: Agent Memory with Neo4j], and Part 4, xref:lab6.adoc[Lab 6: Neo4j MCP Agent]. For a refresher on agent fundamentals, see xref:appendix-agent.adoc[the agent fundamentals appendix].
+</content>

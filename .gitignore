@@ -14,9 +14,10 @@ downloads/
 eggs/
 .eggs/
 lib/
-!Lab_4_GraphRAG_Search/lib/
-!Lab_5_MCP_Server/lib/
-!Lab_6_GraphRAG_Pipeline/lib/
+!Lab_2_Data_Pipeline/lib/
+!Lab_3_GraphRAG_Search/lib/
+!Lab_4_GraphRAG_Agent/lib/
+!Lab_6_MCP_Server/lib/
 !financial_data_load/lib/
 lib64/
 parts/

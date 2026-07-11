@@ -1,6 +1,6 @@
 # Lab 1: Neo4j Aura Setup and Exploration
 
-In this lab, you will set up your Neo4j Aura database, load a financial knowledge graph using Cypher, and explore your graph visually.
+In this lab, you will set up your Neo4j Aura database, load a complete financial knowledge graph — structured entities, relationships, and document chunks with vector embeddings — using Cypher, and explore your graph visually. After this lab the graph is ready for every downstream lab; no further data loading is required.
 
 ## Prerequisites
 
@@ -43,6 +43,9 @@ FOR (d:Document) REQUIRE d.documentId IS UNIQUE;
 
 CREATE CONSTRAINT metricId IF NOT EXISTS
 FOR (fm:FinancialMetric) REQUIRE fm.metricId IS UNIQUE;
+
+CREATE CONSTRAINT chunkId IF NOT EXISTS
+FOR (c:Chunk) REQUIRE c.chunkId IS UNIQUE;
 ```
 
 ### Step 2: Load Nodes
@@ -118,7 +121,81 @@ MATCH (fm:FinancialMetric {metricId: row.metricId})
 MERGE (c)-[:REPORTS]->(fm);
 ```
 
-### Step 4: Create Fulltext Index
+### Step 4: Load Document Chunks and Embeddings
+
+So far you have loaded the **structured layer** — companies, products, risk factors, and the relationships between them. Now you add the **unstructured layer**: the SEC filing text split into chunks, each carrying a pre-computed 1024-dimensional embedding.
+
+This statement reads `chunks.csv`, where the embedding is stored as a semicolon-delimited list of floats, rebuilds it into a vector with `split()`/`toFloat()`, and attaches it to each Chunk node. The load is batched with `CALL { ... } IN TRANSACTIONS` because the file is large (~9 MB).
+
+> **Run this statement on its own.** `CALL { ... } IN TRANSACTIONS` must execute as a single auto-committing query, so paste and run only this block (not alongside other statements). It may take a few seconds to complete.
+
+```cypher
+LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/chunks.csv' AS row
+CALL {
+    WITH row
+    MERGE (c:Chunk {chunkId: row.chunkId})
+    SET c.index = toInteger(row.index), c.text = row.text
+    WITH c, [x IN split(row.embedding, ';') | toFloat(x)] AS emb
+    CALL db.create.setNodeVectorProperty(c, 'embedding', emb)
+} IN TRANSACTIONS OF 50 ROWS;
+```
+
+> **Note:** These embeddings were generated with Amazon Titan Text Embeddings V2 (1024 dimensions). Your query-time embedder in later labs uses the same model, so vector search matches correctly.
+
+### Step 5: Create the Vector Index
+
+Create a vector index on the Chunk embeddings. This uses cosine similarity and enables fast approximate nearest-neighbor search in the GraphRAG labs.
+
+```cypher
+CREATE VECTOR INDEX chunkEmbeddings IF NOT EXISTS
+FOR (c:Chunk) ON (c.embedding)
+OPTIONS {indexConfig: {
+    `vector.dimensions`: 1024,
+    `vector.similarity_function`: 'cosine'
+}};
+```
+
+### Step 6: Link Chunks to the Graph
+
+Connect the chunks to the structured graph. `FROM_DOCUMENT` ties each chunk to its source filing, `NEXT_CHUNK` preserves reading order, and `FROM_CHUNK` links Products, Risk Factors, Financial Metrics, and Companies to the chunks that mention them. These cross-links are what make GraphRAG powerful: a vector search finds relevant chunks, then graph traversal reaches the connected entities.
+
+```cypher
+LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/chunk_documents.csv' AS row
+MATCH (c:Chunk {chunkId: row.chunkId})
+MATCH (d:Document {documentId: row.documentId})
+MERGE (c)-[:FROM_DOCUMENT]->(d);
+
+LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/chunk_sequence.csv' AS row
+MATCH (curr:Chunk {chunkId: row.chunkId})
+MATCH (next:Chunk {chunkId: row.nextChunkId})
+MERGE (curr)-[:NEXT_CHUNK]->(next);
+
+LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/entity_chunks.csv' AS row
+WITH row WHERE row.entityType = 'Product'
+MATCH (e:Product {productId: row.entityId})
+MATCH (c:Chunk {chunkId: row.chunkId})
+MERGE (e)-[:FROM_CHUNK]->(c);
+
+LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/entity_chunks.csv' AS row
+WITH row WHERE row.entityType = 'RiskFactor'
+MATCH (e:RiskFactor {riskId: row.entityId})
+MATCH (c:Chunk {chunkId: row.chunkId})
+MERGE (e)-[:FROM_CHUNK]->(c);
+
+LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/entity_chunks.csv' AS row
+WITH row WHERE row.entityType = 'FinancialMetric'
+MATCH (e:FinancialMetric {metricId: row.entityId})
+MATCH (c:Chunk {chunkId: row.chunkId})
+MERGE (e)-[:FROM_CHUNK]->(c);
+
+LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/entity_chunks.csv' AS row
+WITH row WHERE row.entityType = 'Company'
+MATCH (e:Company {companyId: row.entityId})
+MATCH (c:Chunk {chunkId: row.chunkId})
+MERGE (e)-[:FROM_CHUNK]->(c);
+```
+
+### Step 7: Create Fulltext Index
 
 This enables keyword search across entity names and descriptions.
 
@@ -128,7 +205,7 @@ FOR (n:Company|Product|RiskFactor)
 ON EACH [n.name, n.description];
 ```
 
-### Step 5: Verify the Load
+### Step 8: Verify the Load
 
 Run this query to confirm your node and relationship counts:
 
@@ -143,11 +220,28 @@ You should see approximately:
 | Label | Count |
 |---|---|
 | AssetManager | 15 |
+| Chunk | 346 |
 | Company | ~71 |
 | Document | 7 |
 | FinancialMetric | 874 |
 | Product | 303 |
 | RiskFactor | 883 |
+
+Then confirm the chunk relationships loaded:
+
+```cypher
+MATCH ()-[r]->()
+WITH type(r) AS type, count(r) AS count
+RETURN type, count ORDER BY type;
+```
+
+You should see `FROM_DOCUMENT`, `NEXT_CHUNK`, and `FROM_CHUNK` alongside the structured relationships (`OFFERS`, `FACES_RISK`, `OWNS`, `COMPETES_WITH`, `PARTNERS_WITH`, `FILED`, `REPORTS`). Finally, confirm the vector index is online:
+
+```cypher
+SHOW VECTOR INDEXES;
+```
+
+The `chunkEmbeddings` index should be listed with a `state` of `ONLINE`.
 
 > **Note:** The Company count is higher than 6 because `company_competitors.csv` and
 > `company_partners.csv` contain competitor and partner names (e.g., Google, Samsung, OpenAI)
@@ -159,7 +253,7 @@ You should see approximately:
 > MATCH (c:Company) WHERE c.companyId IS NOT NULL RETURN c.name, c.ticker ORDER BY c.name;
 > ```
 
-### Step 6: Try Some Queries
+### Step 9: Try Some Queries
 
 Now that the graph is loaded, try these queries to explore the data.
 
@@ -224,4 +318,4 @@ Follow [EXPLORE.md](EXPLORE.md) to:
 
 ## Next Steps
 
-After completing this lab, continue to [Lab 2 - Aura Agents](../Lab_2_Aura_Agents) to build an AI-powered agent using the Neo4j Aura Agent no-code platform.
+After completing this lab, continue to [Lab 2 - Data Pipeline](../Lab_2_Data_Pipeline) (optional) to see how the graph's chunk embeddings are generated, or go straight to [Lab 3 - Semantic Search and GraphRAG](../Lab_3_GraphRAG_Search) to begin building GraphRAG retrieval over this knowledge graph.

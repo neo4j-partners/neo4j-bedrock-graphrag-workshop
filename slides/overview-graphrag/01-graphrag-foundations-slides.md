@@ -80,7 +80,7 @@ An **embedding** is a list of numbers that represents the *meaning* of text, not
 
 - "Supply chain disruption" and "logistics bottleneck risk" produce **similar vectors** because they describe related concepts
 - Two texts can share zero keywords but have nearly identical embeddings
-- The embedding model reads text and outputs a fixed-length vector (1024 dimensions for Amazon Nova)
+- The embedding model reads text and outputs a fixed-length vector (1024 dimensions for Amazon Titan Text Embeddings V2)
 
 Embeddings power **semantic search**: matching on meaning rather than exact keywords.
 
@@ -200,7 +200,7 @@ Each strategy excels at different question types. Labs 4 and 5 implement all thr
 The data pipeline that powers GraphRAG:
 
 1. **Split** filing text into chunks
-2. **Generate embeddings** for each chunk (Bedrock Nova, 1024 dimensions)
+2. **Generate embeddings** for each chunk (Bedrock Titan, 1024 dimensions)
 3. **Store** chunks as nodes, linked by NEXT_CHUNK and FROM_DOCUMENT
 4. **Create vector index** over chunk embeddings
 5. **Cross-link** chunks to entities via FROM_CHUNK relationships

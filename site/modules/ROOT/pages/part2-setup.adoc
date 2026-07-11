@@ -1,0 +1,33 @@
+= Environment Setup: AWS and SageMaker
+
+Part 2 moves from the no-code tools of Part 1 into code. This page covers the environment you set up once and use for every coding lab that follows: an AWS account with Amazon Bedrock model access, and Amazon SageMaker Studio as the notebook environment.
+
+TIP: Ready to start? Jump to the xref:part2-setup-instructions.adoc[Environment Setup Instructions] for step-by-step setup.
+
+.**At a Glance**
+
+* **AWS Console**: access is required for all Part 2 labs, either through workshop-provided OneBlink credentials or your own account
+* **Amazon Bedrock**: foundation model access for Claude (reasoning and tool use) and Amazon Titan Text Embeddings V2 (embeddings)
+* **US East (N. Virginia)**: use `us-east-1` for the widest Bedrock model availability
+* **Amazon SageMaker Studio**: the JupyterLab environment where you run the notebooks
+
+== AWS Account Access
+
+You reach the AWS Console one of two ways. For instructor-led workshops, participants receive temporary AWS credentials through OneBlink. These accounts are pre-configured with the IAM permissions needed for Bedrock, SageMaker, and related services, and they are terminated at the end of the workshop. If you are working independently, you use your own AWS account with an IAM user that has permissions for Amazon Bedrock (model access and agent creation) and CloudFormation.
+
+== Amazon Bedrock
+
+Amazon Bedrock is a managed service that provides API access to foundation models from multiple providers. This workshop uses two models:
+
+* **Anthropic Claude** (via cross-region inference) for reasoning, tool selection, and response generation
+* **Amazon Titan Text Embeddings V2** (`amazon.titan-embed-text-v2:0`, 1024 dimensions) for generating vector representations of text chunks
+
+Model access is not enabled by default. You request access to both models in the instructions. Use the **US East (N. Virginia) / us-east-1** region for the widest model availability.
+
+== Amazon SageMaker Studio
+
+The Part 2 labs run as Jupyter notebooks. Rather than install Python locally, you use Amazon SageMaker Studio, a managed development environment that runs JupyterLab in the browser. You create a SageMaker domain, launch a JupyterLab space, and clone the workshop repository into it. Every notebook from Lab 2 onward runs from this environment and reads credentials from `CONFIG.txt`.
+
+== Next Steps
+
+Continue to xref:part2-setup-instructions.adoc[Environment Setup Instructions] to sign in, enable Bedrock model access, and launch SageMaker Studio. When your environment is ready, proceed to xref:lab2.adoc[Lab 2: Data Pipeline (Optional)] or go straight to xref:lab3.adoc[Lab 3: Semantic Search and GraphRAG].

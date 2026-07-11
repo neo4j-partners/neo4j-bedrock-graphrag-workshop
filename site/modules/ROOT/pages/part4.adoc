@@ -1,0 +1,13 @@
+= Part 4: Neo4j MCP Server (Optional)
+
+Parts 2 and 3 connected agents to Neo4j with the Python driver embedded directly in application code. That works, but every application repeats the same driver setup, connection handling, and query logic. The **Model Context Protocol (MCP)** is the recommended production pattern for connecting agents to Neo4j. It moves database access behind a standard interface that any agent can call.
+
+MCP gives you three properties that matter in production:
+
+* **Framework-agnostic**: Strands, LangChain, LangGraph, or a custom agent loop all connect to the same MCP server without changing the server. The protocol is the contract.
+* **No per-application driver code**: The MCP server owns the Neo4j connection, credentials, and query execution. Applications call tools, not a database driver.
+* **Schema-aware tools**: The server exposes a `get-schema` tool so agents discover node labels, relationship types, and properties at runtime instead of hard-coding them.
+
+This part is optional and advanced. It suits all-day sessions or take-home study, and it builds on the agent and retrieval work from Parts 2 and 3.
+
+* xref:lab6.adoc[Lab 6: Neo4j MCP Agent]

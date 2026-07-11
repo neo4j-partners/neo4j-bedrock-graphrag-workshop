@@ -1,60 +1,46 @@
-= Lab 4 Instructions: neo4j-graphrag Library
+= Lab 4 Instructions: Strands GraphRAG Agent and AgentCore
 
-Follow these notebooks to load chunk embeddings into your knowledge graph, build retrieval pipelines that progress from pure vector search to graph-enriched retrieval, then combine both retrievers in a Strands agent that chooses the right strategy per question.
+Follow this notebook to build a Strands agent that wraps the Lab 3 `VectorCypherRetriever` as a tool, test it locally against your knowledge graph, then deploy it to Amazon Bedrock AgentCore Runtime and invoke it over REST.
 
-TIP: For concepts and background, see xref:lab4.adoc[Lab 4: neo4j-graphrag Library].
+TIP: For concepts and background, see xref:lab4.adoc[Lab 4: Strands GraphRAG Agent and AgentCore].
 
 == What You'll Learn
 
-* **Data Loading**: Add document chunks with pre-computed embeddings to the existing knowledge graph from Lab 1
-* **Vector Search**: Use `VectorRetriever` to find semantically similar chunks and generate answers with `GraphRAG`
-* **Graph-Enriched Search**: Use `VectorCypherRetriever` to combine vector search with Cypher graph traversal for richer context
-* **Agent-Driven Retrieval**: Wrap both retrievers as Strands `@tool` functions and let the agent choose the right strategy per question
+* **Wrap retrieval as a tool**: expose the Lab 3 `VectorCypherRetriever` as a Strands `@tool` function
+* **Build and test the agent**: create an `Agent` with a `BedrockModel` and the retrieval tool, then run natural-language SEC 10-K questions locally
+* **Deploy to AgentCore**: package and deploy the agent with `direct_code_deploy` from the bedrock-agentcore-starter-toolkit
+* **Invoke remotely**: call the deployed agent through its REST endpoint via boto3 and the agentcore CLI
 
 == Prerequisites
 
-* Completed **Lab 1**: Aura instance created and knowledge graph loaded
-* Completed **Lab 3**: SageMaker Studio set up and repository cloned
-* A running environment (SageMaker Studio or GitHub Codespace)
+* Completed **Lab 3** (or at least the Lab 0 seed load, which provides the chunks, Titan v2 embeddings, and the `chunkEmbeddings` index the agent's tool queries)
+* Completed the **Part 2 environment setup**: see xref:part2-setup-instructions.adoc[Part 2 Setup Instructions]
+* `CONFIG.txt` filled in with your Neo4j credentials; `MODEL_ID` and `REGION` use working defaults
 
-NOTE: This lab uses the same Neo4j Aura instance from Labs 1-2. The structured graph (companies, products, risk factors, asset managers) must already be loaded. Notebook 01 adds the unstructured layer on top; it does not clear existing data.
+NOTE: The AgentCore deployment relies on IAM resources the workshop administrator provisions ahead of time, including the runtime execution role. See xref:admin-setup.adoc[the admin setup guide] for details. In hosted OneBlink environments the deploy step may lack the permissions to create the runtime; if so, review the deployment code to understand each step, then run the full deploy later in your own AWS account.
 
-=== Update CONFIG.txt with Neo4j Credentials
+== Notebook
 
-Before running the notebooks, open `CONFIG.txt` at the repository root and fill in the Neo4j credentials you saved in Lab 1:
-
-[source,text]
-----
-NEO4J_URI=neo4j+s://xxxxxxxx.databases.neo4j.io
-NEO4J_USERNAME=neo4j
-NEO4J_PASSWORD=your-password-from-lab-1
-----
-
-`MODEL_ID` and `REGION` are pre-configured with working defaults. See xref:configuration.adoc[Configuration Reference] for details on all fields.
-
-== Notebooks
+The notebook lives in `Lab_4_GraphRAG_Agent/`.
 
 [cols="1,2,3"]
 |===
 | Notebook | Title | What You Build
 
-| `01_load_and_query.ipynb`
-| Load Data and Query
-| Load chunk embeddings into the graph, create a vector index, link entities to chunks with `FROM_CHUNK` relationships, and run test queries
-
-| `02_vector_retriever.ipynb`
-| Vector Retriever
-| Semantic search with `VectorRetriever` and end-to-end question answering with `GraphRAG`
-
-| `03_vector_cypher_retriever.ipynb`
-| VectorCypher Retriever
-| Graph-enriched retrieval using `VectorCypherRetriever`, adding filing metadata, companies, products, and risk factors to vector search results
-
-| `04_strands_graphrag_agent.ipynb`
+| `01_strands_graphrag_agent.ipynb`
 | Strands GraphRAG Agent
-| A Strands agent with both retrievers as `@tool` functions that decides which retrieval strategy to use based on the question
+| Wrap the `VectorCypherRetriever` as a `@tool`, build and test the agent locally, then deploy to AgentCore and invoke it over REST
 |===
+
+=== Walkthrough
+
+. **Build the retrieval tool.** Wrap the Lab 3 `VectorCypherRetriever` in a Python function decorated with `@tool`. The function embeds the query, runs vector search over the `chunkEmbeddings` index, traverses the graph to companies, products, and risk factors, and returns the formatted context. Write the docstring as instructions to the model.
+. **Assemble the agent.** Create a Strands `Agent` with a `BedrockModel` and the retrieval tool, then give it a system prompt that frames it as a SEC 10-K analyst.
+. **Test locally.** Ask natural-language questions such as the workshop's hero question and confirm the agent calls the tool, traverses the graph, and returns grounded answers.
+. **Deploy to AgentCore.** Use `direct_code_deploy` from the bedrock-agentcore-starter-toolkit. The deployment package is the agent code (`agent.py`) plus `pyproject.toml`, and the `.bedrock_agentcore.yaml` config specifies the entrypoint, runtime, and IAM execution role. Running the deploy packages the code, uploads it to S3, and creates the runtime.
+. **Invoke remotely.** Call the deployed agent through its REST endpoint using the `bedrock-agentcore` boto3 client's `invoke_agent_runtime` with the agent ARN, or through the `agentcore` CLI.
 
 == Next Steps
 
-After completing these notebooks, explore the xref:lab4-sample-queries.adoc[Lab 4: Sample Queries] for more Cypher examples, then continue to xref:lab5.adoc[Lab 5: Neo4j MCP Server] for agent-based retrieval via MCP.
+After completing this notebook, continue to Part 3, xref:lab5.adoc[Lab 5: Agent Memory with Neo4j].
+</content>

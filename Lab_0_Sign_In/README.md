@@ -63,7 +63,7 @@ Amazon Bedrock is available in select regions. For this workshop, we recommend *
 
 **Note:** If this is your first time using Bedrock, you may need to request access to specific models:
 - Click **Manage model access**
-- Enable **Amazon Nova Multimodal Embeddings** (usually approved instantly)
+- Enable **Amazon Titan Text Embeddings V2** (usually approved instantly)
 - Enable **Anthropic Claude 3.5 Sonnet** (may take a few minutes)
 - Click **Save changes**
 
@@ -76,7 +76,7 @@ Amazon Bedrock is available in select regions. For this workshop, we recommend *
 ### Model access shows "Not available"
 - Some models require explicit access requests
 - Click **Manage model access** and request the needed models
-- Nova models are usually instant; Claude may take a few minutes
+- Titan models are usually instant; Claude may take a few minutes
 
 ### Cannot find Bedrock in services
 - Ensure you are in a region that supports Bedrock
@@ -88,4 +88,4 @@ As you work through these labs, we'd appreciate your feedback. Help us improve b
 
 ## Next Steps
 
-After completing this lab, continue to [Lab 1 - Neo4j Aura Setup](../Lab_1_Aura_Setup) to set up your Neo4j database through the AWS Marketplace.
+After completing this lab, continue to [Lab 1 - Neo4j Aura Setup](../Lab_1_Aura_Setup) to create your Neo4j Aura instance using the free trial and load the knowledge graph.

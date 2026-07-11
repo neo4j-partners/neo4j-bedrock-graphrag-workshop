@@ -31,7 +31,7 @@ REGION = config.region
 AGENT_NAME = "basic_strands_agent"
 AGENT_DIR = (
     Path(__file__).resolve().parent.parent.parent
-    / "Lab_3_Intro_to_Bedrock_and_Agents"
+    / "Appendix_What_Is_An_Agent"
     / "agentcore_deploy"
 )
 

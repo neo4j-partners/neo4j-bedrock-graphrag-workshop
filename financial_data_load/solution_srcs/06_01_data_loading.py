@@ -19,7 +19,7 @@ sys.path.insert(0, FINANCIAL_DATA_DIR)
 
 from lib.data_utils import split_text  # noqa: E402
 
-# Structured filing data matching Lab_6_GraphRAG_Pipeline/financial_data.json
+# Structured filing data matching Lab_2_Data_Pipeline/financial_data.json
 FILING_DATA = {
     "company": {
         "name": "Apple Inc.",

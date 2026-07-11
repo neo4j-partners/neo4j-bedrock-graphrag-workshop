@@ -173,18 +173,6 @@ Neo4j Aura is the **fully managed cloud graph database** used in this workshop:
 
 ---
 
-## Aura Agents (Lab 2 Preview)
-
-Neo4j's **no-code agent platform** for conversational AI:
-
-- "Create with AI" inspects your graph schema and auto-generates tools
-- **Cypher Templates**: deterministic, pre-built traversal patterns
-- **Text2Cypher**: flexible natural language to Cypher at runtime
-- **Similarity Search**: vector-based matching (requires embeddings)
-- Deploy as REST API or MCP Server endpoint
-
----
-
 ## Data Loading Pattern
 
 Lab 1 loads the knowledge graph using Cypher:
@@ -224,7 +212,6 @@ OPTIONS {indexConfig: {`vector.dimensions`: 1024,
 ## What Comes Next
 
 - **Lab 1**: Provision Aura, load the structured graph, explore visually
-- **Lab 2**: Build a no-code agent with Aura Agents
 - **Lab 4**: Add the unstructured layer (chunks + embeddings), run GraphRAG retrievers
 - **Lab 5**: Connect agents to the graph via MCP
 - **Lab 6**: Build the entire data pipeline from scratch

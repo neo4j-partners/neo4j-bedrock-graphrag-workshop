@@ -100,7 +100,7 @@ def get_llm_deterministic():
 
 
 def get_embedder():
-    """Get a BedrockNovaEmbeddings instance."""
+    """Get a BedrockEmbeddings (Titan Text Embeddings V2) instance."""
     from .embeddings import get_embedder as _get_embedder
 
     return _get_embedder()

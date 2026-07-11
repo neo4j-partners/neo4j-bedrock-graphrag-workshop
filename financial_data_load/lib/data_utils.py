@@ -14,7 +14,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
-from neo4j_graphrag.embeddings import BedrockNovaEmbeddings
+from neo4j_graphrag.embeddings import BedrockEmbeddings
 from neo4j_graphrag.llm import BedrockLLM
 from neo4j_graphrag.schema import get_schema as _lib_get_schema
 from pydantic import Field
@@ -56,16 +56,18 @@ class BedrockConfig(BaseSettings):
 # AI Services
 # =============================================================================
 
-def get_embedder() -> BedrockNovaEmbeddings:
-    """Get embedder using AWS Bedrock Nova Multimodal Embeddings.
+def get_embedder() -> BedrockEmbeddings:
+    """Get embedder using AWS Bedrock Titan Text Embeddings V2.
 
-    Returns a BedrockNovaEmbeddings object for use with neo4j-graphrag retrievers.
+    Returns a BedrockEmbeddings object for use with neo4j-graphrag retrievers.
+    Titan Text Embeddings V2 outputs 1024-dimensional vectors by default,
+    matching the chunkEmbeddings vector index.
     """
     config = BedrockConfig()
 
-    return BedrockNovaEmbeddings(
+    return BedrockEmbeddings(
+        model_id="amazon.titan-embed-text-v2:0",
         region_name=config.region,
-        embedding_dimension=config.embedding_dimensions,
     )
 
 
@@ -83,7 +85,7 @@ _embedder = None
 
 
 def get_embedding(text: str) -> list[float]:
-    """Generate an embedding vector for text using Bedrock Nova.
+    """Generate an embedding vector for text using Bedrock Titan Text Embeddings V2.
 
     Returns the raw float array for use in Cypher vector search queries.
     """

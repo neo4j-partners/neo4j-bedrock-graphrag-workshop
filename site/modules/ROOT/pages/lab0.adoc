@@ -1,33 +1,76 @@
-= Lab 0: Sign In to AWS
+= Lab 0: Neo4j Aura Sign-Up and Data Load
 
-This is Lab 0 of the workshop. You will sign in to your AWS account and verify access to Amazon Bedrock services. The credentials and region you configure here carry through every subsequent lab.
+Lab 0 is where the workshop starts. You sign up for a Neo4j Aura free trial and load the SEC 10-K financial knowledge graph. The seed load is complete: it provides both the structured graph and the unstructured document layer with embeddings, so every later lab works without running the optional data pipeline.
 
-TIP: Ready to start? Jump to the xref:lab0-instructions.adoc[Lab 0 Instructions] for step-by-step setup.
+TIP: Ready to start? Jump to xref:lab0-instructions.adoc[Lab 0 Instructions: Sign Up and Load Data] for step-by-step directions.
 
 .**At a Glance**
 
-* **AWS Console**: access is required for all labs, either through workshop-provided OneBlink credentials or your own account
-* **Amazon Bedrock**: foundation model access for Claude (generation) and Nova (embeddings)
-* **US East (N. Virginia)**: the recommended region for the widest Bedrock model availability
-* **Model access**: must be explicitly enabled for Claude and Nova in the Bedrock console
+* **Neo4j Aura**: managed cloud graph database with built-in vector search and Graph Data Science
+* **Free trial**: each participant provisions their own Aura instance from the Neo4j Aura free trial
+* **The SEC 10-K dataset**: companies, products, risk factors, asset managers, documents, and financial metrics drawn from public 10-K filings
+* **The seed load**: the structured graph plus the unstructured layer (Document/Chunk nodes, Titan Text Embeddings V2 embeddings, and the `chunkEmbeddings` vector index)
+* **Aura developer tools**: Query (Cypher editor), Explore (visual graph canvas), and Dashboards (low-code visualization)
 
-== Workshop Credentials (OneBlink)
+== Neo4j Aura
 
-For instructor-led workshops, participants receive temporary AWS credentials through OneBlink. These accounts are pre-configured with the necessary IAM permissions for Bedrock, SageMaker, and related services. The accounts are terminated at the end of the workshop.
+Neo4j Aura is a fully managed cloud graph database service. It provides the Neo4j graph engine without the operational overhead: automatic backups, high availability, and deployment on AWS, GCP, or Azure. For this workshop, each participant provisions their own Aura instance from the free trial to hold the SEC financial knowledge graph.
 
-== Using Your Own Account
+.Vector search, Graph Data Science, and AI capabilities
+[%collapsible]
+====
+Aura provides capabilities beyond the core graph engine that support AI retrieval pipelines. Built-in vector indexes store embeddings alongside graph data, enabling semantic similarity search without a separate vector store. Cypher queries can combine vector search with graph traversal in a single operation. Graph Data Science algorithms like PageRank and community detection run directly within Aura. These capabilities come together in Lab 3 (semantic search and GraphRAG) and Lab 6 (the Neo4j MCP agent).
+====
 
-If you are working independently, you need an IAM user with permissions for Amazon Bedrock (model access and agent creation) and CloudFormation (for CDK deployment in later labs). Create access keys for programmatic access if you plan to complete Labs 4-7.
+== The SEC 10-K Dataset
 
-== Amazon Bedrock
+The workshop builds a knowledge graph from SEC 10-K financial filings. The dataset captures public companies, the products they offer, the risks they disclose, the institutions that own them, and the filings themselves. It gives you realistic, connected data to query, visualize, and retrieve over throughout the workshop.
 
-Amazon Bedrock is a managed service that provides API access to foundation models from multiple providers. This workshop uses two model families:
+The structured entities are:
 
-* **Anthropic Claude** (via cross-region inference) for reasoning, tool selection, and response generation
-* **Amazon Nova Multimodal Embeddings** for generating vector representations of text chunks
+[cols="1,3"]
+|===
+| Entity Type | Examples
 
-Model access is not enabled by default. You will request access to both model families in the instructions.
+| **Company**
+| NVIDIA, Microsoft, Apple, Amazon, Tesla, JPMorgan Chase, Goldman Sachs, Johnson & Johnson, Pfizer
+
+| **Product**
+| GPUs, Cloud Services, iPhone, AWS, Model S, Investment Banking
+
+| **RiskFactor**
+| Supply Chain Disruption, Regulatory Compliance, Cybersecurity Threats
+
+| **AssetManager**
+| BlackRock, Vanguard, State Street, Fidelity
+
+| **Document**
+| The 10-K filings themselves, identified by accession number
+
+| **FinancialMetric**
+| Reported financial figures tied to a company and reporting period
+|===
+
+== What the Seed Load Provides
+
+Running Lab 0 loads a complete graph in two layers.
+
+**The structured graph** holds the entity types above, connected by typed relationships: a Company OFFERS products, FACES_RISK on risk factors, COMPETES_WITH and PARTNERS_WITH other companies, and REPORTS financial metrics, while an AssetManager OWNS companies and a Company FILED documents.
+
+**The unstructured layer** connects those entities to the text of the filings. Each Document links to Chunk nodes that hold passages of filing text, and each Chunk carries an embedding vector. The seed load populates these embeddings using Amazon Titan Text Embeddings V2 (`amazon.titan-embed-text-v2:0`), which produces 1024-dimension vectors, and it creates the `chunkEmbeddings` vector index over `Chunk.embedding` so semantic search works immediately.
+
+IMPORTANT: After Lab 0, the graph is complete. Both layers are in place, so Labs 3 through 6 run without you having to run the optional data pipeline in Lab 2. Lab 2 is available if you want to see how the unstructured layer is built, but it is not required.
+
+== Aura Developer Tools
+
+The Aura console provides three tools you will use throughout the workshop.
+
+**Query** is a developer environment for writing and executing Cypher queries with syntax highlighting, auto-completion, and saved query collections. You will use this to load data and verify results.
+
+**Explore** (powered by Neo4j Bloom) provides visual graph exploration through an interactive canvas. Search for nodes by label or property, expand their relationships, and discover patterns visually.
+
+**Dashboards** offer low-code data visualization including bar charts, geographic maps, and graph visualizations for presenting graph data to non-technical stakeholders.
 
 == Next Steps
 
-Continue to xref:lab0-instructions.adoc[Lab 0 Instructions] to sign in and verify Bedrock access. When ready, proceed to xref:lab1.adoc[Lab 1: Neo4j Aura Setup].
+Continue to xref:lab0-instructions.adoc[Lab 0 Instructions: Sign Up and Load Data] to create your Aura instance and load the knowledge graph. Then move on to xref:lab1.adoc[Lab 1: Explore the Knowledge Graph].

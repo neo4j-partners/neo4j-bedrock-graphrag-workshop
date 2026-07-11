@@ -1,174 +1,80 @@
-= Lab 5: Neo4j MCP Server
+= Lab 5: Agent Memory with Neo4j
 
-Lab 4 used the neo4j-graphrag library with a direct Python driver. You called retriever classes that handled embedding, vector search, and graph traversal internally. This lab connects to the same knowledge graph through the **Model Context Protocol (MCP)**, an open standard that defines how AI agents discover and interact with external tools and data sources. You'll progress from MCP basics to pre-written Cypher templates to fully autonomous Text2Cypher agents.
+This lab adds memory to the GraphRAG agent from xref:lab4.adoc[Lab 4]. The agent gains short-term memory for recent conversation turns and long-term memory for extracted entities and facts, both stored in the same Neo4j Aura instance that holds the SEC 10-K knowledge graph. The result is an agent that carries context across a conversation instead of answering every question from a blank slate.
 
-TIP: Ready to start? Jump to the xref:lab5-instructions.adoc[Lab 5 Instructions] for the notebook walkthrough.
+NOTE: The hands-on notebook for this lab is in development. The `Lab_5_Agent_Memory/` directory will hold it when it ships. The conceptual walkthrough below is complete, so you can follow the design and the demo now and run the notebook once it lands.
+
+TIP: Ready to start? Jump to the xref:lab5-instructions.adoc[Lab 5 Instructions] for the step-by-step walkthrough.
 
 .**At a Glance**
 
-* **Three notebooks**: progress from MCP tool discovery to graph-enriched search to autonomous Cypher generation
-* **Strands Agents SDK**: AWS-native agent framework with built-in MCP support
-* **Two retrieval patterns**: Cypher Templates (reliable, pre-written) and Text2Cypher (flexible, agent-generated)
-* **Schema-first approach**: the agent retrieves the graph schema before writing any query
+* **The stateless problem**: why an agent that starts every call from zero context fails in multi-turn conversations
+* **Short-term and long-term memory**: recent turns versus extracted entities and facts, both in Neo4j
+* **One database, two roles**: Neo4j as the GraphRAG knowledge graph and the agent memory store at the same time
+* **A three-turn demo**: reference resolution and cross-turn summary powered by memory
 
-== Model Context Protocol (MCP)
+== Why Stateless Agents Fail
 
-The Model Context Protocol is an open standard that defines how AI agents discover and interact with external tools and data sources. It provides a uniform interface: any MCP-compatible agent connects to any MCP-compatible server without custom integration code.
+The Lab 4 agent is stateless. Each invocation receives only the current question, runs its GraphRAG tool, and returns an answer. Nothing from the previous turn survives into the next one.
 
-=== Three-Component Architecture
+That works for single, self-contained questions. It breaks in conversation. Consider three questions in a row:
 
-MCP defines a three-component architecture:
+. "Tell me about Apple's risk factors."
+. "What about their competitors?"
+. "Summarize what we discussed."
 
-image::lab5-mcp-agent-architecture.png[MCP Agent Architecture,700]
+A stateless agent handles the first question and loses it. On the second question it sees only "What about their competitors?" with no idea who "their" refers to. On the third it has nothing to summarize. Human conversation depends on shared context that accumulates turn by turn, and a stateless agent throws that context away after every call.
 
-**AI Agent (Client)**: The LLM-powered application that needs to access external data. It discovers available tools by asking the MCP server what operations are supported.
+== Short-Term and Long-Term Memory
 
-**MCP Server**: A lightweight service that exposes data source operations as tools. It translates between the MCP protocol and the data source's native API.
+The https://github.com/neo4j-labs/agent-memory[neo4j-agent-memory] library gives the agent two kinds of memory backed by Neo4j:
 
-**Data Source**: The underlying system (Neo4j, a REST API, a file system, etc.) that holds the data.
+* **Short-term memory** holds the recent conversation turns verbatim: the questions asked and the answers given. This is what lets the agent resolve "their" to Apple, because the prior turn is still available.
+* **Long-term memory** holds entities and facts extracted from the conversation over time. Instead of storing raw text, it distills durable knowledge such as "the user is interested in Apple" or "Apple competes with Samsung," which persists beyond the current session.
 
-=== Transport Options
+Together they mirror how people converse. Short-term memory tracks the thread of the current discussion, and long-term memory retains what matters after the discussion ends.
 
-MCP supports multiple transport mechanisms:
+== The Memory Graph Schema
 
-[cols="1,2,2"]
-|===
-| Transport | Description | Use Case
+The memory layer stores its state as its own small graph, using three node types:
 
-| **stdio**
-| Standard input/output streams
-| Local development, CLI tools
+* **`Conversation`**: one node per conversation session, the root that ties the turns together.
+* **`Message`**: one node per turn, holding the question or answer text and its order in the conversation.
+* **`Entity`**: extracted entities and facts that make up long-term memory.
 
-| **Streamable HTTP**
-| HTTP-based streaming protocol
-| Cloud deployments, remote servers
-|===
+These nodes live in the *same* Aura instance as the SEC 10-K knowledge graph. Open Neo4j Browser after running the demo and you will see `Conversation`, `Message`, and `Entity` nodes sitting alongside the `Company`, `Product`, `RiskFactor`, and `Chunk` nodes from the 10-K graph, all in one database.
 
-This lab uses Streamable HTTP to connect to an MCP Gateway running on AWS.
+== One Database, Two Roles
 
-=== Neo4j MCP Server Tools
+The same Neo4j Aura instance plays two roles at once:
 
-The https://github.com/neo4j/mcp[Neo4j MCP Server] is Neo4j's official MCP server. It requires APOC (a standard Neo4j plugin for schema introspection and utility procedures). In this workshop it is deployed in read-only mode, exposing two tools:
+* **Knowledge graph** for GraphRAG retrieval: the companies, products, risk factors, documents, and chunks the agent searches to answer questions.
+* **Memory store** for agent state: the conversation and entity graph that records what has been discussed.
 
-[cols="1,3"]
-|===
-| Tool | Description
+Keeping both in one database means the agent reads its domain knowledge and its conversational context from a single connection. There is no separate memory service to provision, and the memory graph can reference the same entities the knowledge graph already models.
 
-| **`get-schema`**
-| Uses APOC's `apoc.meta.schema()` to read the graph schema, then simplifies the output to just property names and types (e.g., `"title": "STRING"`). This token-efficient format gives the LLM the structural information it needs for Text2Cypher without wasting context on APOC's full metadata.
+The memory layer reuses the infrastructure Part 2 already configured. It connects to the same Aura instance and uses the same embedding model, Amazon Titan Text Embeddings V2 (`bedrock/amazon.titan-embed-text-v2:0`), which produces 1024-dimensional vectors. No new models and no new database are required.
 
-| **`read-cypher`**
-| Executes a read-only Cypher query. Before running the query, the server performs an `EXPLAIN` round-trip to verify it contains no write operations (CREATE, MERGE, DELETE, SET). This is a server-side guard independent of the system prompt's instructions.
-|===
+== What You Build
 
-The agent discovers these tools automatically through the MCP protocol. It does not need to know about them in advance.
+You take the Lab 4 Strands GraphRAG agent and wrap it with neo4j-agent-memory:
 
-NOTE: The gateway may prefix tool names (e.g., `neo4j-get-schema`). The canonical names from the server itself are `get-schema` and `read-cypher`. The server also exposes `write-cypher` (disabled in read-only mode) and `list-gds-procedures` (registered only when the GDS library is installed). Neither is available in this workshop.
+* Configure a memory client against the existing Aura instance, using Titan Text Embeddings V2 for embeddings.
+* After each turn, write the question and answer to short-term memory.
+* Before each invocation, pull relevant prior context from memory and inject it into the prompt so the agent reasons with the full conversation, not just the latest question.
 
-== AWS Deployment Architecture
+The GraphRAG tool from Lab 4 stays the same. Memory wraps around it.
 
-The MCP infrastructure is pre-deployed on AWS:
+== What You See
 
-----
-Agent (Notebook)  -->  AgentCore Gateway (HTTPS)  -->  Neo4j MCP Server (Container)  -->  Secrets Manager  -->  Neo4j Aura
-----
+Run the three-turn demo and watch memory change the agent's behavior:
 
-**Agent (Notebook)**: Your Jupyter notebook running a Strands agent. It connects to the gateway using a URL and access token from `CONFIG.txt`.
+* **Turn 1: "Tell me about Apple's risk factors."** The agent runs GraphRAG retrieval against the 10-K graph and answers from the filing data. It also writes this turn to short-term memory.
+* **Turn 2: "What about their competitors?"** The agent reads short-term memory, resolves "their" to Apple from the previous turn, and answers about Apple's competitors. A stateless agent could not do this.
+* **Turn 3: "Summarize what we discussed."** The agent draws on the accumulated conversation to return a coherent summary that spans both prior turns, covering Apple's risk factors and its competitors.
 
-**AgentCore Gateway**: An AWS-managed HTTPS endpoint that authenticates requests and routes them to the MCP server.
-
-**Neo4j MCP Server**: Neo4j's official MCP server, deployed here in read-only mode over Streamable HTTP transport. It translates `get-schema` and `read-cypher` tool calls into Neo4j operations and tags every query with `MCP4NEO4J` metadata so database admins can identify MCP-originated traffic.
-
-**Secrets Manager**: Stores the Neo4j Aura connection credentials securely. The MCP server retrieves them at runtime.
-
-**Neo4j Aura**: Your graph database containing SEC financial data.
-
-You do not need to set up any of this infrastructure. The gateway URL and access token are provided in `CONFIG.txt`.
-
-== GraphRAG Retrieval Patterns
-
-Neo4j's https://graphrag.com/reference/[GraphRAG Patterns Catalog] defines a spectrum of retrieval strategies. This lab covers two of them, building from controlled to autonomous:
-
-[cols="1,2,1,1"]
-|===
-| Pattern | How It Works | Notebook | Reliability
-
-| **Cypher Templates**
-| Pre-written, parameterized queries in `@tool` functions. The agent selects which template to execute.
-| Notebook 02
-| High (expert-reviewed queries)
-
-| **Text2Cypher**
-| The agent reads the schema, reasons about the question, and writes original Cypher from scratch.
-| Notebook 03
-| Variable (depends on LLM reasoning quality)
-|===
-
-Cypher Templates are the most reliable: queries are reviewed in advance and execute predictably. Text2Cypher is the most flexible: the agent can answer any question the schema supports. The trade-off is that Text2Cypher's query quality depends on the LLM's ability to reason about graph structures, which is why the schema-first approach is critical.
-
-== Cypher Templates vs Text2Cypher
-
-[cols="1,2,2"]
-|===
-| Aspect | Notebook 02 (Cypher Templates) | Notebook 03 (Text2Cypher)
-
-| **Cypher source**
-| Pre-written in `@tool` functions
-| Agent writes from scratch after schema discovery
-
-| **Schema discovery**
-| No; queries are hard-coded with known labels and types
-| Yes; agent calls `get-schema` before every query
-
-| **Flexibility**
-| Limited to the query patterns defined in advance
-| Any question the schema can answer
-
-| **Failure mode**
-| Predictable; expert-reviewed queries return expected results
-| Silent failures possible; wrong labels return empty results without errors
-
-| **MCP role**
-| Transport layer for executing pre-written queries
-| Discovery interface (schema) + execution (queries)
-
-| **Best for**
-| Known query patterns with high reliability requirements
-| Ad-hoc exploration and questions not anticipated during development
-|===
-
-== Schema-First Approach
-
-Notebook 03 instructs the agent to follow a schema-first pattern:
-
-1. **Retrieve the schema** before writing any Cypher query. The agent calls `get-schema` to learn what node labels, relationship types, and properties exist in the database.
-2. **Write a Cypher query** based on the actual schema. This prevents the agent from guessing at property names or relationship types that do not exist.
-3. **Execute the query** using `read-cypher` and return the results.
-
-This approach produces more accurate queries because the agent works with the real structure of the data rather than assumptions.
-
-.How schema-first prevents query failures
-[%collapsible]
-====
-Without the schema step, an LLM might generate `MATCH (c:Corp)-[:HAS_PRODUCT]->(p:Product)` when the actual label is `Company` and the relationship type is `OFFERS`. The query executes without error but returns zero results because `Corp` and `HAS_PRODUCT` do not exist in the graph. The agent would then report "no data found" as a confident answer.
-
-With schema retrieval, the agent sees the actual labels (`Company`, `Product`, `RiskFactor`, `AssetManager`) and relationship types (`OFFERS`, `FACES_RISK`, `COMPETES_WITH`, `PARTNERS_WITH`, `OWNS`, `FILED`, `FROM_DOCUMENT`) before writing any query. The generated Cypher uses the correct vocabulary, and empty results genuinely mean no matching data rather than a query targeting non-existent schema elements.
-====
-
-== Why a Specialized Graph Agent
-
-An agent that handles both SQL analytics and graph traversal in a single prompt must hold two query languages, two data models, and two sets of conventions in context simultaneously. SQL operates on rows, filters, and aggregations. Cypher operates on paths, patterns, and traversals. Mixing both dilutes the agent's focus: it may generate Cypher with SQL idioms (using WHERE clauses where pattern matching would be more precise) or SQL with graph assumptions (expecting JOIN-free traversals that relational databases cannot provide).
-
-The architecture in this workshop separates concerns. The MCP agent in this lab handles only graph queries. It inspects the Neo4j schema, writes Cypher, and executes it. It does not need to know about SQL tables, aggregation functions, or relational joins. That focus produces better Cypher because the agent's entire context is graph-shaped.
-
-In production systems, a supervisor or router agent sits above specialized agents and directs questions to the right one based on the data shape the question targets. Relationship traversals go to the graph agent. Time-series aggregations go to a SQL agent. Questions that span both get decomposed into sub-tasks routed to each specialist.
-
-== Alternative Frameworks
-
-This lab uses the **Strands Agents SDK**: AWS-native, built-in MCP support, simpler API. **LangGraph** is a viable alternative that provides fine-grained control over the agent loop via LangChain MCP adapters, better suited for complex multi-step workflows where you need to customize how the agent reasons, retries, or chains operations.
+Then open Neo4j Browser. The memory nodes (`Conversation`, `Message`, and `Entity`) appear in the same database as the 10-K graph, so you can see the conversation state and the domain knowledge side by side.
 
 == Next Steps
 
-Continue to xref:lab5-instructions.adoc[Lab 5 Instructions] for the notebook walkthrough. This is the final lab in the main workshop.
-
-For a bonus challenge, xref:lab6.adoc[Lab 6: GraphRAG Pipeline] walks through building the data pipeline from scratch: chunking, embedding generation, and retrieval using the neo4j-graphrag library.
+Continue to xref:lab5-instructions.adoc[Lab 5 Instructions] to work through the setup and the demo. After this lab, proceed to xref:lab6.adoc[Lab 6: Neo4j MCP Agent] in Part 4 to connect an agent to Neo4j through the Model Context Protocol.
