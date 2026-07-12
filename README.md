@@ -48,7 +48,7 @@ A hands-on workshop teaching Graph Retrieval-Augmented Generation (GraphRAG) pat
 
 ### Option 1: AWS SageMaker Studio (Recommended for workshops)
 
-Follow the [Appendix — What Is an Agent?](zz_Appendix_What_Is_An_Agent/README.md) to set up SageMaker Studio and clone the repository.
+Follow the [Environment Setup: SageMaker Studio](https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/workshop/neo4j-bedrock-graphrag-workshop/1.0/part2-setup-instructions.html) guide to create a SageMaker Studio domain, launch JupyterLab, and clone the repository.
 
 ### Option 2: Local Development
 

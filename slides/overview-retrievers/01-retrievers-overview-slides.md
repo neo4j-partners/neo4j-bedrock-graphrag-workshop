@@ -43,7 +43,7 @@ The **neo4j-graphrag** Python package provides the building blocks for GraphRAG 
 - **LLM and Embedder abstractions**: pluggable providers including Bedrock, OpenAI, Anthropic, Cohere, and Vertex AI
 - **Vector index utilities**: `create_vector_index` and `upsert_vectors` for managing Neo4j vector indexes
 
-Lab 4 uses the retriever and pipeline components. Lab 6 uses the construction components.
+Lab 3 uses the retriever and pipeline components. The optional Lab 2 uses the construction components.
 
 ---
 
@@ -63,7 +63,7 @@ You have a knowledge graph with:
 
 A **retriever** searches your knowledge graph and returns relevant information.
 
-**Two retrieval patterns in Lab 4:**
+**Two retrieval patterns in Lab 3:**
 
 | Retriever | What It Does |
 |-----------|--------------|
@@ -156,7 +156,7 @@ When you call a retriever, it:
 3. **Traverses the graph** (Cypher retrievers only): executes the `retrieval_query`
 4. **Formats results for the LLM**: packages text and metadata into prompt-ready format
 
-In Lab 5, you do each of these steps yourself through MCP.
+In Lab 6, you do each of these steps yourself through MCP.
 
 ---
 
@@ -199,7 +199,7 @@ MATCH (c:Company {name: 'NVIDIA Corporation'})-[:OFFERS]->(p:Product)
 RETURN count(p)
 ```
 
-For counts, lists, and specific lookups, **Text2Cypher** (Lab 5) writes the query directly.
+For counts, lists, and specific lookups, **Text2Cypher** (Lab 6) writes the query directly.
 
 ---
 
@@ -209,10 +209,10 @@ For counts, lists, and specific lookups, **Text2Cypher** (Lab 5) writes the quer
 |-----------------|----------------|
 | "What is...", "Tell me about..." | VectorRetriever |
 | "Which [entities] are affected by..." | VectorCypherRetriever |
-| "How many...", "List all..." | Text2Cypher (Lab 5) |
+| "How many...", "List all..." | Text2Cypher (Lab 6) |
 | Content about topics | VectorRetriever |
 | Content + relationships | VectorCypherRetriever |
-| Facts, counts, aggregations | Text2Cypher (Lab 5) |
+| Facts, counts, aggregations | Text2Cypher (Lab 6) |
 
 ---
 
@@ -234,19 +234,17 @@ For counts, lists, and specific lookups, **Text2Cypher** (Lab 5) writes the quer
 
 ---
 
-## Lab 4 Notebook Progression
+## Lab 3 Notebook Progression
 
-**Notebook 01: Load and Query**
-Add chunks + embeddings to the existing knowledge graph, create vector index, link entities to chunks
+**Notebook 01: VectorRetriever**
+Semantic question answering with `01_vector_retriever.ipynb`: VectorRetriever + GraphRAG pipeline
 
-**Notebook 02: VectorRetriever**
-Semantic question answering with VectorRetriever + GraphRAG pipeline
+**Notebook 02: VectorCypherRetriever**
+Graph-enriched retrieval with `02_vector_cypher_retriever.ipynb`: VectorCypherRetriever + custom Cypher traversal across companies, products, and risk factors
 
-**Notebook 03: VectorCypherRetriever**
-Graph-enriched retrieval with custom Cypher traversal queries
+The chunk load and embeddings come from the Lab 1 seed load (or the optional Lab 2 pipeline), so Lab 3 starts from a populated graph.
 
-**Notebook 04: Strands GraphRAG Agent**
-Wrap both retrievers as `@tool` functions — the agent picks the right strategy per question
+**Next:** Lab 4 wraps both retrievers as `@tool` functions to build the GraphRAG agent.
 
 ---
 
@@ -258,4 +256,4 @@ Wrap both retrievers as `@tool` functions — the agent picks the right strategy
 - **Each excels at different question types** — choosing the right one matters
 - **The chunk is the anchor** — graph traversal enriches what vector search finds
 
-**Next:** Lab 5 adds MCP, Cypher Templates, and Text2Cypher for full agent autonomy.
+**Next:** Lab 6 adds MCP, Cypher Templates, and Text2Cypher for full agent autonomy.

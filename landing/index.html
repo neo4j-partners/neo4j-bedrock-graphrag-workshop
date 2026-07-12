@@ -118,7 +118,7 @@
     <main>
       <div class="eyebrow">Neo4j + AWS Bedrock</div>
       <h1>GraphRAG Workshop</h1>
-      <p>A hands-on workshop on building GraphRAG (Graph Retrieval-Augmented Generation) applications with Neo4j and AWS Bedrock, using SEC 10-K financial filing data. It progresses from no-code visual exploration to building custom agents over a knowledge graph.</p>
+      <p>A hands-on workshop on building GraphRAG (Graph Retrieval-Augmented Generation) applications with Neo4j and AWS Bedrock, using SEC 10-K financial filing data. It progresses from Neo4j Aura setup and graph exploration through GraphRAG retrieval, agents, memory, and the Neo4j MCP server.</p>
       <div class="actions">
         <a class="button" href="./workshop/">Start the workshop</a>
         <a class="button secondary" href="./slides/">View the slides</a>
@@ -126,16 +126,20 @@
       </div>
       <section class="summary" aria-label="Workshop overview">
         <div class="summary-card">
-          <strong>Part 1 &middot; Setup & Visual Exploration</strong>
-          <span>Stand up Neo4j Aura, load the SEC financial knowledge graph, and explore companies, products, and risk factors visually with Cypher.</span>
+          <strong>Part 1 &middot; Getting Started</strong>
+          <span>Sign in to AWS and Amazon Bedrock, provision Neo4j Aura, load the SEC financial knowledge graph, and explore companies, products, and risk factors with Cypher.</span>
         </div>
         <div class="summary-card">
-          <strong>Part 2 &middot; Python GraphRAG</strong>
-          <span>Build GraphRAG with the Strands Agents SDK and the neo4j-graphrag library — vector and vector-cypher retrievers backed by Bedrock embeddings.</span>
+          <strong>Part 2 &middot; GraphRAG and Agents</strong>
+          <span>Build GraphRAG with the neo4j-graphrag library, vector and vector-cypher retrievers backed by Bedrock embeddings, then a Strands GraphRAG agent deployed to Amazon Bedrock AgentCore. The data pipeline is an optional lab.</span>
         </div>
         <div class="summary-card">
-          <strong>Part 3 &middot; Agents & Pipeline</strong>
-          <span>Search the graph through MCP agents and build a GraphRAG data pipeline that loads, embeds, and retrieves over the knowledge graph.</span>
+          <strong>Part 3 &middot; Agent Memory</strong>
+          <span>Add neo4j-agent-memory so the agent remembers across conversation turns, using one Neo4j instance as both the knowledge graph and the memory store. Optional.</span>
+        </div>
+        <div class="summary-card">
+          <strong>Part 4 &middot; Neo4j MCP Server</strong>
+          <span>Connect an agent to the graph through the Neo4j MCP Server and let it write its own Cypher with Text2Cypher over the Model Context Protocol. Optional.</span>
         </div>
       </section>
     </main>

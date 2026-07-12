@@ -1,6 +1,6 @@
 # Proposed AWS Workshop Outline
 
-A condensed proposal for the revamped Neo4j + AWS GraphRAG workshop. Three changes drive the new flow: lead with the why, show the finished build before any setup work, and close with a real call to action. Full run-of-show detail lives in `aws-outline.md`.
+A condensed proposal for the revamped Neo4j + AWS GraphRAG workshop. Three changes drive the new flow: lead with the why, show the finished build before any setup work, and close with a real call to action.
 
 ---
 

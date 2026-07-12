@@ -58,14 +58,15 @@ Amazon Bedrock is available in select regions. For this workshop, we recommend *
 ## Verify Bedrock Access
 
 1. In the AWS Console search bar, type **Bedrock** and select **Amazon Bedrock**
-2. You should see the Amazon Bedrock welcome page
-3. In the left sidebar, click **Model access** to verify which models are available
+2. In the left sidebar under **Test**, click **Playground**
+3. Click **Select model**, choose **Anthropic** as the provider, then select **Claude Sonnet 4.6** and click **Apply**
+4. Enter the following test prompt and run it:
 
-**Note:** If this is your first time using Bedrock, you may need to request access to specific models:
-- Click **Manage model access**
-- Enable **Amazon Titan Text Embeddings V2** (usually approved instantly)
-- Enable **Anthropic Claude 3.5 Sonnet** (may take a few minutes)
-- Click **Save changes**
+   > In 2-3 sentences, explain what GraphRAG is and why a knowledge graph like Neo4j can improve retrieval-augmented generation compared to plain vector search.
+
+5. If you get a response, your Bedrock access is working and you are ready for the labs.
+
+**Note:** Access to all Amazon Bedrock foundation models is enabled by default in commercial AWS regions, so there is no longer a separate model access request step. The first time you invoke an Anthropic model in a brand-new account, you may be prompted to complete a one-time use case form, after which access is granted immediately.
 
 ## Troubleshooting
 
@@ -73,10 +74,10 @@ Amazon Bedrock is available in select regions. For this workshop, we recommend *
 - Verify your IAM user has the `AmazonBedrockFullAccess` policy attached
 - Check you are in a supported region (us-east-1 recommended)
 
-### Model access shows "Not available"
-- Some models require explicit access requests
-- Click **Manage model access** and request the needed models
-- Titan models are usually instant; Claude may take a few minutes
+### Model returns "Access Denied" on first invoke
+- Foundation model access is enabled by default, but the account needs AWS Marketplace permissions for the automatic subscription to complete
+- For a brand-new account, complete the one-time Anthropic use case form when prompted, then retry
+- Confirm the account has a valid payment method configured
 
 ### Cannot find Bedrock in services
 - Ensure you are in a region that supports Bedrock

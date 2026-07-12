@@ -175,11 +175,11 @@ Neo4j Aura is the **fully managed cloud graph database** used in this workshop:
 
 ## Data Loading Pattern
 
-Lab 1 loads the knowledge graph using Cypher:
+The Lab 1 seed load is a provided import of the **complete graph**: structured entities, text chunks, embeddings, and the vector index. The MERGE pattern below shows how the **structured entity layer** is built with Cypher:
 
 1. **Create constraints** for uniqueness (Company by ticker, Product by name)
-2. **MERGE nodes** — create if not exists, match if it does
-3. **MERGE relationships** — connect entities with typed relationships
+2. **MERGE nodes**: create if not exists, match if it does
+3. **MERGE relationships**: connect entities with typed relationships
 
 ```cypher
 MERGE (c:Company {ticker: row.ticker})
@@ -199,7 +199,7 @@ FOR (c:Company) REQUIRE c.ticker IS UNIQUE
 
 **Constraints** prevent duplicate nodes and enable efficient MERGE operations.
 
-**Vector indexes** store embeddings for semantic search (Labs 4-6):
+**Vector indexes** store embeddings for semantic search (Lab 2 and Lab 3):
 ```cypher
 CREATE VECTOR INDEX chunkEmbeddings IF NOT EXISTS
 FOR (c:Chunk) ON (c.embedding)
@@ -211,9 +211,9 @@ OPTIONS {indexConfig: {`vector.dimensions`: 1024,
 
 ## What Comes Next
 
-- **Lab 1**: Provision Aura, load the structured graph, explore visually
-- **Lab 4**: Add the unstructured layer (chunks + embeddings), run GraphRAG retrievers
-- **Lab 5**: Connect agents to the graph via MCP
-- **Lab 6**: Build the entire data pipeline from scratch
+- **Lab 1**: Provision Aura, load the seed graph, explore visually
+- **Lab 2**: Build the data pipeline from scratch (optional)
+- **Lab 3**: Run GraphRAG retrievers over chunks and embeddings
+- **Lab 6**: Connect agents to the graph via MCP
 
 The knowledge graph is the foundation for everything that follows.

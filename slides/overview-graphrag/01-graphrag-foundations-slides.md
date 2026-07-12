@@ -191,7 +191,7 @@ With graph context, these are **verified facts** from the knowledge graph, not L
 | **Graph-Enriched Search** | Vector search + graph traversal | Questions needing entity context |
 | **Text2Cypher** | LLM writes Cypher from schema | Counts, lists, specific lookups |
 
-Each strategy excels at different question types. Labs 4 and 5 implement all three.
+Each strategy excels at different question types. Lab 3 and Lab 6 implement all three.
 
 ---
 
@@ -205,7 +205,9 @@ The data pipeline that powers GraphRAG:
 4. **Create vector index** over chunk embeddings
 5. **Cross-link** chunks to entities via FROM_CHUNK relationships
 
-Lab 4 loads pre-built data. Lab 6 builds this pipeline from scratch.
+The Lab 1 seed load provides this data. The optional Lab 2 builds this pipeline from scratch.
+
+The full production pipeline is the AWS lakehouse pattern shown in the workshop architecture deck.
 
 ---
 
@@ -215,8 +217,8 @@ Lab 4 loads pre-built data. Lab 6 builds this pipeline from scratch.
 
 ## What Comes Next
 
-- **Lab 4**: Load chunks and embeddings, run VectorRetriever and VectorCypherRetriever
-- **Lab 5**: Connect agents to Neo4j via MCP, Cypher Templates and Text2Cypher
-- **Lab 6**: Build the entire chunking, embedding, and indexing pipeline
+- **Lab 3**: Load chunks and embeddings, run VectorRetriever and VectorCypherRetriever
+- **Lab 6**: Connect agents to Neo4j via MCP, Cypher Templates and Text2Cypher
+- **Lab 2**: Build the chunking, embedding, and indexing pipeline (optional)
 
 The graph provides the knowledge. Retrieval strategies determine how agents access it.

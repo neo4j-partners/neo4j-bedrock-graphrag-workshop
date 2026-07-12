@@ -1,8 +1,8 @@
 = Workshop Slides
 
-Five presentation decks accompany this workshop. They provide the conceptual background behind each part: the AWS and Neo4j partnership, graph and GraphRAG foundations, retriever patterns, and agents with MCP. Presenters can walk through them before the hands-on labs, and self-paced attendees can read them for the theory behind the code.
+Eight presentation decks accompany this workshop. They provide the conceptual background behind each part: the business case for GraphRAG, the AWS and Neo4j architecture, graph and GraphRAG foundations, retriever patterns, the GraphRAG agent with AgentCore, agent memory, and the Neo4j MCP agent. Presenters can walk through them before the hands-on labs, and self-paced attendees can read them for the theory behind the code.
 
-The decks are published as a standalone slide gallery. Open any deck below, or browse the full https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/slides/[slide gallery].
+The decks are published as a standalone slide gallery. Open any deck below, or browse the full https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/slides/[slide gallery]. The table follows the workshop run of show.
 
 == Decks
 
@@ -10,8 +10,12 @@ The decks are published as a standalone slide gallery. Open any deck below, or b
 |===
 | Deck | Covers | Pairs With
 
-| https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/slides/aws-neo4j/[Workshop Introduction]
-| The AWS and Neo4j partnership, workshop architecture, the SEC 10-K financial data domain, and the lab roadmap from visual exploration through GraphRAG agents.
+| https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/slides/business-story/[The Business Case for GraphRAG]
+| The opening business story: the stakes, why vector search alone falls short, the shift to GraphRAG, decision governance, the hero questions, what the workshop builds, and the Neo4j and AWS partnership.
+| xref:index.adoc[Overview], xref:part1.adoc[Part 1]
+
+| https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/slides/aws-neo4j/[Workshop Architecture and Roadmap]
+| The AWS and Neo4j architecture, the production lakehouse-to-graph pipeline, the SEC 10-K financial data domain, and the four-part lab roadmap.
 | xref:index.adoc[Overview], xref:part1.adoc[Part 1]
 
 | https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/slides/knowledge-graph/[Knowledge Graph Foundations]
@@ -26,9 +30,17 @@ The decks are published as a standalone slide gallery. Open any deck below, or b
 | VectorRetriever, VectorCypherRetriever, the two-layer graph, retrieval query design, and choosing the right retriever for your question type.
 | xref:lab3.adoc[Lab 3]
 
-| https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/slides/agents-mcp/[Agents and MCP]
-| The ReAct pattern, the Strands Agents SDK, Model Context Protocol architecture, Cypher Templates versus Text2Cypher, the schema-first approach, and agent deployment with AgentCore.
-| xref:lab4.adoc[Lab 4], xref:lab6.adoc[Lab 6]
+| https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/slides/agent-agentcore/[GraphRAG Agent and AgentCore]
+| The ReAct pattern, the Strands Agents SDK, wrapping GraphRAG retrievers as tools, and deploying the agent to Amazon Bedrock AgentCore.
+| xref:lab4.adoc[Lab 4]
+
+| https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/slides/agent-memory/[Agent Memory with Neo4j]
+| Why stateless agents fail across turns, neo4j-agent-memory for short and long-term memory, the memory graph schema, and one Neo4j instance serving as both knowledge graph and memory store.
+| xref:lab5.adoc[Lab 5]
+
+| https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/slides/mcp/[Neo4j MCP Agent]
+| Model Context Protocol architecture, the Neo4j MCP Server tools, Cypher Templates versus Text2Cypher, the schema-first approach, and MCP as a framework-agnostic production pattern.
+| xref:lab6.adoc[Lab 6]
 |===
 
 == Next Steps

@@ -15,12 +15,20 @@ const SHARED_IMAGES_DIR = "images";
 
 const decks = [
   {
+    key: "business-story",
+    dir: "overview-business-story",
+    source: "01-business-story-slides.md",
+    title: "The Business Case for GraphRAG",
+    description:
+      "The stakes, why vectors alone fall short, decision governance, the hero questions, and the Neo4j + AWS partnership.",
+  },
+  {
     key: "aws-neo4j",
     dir: "overview-aws-neo4j",
     source: "01-aws-neo4j-workshop-slides.md",
-    title: "AWS & Neo4j Workshop Overview",
+    title: "Workshop Architecture & Roadmap",
     description:
-      "The AWS + Neo4j partnership, workshop architecture, the SEC 10-K financial data domain, and the lab roadmap.",
+      "The AWS + Neo4j architecture, the production lakehouse-to-graph pipeline, the SEC 10-K data domain, and the four-part lab roadmap.",
   },
   {
     key: "knowledge-graph",
@@ -36,7 +44,7 @@ const decks = [
     source: "01-graphrag-foundations-slides.md",
     title: "GraphRAG Foundations",
     description:
-      "GenAI limitations and the GraphRAG solution — hallucination, embeddings, vector search, RAG, and graph context.",
+      "GenAI limitations and the GraphRAG solution: hallucination, embeddings, vector search, RAG, and graph context.",
   },
   {
     key: "retrievers",
@@ -47,12 +55,28 @@ const decks = [
       "VectorRetriever, VectorCypherRetriever, the two-layer graph, and choosing the right retriever for a question.",
   },
   {
-    key: "agents-mcp",
-    dir: "overview-agents-mcp",
-    source: "01-agents-and-mcp-slides.md",
-    title: "Agents & MCP",
+    key: "agent-agentcore",
+    dir: "overview-agent-agentcore",
+    source: "01-agent-agentcore-slides.md",
+    title: "GraphRAG Agent & AgentCore",
     description:
-      "The ReAct pattern, Strands Agents SDK, Model Context Protocol, Cypher Templates vs Text2Cypher, and AgentCore.",
+      "The ReAct pattern, the Strands Agents SDK, wrapping GraphRAG retrievers as tools, and deploying the agent to Amazon Bedrock AgentCore.",
+  },
+  {
+    key: "agent-memory",
+    dir: "overview-agent-memory",
+    source: "01-agent-memory-slides.md",
+    title: "Agent Memory with Neo4j",
+    description:
+      "Why stateless agents fail across turns, neo4j-agent-memory for short and long-term memory, and one Neo4j instance as both knowledge graph and memory store.",
+  },
+  {
+    key: "mcp",
+    dir: "overview-mcp",
+    source: "01-mcp-slides.md",
+    title: "Neo4j MCP Agent",
+    description:
+      "The Model Context Protocol, the Neo4j MCP Server tools, Cypher Templates vs Text2Cypher, and MCP as a framework-agnostic production pattern.",
   },
 ];
 

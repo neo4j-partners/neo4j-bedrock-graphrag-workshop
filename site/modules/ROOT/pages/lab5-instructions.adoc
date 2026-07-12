@@ -63,7 +63,12 @@ Two lines of memory work surround each agent call: read context before, write th
 [source,python]
 ----
 async def ask(question: str, session_id: str) -> str:
-    context = await memory.get_context(question, session_id=session_id)
+    context = await memory.get_context(
+        question,
+        session_id=session_id,
+        include_long_term=False,
+        include_reasoning=False,
+    )
     prompt = f"{context}\n\nUser question: {question}" if context else question
 
     agent.messages = []
@@ -92,11 +97,11 @@ await ask("Summarize what we discussed.", SESSION)
 
 === 4. Inspect the Conversation in Neo4j
 
-The memory client exposes the graph via `memory.graph`. Read back this session's messages:
+The memory client runs read-only Cypher via `memory.query.cypher`, which works on both the bolt and hosted backends. Read back this session's messages:
 
 [source,python]
 ----
-rows = await memory.graph.execute_read(
+rows = await memory.query.cypher(
     """
     MATCH (c:Conversation {session_id: $session_id})-[:HAS_MESSAGE]->(m:Message)
     RETURN m.role AS role, m.content AS content, m.timestamp AS timestamp
@@ -131,7 +136,7 @@ Then recall them from a fresh session, proving the knowledge is stored rather th
 
 [source,python]
 ----
-entities = await memory.long_term.search_entities("technology company", limit=5)
+entities = await memory.long_term.search_entities("technology company", limit=5, threshold=0.5)
 context = await memory.long_term.get_context("What do we know about Apple?")
 ----
 

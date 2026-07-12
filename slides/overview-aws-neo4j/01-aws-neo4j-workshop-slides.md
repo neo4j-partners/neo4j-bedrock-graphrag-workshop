@@ -61,13 +61,13 @@ Together: AWS aggregates and governs enterprise data in the lakehouse and provid
 
 ## Data Pipeline: AWS Lakehouse to Neo4j
 
-The SEC 10-K data flows from the **AWS lakehouse** to **Neo4j** through AWS Glue (Spark) and the Neo4j Spark Connector:
+This is the **production pattern** for how data reaches the graph. The SEC 10-K data flows from the **AWS lakehouse** to **Neo4j** through AWS Glue (Spark) and the Neo4j Spark Connector:
 
 - Governed Apache Iceberg tables on Amazon S3, refined through the **medallion pattern** (bronze, silver, gold), cataloged in the Glue Data Catalog and secured with Lake Formation
 - An AWS Glue (or Amazon EMR) Spark job runs the Neo4j Spark Connector, reading from the silver/gold tables and writing nodes and relationships into the knowledge graph
 - Table rows become nodes, foreign keys become relationships, shared attributes become shared nodes
 
-This workshop's knowledge graph is **pre-loaded**. You work directly with the populated graph from Lab 1 onward.
+This workshop's knowledge graph is **pre-loaded**. You work directly with the populated graph from Lab 1 onward. The workshop's hands-on version is the optional Lab 2, which rebuilds from `financial_data.json` with Amazon Titan embeddings rather than running the full lakehouse job.
 
 ---
 
@@ -118,14 +118,20 @@ Four entity types connected by typed relationships that reflect real-world struc
 
 ## Workshop Roadmap
 
-**Part 1: Setup & Visual Exploration** (Labs 0-1)
-Sign in to AWS, provision Neo4j Aura, load the knowledge graph, and explore it with Cypher
+**Part 1: Setup & Exploration** (Labs 0-1)
+Sign in to AWS and enable Bedrock access, provision Neo4j Aura, load the seed graph, and explore it with Cypher
 
-**Part 2: Building GraphRAG Agents** (Labs 3-5)
-Amazon Bedrock and Strands SDK, vector search and graph-enriched retrieval with neo4j-graphrag, MCP agents with Cypher Templates and Text2Cypher
+**Part 2: GraphRAG Pipelines & Agents** (Labs 2-4)
+Optional Lab 2 data pipeline, Lab 3 semantic search and GraphRAG (neo4j-graphrag), Lab 4 GraphRAG agent with AgentCore
 
-**Part 3: Bonus — Build Your Own Pipeline** (Lab 6)
-Build the GraphRAG data pipeline from scratch: data loading, embeddings, and vector-cypher retrieval
+**Part 3: Agent Memory** (Lab 5, optional)
+Add short and long-term memory to the agent with Neo4j
+
+**Part 4: Neo4j MCP Server** (Lab 6, optional)
+Schema-first Text2Cypher agent over the Model Context Protocol
+
+**Appendix: What Is an Agent?**
+Strands intro with toy tools
 
 ---
 
@@ -134,11 +140,12 @@ Build the GraphRAG data pipeline from scratch: data loading, embeddings, and vec
 | Lab | Focus | Key Concept |
 |-----|-------|-------------|
 | **0** | AWS sign-in, Bedrock access | Foundation model access |
-| **1** | Neo4j Aura setup, data loading | Graph databases, Cypher |
-| **3** | Strands SDK, Bedrock agents | ReAct pattern, tool use |
-| **4** | neo4j-graphrag retrievers | Vector + graph-enriched search |
-| **5** | MCP server, Text2Cypher | Schema-first agent queries |
-| **6** | Full data pipeline (bonus) | Chunking, embeddings, indexing |
+| **1** | Neo4j Aura setup, seed load, exploration | Graph databases, Cypher |
+| **2** | Data pipeline (optional) | Chunking, embeddings, indexing |
+| **3** | Semantic search + GraphRAG (neo4j-graphrag) | Vector + graph-enriched retrieval |
+| **4** | GraphRAG agent + AgentCore | ReAct pattern, tool use, deployment |
+| **5** | Agent memory (optional) | Short and long-term memory |
+| **6** | Neo4j MCP agent (optional) | Schema-first Text2Cypher over MCP |
 
 ---
 
@@ -147,10 +154,10 @@ Build the GraphRAG data pipeline from scratch: data loading, embeddings, and vec
 The labs progress along a **control spectrum**:
 
 ```
-Lab 3: Strands SDK         → Code-first agents, @tool decorator
-Lab 4: neo4j-graphrag      → Pre-built retriever classes
-Lab 5: Cypher Templates    → Pre-written queries, MCP transport
-Lab 5: Text2Cypher         → Agent writes its own Cypher
+Appendix: Strands SDK      → Code-first agents, @tool decorator
+Lab 3: neo4j-graphrag      → Pre-built retriever classes
+Lab 6: Cypher Templates    → Pre-written queries, MCP transport
+Lab 6: Text2Cypher         → Agent writes its own Cypher
 ```
 
 Each step gives the agent more autonomy. The trade-off: more flexibility means less predictability.

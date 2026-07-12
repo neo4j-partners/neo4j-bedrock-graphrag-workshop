@@ -1,6 +1,6 @@
 # Plan: Align Slides and Site with the Revamped Outline
 
-This plan brings `slides/` and `site/` into line with `aws-outline.md` and `proposed-outline.md`. The lab directories and notebooks were already reorganized to the four-part structure. The slide decks and several site pages still reflect the old numbering, the old AWS-lakehouse pipeline narrative, and the old "lead with architecture" flow. This plan reorders the decks, fixes the stale content, and adds the three segments the outline calls for that have no slides today: the strategic opening, agent memory, and the call-to-action close.
+This plan brings `slides/` and `site/` into line with `course-outline.md`. The lab directories and notebooks were already reorganized to the four-part structure. The slide decks and several site pages still reflect the old numbering, the old AWS-lakehouse pipeline narrative, and the old "lead with architecture" flow. This plan reorders the decks, fixes the stale content, and adds the three segments the outline calls for that have no slides today: the strategic opening, agent memory, and the call-to-action close.
 
 ## Target Structure
 
@@ -30,7 +30,7 @@ Every deck uses the old numbering. The mapping to apply everywhere:
 
 ## Resolved Decisions
 
-- **Lab 0 and Lab 1.** Lab 0 stays AWS Console sign-in plus Amazon Bedrock model access. Lab 1 is Neo4j Aura setup, the seed dataset load, and graph exploration. The outline (`aws-outline.md`, `proposed-outline.md`) was updated to match this current state.
+- **Lab 0 and Lab 1.** Lab 0 stays AWS Console sign-in plus Amazon Bedrock model access. Lab 1 is Neo4j Aura setup, the seed dataset load, and graph exploration. The outline (`course-outline.md`) was updated to match this current state.
 - **Pipeline narrative.** Keep the S3 + Iceberg + Glue/Spark + Neo4j Spark Connector lakehouse pipeline in the decks as the production pattern for how data reaches the graph. Frame the workshop hands-on version as the optional Lab 2 that rebuilds from `financial_data.json` with Titan embeddings.
 - **Agents/MCP deck.** Split the `overview-agents-mcp` deck into two: a Lab 4 deck (GraphRAG agent + AgentCore) and a Lab 6 deck (MCP patterns).
 - **Opening and close.** Surface the business-story opening as a slide deck only. No new Antora pages.
@@ -44,7 +44,7 @@ Five decks exist today: `overview-aws-neo4j`, `overview-knowledge-graph`, `overv
 
 ### A1. New deck: `overview-business-story` (opening)
 
-The outline's highest-priority gap. Leads with the why before any architecture. Slides, following the business-story arc in `aws-outline.md`:
+The outline's highest-priority gap. Leads with the why before any architecture. Slides, following the business-story arc:
 
 1. **The stakes.** Enterprises put GenAI agents into investment research, compliance, and risk reporting where a wrong or unexplainable answer has real cost.
 2. **The problem vectors do not solve.** Vector search finds similar text but cannot traverse relationships. In financial data it misses shared executives across companies, cross-portfolio risk exposure, and parent company disclosures.
@@ -162,3 +162,52 @@ No change. The sales CTA close is out of scope. `production-path.adoc` stays as 
 3. Author the two new decks: business story (A1) and agent memory (A7). Register them in `build-slides.mjs` and `README.md`.
 4. Update `slides.adoc` and `landing/index.html` (B1, B4).
 5. Build the decks with `npm run build` in `slides/` and verify the gallery renders all eight.
+
+---
+
+## Implementation Status
+
+**Parallelization:** The content work fans out to 7 parallel agents, each owning a disjoint set of files. The only write-contention point is the two shared registration files (`slides/scripts/build-slides.mjs` and `slides/README.md`), which the coordinator owns exclusively. Agents are forbidden from touching them. The final build runs serially after all agents complete.
+
+**Fixed deck registry** (coordinator writes this; agents must use these exact dir/source names):
+
+| Order | key | dir | source | title |
+| --- | --- | --- | --- | --- |
+| 1 | `business-story` | `overview-business-story` | `01-business-story-slides.md` | Business Story |
+| 2 | `aws-neo4j` | `overview-aws-neo4j` | `01-aws-neo4j-workshop-slides.md` | Workshop Architecture & Roadmap |
+| 3 | `knowledge-graph` | `overview-knowledge-graph` | `01-knowledge-graph-foundations-slides.md` | Knowledge Graph Foundations |
+| 4 | `graphrag` | `overview-graphrag` | `01-graphrag-foundations-slides.md` | GraphRAG Foundations |
+| 5 | `retrievers` | `overview-retrievers` | `01-retrievers-overview-slides.md` | Retrievers Overview |
+| 6 | `agent-agentcore` | `overview-agent-agentcore` | `01-agent-agentcore-slides.md` | GraphRAG Agent & AgentCore |
+| 7 | `agent-memory` | `overview-agent-memory` | `01-agent-memory-slides.md` | Agent Memory |
+| 8 | `mcp` | `overview-mcp` | `01-mcp-slides.md` | Neo4j MCP Agent |
+
+Old `agents-mcp` key / `overview-agents-mcp` dir retired.
+
+| Item | Owner | Parallel? | Status |
+| --- | --- | --- | --- |
+| A2 aws-neo4j numbering + Lab 2 note | Agent 1 | yes | DONE |
+| A3 knowledge-graph numbering | Agent 2 | yes | DONE |
+| A4 graphrag numbering + pipeline placement | Agent 3 | yes | DONE |
+| A5 retrievers numbering + 2-notebook layout | Agent 4 | yes | DONE |
+| A1 new business-story deck | Agent 5 | yes | DONE (9 slides, no em-dashes) |
+| A6 split agents-mcp → agent-agentcore + mcp | Agent 6 | yes | DONE (agent-agentcore 9 slides, mcp 13 slides, png git-moved, old dir removed) |
+| A7 new agent-memory deck | Agent 7 | yes | DONE (8 slides, no em-dashes) |
+| build-slides.mjs registration (shared) | Coordinator | serial | DONE (8 decks, run-of-show order, agents-mcp retired) |
+| README.md deck list (shared) | Coordinator | serial | DONE |
+| B1 slides.adoc gallery | Coordinator | yes | DONE (8 rows, run-of-show order) |
+| B4 landing/index.html four-part | Coordinator | yes | DONE (4 cards, no-code wording dropped) |
+| B2 nav.adoc | Coordinator | confirm-only | DONE (already matches, no change) |
+| B3 Part 1 pages | Coordinator | confirm-only | DONE (already Titan V2 + complete seed load + correct numbering) |
+| Final `npm run build` + verify | Coordinator | serial (last) | DONE (built under Node 22; gallery renders all 8) |
+
+### Quality review (post-implementation)
+- **Cross-deck lab numbering:** swept all 8 decks; fully consistent with the target mapping, no stale patterns (`Labs 3-5`, `Bonus`, `agents-mcp`, `no-code`, `four notebooks`) remain.
+- **agent-memory deck:** verified API and schema against the real Lab 5 notebooks (`get_context`, `short_term.add_message`, `search_entities/facts`, `adopt_existing_graph`, `HAS_MESSAGE`, `github.com/neo4j-labs/agent-memory`). Accurate.
+- **FIXED — business-story partnership slide:** the three specific "2026 roadmap" bullets (AgentCore Memory connector, Bedrock Knowledge Bases GraphRAG backend, Marketplace Quick Launch) were agent-invented; not in `course-outline.md` (which only says "Strategic Collaboration Agreement and 2026 roadmap"). Replaced with sourced/generic framing plus an instructor speaker-note placeholder to insert the real, publicly announced roadmap.
+- **FIXED — agent-agentcore "Why a Specialized Graph Agent":** relocated slide described "inspect schema, write Cypher, execute it" (that is the Lab 6 Text2Cypher agent). Reworded to graph retrieval, matching the Lab 4 retriever-based agent.
+- Rebuilt after fixes: clean, 8 cards.
+
+### Notes / follow-ups
+- **Build requires Node 22** (`brew install node@22`); Marp breaks on Node 25+. Built with `PATH="/opt/homebrew/opt/node@22/bin:$PWD/node_modules/.bin:$PATH" node scripts/build-slides.mjs`.
+- **Em-dashes:** the two new decks (business-story, agent-memory) are em-dash-free per the project style rule. The six kept/split decks still contain pre-existing em-dashes in content that was only renumbered or relocated verbatim (out of scope for the requested numbering fixes). Strip them repo-wide only if requested.

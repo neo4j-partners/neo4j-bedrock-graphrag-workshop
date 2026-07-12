@@ -1,10 +1,6 @@
 # ---------------------------------------------------------------------------
-# COPIED from root lib/mcp_utils.py to simplify env loading.
-# financial_data_load uses .env (not CONFIG.txt), so this local copy loads
-# from the financial_data_load/.env instead of the project-root CONFIG.txt.
-#
-# If you change this file, update the root lib/mcp_utils.py as well.
-# If you change the root lib/mcp_utils.py, update this file as well.
+# MCP utility for the financial_data_load test harness.
+# Loads config from financial_data_load/.env, not the project-root CONFIG.txt.
 # ---------------------------------------------------------------------------
 
 """MCP connection and query utilities for Neo4j MCP server."""
@@ -22,7 +18,7 @@ class MCPConnection:
 
     Wraps a raw MCP ClientSession over Streamable HTTP transport.
     Provides execute_query() for running Cypher directly through the
-    MCP read-cypher tool.
+    MCP read_neo4j_cypher tool.
 
     Usage::
 
@@ -68,17 +64,17 @@ class MCPConnection:
         tool_names = [t.name for t in tools_result.tools]
         print(f"MCP tools discovered: {tool_names}")
 
-        # Discover the read-cypher tool name (may be prefixed by gateway)
+        # Discover the read_neo4j_cypher tool name (may be prefixed by gateway)
         self._query_tool = next(
-            (n for n in tool_names if "read-cypher" in n), None
+            (n for n in tool_names if "read_neo4j_cypher" in n), None
         )
         assert self._query_tool, (
             f"No query tool found among: {tool_names}. "
-            "Expected a tool containing 'read-cypher'."
+            "Expected a tool containing 'read_neo4j_cypher'."
         )
 
     async def execute_query(self, cypher: str, params: dict | None = None) -> str:
-        """Execute a Cypher query via the MCP read-cypher tool."""
+        """Execute a Cypher query via the MCP read_neo4j_cypher tool."""
         arguments = {"query": cypher}
         if params:
             arguments["params"] = params

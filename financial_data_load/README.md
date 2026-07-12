@@ -148,7 +148,6 @@ Per-label defaults (used by the cleanse pipeline):
 | `main.py verify` | Counts + enrichment checks + end-to-end search validation |
 | `main.py clean` | Clear all data |
 | `main.py samples [--limit N]` | Run sample queries showcasing the graph |
-| `test_solutions.sh <env-file> [N\|N-M]` | Test solutions against a given `.env` file |
 | `main.py snapshot` | Export Company entity snapshot (for standalone resolution testing) |
 | `main.py resolve [--snapshot PATH] [--strategy ...] [--threshold ...]` | LLM entity resolution on snapshot (Company only) |
 | `main.py compare` | Compare resolution runs, score against ground truth |
@@ -181,69 +180,6 @@ The samples cover:
 
 Each section prints the Cypher query it runs followed by the results, making it useful for learning graph query patterns.
 
-### 8. Run Workshop Solutions
-
-```bash
-# Interactive menu
-uv run python main.py solutions
-
-# Run specific solution
-uv run python main.py solutions 4
-
-# Run all (from option 4 onwards)
-uv run python main.py solutions A
-```
-
-### 9. Test Solutions
-
-Use the test script to validate all solutions against a given `.env` file:
-
-```bash
-# Run all safe solutions (4-22, skips destructive 1-3)
-./test_solutions.sh .env.gold
-
-# Run a specific solution
-./test_solutions.sh .env.gold 8
-
-# Run a range
-./test_solutions.sh .env.gold 8-11
-```
-
-Each solution runs with a 5-minute timeout. `test_solutions.sh` uses its own solution numbering (1-22), separate from the `main.py solutions` menu (1-12). Solutions 9-11 (MCP) require `MCP_GATEWAY_URL` and `MCP_ACCESS_TOKEN` in the env file; they are skipped if not configured. The env file is sourced into the shell environment; your `.env` is not modified.
-
-## Workshop Solutions
-
-Solution numbers below match the `main.py solutions` menu and the `SOLUTIONS` list in `main.py`. Files live in `solution_srcs/`.
-
-### Lab 4: neo4j-graphrag Library (04_xx)
-
-Data loading and GraphRAG retrieval patterns using neo4j-graphrag:
-
-| # | Solution | Description |
-|---|----------|-------------|
-| 1 | `04_01_load_and_query.py` | Load data and query |
-| 2 | `04_02_vector_retriever.py` | Vector retriever |
-| 3 | `04_03_vector_cypher_retriever.py` | VectorCypher retriever |
-| 4 | `04_04_strands_graphrag_agent.py` | Strands GraphRAG agent |
-
-### Lab 5: MCP Server (05_xx)
-
-Strands Agents SDK with MCP to search a Neo4j knowledge graph:
-
-| # | Solution | Description |
-|---|----------|-------------|
-| 5 | `05_01_mcp_text2cypher_agent.py` | Neo4j MCP agent with Text2Cypher |
-
-### Lab 6: GraphRAG Pipeline (06_xx)
-
-Data pipeline patterns using neo4j-graphrag. **Solution 6 deletes all data.**
-
-| # | Solution | Description |
-|---|----------|-------------|
-| 6 | `06_01_data_loading.py` | Load financial documents into Neo4j |
-| 7 | `06_02_embeddings.py` | Generate and store vector embeddings |
-| 8 | `06_03_vector_cypher_retriever.py` | Vector search + custom Cypher |
-
 ## AI Provider
 
 Uses `BedrockLLM` and `BedrockEmbeddings` from [neo4j-graphrag-python](https://github.com/neo4j-partners/neo4j-graphrag-python). AWS credentials are resolved by the standard boto3 credential chain (env vars, `~/.aws/credentials`, IAM role).
@@ -267,7 +203,6 @@ Embedding dimensions default to 1024. Titan Text Embeddings V2 supports 256, 512
 financial_data_load/
 ├── pyproject.toml          # Dependencies (uv sync)
 ├── main.py                 # CLI entry point (load, cleanse, apply-cleanse, finalize, etc.)
-├── test_solutions.sh       # Test runner for workshop solutions
 ├── run_cleanse.sh          # Dev script: full load-to-finalize pipeline against an env file
 ├── run_all_configs.sh      # Dev script: run all entity-resolution configs and compare
 ├── financial-data/         # SEC 10-K data files
@@ -296,10 +231,11 @@ financial_data_load/
 │   └── embeddings/         # Embedding provider
 │       ├── __init__.py     # get_embedder(), get_embedding_dimensions()
 │       └── bedrock.py      # AWS Bedrock (Titan via neo4j-graphrag)
-└── solution_srcs/          # Workshop solution + test scripts
-    ├── config.py           # Shared config for solutions
-    ├── test_connection.py  # Connection test helper
-    └── ...                 # 01_/03_/04_/05_/06_ solution and test scripts
+└── solution_srcs/          # Standalone validation test scripts
+    ├── config.py                        # Shared config for the test scripts
+    ├── test_connection.py               # Connection test helper (main.py test)
+    ├── 01_01_test_lab1_csv_load.py      # Validate the Lab 1 CSV load
+    └── 04_00_test_all_sample_queries.py # Run all sample queries from the docs
 ```
 
 ## Environment Variables
@@ -324,10 +260,10 @@ Several `.env` variants live at the project root:
 |------|---------|---------|
 | `.env` | No | Your active config, read by `main.py` and `src/config.py`. |
 | `.env.sample` | Yes | Template. Copy to `.env` and fill in credentials. |
-| `.env.gold` | No | Credentials fixture for `test_solutions.sh` (the "gold" workshop instance). |
+| `.env.gold` | No | Credentials for the "gold" workshop instance. |
 | `.env.final` | No | Credentials fixture for the `run_cleanse.sh` end-to-end pipeline. |
 
-Only `.env.sample` is committed. `.env`, `.env.gold`, and `.env.final` hold real credentials and are git-ignored. Passing an env file to `test_solutions.sh` or `run_cleanse.sh` sources it into that command's environment; it does not modify your `.env`.
+Only `.env.sample` is committed. `.env`, `.env.gold`, and `.env.final` hold real credentials and are git-ignored. Passing an env file to `run_cleanse.sh` sources it into that command's environment; it does not modify your `.env`.
 
 ## Entity Resolution Experimentation Results
 

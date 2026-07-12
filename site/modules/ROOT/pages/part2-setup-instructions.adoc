@@ -62,15 +62,7 @@ image::lab3-quick-start.png[Quick Start Launch]
 
 image::lab3-open-space.png[JupyterLab spaces list showing Running status and space name to click]
 
-=== Step 7: Create a Labs Folder
-
-1. In the JupyterLab file browser on the left, click the **Create New Folder** icon (folder with a + sign)
-2. Name the folder `labs` and press Enter
-3. Double-click the **labs** folder to open it
-
-image::lab3-create-folder.png[Create Folder]
-
-=== Step 8: Clone the Git Repository
+=== Step 7: Clone the Git Repository
 
 1. Click the **Git icon** in the left sidebar (it looks like a diamond/branch symbol)
 2. If a **Clone a Repository** button is visible, click it and enter the repository URL:
@@ -82,6 +74,9 @@ https://github.com/neo4j-partners/neo4j-bedrock-graphrag-workshop.git
 If the clone button is not available, open a terminal instead:
 +
 a. In the JupyterLab Launcher, click **Terminal** under the **Other** section
++
+image::click-terminal.png[JupyterLab Launcher showing the Terminal option under the Other section]
++
 b. Run these commands to clone the repository:
 +
 [source,bash]
@@ -89,7 +84,7 @@ b. Run these commands to clone the repository:
 git clone https://github.com/neo4j-partners/neo4j-bedrock-graphrag-workshop.git
 ----
 +
-3. Once the clone completes, click the **file browser icon** (folder icon) in the left sidebar to navigate into the `labs/neo4j-bedrock-graphrag-workshop` directory
+3. Once the clone completes, click the **file browser icon** (folder icon) in the left sidebar to navigate into the `neo4j-bedrock-graphrag-workshop` directory
 
 == Next Steps
 

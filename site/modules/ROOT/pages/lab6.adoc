@@ -54,16 +54,16 @@ The https://github.com/neo4j/mcp[Neo4j MCP Server] is Neo4j's official MCP serve
 |===
 | Tool | Description
 
-| **`get-schema`**
+| **`get_neo4j_schema`**
 | Uses APOC's `apoc.meta.schema()` to read the graph schema, then simplifies the output to just property names and types (e.g., `"title": "STRING"`). This token-efficient format gives the LLM the structural information it needs for Text2Cypher without wasting context on APOC's full metadata.
 
-| **`read-cypher`**
+| **`read_neo4j_cypher`**
 | Executes a read-only Cypher query. Before running the query, the server performs an `EXPLAIN` round-trip to verify it contains no write operations (CREATE, MERGE, DELETE, SET). This is a server-side guard independent of the system prompt's instructions.
 |===
 
 The agent discovers these tools automatically through the MCP protocol. It does not need to know about them in advance.
 
-NOTE: The gateway may prefix tool names (e.g., `neo4j-get-schema`). The canonical names from the server itself are `get-schema` and `read-cypher`. The server also exposes `write-cypher` (disabled in read-only mode) and `list-gds-procedures` (registered only when the GDS library is installed). Neither is available in this workshop.
+NOTE: When accessed through the gateway, tool names are prefixed with the gateway target name and a `___` separator, for example `neo4j-mcp-server-target___get_neo4j_schema`. The canonical names from the server itself are `get_neo4j_schema` and `read_neo4j_cypher`. The server also provides `write_neo4j_cypher`, disabled here because the deployment runs in read-only mode (`NEO4J_READ_ONLY=true`).
 
 == AWS Deployment Architecture
 
@@ -77,7 +77,7 @@ Agent (Notebook)  -->  AgentCore Gateway (HTTPS)  -->  Neo4j MCP Server (Contain
 
 **AgentCore Gateway**: An AWS-managed HTTPS endpoint that authenticates requests and routes them to the MCP server.
 
-**Neo4j MCP Server**: Neo4j's official MCP server, deployed here in read-only mode over Streamable HTTP transport. It translates `get-schema` and `read-cypher` tool calls into Neo4j operations and tags every query with `MCP4NEO4J` metadata so database admins can identify MCP-originated traffic.
+**Neo4j MCP Server**: Neo4j's official MCP server, deployed here in read-only mode over Streamable HTTP transport. It translates `get_neo4j_schema` and `read_neo4j_cypher` tool calls into Neo4j operations and tags every query with `MCP4NEO4J` metadata so database admins can identify MCP-originated traffic.
 
 **Secrets Manager**: Stores the Neo4j Aura connection credentials securely. The MCP server retrieves them at runtime.
 
@@ -110,9 +110,9 @@ You already built the Cypher Templates end of the spectrum in xref:lab3.adoc[Lab
 
 This lab's agent follows a schema-first pattern:
 
-1. **Retrieve the schema** before writing any Cypher query. The agent calls `get-schema` to learn what node labels, relationship types, and properties exist in the database.
+1. **Retrieve the schema** before writing any Cypher query. The agent calls `get_neo4j_schema` to learn what node labels, relationship types, and properties exist in the database.
 2. **Write a Cypher query** based on the actual schema. This prevents the agent from guessing at property names or relationship types that do not exist.
-3. **Execute the query** using `read-cypher` and return the results.
+3. **Execute the query** using `read_neo4j_cypher` and return the results.
 
 This approach produces more accurate queries because the agent works with the real structure of the data rather than assumptions.
 

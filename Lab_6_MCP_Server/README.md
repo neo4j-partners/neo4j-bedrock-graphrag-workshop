@@ -22,7 +22,7 @@ This lab connects to the **Neo4j MCP server deployed on Amazon Bedrock AgentCore
 
 - **[neo4j-partners/aws-starter](https://github.com/neo4j-partners/aws-starter)**. See the `neo4j-agentcore-mcp-server/` directory.
 
-The lab administrator runs that deployment and provides the resulting `MCP_GATEWAY_URL` and `MCP_ACCESS_TOKEN` in `CONFIG.txt`. The server exposes two read-only tools over MCP: `get-schema` and `read-cypher`.
+The lab administrator runs that deployment and provides the resulting `MCP_GATEWAY_URL` and `MCP_ACCESS_TOKEN` in `CONFIG.txt`. The server exposes two read-only tools over MCP: `get_neo4j_schema` and `read_neo4j_cypher`.
 
 ## Notebook
 

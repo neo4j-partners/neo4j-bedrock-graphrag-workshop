@@ -6,7 +6,7 @@ MCP gives you three properties that matter in production:
 
 * **Framework-agnostic**: Strands, LangChain, LangGraph, or a custom agent loop all connect to the same MCP server without changing the server. The protocol is the contract.
 * **No per-application driver code**: The MCP server owns the Neo4j connection, credentials, and query execution. Applications call tools, not a database driver.
-* **Schema-aware tools**: The server exposes a `get-schema` tool so agents discover node labels, relationship types, and properties at runtime instead of hard-coding them.
+* **Schema-aware tools**: The server exposes a `get_neo4j_schema` tool so agents discover node labels, relationship types, and properties at runtime instead of hard-coding them.
 
 This part is optional and advanced. It suits all-day sessions or take-home study, and it builds on the agent and retrieval work from Parts 2 and 3.
 

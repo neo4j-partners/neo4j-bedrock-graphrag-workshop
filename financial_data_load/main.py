@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CLI entry point for SEC 10-K financial data loading and workshop solutions.
+"""CLI entry point for SEC 10-K financial data loading.
 
 Usage from financial_data_load directory:
 
@@ -28,23 +28,16 @@ Usage from financial_data_load directory:
         uv run python main.py verify                 # Print node/relationship counts
         uv run python main.py clean                  # Clear all data
         uv run python main.py samples [--limit N]    # Run sample queries
-
-    Workshop solution runner:
-        uv run python main.py solutions              # Interactive menu
-        uv run python main.py solutions 4            # Run specific solution
-        uv run python main.py solutions A            # Run all
 """
 
 import argparse
-import asyncio
-import importlib
 import logging
 import sys
 import time
 from datetime import datetime
 from pathlib import Path
 
-# Add solution_srcs to path so solution files can import their config module.
+# Add solution_srcs to path so test_connection.py can import its config module.
 # shared/ is added after solution_srcs/ so solution_srcs/config.py takes priority.
 sys.path.insert(0, str(Path(__file__).parent.parent / "shared"))
 sys.path.insert(0, str(Path(__file__).parent / "solution_srcs"))
@@ -465,135 +458,6 @@ def cmd_samples(args):
 
 
 # ============================================================================
-# Workshop solution runner
-# ============================================================================
-
-# Solution definitions: (module_name, title, is_async, entry_func)
-# Module prefixes align with workshop labs:
-#   04_xx = Lab 4 (neo4j-graphrag Library)
-#   05_xx = Lab 5 (MCP Server)
-#   06_xx = Lab 6 (GraphRAG Pipeline)
-SOLUTIONS = [
-    ("solution_srcs.04_01_load_and_query", "Load Data and Query (Lab 4)", False, "main"),
-    ("solution_srcs.04_02_vector_retriever", "Vector Retriever (Lab 4)", False, "main"),
-    ("solution_srcs.04_03_vector_cypher_retriever", "VectorCypher Retriever (Lab 4)", False, "main"),
-    ("solution_srcs.04_04_strands_graphrag_agent", "Strands GraphRAG Agent (Lab 4)", False, "main"),
-    ("solution_srcs.05_01_mcp_text2cypher_agent", "Neo4j MCP Agent with Text2Cypher (Lab 5)", False, "main"),
-    ("solution_srcs.06_01_data_loading", "Data Loading (Lab 6)", False, "main"),
-    ("solution_srcs.06_02_embeddings", "Embeddings (Lab 6)", False, "main"),
-    ("solution_srcs.06_03_vector_cypher_retriever", "VectorCypher Retriever (Lab 6)", False, "main"),
-]
-
-
-AGENT_QUERIES = {}
-
-
-def _print_solutions_menu():
-    print("\n" + "=" * 50)
-    print("Workshop Solutions")
-    print("=" * 50)
-    print("\nLab 4 - neo4j-graphrag Library:")
-    print("  1. Load Data and Query")
-    print("  2. Vector Retriever")
-    print("  3. VectorCypher Retriever")
-    print("  4. Strands GraphRAG Agent")
-    print("\nLab 5 - MCP Server:")
-    print("  5. Neo4j MCP Agent with Text2Cypher")
-    print("\nLab 6 - GraphRAG Pipeline (WARNING: 6 will delete all data):")
-    print("  6. Data Loading")
-    print("  7. Embeddings")
-    print("  8. VectorCypher Retriever")
-    print("\n  A. Run all")
-    print("  0. Exit")
-    print("=" * 50)
-
-
-
-def _run_solution(choice: int) -> bool:
-    """Run the selected solution. Returns False to exit."""
-    if choice == 0:
-        return False
-    if choice < 1 or choice > len(SOLUTIONS):
-        print("Invalid choice.")
-        return True
-
-    module_name, title, is_async, entry_func = SOLUTIONS[choice - 1]
-    print(f"\n>>> Running: {title}")
-    print("-" * 50)
-
-    try:
-        module = importlib.import_module(module_name)
-        func = getattr(module, entry_func)
-        if is_async:
-            if entry_func == "run_agent":
-                query = AGENT_QUERIES.get(module_name, "Hello")
-                asyncio.run(func(query))
-            else:
-                asyncio.run(func())
-        else:
-            func()
-    except KeyboardInterrupt:
-        print("\n\nInterrupted.")
-        raise
-    except Exception as e:
-        print(f"Error: {e}")
-
-    print("-" * 50)
-    return True
-
-
-def cmd_solutions(args):
-    """Launch workshop solution runner."""
-    if args.choice:
-        choice = args.choice
-        if choice.upper() == "A":
-            try:
-                for i in range(1, len(SOLUTIONS) + 1):
-                    _run_solution(i)
-                print("\n>>> All solutions completed!")
-            except KeyboardInterrupt:
-                print("\n\nExiting.")
-                sys.exit(0)
-            return
-        try:
-            _run_solution(int(choice))
-        except ValueError:
-            print(f"Invalid: {choice}. Use 1-{len(SOLUTIONS)} or A.")
-        return
-
-    # Interactive menu
-    while True:
-        _print_solutions_menu()
-        try:
-            choice = input("\nSelect solution (0-10, A):").strip()
-            if not choice:
-                continue
-            if choice.upper() == "A":
-                try:
-                    for i in range(1, len(SOLUTIONS) + 1):
-                        _run_solution(i)
-                except KeyboardInterrupt:
-                    print("\n\nExiting.")
-                    sys.exit(0)
-                continue
-            choice_int = int(choice)
-        except ValueError:
-            print("Please enter a number or 'A'.")
-            continue
-        except (KeyboardInterrupt, EOFError):
-            print("\nExiting.")
-            break
-
-        try:
-            if not _run_solution(choice_int):
-                print("Goodbye!")
-                break
-        except KeyboardInterrupt:
-            print("\n\nExiting.")
-            break
-
-
-# ============================================================================
 # CLI entry point
 # ============================================================================
 
@@ -747,13 +611,6 @@ def main():
     p_test = subparsers.add_parser(
         "test", help="Test Neo4j and AI provider connections")
     p_test.set_defaults(func=cmd_test)
-
-    # solutions
-    p_solutions = subparsers.add_parser(
-        "solutions", help="Workshop solution runner")
-    p_solutions.add_argument(
-        "choice", nargs="?", help="Solution number (1-10) or A for all")
-    p_solutions.set_defaults(func=cmd_solutions)
 
     args = parser.parse_args()
 
