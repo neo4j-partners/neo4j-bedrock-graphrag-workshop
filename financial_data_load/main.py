@@ -478,9 +478,7 @@ SOLUTIONS = [
     ("solution_srcs.04_02_vector_retriever", "Vector Retriever (Lab 4)", False, "main"),
     ("solution_srcs.04_03_vector_cypher_retriever", "VectorCypher Retriever (Lab 4)", False, "main"),
     ("solution_srcs.04_04_strands_graphrag_agent", "Strands GraphRAG Agent (Lab 4)", False, "main"),
-    ("solution_srcs.05_01_intro_strands_mcp", "Intro to Strands + MCP (Lab 5)", False, "main"),
-    ("solution_srcs.05_02_graph_enriched_search", "Graph-Enriched Search via MCP (Lab 5)", False, "main"),
-    ("solution_srcs.05_03_text2cypher_agent", "Text2Cypher Agent (Lab 5)", False, "main"),
+    ("solution_srcs.05_01_mcp_text2cypher_agent", "Neo4j MCP Agent with Text2Cypher (Lab 5)", False, "main"),
     ("solution_srcs.06_01_data_loading", "Data Loading (Lab 6)", False, "main"),
     ("solution_srcs.06_02_embeddings", "Embeddings (Lab 6)", False, "main"),
     ("solution_srcs.06_03_vector_cypher_retriever", "VectorCypher Retriever (Lab 6)", False, "main"),
@@ -500,13 +498,11 @@ def _print_solutions_menu():
     print("  3. VectorCypher Retriever")
     print("  4. Strands GraphRAG Agent")
     print("\nLab 5 - MCP Server:")
-    print("  5. Intro to Strands + MCP")
-    print("  6. Graph-Enriched Search via MCP")
-    print("  7. Text2Cypher Agent")
-    print("\nLab 6 - GraphRAG Pipeline (WARNING: 8 will delete all data):")
-    print("  8. Data Loading")
-    print("  9. Embeddings")
-    print(" 10. VectorCypher Retriever")
+    print("  5. Neo4j MCP Agent with Text2Cypher")
+    print("\nLab 6 - GraphRAG Pipeline (WARNING: 6 will delete all data):")
+    print("  6. Data Loading")
+    print("  7. Embeddings")
+    print("  8. VectorCypher Retriever")
     print("\n  A. Run all")
     print("  0. Exit")
     print("=" * 50)

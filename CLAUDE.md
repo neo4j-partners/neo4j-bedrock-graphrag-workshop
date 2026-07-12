@@ -50,12 +50,10 @@ Net-new lab (in development) that adds `neo4j-agent-memory` on top of the Lab 4 
 ### Lab 6 - Neo4j MCP Server
 Location: `Lab_6_MCP_Server/`
 
-Three notebooks using Strands Agents SDK with MCP to search a Neo4j knowledge graph:
-- `01_intro_strands_mcp.ipynb`: MCP tool discovery, schema inspection, simple queries — pure MCP introduction
-- `02_graph_enriched_search.ipynb`: Cypher Templates pattern — `@tool` wrappers with vector search + graph traversal via MCP
-- `03_text2cypher_agent.ipynb`: Text2Cypher pattern — autonomous agent writes its own Cypher
+One notebook using Strands Agents SDK with MCP to search a Neo4j knowledge graph:
+- `01_mcp_text2cypher_agent.ipynb`: MCP tool discovery and schema inspection, then an autonomous Text2Cypher agent that writes its own Cypher
 
-Uses `lib/data_utils.py` for Bedrock embeddings (lightweight — no neo4j or neo4j-graphrag dependency). All MCP access via Strands `MCPClient` with `streamablehttp_client` transport. The MCP server is pre-deployed with full embeddings by the lab administrator.
+All MCP access via Strands `MCPClient` with `streamablehttp_client` transport. The MCP server is pre-deployed with full embeddings by the lab administrator. Its deployment code lives in the separate `neo4j-partners/aws-starter` repository (`neo4j-agentcore-mcp-server/`).
 
 ## Shared Utilities
 
@@ -64,8 +62,6 @@ Uses `lib/data_utils.py` for Bedrock embeddings (lightweight — no neo4j or neo
 `lib/mcp_utils.py`: `MCPConnection` — wraps raw MCP `ClientSession` over Streamable HTTP for persistent connections and `execute_query(cypher)`. Loads config from `CONFIG.txt` by default.
 
 `Lab_3_GraphRAG_Search/lib/data_utils.py` and `Lab_4_GraphRAG_Agent/lib/data_utils.py`: Copies of root `lib/data_utils.py` used by the Lab 3 and Lab 4 notebooks for `get_embedder()` and `get_llm()`.
-
-`Lab_6_MCP_Server/lib/data_utils.py`: Lightweight `BedrockConfig` and `get_embedding()` only — no neo4j or neo4j-graphrag dependency. Used by Lab 6 MCP notebooks. Lab 6 uses Strands `MCPClient` directly for all MCP access.
 
 `financial_data_load/lib/`: Local copies of `data_utils.py` and `mcp_utils.py` that load from `financial_data_load/.env` instead of the project-root `CONFIG.txt`. These are copied from the root `lib/` to simplify env loading for the test harness. If either copy is changed, the other must be updated to match.
 

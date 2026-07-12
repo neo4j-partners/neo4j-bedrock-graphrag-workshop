@@ -124,7 +124,7 @@ Any MCP-compatible agent connects to any MCP-compatible server.
 
 ---
 
-![bg contain](lab5-mcp-agent-architecture.png)
+![bg contain](lab6-mcp-agent-architecture.png)
 
 ---
 
@@ -156,9 +156,11 @@ Agent (Notebook)  →  AgentCore Gateway (HTTPS)  →  Neo4j MCP Server  →  Ne
 
 All pre-deployed. You connect with a URL and access token from `CONFIG.txt`.
 
+Deployment code: `neo4j-partners/aws-starter` (`neo4j-agentcore-mcp-server/`).
+
 ---
 
-## Cypher Templates (Lab 5, Notebook 02)
+## Cypher Templates (Labs 3-4)
 
 Pre-written queries wrapped in `@tool` functions:
 
@@ -177,7 +179,7 @@ The agent **selects** which template to execute. The queries are expert-reviewed
 
 ---
 
-## Text2Cypher (Lab 5, Notebook 03)
+## Text2Cypher (Lab 5)
 
 The agent writes its own Cypher from scratch after schema discovery:
 
@@ -257,16 +259,13 @@ Each session runs in an **isolated microVM** — dedicated CPU, memory, filesyst
 
 ---
 
-## Lab 5 Notebook Progression
+## Lab 5 Notebook
 
-**Notebook 01: Intro to Strands MCP**
-MCP tool discovery, schema inspection, simple queries
+**Notebook 01: Neo4j MCP Agent with Text2Cypher**
 
-**Notebook 02: Graph-Enriched Search**
-Cypher Templates pattern — `@tool` wrappers with vector search + graph traversal via MCP
+MCP tool discovery and schema inspection, then full autonomy: the agent reads the schema and writes its own Cypher, executing it over MCP.
 
-**Notebook 03: Text2Cypher Agent**
-Full autonomy — agent reads schema and writes its own Cypher
+The Cypher Templates pattern (pre-written vector search plus graph traversal) was covered earlier with the neo4j-graphrag library in Labs 3-4.
 
 ---
 
@@ -275,8 +274,8 @@ Full autonomy — agent reads schema and writes its own Cypher
 - **ReAct pattern**: reason, act, observe, repeat — foundation for all workshop agents
 - **Strands SDK**: model-driven, AWS-native, built-in MCP support
 - **MCP**: open standard for agent-to-tool connectivity
-- **Cypher Templates**: reliable, pre-written queries via MCP
-- **Text2Cypher**: flexible, agent-generated queries after schema discovery
+- **Cypher Templates**: reliable, pre-written queries (Labs 3-4)
+- **Text2Cypher**: flexible, agent-generated queries after schema discovery, over MCP
 - **Schema-first**: critical for accurate Cypher generation
 - **AgentCore**: serverless deployment with session isolation
 

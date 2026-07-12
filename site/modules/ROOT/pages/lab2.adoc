@@ -2,22 +2,22 @@
 
 NOTE: This lab is optional and audience-dependent. Skip it for non-technical audiences or when short on time. The Lab 1 seed load already provides the full graph, including chunks, Amazon Titan Text Embeddings V2 embeddings, and the `chunkEmbeddings` vector index, so the rest of Part 2 works without running this lab.
 
-Lab 1 loaded a pre-built knowledge graph where seed data and embeddings were already in place. This lab builds that graph from scratch. Using the neo4j-graphrag library, you load raw SEC 10-K filing data, split it into chunks, generate vector embeddings, and create the vector index that powers semantic search. Lab 3 then builds retrieval on top of the graph you produce here.
+Lab 1 loaded a pre-built knowledge graph where seed data and embeddings were already in place. This lab shows how that graph is produced. Using the neo4j-graphrag library, you load a slice of raw SEC 10-K filing data, split it into chunks, generate vector embeddings, build the graph pipeline, and create a vector index that powers semantic search. Lab 3 then builds retrieval on the full workshop graph.
 
-This lab wipes and rebuilds the shared workshop Aura instance from `financial_data.json`, reproducing the complete graph: structured entities, chunks, Amazon Titan Text Embeddings V2 embeddings, and the vector index. The rest of Part 2 still works afterward because the rebuilt graph matches what the Lab 1 seed load produced.
+Everything in this lab runs in an isolated sandbox. Every node it creates carries a `:Demo` label, and the vector index is named `demoChunkEmbeddings`, so the lab never touches the `:Company`, `:Chunk`, or `chunkEmbeddings` data that Lab 1 loaded. The final step deletes the sandbox, leaving the shared graph exactly as it was.
 
 TIP: Ready to start? Jump to the xref:lab2-instructions.adoc[Lab 2 Instructions] for the notebook walkthrough.
 
 .**At a Glance**
 
-* **Two notebooks**: progress from loading raw text into a knowledge graph to generating embeddings and a vector index
+* **One notebook**: chunk the filing text, generate embeddings, build the graph pipeline, and run a semantic search
 * **neo4j-graphrag library**: `FixedSizeSplitter` for chunking and Amazon Titan Text Embeddings V2 for embedding generation
-* **Full data pipeline**: chunking, embedding generation, and index creation from scratch
-* **Rebuilds the shared instance**: wipes the graph and rebuilds from `financial_data.json`, reproducing the full workshop graph
+* **Full data pipeline**: chunking, embedding generation, graph construction, and index creation
+* **Non-destructive sandbox**: builds and tears down its own `:Demo` subgraph, leaving the shared instance untouched
 
 == Embeddings and Vector Search
 
-The Lab 1 seed load used pre-built embeddings. This lab generates them from scratch. Amazon Titan Text Embeddings V2 generates 1024-dimensional embeddings for each chunk of SEC filing text. Those vectors are stored as properties on Chunk nodes in Neo4j and indexed with a vector index (`chunkEmbeddings`) that supports approximate nearest-neighbor lookup. When a retriever receives a question, it embeds the question with the same model, queries the index for the closest chunk vectors, and returns the matched text.
+The Lab 1 seed load used pre-built embeddings. This lab generates them from scratch. Amazon Titan Text Embeddings V2 generates 1024-dimensional embeddings for each chunk of SEC filing text. Those vectors are stored as properties on the sandbox `DemoChunk` nodes and indexed with a vector index, `demoChunkEmbeddings`, that supports approximate nearest-neighbor lookup. When a retriever receives a question, it embeds the question with the same model, queries the index for the closest chunk vectors, and returns the matched text.
 
 .How vector search powers RAG
 [%collapsible]
@@ -27,7 +27,7 @@ Vector search is the mechanism that makes Retrieval-Augmented Generation work. T
 
 == Chunking
 
-SEC 10-K filings are too long to embed as single documents, so each filing is split into smaller passages. Each chunk becomes a Chunk node in the graph, linked to its source Document via `FROM_DOCUMENT` and to adjacent chunks via `NEXT_CHUNK` to preserve reading order.
+SEC 10-K filings are too long to embed as single documents, so each filing is split into smaller passages. Each chunk becomes a chunk node in the graph, linked to its source document via `FROM_DOCUMENT` and to adjacent chunks via `NEXT_CHUNK` to preserve reading order.
 
 .Chunking trade-offs
 [%collapsible]
@@ -39,9 +39,9 @@ Larger chunks give the LLM more context during retrieval, which helps when the a
 
 The pipeline builds both the structured and unstructured layers of the knowledge graph, then connects them:
 
-1. **Load filing text as Document and Chunk nodes.** Each 10-K filing becomes a Document node. The filing text is split into chunks, each stored as a Chunk node linked to its source via FROM_DOCUMENT and to adjacent chunks via NEXT_CHUNK.
-2. **Create structured entities.** Company, Product, and RiskFactor nodes are created from the structured data in the filing, linked by OFFERS, FACES_RISK, and FILED relationships.
-3. **Generate embeddings on every Chunk.** Amazon Titan Text Embeddings V2 embeds each chunk's text into a 1024-dimensional vector, stored as a property on the Chunk node. A vector index (`chunkEmbeddings`) is created over these embeddings.
+1. **Load filing text as Document and Chunk nodes.** The filing becomes a Document node. The filing text is split into chunks, each stored as a Chunk node linked to its source via `FROM_DOCUMENT` and to adjacent chunks via `NEXT_CHUNK`.
+2. **Create structured entities.** Company and Product nodes are created from the structured data in the filing, linked by `OFFERS` and `FILED`. Each Product is cross-linked to the chunks that mention it via `FROM_CHUNK`.
+3. **Generate embeddings on every Chunk.** Amazon Titan Text Embeddings V2 embeds each chunk's text into a 1024-dimensional vector, stored as a property on the Chunk node. A vector index over these embeddings supports approximate nearest-neighbor search.
 
 .Entity extraction and resolution
 [%collapsible]
@@ -55,29 +55,29 @@ The workshop sidesteps extraction because the SEC dataset already provides clean
 
 == The Pipeline
 
-The two notebooks form a single arc: create the graph, then generate the embeddings and vector index that make it searchable.
+A single notebook walks the full arc: chunk the filing text, embed it, build the graph, and create the vector index that makes it searchable.
 
-Notebook 01 loads SEC filing text as Document and Chunk nodes linked by `FROM_DOCUMENT` and `NEXT_CHUNK` relationships, and creates the structured layer (Company, Product, RiskFactor) with cross-links (`FILED`, `FROM_CHUNK`). Notebook 02 generates vector embeddings on every Chunk node and creates a `chunkEmbeddings` vector index. With the graph and index in place, Lab 3 builds vector and graph-enriched retrieval on top of it.
+The notebook splits SEC filing text into `DemoChunk` nodes linked by `FROM_DOCUMENT` and `NEXT_CHUNK`, creates the structured layer (`DemoCompany`, `DemoProduct`, `DemoDocument`) with the `OFFERS`, `FILED`, and `FROM_CHUNK` cross-links, generates a vector embedding on every chunk, and creates the `demoChunkEmbeddings` vector index. It then runs a semantic search to confirm the pipeline works and deletes the sandbox. Lab 3 builds vector and graph-enriched retrieval on the full workshop graph.
 
 == Lab 1 Seed Load vs Lab 2 Pipeline
 
-The Lab 1 seed load and this lab produce the same knowledge graph using the same neo4j-graphrag library and graph pattern. The difference is in what comes pre-built versus what you build yourself.
+The Lab 1 seed load and this lab use the same neo4j-graphrag library and the same graph pattern. The difference is scope. Lab 1 loads the complete workshop graph that every later lab queries, while Lab 2 rebuilds a small slice of it in a throwaway sandbox to show how the pipeline works.
 
 [cols="1,2,2"]
 |===
-| Aspect | Lab 1 Seed Load (Pre-built Graph) | Lab 2 Pipeline (Build from Scratch)
+| Aspect | Lab 1 Seed Load (Shared Graph) | Lab 2 Pipeline (Sandbox Demo)
 
 | **Data loading**
 | Full graph pre-loaded from seed data, including chunks and embeddings
-| Build from raw `financial_data.json`: chunking, entity creation, embedding generation
+| Build a small slice from raw `financial_data.json`: chunking, entity creation, embedding generation
 
 | **Embeddings**
-| Titan Text Embeddings V2 vectors and `chunkEmbeddings` index already in place
-| Generate Titan Text Embeddings V2 vectors and create the `chunkEmbeddings` index yourself
+| Titan Text Embeddings V2 vectors and the `chunkEmbeddings` index already in place, used by every later lab
+| Generate Titan Text Embeddings V2 vectors and create a separate `demoChunkEmbeddings` index yourself
 
-| **Pipeline ownership**
-| Query only; the data pipeline was done for you
-| Full ownership; you build every layer
+| **Scope and cleanup**
+| Permanent; the shared graph the rest of the workshop queries
+| Isolated `:Demo` sandbox, deleted at the end so the shared graph stays untouched
 |===
 
 == Next Steps

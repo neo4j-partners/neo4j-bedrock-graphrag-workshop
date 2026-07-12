@@ -1,0 +1,36 @@
+= Workshop Slides
+
+Five presentation decks accompany this workshop. They provide the conceptual background behind each part: the AWS and Neo4j partnership, graph and GraphRAG foundations, retriever patterns, and agents with MCP. Presenters can walk through them before the hands-on labs, and self-paced attendees can read them for the theory behind the code.
+
+The decks are published as a standalone slide gallery. Open any deck below, or browse the full https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/slides/[slide gallery].
+
+== Decks
+
+[cols="1,2,1"]
+|===
+| Deck | Covers | Pairs With
+
+| https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/slides/aws-neo4j/[Workshop Introduction]
+| The AWS and Neo4j partnership, workshop architecture, the SEC 10-K financial data domain, and the lab roadmap from visual exploration through GraphRAG agents.
+| xref:index.adoc[Overview], xref:part1.adoc[Part 1]
+
+| https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/slides/knowledge-graph/[Knowledge Graph Foundations]
+| Graph databases versus relational, the Cypher query language, the SEC financial knowledge graph schema, Neo4j Aura, and visual exploration tools.
+| xref:lab1.adoc[Lab 1]
+
+| https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/slides/graphrag/[GraphRAG Foundations]
+| GenAI limitations and the GraphRAG solution: hallucination, context rot, embeddings, vector search, RAG, and how graph context transforms retrieval quality.
+| xref:lab3.adoc[Lab 3]
+
+| https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/slides/retrievers/[GraphRAG Retriever Patterns]
+| VectorRetriever, VectorCypherRetriever, the two-layer graph, retrieval query design, and choosing the right retriever for your question type.
+| xref:lab3.adoc[Lab 3]
+
+| https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/slides/agents-mcp/[Agents and MCP]
+| The ReAct pattern, the Strands Agents SDK, Model Context Protocol architecture, Cypher Templates versus Text2Cypher, the schema-first approach, and agent deployment with AgentCore.
+| xref:lab4.adoc[Lab 4], xref:lab6.adoc[Lab 6]
+|===
+
+== Next Steps
+
+Start with xref:part1.adoc[Part 1] to sign in and set up Neo4j Aura, or jump straight to the xref:index.adoc[workshop overview] for the full architecture flow.

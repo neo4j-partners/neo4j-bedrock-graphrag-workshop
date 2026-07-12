@@ -1,13 +1,12 @@
-# Lab 6 — Neo4j MCP Server
+# Lab 6 - Neo4j MCP Server
 
-Connect a Strands Agent to a Neo4j knowledge graph through the **Model Context Protocol (MCP)**. This lab introduces MCP tool discovery, then progresses from pre-written Cypher templates to fully autonomous Text2Cypher agents.
+Connect a Strands Agent to a Neo4j knowledge graph through the **Model Context Protocol (MCP)**. This lab introduces MCP tool discovery, then builds an autonomous **Text2Cypher** agent that discovers the graph schema and writes its own Cypher from scratch.
 
 ## What You'll Learn
 
 - **MCP fundamentals**: Agent → MCP Server → Data Source architecture, tool discovery, Streamable HTTP transport
-- **Cypher Templates pattern**: Pre-written queries in `@tool` functions for reliable, predictable results
-- **Text2Cypher pattern**: The agent discovers the graph schema and writes original Cypher from scratch
-- **Graph-enriched search**: Vector similarity combined with graph traversal for knowledge retrieval
+- **Text2Cypher pattern**: The agent discovers the graph schema and writes original Cypher, then executes it over MCP
+- **Schema-first prompting**: grounding generated queries in the real graph structure so the agent uses correct labels, relationship types, and properties
 
 ## Prerequisites
 
@@ -15,25 +14,29 @@ Connect a Strands Agent to a Neo4j knowledge graph through the **Model Context P
 - `CONFIG.txt` updated with `MCP_GATEWAY_URL` and `MCP_ACCESS_TOKEN`
 - AWS credentials configured for Amazon Bedrock access
 
-> **Note:** The MCP server is pre-configured by the lab administrator with full embeddings and indexes. You do not need to complete Labs 2–4 before starting this lab.
+> **Note:** The MCP server is pre-deployed by the lab administrator with full embeddings and indexes. You do not need to complete Labs 2–4 before starting this lab.
 
-## Notebooks
+## The MCP Server
 
-Open each notebook in order. The progression builds from MCP basics to autonomous agents.
+This lab connects to the **Neo4j MCP server deployed on Amazon Bedrock AgentCore**. The deployment (AgentCore Gateway, IAM, container, and setup scripts) lives in a separate repository:
+
+- **[neo4j-partners/aws-starter](https://github.com/neo4j-partners/aws-starter)**. See the `neo4j-agentcore-mcp-server/` directory.
+
+The lab administrator runs that deployment and provides the resulting `MCP_GATEWAY_URL` and `MCP_ACCESS_TOKEN` in `CONFIG.txt`. The server exposes two read-only tools over MCP: `get-schema` and `read-cypher`.
+
+## Notebook
 
 | Notebook | Title | What You Build |
 |----------|-------|----------------|
-| `01_intro_strands_mcp.ipynb` | Intro to Strands + MCP | MCP connection via Streamable HTTP, tool discovery with `list_tools_sync()`, graph schema inspection |
-| `02_graph_enriched_search.ipynb` | Graph-Enriched Search | Cypher Templates — pre-written `@tool` functions that combine vector search with graph traversal for document context and entity enrichment |
-| `03_text2cypher_agent.ipynb` | Text2Cypher Agent | An autonomous agent that discovers the graph schema and writes original Cypher from scratch — the Text2Cypher retrieval pattern |
+| `01_mcp_text2cypher_agent.ipynb` | Neo4j MCP Agent with Text2Cypher | MCP connection via Streamable HTTP, tool discovery with `list_tools_sync()`, and an autonomous Text2Cypher agent that discovers the schema and writes original Cypher |
 
 ## Alternative Frameworks
 
-This lab uses the **Strands Agents SDK** (AWS-native, built-in MCP support, simpler API). **LangGraph** is a viable alternative that provides fine-grained control over the agent loop via LangChain MCP adapters — better suited for complex, multi-step workflows.
+This lab uses the **Strands Agents SDK** (AWS-native, built-in MCP support, simpler API). **LangGraph** is a viable alternative that provides fine-grained control over the agent loop via LangChain MCP adapters. It is better suited for complex, multi-step workflows.
 
 ## Sample Queries
 
-Once your agent is running in notebook 03, try these questions about the SEC financial data:
+Once your agent is running, try these questions about the SEC financial data:
 
 | Category | Example Question |
 |----------|-----------------|

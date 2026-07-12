@@ -2,6 +2,7 @@
 * xref:aws-services.adoc[AWS GenAI Services]
 * xref:neo4j-platform.adoc[Graph Intelligence Platform]
 * xref:configuration.adoc[Configuration Reference]
+* xref:slides.adoc[Workshop Slides]
 * xref:part1.adoc[Part 1: Getting Started with Neo4j Aura and the Dataset]
 ** xref:lab0.adoc[Lab 0: Sign In to AWS]
 *** xref:lab0-instructions.adoc[Sign In to AWS]
@@ -28,3 +29,4 @@
 * xref:appendix-agent.adoc[Appendix: What Is an Agent?]
 ** xref:appendix-agent-instructions.adoc[Instructions]
 * xref:admin-setup.adoc[Admin Setup]
+* xref:production-path.adoc[Production Path and Next Steps]

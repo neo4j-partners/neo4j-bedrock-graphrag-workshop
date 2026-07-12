@@ -5,7 +5,6 @@ TIP: For concepts and background, see xref:lab6.adoc[Lab 6: Neo4j MCP Agent].
 == What You'll Learn
 
 * **MCP Fundamentals**: Connect a Strands Agent to a Neo4j MCP Server, discover tools, inspect the graph schema
-* **Cypher Templates**: Pre-written vector search + graph traversal queries in `@tool` functions for reliable, predictable results
 * **Text2Cypher**: The agent discovers the schema and writes original Cypher from scratch, enabling fully autonomous graph querying
 
 == Prerequisites
@@ -17,32 +16,22 @@ TIP: For concepts and background, see xref:lab6.adoc[Lab 6: Neo4j MCP Agent].
 
 NOTE: The MCP server is pre-configured by the lab administrator with full embeddings and indexes.
 
-== Notebooks
+== Notebook
 
-Open each notebook in order in the `Lab_6_MCP_Server/` directory. The progression builds from MCP basics to autonomous agents.
+Open the notebook in the `Lab_6_MCP_Server/` directory. It builds from MCP basics to an autonomous Text2Cypher agent.
 
 [cols="1,2,3"]
 |===
 | Notebook | Title | What You Build
 
-| `01_intro_strands_mcp.ipynb`
-| Intro to Strands + MCP
-| MCP connection via Streamable HTTP, tool discovery with `list_tools_sync()`, graph schema inspection
-
-| `02_graph_enriched_search.ipynb`
-| Graph-Enriched Search
-| Cypher Templates: pre-written `@tool` functions that combine vector search with graph traversal for document context and entity enrichment
-
-| `03_text2cypher_agent.ipynb`
-| Text2Cypher Agent
-| An autonomous agent that discovers the graph schema and writes original Cypher from scratch (the Text2Cypher retrieval pattern)
+| `01_mcp_text2cypher_agent.ipynb`
+| Neo4j MCP Agent with Text2Cypher
+| MCP connection via Streamable HTTP, tool discovery with `list_tools_sync()`, and an autonomous agent that discovers the graph schema and writes original Cypher from scratch (the Text2Cypher retrieval pattern)
 |===
-
-Vector search in notebook 02 uses Amazon Titan Text Embeddings V2 (`amazon.titan-embed-text-v2:0`), which produces 1024-dimensional vectors matching the `chunkEmbeddings` index.
 
 == Sample Queries
 
-Once your agent is running in notebook 03, try these questions about the SEC financial data:
+Once your agent is running, try these questions about the SEC financial data:
 
 [cols="1,3"]
 |===
@@ -69,6 +58,6 @@ Once your agent is running in notebook 03, try these questions about the SEC fin
 
 == Next Steps
 
-This completes the optional MCP part of the workshop. You have connected an agent to Neo4j through the Model Context Protocol, run pre-written Cypher templates, and let an agent write its own Cypher with the Text2Cypher pattern.
+This completes the optional MCP part of the workshop. You have connected an agent to Neo4j through the Model Context Protocol and let it write its own Cypher with the Text2Cypher pattern.
 
 To revisit agent fundamentals, see xref:appendix-agent.adoc[the agent appendix].

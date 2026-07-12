@@ -1,11 +1,13 @@
-= Lab 2 Instructions: Data Pipeline
+= Lab 2 Instructions: Chunking and Embeddings
 
 TIP: For concepts and background, see xref:lab2.adoc[Lab 2: Data Pipeline].
 
 == What You'll Learn
 
-* **Data Loading**: Build a two-layer knowledge graph from raw SEC 10-K filing data, including structured entities and unstructured document chunks connected by cross-links
-* **Embeddings**: Generate vector embeddings with Amazon Titan Text Embeddings V2 and create a vector index for semantic search
+* **Chunking**: Split SEC 10-K filing text into overlapping passages sized for embedding
+* **Embeddings**: Generate 1024-dimensional vectors with Amazon Titan Text Embeddings V2
+* **Graph pipeline**: Store chunks, embeddings, and their relationships alongside structured Company, Product, and Document entities
+* **Vector search**: Create a vector index and run a semantic query with `VectorRetriever`
 
 == Prerequisites
 
@@ -13,25 +15,19 @@ TIP: For concepts and background, see xref:lab2.adoc[Lab 2: Data Pipeline].
 * Completed the Part 2 environment setup (xref:part2-setup-instructions.adoc[Part 2 Setup Instructions])
 * A running environment (SageMaker Studio or GitHub Codespace)
 
-NOTE: This lab wipes the graph and rebuilds from scratch using `financial_data.json`, reproducing the full workshop graph so the rest of Part 2 still works afterward.
+NOTE: This lab is optional and non-destructive. It builds everything in an isolated sandbox using `:Demo` node labels and a `demoChunkEmbeddings` index, then tears the sandbox down at the end. The graph Lab 1 loaded is never touched, so the notebook is safe to run as many times as you like.
 
-== Notebooks
-
-Open each notebook in order. Each one builds on the graph state left by the previous notebook.
+== Notebook
 
 [cols="1,2,3"]
 |===
 | Notebook | Title | What You Build
 
-| `Lab_2_Data_Pipeline/01_data_loading.ipynb`
-| Data Loading
-| Company, Product, RiskFactor, Document, and Chunk nodes linked by `OFFERS`, `FACES_RISK`, `FILED`, `FROM_DOCUMENT`, `NEXT_CHUNK`, and `FROM_CHUNK` relationships
-
-| `Lab_2_Data_Pipeline/02_embeddings.ipynb`
-| Embeddings
-| Amazon Titan Text Embeddings V2 vectors on every Chunk node, plus a `chunkEmbeddings` vector index
+| `Lab_2_Data_Pipeline/01_chunking_and_embeddings.ipynb`
+| Chunking and Embeddings
+| A sandboxed `Demo*` subgraph: Company, Product, Document, and Chunk nodes with embeddings, a `demoChunkEmbeddings` vector index, and a semantic search over it
 |===
 
 == Next Steps
 
-Continue to xref:lab3.adoc[Lab 3: Semantic Search and GraphRAG] for vector search and GraphRAG retrieval on the graph.
+Continue to xref:lab3.adoc[Lab 3: Semantic Search and GraphRAG] for vector search and GraphRAG retrieval on the full workshop graph.

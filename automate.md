@@ -51,7 +51,7 @@ The runner validates notebooks that read against a pre-loaded graph:
 
 - **Lab 3** `01_vector_retriever.ipynb`, `02_vector_cypher_retriever.ipynb`. Read-only retrieval.
 - **Lab 4** `01_strands_graphrag_agent.ipynb`. Read-only agent. `02_deploy_to_agentcore.ipynb` is a deploy with AWS side effects, off by default and opt-in via a flag.
-- **Lab 6** `01_intro_strands_mcp.ipynb`, `02_graph_enriched_search.ipynb`, `03_text2cypher_agent.ipynb`. Require `MCP_GATEWAY_URL` and `MCP_ACCESS_TOKEN`, skipped when those are absent.
+- **Lab 6** `01_mcp_text2cypher_agent.ipynb`. Requires `MCP_GATEWAY_URL` and `MCP_ACCESS_TOKEN`, skipped when those are absent.
 
 Out of scope:
 - Lab 2 (`01_data_loading.ipynb`, `02_embeddings.ipynb`), which wipes and rebuilds the graph.
@@ -90,7 +90,7 @@ Remove the `04_01` through `06_03` mirrors and the `main.py solutions` and `test
 In order:
 
 1. **Validate Lab 4 live.** Run `uv run setup/run_notebooks.py --labs 4`. The Lab 4 lib already carries the `get_llm()` fix; confirm the Strands agent notebook runs clean against the loaded graph.
-2. **Validate Lab 6 live.** Run `uv run setup/run_notebooks.py --labs 6`. MCP creds are in the root `.env`, so the three MCP notebooks should execute rather than skip.
+2. **Validate Lab 6 live.** Run `uv run setup/run_notebooks.py --labs 6`. MCP creds are in the root `.env`, so the MCP notebook should execute rather than skip.
 3. **Add the assertion cells (item 1).** One consolidated check cell per in-scope notebook, ported from `04_00_test_all_sample_queries.py`. This is the remaining substantive work.
 4. **Retire `solution_srcs` (item 4).** Only after the notebooks self-validate, and only the `solutions` subcommand plus mirrors. Confirm before deleting.
 

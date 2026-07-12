@@ -1,14 +1,14 @@
 = Lab 6: Neo4j MCP Agent
 
-Earlier labs used the neo4j-graphrag library with a direct Python driver. You called retriever classes that handled embedding, vector search, and graph traversal internally. This lab connects to the same knowledge graph through the **Model Context Protocol (MCP)**, an open standard that defines how AI agents discover and interact with external tools and data sources. You'll progress from MCP basics to pre-written Cypher templates to fully autonomous Text2Cypher agents.
+Earlier labs used the neo4j-graphrag library with a direct Python driver. You called retriever classes that handled embedding, vector search, and graph traversal internally. This lab connects to the same knowledge graph through the **Model Context Protocol (MCP)**, an open standard that defines how AI agents discover and interact with external tools and data sources. You'll progress from MCP basics to a fully autonomous Text2Cypher agent.
 
 TIP: Ready to start? Jump to the xref:lab6-instructions.adoc[Lab 6 Instructions] for the notebook walkthrough.
 
 .**At a Glance**
 
-* **Three notebooks**: progress from MCP tool discovery to graph-enriched search to autonomous Cypher generation
+* **One notebook**: progress from MCP tool discovery to autonomous Cypher generation
 * **Strands Agents SDK**: AWS-native agent framework with built-in MCP support
-* **Two retrieval patterns**: Cypher Templates (reliable, pre-written) and Text2Cypher (flexible, agent-generated)
+* **Text2Cypher pattern**: the agent reads the schema and writes original Cypher, then executes it over MCP
 * **Schema-first approach**: the agent retrieves the graph schema before writing any query
 
 == Model Context Protocol (MCP)
@@ -85,63 +85,30 @@ Agent (Notebook)  -->  AgentCore Gateway (HTTPS)  -->  Neo4j MCP Server (Contain
 
 You do not need to set up any of this infrastructure. The gateway URL and access token are provided in `CONFIG.txt`.
 
+The deployment code for this MCP server (AgentCore Gateway, IAM, container, and setup scripts) lives in the https://github.com/neo4j-partners/aws-starter[neo4j-partners/aws-starter] repository, in the `neo4j-agentcore-mcp-server/` directory. The lab administrator runs that deployment and distributes the resulting credentials.
+
 == GraphRAG Retrieval Patterns
 
-Neo4j's https://graphrag.com/reference/[GraphRAG Patterns Catalog] defines a spectrum of retrieval strategies. This lab covers two of them, building from controlled to autonomous:
+Neo4j's https://graphrag.com/reference/[GraphRAG Patterns Catalog] defines a spectrum of retrieval strategies, from controlled to autonomous:
 
-[cols="1,2,1,1"]
+[cols="1,2,1"]
 |===
-| Pattern | How It Works | Notebook | Reliability
+| Pattern | How It Works | Reliability
 
 | **Cypher Templates**
-| Pre-written, parameterized queries in `@tool` functions. The agent selects which template to execute.
-| Notebook 02
+| Pre-written, parameterized queries the agent selects and executes. Reliable because the queries are reviewed in advance.
 | High (expert-reviewed queries)
 
 | **Text2Cypher**
-| The agent reads the schema, reasons about the question, and writes original Cypher from scratch.
-| Notebook 03
+| The agent reads the schema, reasons about the question, and writes original Cypher from scratch. Flexible enough to answer any question the schema supports.
 | Variable (depends on LLM reasoning quality)
 |===
 
-Cypher Templates are the most reliable: queries are reviewed in advance and execute predictably. Text2Cypher is the most flexible: the agent can answer any question the schema supports. The trade-off is that Text2Cypher's query quality depends on the LLM's ability to reason about graph structures, which is why the schema-first approach is critical.
-
-The vector search templates in Notebook 02 embed questions with Amazon Titan Text Embeddings V2 (`amazon.titan-embed-text-v2:0`), producing 1024-dimensional vectors that match the `chunkEmbeddings` index on the graph.
-
-== Cypher Templates vs Text2Cypher
-
-[cols="1,2,2"]
-|===
-| Aspect | Notebook 02 (Cypher Templates) | Notebook 03 (Text2Cypher)
-
-| **Cypher source**
-| Pre-written in `@tool` functions
-| Agent writes from scratch after schema discovery
-
-| **Schema discovery**
-| No; queries are hard-coded with known labels and types
-| Yes; agent calls `get-schema` before every query
-
-| **Flexibility**
-| Limited to the query patterns defined in advance
-| Any question the schema can answer
-
-| **Failure mode**
-| Predictable; expert-reviewed queries return expected results
-| Silent failures possible; wrong labels return empty results without errors
-
-| **MCP role**
-| Transport layer for executing pre-written queries
-| Discovery interface (schema) + execution (queries)
-
-| **Best for**
-| Known query patterns with high reliability requirements
-| Ad-hoc exploration and questions not anticipated during development
-|===
+You already built the Cypher Templates end of the spectrum in xref:lab3.adoc[Lab 3] and xref:lab4.adoc[Lab 4], where `VectorCypherRetriever` ran a pre-written retrieval query and the Strands agent selected which retriever `@tool` to call. This lab covers the autonomous end: **Text2Cypher**, delivered over MCP. The trade-off is that Text2Cypher's query quality depends on the LLM's ability to reason about graph structures, which is why the schema-first approach is critical.
 
 == Schema-First Approach
 
-Notebook 03 instructs the agent to follow a schema-first pattern:
+This lab's agent follows a schema-first pattern:
 
 1. **Retrieve the schema** before writing any Cypher query. The agent calls `get-schema` to learn what node labels, relationship types, and properties exist in the database.
 2. **Write a Cypher query** based on the actual schema. This prevents the agent from guessing at property names or relationship types that do not exist.

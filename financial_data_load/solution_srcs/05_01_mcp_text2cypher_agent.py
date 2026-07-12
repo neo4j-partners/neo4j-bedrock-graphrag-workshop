@@ -1,9 +1,10 @@
 """
-Introduction to Strands Agents with MCP
+Neo4j MCP Agent with Text2Cypher
 
-Demonstrates a Strands Agent connected to a Neo4j MCP Server. The agent
-discovers tools at startup, inspects the graph schema, and runs simple
-queries — a pure MCP introduction with no custom @tool wrappers.
+Demonstrates connecting a Strands Agent to a Neo4j MCP Server over Streamable
+HTTP and the Text2Cypher pattern: the agent discovers MCP tools at startup,
+inspects the graph schema, and writes its own Cypher queries autonomously —
+no custom @tool wrappers needed.
 
 Run with: uv run python main.py solutions <N>
 """
@@ -34,12 +35,21 @@ MCP_ACCESS_TOKEN = os.getenv("MCP_ACCESS_TOKEN")
 # 2. System Prompt
 # ---------------------------------------------------------------------------
 
-SYSTEM_PROMPT = """You are a helpful assistant with access to a Neo4j knowledge graph containing SEC 10-K financial filing data.
+SYSTEM_PROMPT = """You are a Neo4j database assistant with access to a knowledge graph \
+containing SEC 10-K financial filing data (companies, products, services, risk factors, \
+financial metrics, executives, asset manager holdings).
 
 Rules:
-1. Always retrieve the database schema before writing any Cypher query.
+1. Always retrieve the database schema before writing Cypher queries.
 2. Only use read-only Cypher (MATCH, RETURN, WITH, WHERE, ORDER BY, LIMIT).
-3. Keep results concise — limit to 10 rows unless asked otherwise.
+3. Include LIMIT clauses to avoid excessive results.
+4. Use COALESCE() or IS NOT NULL for properties that might be missing.
+5. Format results clearly and cite actual data from query results.
+6. Modern Cypher syntax:
+   - Use elementId(n) instead of id(n) — id() is removed in Neo4j 5+
+   - Use COUNT{ pattern } instead of size((pattern)) for counting pattern occurrences
+   - Use EXISTS{ pattern } instead of exists((pattern)) for checking pattern existence
+   - Always use $parameter syntax for dynamic values, never string concatenation
 """
 
 
@@ -49,7 +59,7 @@ Rules:
 
 
 def main():
-    """Run MCP intro demo."""
+    """Run Text2Cypher agent demo."""
     print(f"Model:     {MODEL_ID}")
     print(f"Region:    {REGION}")
 
@@ -88,13 +98,13 @@ def main():
         # --- Run queries ---
 
         print("=" * 60)
-        query(
-            "What is the database schema? Give me a brief summary of "
-            "the node labels, relationship types, and key properties."
-        )
+        query("What is the database schema?")
 
         print("\n" + "=" * 60)
-        query("How many companies are in the database?")
+        query("How many nodes are there by label?")
+
+        print("\n" + "=" * 60)
+        query("Show 5 sample records from the most populated node type.")
 
 
 if __name__ == "__main__":

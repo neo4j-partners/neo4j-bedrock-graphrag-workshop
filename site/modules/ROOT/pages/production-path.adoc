@@ -1,0 +1,65 @@
+= Production Path and Next Steps
+
+You built a working GraphRAG stack: a Neo4j knowledge graph with vector search, retrievers that combine semantic similarity with graph traversal, a Strands agent deployed to AgentCore, persistent agent memory, and MCP-based graph access. This page covers what changes when you move that stack from a workshop sandbox to a production system, and where to go next.
+
+.**At a Glance**
+
+* **Harden the graph**: right-size Aura, secure access, and back up the data your agents depend on
+* **Scale retrieval**: tune chunking, add hybrid search and reranking, and measure retrieval quality
+* **Operate the agent**: add observability, guardrails, and evaluation around the deployed AgentCore runtime
+* **Grow the pipeline**: move from a one-time seed load to incremental ingestion with entity resolution
+
+== From Workshop to Production
+
+The workshop optimizes for learning: a small dataset, a free Aura tier, and notebooks that rebuild the graph on demand. A production deployment optimizes for reliability, scale, and cost. The four areas below are where that shift happens.
+
+=== Harden the Graph
+
+The workshop uses an Aura free instance and a single set of credentials. In production:
+
+* **Right-size the instance.** Move to Aura Professional or Enterprise and size memory to hold the graph and vector index in the page cache. Vector search latency depends on keeping embeddings resident in memory.
+* **Secure access.** Rotate the database password, scope application credentials to least privilege, and put the connection string and secrets in AWS Secrets Manager rather than a `CONFIG.txt` file. Restrict network access with Aura's IP allowlisting or private endpoints.
+* **Back up and monitor.** Enable automated backups and set up query and resource monitoring so you catch slow retrievals and memory pressure before users do.
+
+=== Scale Retrieval
+
+Retrieval quality is the ceiling on answer quality. Beyond the workshop retrievers:
+
+* **Tune chunking.** Chunk size and overlap directly affect what the vector index can surface. Test a few strategies against representative questions rather than assuming the seed defaults are optimal.
+* **Add hybrid search.** Combine the `chunkEmbeddings` vector index with the `search_chunks` and `search_entities` fulltext indexes so exact-term matches and semantic matches reinforce each other. The neo4j-graphrag `HybridRetriever` and `HybridCypherRetriever` implement this pattern.
+* **Rerank results.** Add a reranking step over the top-k retrieved chunks before passing them to the model. Reranking trades a small amount of latency for a meaningful gain in the relevance of what reaches the context window.
+* **Expand the retrieval query.** The `VectorCypherRetriever` traversal you wrote in Lab 3 is a starting point. Production retrieval queries often pull in more graph context: related risk factors, competitor filings, or time-series financial metrics scoped to the question.
+
+=== Operate the Agent
+
+A deployed agent needs the same operational rigor as any other service:
+
+* **Observe it.** Instrument the AgentCore runtime with tracing so you can see which tools the agent called, what Cypher ran, and how long each step took. AgentCore integrates with Amazon CloudWatch for logs and metrics.
+* **Add guardrails.** Use Amazon Bedrock Guardrails to filter prompts and responses, and constrain Text2Cypher agents to read-only queries so a generated statement can never mutate the graph.
+* **Manage memory growth.** The neo4j-agent-memory store from Lab 5 grows with every conversation. Decide on retention: how long memories persist, when to summarize, and how to isolate one user's memory from another.
+* **Control cost.** Reasoning and embedding calls to Bedrock are the dominant cost. Cache embeddings for repeated queries, batch embedding generation during ingestion, and choose the smallest model that meets your quality bar per task.
+
+=== Grow the Data Pipeline
+
+The workshop loads a fixed seed dataset once. Real systems ingest continuously:
+
+* **Move to incremental ingestion.** Load new filings as they arrive rather than wiping and rebuilding. Use `MERGE` on stable business keys so re-running the pipeline is idempotent.
+* **Resolve entities.** As sources grow, the same company or product appears under different names. Add an entity resolution step so the graph stays connected rather than fragmenting into duplicates.
+* **Automate embedding refresh.** When chunk text changes, regenerate its Titan V2 embedding and update the vector index so retrieval reflects the current data.
+
+== Evaluate Before You Ship
+
+Add an evaluation loop before putting a GraphRAG system in front of users. Assemble a set of representative questions with known-good answers, then measure retrieval quality (did the right chunks and entities surface?) separately from answer quality (did the model use them correctly?). Track both as you change chunking, retrievers, and prompts so you can tell an improvement from a regression.
+
+== Resources
+
+* https://neo4j.com/docs/aura/[Neo4j Aura documentation]
+* https://neo4j.com/docs/neo4j-graphrag-python/current/[neo4j-graphrag Python library]
+* https://neo4j.com/labs/genai-ecosystem/[Neo4j GenAI ecosystem and integrations]
+* https://docs.aws.amazon.com/bedrock/latest/userguide/agentcore.html[Amazon Bedrock AgentCore documentation]
+* https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html[Amazon Bedrock Guardrails]
+* https://strandsagents.com/[Strands Agents SDK documentation]
+
+== Keep Building
+
+Revisit the xref:slides.adoc[workshop slides] for the concepts behind each part, or explore the xref:appendix-agent.adoc[agent fundamentals appendix] for a deeper look at how Strands agents reason. The full workshop source lives at https://github.com/neo4j-partners/neo4j-bedrock-graphrag-workshop[neo4j-partners/neo4j-bedrock-graphrag-workshop].

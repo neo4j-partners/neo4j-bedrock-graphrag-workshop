@@ -170,25 +170,25 @@ MATCH (next:Chunk {chunkId: row.nextChunkId})
 MERGE (curr)-[:NEXT_CHUNK]->(next);
 
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/entity_chunks.csv' AS row
-WITH row WHERE row.entityType = 'Product'
+FILTER row.entityType = 'Product'
 MATCH (e:Product {productId: row.entityId})
 MATCH (c:Chunk {chunkId: row.chunkId})
 MERGE (e)-[:FROM_CHUNK]->(c);
 
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/entity_chunks.csv' AS row
-WITH row WHERE row.entityType = 'RiskFactor'
+FILTER row.entityType = 'RiskFactor'
 MATCH (e:RiskFactor {riskId: row.entityId})
 MATCH (c:Chunk {chunkId: row.chunkId})
 MERGE (e)-[:FROM_CHUNK]->(c);
 
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/entity_chunks.csv' AS row
-WITH row WHERE row.entityType = 'FinancialMetric'
+FILTER row.entityType = 'FinancialMetric'
 MATCH (e:FinancialMetric {metricId: row.entityId})
 MATCH (c:Chunk {chunkId: row.chunkId})
 MERGE (e)-[:FROM_CHUNK]->(c);
 
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/entity_chunks.csv' AS row
-WITH row WHERE row.entityType = 'Company'
+FILTER row.entityType = 'Company'
 MATCH (e:Company {companyId: row.entityId})
 MATCH (c:Chunk {chunkId: row.chunkId})
 MERGE (e)-[:FROM_CHUNK]->(c);
@@ -260,6 +260,7 @@ Now that the graph is loaded, try these queries to explore the data.
 
 ```cypher
 MATCH (c:Company {ticker: 'NVDA'})-[:OFFERS]->(p:Product)
+WHERE p.name IS NOT NULL
 RETURN p.name ORDER BY p.name LIMIT 10;
 ```
 
@@ -285,7 +286,8 @@ ORDER BY holdings DESC LIMIT 5;
 **Who does Microsoft compete with?**
 
 ```cypher
-MATCH (c:Company {ticker: 'MSFT'})-[:COMPETES_WITH]->(comp)
+MATCH (c:Company {ticker: 'MSFT'})-[:COMPETES_WITH]->(comp:Company)
+WHERE comp.name IS NOT NULL
 RETURN comp.name ORDER BY comp.name;
 ```
 
@@ -294,7 +296,7 @@ RETURN comp.name ORDER BY comp.name;
 ```cypher
 MATCH (am:AssetManager)-[:OWNS]->(c:Company)-[:FACES_RISK]->(r:RiskFactor)
 WITH am, r, count(DISTINCT c) AS exposed
-WHERE exposed > 1
+WHERE exposed > 1 AND am.name IS NOT NULL
 RETURN am.name, r.name, exposed
 ORDER BY exposed DESC, am.name LIMIT 5;
 ```
@@ -302,7 +304,8 @@ ORDER BY exposed DESC, am.name LIMIT 5;
 **Who are NVIDIA's supply chain partners?**
 
 ```cypher
-MATCH (c:Company {ticker: 'NVDA'})-[:PARTNERS_WITH]->(p)
+MATCH (c:Company {ticker: 'NVDA'})-[:PARTNERS_WITH]->(p:Company)
+WHERE p.name IS NOT NULL
 RETURN p.name ORDER BY p.name;
 ```
 

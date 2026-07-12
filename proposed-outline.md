@@ -16,14 +16,14 @@ Deliver the why before anything technical. Attendees hear the business story, th
 * Neo4j + AWS Strategic Collaboration Agreement and 2026 roadmap
 * Live demo: the instructor runs hero questions against the finished agent, pre-deployed before the event. Example: "Which risk factors expose BlackRock's portfolio across multiple companies?"
 
-## 2. Aura Setup, Simplified
+## 2. Sign In and Set Up Aura
 
-Setup is streamlined to protect momentum. Attendees sign up for the Neo4j Aura free trial and connect.
+Setup is streamlined to protect momentum. Lab 0 signs in to AWS and enables Bedrock model access; Lab 1 sets up Neo4j Aura and loads the data.
 
-* Walk through the Aura free trial sign-up
-* Save connection credentials to CONFIG.txt and confirm Bedrock access
-* Load the seed dataset so the 10-K graph, embeddings, and vector index are ready for the labs
-* Goal: everyone connected and oriented in under 30 minutes
+* Lab 0: sign in to AWS and enable Amazon Bedrock access for Claude and Titan Text Embeddings V2
+* Lab 1: walk through the Aura free trial sign-up and save connection credentials to CONFIG.txt
+* Lab 1: load the seed dataset so the 10-K graph, embeddings, and vector index are ready for the labs
+* Goal: everyone signed in, connected, and oriented in under 30 minutes
 
 ## 3. Explore the SEC 10-K Knowledge Graph
 

@@ -10,8 +10,9 @@
 #     "python-dotenv>=1.0",
 #     # Lab dependencies, pre-provisioned so the neutralized %pip cells have
 #     # nothing left to install at run time. Mirrors the %pip lines in the
-#     # in-scope notebooks (Labs 3, 4, 5, 6).
+#     # in-scope notebooks (Labs 2, 3, 4, 5, 6).
 #     "neo4j-graphrag[bedrock]>=1.18.0",
+#     "nest_asyncio",  # Lab 2 split_text() needs it under a running event loop
 #     "neo4j-agent-memory[bedrock]==0.5.0",
 #     "strands-agents",
 #     "strands-agents-tools",
@@ -79,9 +80,11 @@ class Notebook:
     is_deploy: bool = False
 
 
-# Registry of in-scope notebooks. Data-load notebooks (Lab 2) are intentionally
-# absent: the runner assumes the graph is already loaded.
+# Registry of in-scope notebooks. Lab 2 is the optional chunking-and-embeddings
+# demo; it is self-contained and non-destructive (it builds and tears down its
+# own :Demo sandbox), so it is safe to run against the pre-loaded graph.
 NOTEBOOKS: list[Notebook] = [
+    Notebook("2", REPO_ROOT / "Lab_2_Data_Pipeline" / "01_chunking_and_embeddings.ipynb"),
     Notebook("3", REPO_ROOT / "Lab_3_GraphRAG_Search" / "01_vector_retriever.ipynb"),
     Notebook("3", REPO_ROOT / "Lab_3_GraphRAG_Search" / "02_vector_cypher_retriever.ipynb"),
     Notebook("4", REPO_ROOT / "Lab_4_GraphRAG_Agent" / "01_strands_graphrag_agent.ipynb"),
@@ -92,9 +95,7 @@ NOTEBOOKS: list[Notebook] = [
     ),
     Notebook("5", REPO_ROOT / "Lab_5_Agent_Memory" / "01_short_term_memory.ipynb"),
     Notebook("5", REPO_ROOT / "Lab_5_Agent_Memory" / "02_long_term_memory.ipynb"),
-    Notebook("6", REPO_ROOT / "Lab_6_MCP_Server" / "01_intro_strands_mcp.ipynb", requires_mcp=True),
-    Notebook("6", REPO_ROOT / "Lab_6_MCP_Server" / "02_graph_enriched_search.ipynb", requires_mcp=True),
-    Notebook("6", REPO_ROOT / "Lab_6_MCP_Server" / "03_text2cypher_agent.ipynb", requires_mcp=True),
+    Notebook("6", REPO_ROOT / "Lab_6_MCP_Server" / "01_mcp_text2cypher_agent.ipynb", requires_mcp=True),
 ]
 
 
@@ -110,7 +111,7 @@ class Result:
 # Lab selection
 # ---------------------------------------------------------------------------
 
-_KNOWN_LABS = ("3", "4", "5", "6")
+_KNOWN_LABS = ("2", "3", "4", "5", "6")
 
 
 def parse_labs(spec: str | None) -> set[str]:
@@ -137,7 +138,7 @@ def parse_labs(spec: str | None) -> set[str]:
         else:
             raise ValueError(f"invalid --labs token '{token}'")
 
-    # Numeric tokens outside the in-scope set (e.g. 2 from a 1-3 range) are
+    # Numeric tokens outside the in-scope set (e.g. 1 from a 1-3 range) are
     # dropped; that lab simply has no in-scope notebooks. An all-unknown spec
     # yields an empty set, which main() reports as an error.
     return selected & set(_KNOWN_LABS)

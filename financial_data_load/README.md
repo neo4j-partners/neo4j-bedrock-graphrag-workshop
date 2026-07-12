@@ -232,19 +232,17 @@ Strands Agents SDK with MCP to search a Neo4j knowledge graph:
 
 | # | Solution | Description |
 |---|----------|-------------|
-| 5 | `05_01_intro_strands_mcp.py` | Intro to Strands + MCP |
-| 6 | `05_02_graph_enriched_search.py` | Graph-enriched search via MCP |
-| 7 | `05_03_text2cypher_agent.py` | Text2Cypher agent |
+| 5 | `05_01_mcp_text2cypher_agent.py` | Neo4j MCP agent with Text2Cypher |
 
 ### Lab 6: GraphRAG Pipeline (06_xx)
 
-Data pipeline patterns using neo4j-graphrag. **Solution 8 deletes all data.**
+Data pipeline patterns using neo4j-graphrag. **Solution 6 deletes all data.**
 
 | # | Solution | Description |
 |---|----------|-------------|
-| 8 | `06_01_data_loading.py` | Load financial documents into Neo4j |
-| 9 | `06_02_embeddings.py` | Generate and store vector embeddings |
-| 10 | `06_03_vector_cypher_retriever.py` | Vector search + custom Cypher |
+| 6 | `06_01_data_loading.py` | Load financial documents into Neo4j |
+| 7 | `06_02_embeddings.py` | Generate and store vector embeddings |
+| 8 | `06_03_vector_cypher_retriever.py` | Vector search + custom Cypher |
 
 ## AI Provider
 

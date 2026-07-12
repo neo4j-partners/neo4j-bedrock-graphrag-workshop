@@ -46,7 +46,7 @@ The narrative arc for the opening of every session. This is the script behind th
 
 ### Part 1 — Getting Started with Neo4j Aura and the Dataset
 
-Goal: get everyone connected and oriented on the data in under 30 minutes. No marketplace walkthrough; attendees sign up for the Neo4j Aura free trial.
+Goal: get everyone signed in, connected, and oriented on the data in under 30 minutes. No marketplace walkthrough. Lab 0 signs in to AWS and enables Bedrock model access; Lab 1 sets up the Neo4j Aura free trial, loads the seed dataset, and explores the graph.
 
 **Strategic Overview Slides** (5–10 minutes, before Lab 0)
 
@@ -93,17 +93,20 @@ Runs immediately after the strategic slides, before Lab 0. About 5 minutes. This
 
 ---
 
-* **Lab 0 — Aura Free Trial Sign-Up:** Sign up for the Neo4j Aura free trial, create an instance, save credentials to CONFIG.txt, and load the seed dataset so the graph and embeddings are ready for the labs.
+* **Lab 0 — Sign In to AWS:** Sign in to the AWS Console with the workshop OneBlink credentials or your own account, and enable Amazon Bedrock model access for Anthropic Claude and Amazon Titan Text Embeddings V2 so the coding labs can call them.
+
+  **Slides:**
+  * AWS Console access: sign in through workshop-provided OneBlink credentials or your own AWS account
+  * Amazon Bedrock model access: enable Anthropic Claude and Amazon Titan Text Embeddings V2 (`amazon.titan-embed-text-v2:0`, 1024 dimensions)
+  * Region: use `us-east-1` for the widest model availability
+
+* **Lab 1 — Neo4j Aura Setup and Exploration:** Sign up for the Neo4j Aura free trial, create an instance, save credentials to CONFIG.txt, and load the seed dataset so the graph and embeddings are ready for the labs. Then run introductory Cypher queries and explore companies, products, risk factors, executives, and relationships in the Neo4j browser.
 
   **Slides:**
   * Aura free trial sign-up: create the instance, capture the connection URL and password, save credentials to CONFIG.txt along with the Bedrock region
   * Seed data load: one provided load step brings in the 10-K graph, embeddings, and vector index
   * Architecture diagram: what the seed load provides (10-K graph, embeddings, vector index) vs. what participants build today
   * The dataset: SEC 10-K filings from S&P 500 companies, chunked, embedded, and loaded into the graph
-
-* **Lab 1 — Explore the SEC 10-K Knowledge Graph:** Run introductory Cypher queries, explore companies, products, risk factors, executives, and relationships using the Neo4j browser.
-
-  **Slides:**
   * Graph schema: node types (Company, Chunk, RiskFactor, Executive, Product) and the relationships connecting them
   * Why SEC filings are naturally graph-shaped: entities cross-referenced across filings, companies, and years
   * Sample traversal: from one company, follow relationships to shared executives at competitors and overlapping disclosed risk factors
@@ -120,7 +123,7 @@ Goal: build GraphRAG end to end. This is the core of the workshop.
 
 **Lab 2 — Data Pipeline (Optional — audience-dependent)**
 
-Skip if the audience is non-technical or time is short. The rest of Part 2 uses the embeddings from the Lab 0 seed load and works without it.
+Skip if the audience is non-technical or time is short. The rest of Part 2 uses the embeddings from the Lab 1 seed load and works without it.
 
 * **What it covers:** Load SEC 10-K chunks into Neo4j, generate embeddings with Amazon Titan via Bedrock, create a vector index, link chunks to graph entities.
 * **When to run it:** Advanced audience, full-day format, or when the instructor wants participants to understand where embeddings come from before using them.
@@ -133,7 +136,7 @@ Skip if the audience is non-technical or time is short. The rest of Part 2 uses 
 
 **Lab 3 — Semantic Search and GraphRAG**
 
-Core lab. Uses loaded data (either from Lab 2 or from the Lab 0 seed load).
+Core lab. Uses loaded data (either from Lab 2 or from the Lab 1 seed load).
 
 * **VectorRetriever:** Find relevant SEC chunks by semantic similarity.
 * **VectorCypherRetriever:** Combine vector similarity with graph traversal — retrieve chunks, then follow relationships to companies, products, risk factors.
@@ -255,12 +258,12 @@ So embedding generation, the conceptual foundation, is taught last, and the "how
 | Current | Target | Action
 
 | `Lab_0_Sign_In`
-| Lab 0: Aura Free Trial Sign-Up + full seed load
-| Repurpose from AWS sign-in to Aura sign-up. Fold the seed load in.
+| Lab 0: Sign In to AWS
+| Keep as AWS sign-in and Bedrock model access.
 
 | `Lab_1_Aura_Setup`
-| Lab 1: Explore the Knowledge Graph
-| Keep exploration content. Move the CSV load into the Lab 0 seed step.
+| Lab 1: Neo4j Aura Setup and Exploration
+| Aura sign-up, seed load, and graph exploration.
 
 | `Lab_3_Intro_to_Bedrock_and_Agents`
 | Appendix: What Is an Agent?
@@ -275,7 +278,7 @@ So embedding generation, the conceptual foundation, is taught last, and the "how
 | The GraphRAG agent notebook becomes its own lab with deployment.
 
 | `Lab_4_GraphRAG_Search` nb 01
-| Folds into Lab 0 seed load (see open decision 1)
+| Folds into Lab 1 seed load
 | The chunk/embedding/index load moves into setup so downstream labs work without the pipeline.
 
 | (new)
@@ -295,7 +298,7 @@ So embedding generation, the conceptual foundation, is taught last, and the "how
 
 The reordering only works if the seed load is self-sufficient. The plan:
 
-1. **Extend the Lab 0 seed load to include the unstructured layer.** Add Chunk nodes, embeddings, and the `chunkEmbeddings` vector index to what setup provides, using the logic currently in `Lab_4/01_load_and_query.ipynb`. After Lab 0, the graph is complete: structured entities, chunks, embeddings, indexes. Embeddings are delivered as a provided data import, not generated live, so setup stays fast.
+1. **Extend the Lab 1 seed load to include the unstructured layer.** Add Chunk nodes, embeddings, and the `chunkEmbeddings` vector index to what setup provides, using the logic currently in `Lab_4/01_load_and_query.ipynb`. After Lab 1, the graph is complete: structured entities, chunks, embeddings, indexes. Embeddings are delivered as a provided data import, not generated live, so setup stays fast.
 2. **Reposition the pipeline as optional Lab 2.** With the seed load complete, Lab 2 becomes a "here is how the embeddings were made" lab that any audience can skip. Labs 3 and 4 run on the seed-loaded data regardless.
 3. **The pipeline wipes and rebuilds the shared workshop instance.** Lab 2 keeps the current Lab 6 behavior: it clears the graph and rebuilds the complete graph from `financial_data.json`, regenerating embeddings with Titan Text Embeddings V2. The rebuild must reproduce the full graph that Labs 3 and 4 expect: structured entities, chunks, embeddings, and the `chunkEmbeddings` vector index. Attendees who run Lab 2 replace the seed load with a freshly built, equivalent graph.
 
@@ -317,7 +320,7 @@ The workshop standardizes on **Amazon Titan Text Embeddings V2** (`amazon.titan-
 
 ### Resolved Decisions
 
-1. **Seed-load scope.** Lab 0 loads the full graph: structured entities plus chunks, embeddings, and the vector index. Embeddings ship as a provided data import, not live generation.
+1. **Seed-load scope.** Lab 1 loads the full graph: structured entities plus chunks, embeddings, and the vector index. Embeddings ship as a provided data import, not live generation. Lab 0 stays AWS sign-in and Bedrock model access.
 2. **Pipeline target.** The optional Lab 2 wipes and rebuilds the shared workshop instance, reproducing the complete graph from `financial_data.json`.
 3. **Embedding model.** Amazon Titan Text Embeddings V2 at 1024 dimensions. Nova is dropped because it is multimodal and unnecessary for text-only filings.
 4. **Renumbering.** Rename the physical directories and Antora pages now, in this pass.
@@ -329,8 +332,8 @@ Directory renames run in an order that avoids collisions with existing names:
 1. `Lab_6_GraphRAG_Pipeline` to `Lab_2_Data_Pipeline` (frees Lab_6, the headline move).
 2. `Lab_5_MCP_Server` to `Lab_6_MCP_Server`.
 3. `Lab_3_Intro_to_Bedrock_and_Agents` to `zz_Appendix_What_Is_An_Agent` (frees Lab_3).
-4. `Lab_4_GraphRAG_Search` split: notebooks 02 and 03 to `Lab_3_GraphRAG_Search`, notebook 04 to `Lab_4_GraphRAG_Agent`, notebook 01's chunk/embedding/index logic folds into the Lab 0 seed load.
-5. Reconstitute Lab 0 and Lab 1 from `Lab_0_Sign_In` and `Lab_1_Aura_Setup`: Lab 0 becomes Aura sign-up plus full seed load, Lab 1 becomes graph exploration.
+4. `Lab_4_GraphRAG_Search` split: notebooks 02 and 03 to `Lab_3_GraphRAG_Search`, notebook 04 to `Lab_4_GraphRAG_Agent`, notebook 01's chunk/embedding/index logic folds into the Lab 1 seed load.
+5. Keep Lab 0 as AWS sign-in and Bedrock access (`Lab_0_Sign_In`); keep Lab 1 as Aura sign-up, seed load, and graph exploration (`Lab_1_Aura_Setup`).
 6. Author `Lab_5_Agent_Memory` as net-new.
 
 Site changes follow the same numbering: rename `site/modules/ROOT/pages/lab*.adoc`, update `site/nav.adoc`, and rewrite the part pages to the four-part structure.
@@ -357,7 +360,7 @@ Status as of 2026-07-10, from a review of the working tree against the plan abov
 
 1. **Complete the Nova to Titan swap in code (highest priority, blocks correctness).** The docs say Titan but all executable code still uses Amazon Nova. `get_embedder`/`get_embedding` in `Lab_2_Data_Pipeline/lib/data_utils.py`, `Lab_3_GraphRAG_Search/lib/data_utils.py`, `Lab_4_GraphRAG_Agent/lib/data_utils.py`, and `financial_data_load/lib/data_utils.py` all return `BedrockNovaEmbeddings`. `Lab_6_MCP_Server/lib/lab_5_data_utils.py` hardcodes `amazon.nova-2-multimodal-embeddings-v1:0` with a Nova-specific request body. `financial_data_load/src/embeddings/bedrock.py` and `src/config.py` also reference Nova. Prose in `Lab_2_Data_Pipeline/02_embeddings.ipynb` and the model-access step in `setup/README.md` still name Nova. Until this is fixed, the code contradicts every slide and page.
 
-2. **Make the Lab 0 seed load self-sufficient.** `setup/01_load_and_query.ipynb` loads only the unstructured layer (Chunk nodes with pre-computed embeddings, the `chunkEmbeddings` vector index, and the `FROM_DOCUMENT`/`NEXT_CHUNK`/`FROM_CHUNK` relationships). It `MATCH`es pre-existing Company, Product, RiskFactor, and Document nodes and assumes Lab 1 loaded the structured layer. The plan (Resolved Decision 1) requires Lab 0 to produce the complete graph on its own, and the `.adoc` pages already claim it does. The structured CSVs exist in `financial_data_load/seed-data/` but this notebook never reads them. Also fix the import path: the notebook imports `from lib.data_utils import get_embedder` but there is no `lib/` under `setup/`.
+2. **Make the Lab 1 seed load self-sufficient.** `setup/01_load_and_query.ipynb` loads only the unstructured layer (Chunk nodes with pre-computed embeddings, the `chunkEmbeddings` vector index, and the `FROM_DOCUMENT`/`NEXT_CHUNK`/`FROM_CHUNK` relationships). It `MATCH`es pre-existing Company, Product, RiskFactor, and Document nodes and assumes the structured layer is already loaded. The plan (Resolved Decision 1) requires Lab 1 to produce the complete graph on its own, and the `.adoc` pages already claim it does. The structured CSVs exist in `financial_data_load/seed-data/` but this notebook never reads them. Also fix the import path: the notebook imports `from lib.data_utils import get_embedder` but there is no `lib/` under `setup/`.
 
 3. **Add AgentCore deployment to Lab 4.** `Lab_4_GraphRAG_Agent` has no `agentcore_deploy/` directory and no references to `bedrock-agentcore-starter-toolkit`. The revamp's core promise is that attendees deploy the GraphRAG agent they built and invoke it over REST, matching the opening demo. This is currently unfulfilled.
 
