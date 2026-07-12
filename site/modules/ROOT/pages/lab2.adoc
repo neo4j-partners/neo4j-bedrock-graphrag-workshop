@@ -2,7 +2,7 @@
 
 NOTE: This lab is optional and audience-dependent. Skip it for non-technical audiences or when short on time. The Lab 1 seed load already provides the full graph, including chunks, Amazon Titan Text Embeddings V2 embeddings, and the `chunkEmbeddings` vector index, so the rest of Part 2 works without running this lab.
 
-Lab 1 loaded a pre-built knowledge graph where seed data and embeddings were already in place. This lab builds that graph from scratch. You load raw SEC 10-K filing data, split it into chunks, generate vector embeddings, and then query the graph using the neo4j-graphrag library with `VectorCypherRetriever`, which adds graph traversal to enrich every vector search result with connected entities.
+Lab 1 loaded a pre-built knowledge graph where seed data and embeddings were already in place. This lab builds that graph from scratch. Using the neo4j-graphrag library, you load raw SEC 10-K filing data, split it into chunks, generate vector embeddings, and create the vector index that powers semantic search. Lab 3 then builds retrieval on top of the graph you produce here.
 
 This lab wipes and rebuilds the shared workshop Aura instance from `financial_data.json`, reproducing the complete graph: structured entities, chunks, Amazon Titan Text Embeddings V2 embeddings, and the vector index. The rest of Part 2 still works afterward because the rebuilt graph matches what the Lab 1 seed load produced.
 
@@ -10,8 +10,8 @@ TIP: Ready to start? Jump to the xref:lab2-instructions.adoc[Lab 2 Instructions]
 
 .**At a Glance**
 
-* **Three notebooks**: progress from loading raw text into a knowledge graph to running graph-enriched retrieval queries
-* **neo4j-graphrag library**: `VectorCypherRetriever` combines semantic search with Cypher graph traversal
+* **Two notebooks**: progress from loading raw text into a knowledge graph to generating embeddings and a vector index
+* **neo4j-graphrag library**: `FixedSizeSplitter` for chunking and Amazon Titan Text Embeddings V2 for embedding generation
 * **Full data pipeline**: chunking, embedding generation, and index creation from scratch
 * **Rebuilds the shared instance**: wipes the graph and rebuilds from `financial_data.json`, reproducing the full workshop graph
 
@@ -55,37 +55,9 @@ The workshop sidesteps extraction because the SEC dataset already provides clean
 
 == The Pipeline
 
-The three notebooks form a single arc: create the graph, generate embeddings, then run graph-enriched retrieval queries.
+The two notebooks form a single arc: create the graph, then generate the embeddings and vector index that make it searchable.
 
-Notebooks 01 and 02 build the foundation. Notebook 01 loads SEC filing text as Document and Chunk nodes linked by `FROM_DOCUMENT` and `NEXT_CHUNK` relationships, and creates the structured layer (Company, Product, RiskFactor) with cross-links (`FILED`, `FROM_CHUNK`). Notebook 02 generates vector embeddings on every Chunk node and creates a `chunkEmbeddings` vector index. Notebook 03 queries the graph using `VectorCypherRetriever`, which combines vector similarity search with Cypher graph traversal to enrich results with connected entities.
-
-== VectorCypherRetriever
-
-The `VectorCypherRetriever` adds a graph traversal step after vector search. It finds semantically similar chunks the same way `VectorRetriever` does, then executes a custom Cypher `retrieval_query` that traverses from each matched chunk to related entities in the graph. The chunk acts as an anchor: vector search determines relevance, then Cypher gathers the structured context around it.
-
-A typical traversal follows FROM_DOCUMENT to the source Document, then FILED back to the Company, and from there to OFFERS, FACES_RISK, or other relationships. The LLM receives both the chunk text and the connected entities.
-
-.How the retrieval_query parameter works
-[%collapsible]
-====
-The `VectorCypherRetriever` accepts a `retrieval_query` parameter: a Cypher query that executes once per matched chunk. The retriever binds the matched Chunk node to a variable (`node`), and the retrieval query traverses from there to gather context. A typical query follows the chain from chunk to document to company:
-
-[source,cypher]
-----
-MATCH (node)-[:FROM_DOCUMENT]->(d:Document)<-[:FILED]-(c:Company)
-OPTIONAL MATCH (c)-[:FACES_RISK]->(r:RiskFactor)
-RETURN node.text AS text, d.source AS document, c.name AS company,
-       collect(r.name) AS riskFactors
-----
-
-This query runs for each chunk that vector search returns. The retriever collects the results and passes them to the LLM as enriched context. The design separates the search step (which chunk is relevant) from the enrichment step (what structured context surrounds it).
-====
-
-.The chunk-as-anchor constraint
-[%collapsible]
-====
-Graph traversal starts from what vector search found. If the question does not surface relevant chunks, no amount of traversal compensates. A question targeting a specific entity by name ("How many products does NVIDIA offer?") may return better results with a direct Cypher query than with vector search, because the answer depends on counting relationships, not finding semantically similar text. VectorCypherRetriever is strongest when the question combines semantic relevance with structural context: the vector search finds the right passage, and the graph traversal enriches it with the entities and relationships that surround it.
-====
+Notebook 01 loads SEC filing text as Document and Chunk nodes linked by `FROM_DOCUMENT` and `NEXT_CHUNK` relationships, and creates the structured layer (Company, Product, RiskFactor) with cross-links (`FILED`, `FROM_CHUNK`). Notebook 02 generates vector embeddings on every Chunk node and creates a `chunkEmbeddings` vector index. With the graph and index in place, Lab 3 builds vector and graph-enriched retrieval on top of it.
 
 == Lab 1 Seed Load vs Lab 2 Pipeline
 
@@ -102,10 +74,6 @@ The Lab 1 seed load and this lab produce the same knowledge graph using the same
 | **Embeddings**
 | Titan Text Embeddings V2 vectors and `chunkEmbeddings` index already in place
 | Generate Titan Text Embeddings V2 vectors and create the `chunkEmbeddings` index yourself
-
-| **Retriever**
-| Query the pre-built graph directly
-| VectorCypherRetriever with graph traversal
 
 | **Pipeline ownership**
 | Query only; the data pipeline was done for you

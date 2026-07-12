@@ -37,7 +37,7 @@ The runner validates notebooks that read against a pre-loaded graph:
 - **Lab 6** `01_intro_strands_mcp.ipynb`, `02_graph_enriched_search.ipynb`, `03_text2cypher_agent.ipynb`. Require `MCP_GATEWAY_URL` and `MCP_ACCESS_TOKEN`, skipped when those are absent.
 - **Appendix** `01_basic_strands_agent.ipynb`. `02_deploy_to_agentcore.ipynb` is a deploy, off by default.
 
-Out of scope: Lab 2 (`01_data_loading.ipynb`, `02_embeddings.ipynb`, `03_vector_cypher_retriever.ipynb`), which wipes and rebuilds the graph.
+Out of scope: Lab 2 (`01_data_loading.ipynb`, `02_embeddings.ipynb`), which wipes and rebuilds the graph.
 
 ## Work Items
 

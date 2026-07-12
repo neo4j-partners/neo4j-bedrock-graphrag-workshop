@@ -6,7 +6,6 @@ TIP: For concepts and background, see xref:lab2.adoc[Lab 2: Data Pipeline].
 
 * **Data Loading**: Build a two-layer knowledge graph from raw SEC 10-K filing data, including structured entities and unstructured document chunks connected by cross-links
 * **Embeddings**: Generate vector embeddings with Amazon Titan Text Embeddings V2 and create a vector index for semantic search
-* **VectorCypherRetriever**: Vector search enriched with Cypher graph traversal to connected entities, wired into a GraphRAG pipeline
 
 == Prerequisites
 
@@ -31,10 +30,6 @@ Open each notebook in order. Each one builds on the graph state left by the prev
 | `Lab_2_Data_Pipeline/02_embeddings.ipynb`
 | Embeddings
 | Amazon Titan Text Embeddings V2 vectors on every Chunk node, plus a `chunkEmbeddings` vector index
-
-| `Lab_2_Data_Pipeline/03_vector_cypher_retriever.ipynb`
-| VectorCypher Retriever
-| A `VectorCypherRetriever` that enriches each vector match with document metadata and connected entities via Cypher, wired into a `GraphRAG` pipeline
 |===
 
 == Next Steps

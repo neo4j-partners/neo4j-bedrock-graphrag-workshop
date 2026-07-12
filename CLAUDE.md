@@ -23,8 +23,8 @@ All credentials are stored in `CONFIG.txt` at the project root (gitignored). The
 ### Lab 2 - GraphRAG Data Pipeline (Optional)
 Location: `Lab_2_Data_Pipeline/`
 
-Three notebooks covering data loading, embedding generation, and vector-cypher retrieval. Wipes the graph and rebuilds from `financial_data.json` (isolated sandbox). Uses neo4j-graphrag with Bedrock support (`neo4j-graphrag[bedrock]>=1.18.0` from PyPI).
-- `01_data_loading.ipynb`, `02_embeddings.ipynb`, `03_vector_cypher_retriever.ipynb`
+Two notebooks covering data loading and embedding generation. Wipes the graph and rebuilds from `financial_data.json` (isolated sandbox). Uses neo4j-graphrag with Bedrock support (`neo4j-graphrag[bedrock]>=1.18.0` from PyPI). Retrieval is deferred to Lab 3.
+- `01_data_loading.ipynb`, `02_embeddings.ipynb`
 
 ### Lab 3 - Semantic Search and GraphRAG (neo4j-graphrag Library)
 Location: `Lab_3_GraphRAG_Search/`
