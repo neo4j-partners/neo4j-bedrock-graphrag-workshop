@@ -15,6 +15,8 @@
 
 from __future__ import annotations
 
+import logging
+
 from neo4j_agent_memory import EmbeddingConfig, EmbeddingProvider, MemoryClient, MemorySettings
 from neo4j_agent_memory import Neo4jConfig as MemoryNeo4jConfig
 from neo4j_agent_memory.config.settings import ExtractionConfig, ExtractorType
@@ -24,6 +26,16 @@ from pydantic import SecretStr
 from lib.data_utils import BedrockConfig, Neo4jConfig
 
 TITAN_EMBEDDING_MODEL = "amazon.titan-embed-text-v2:0"
+
+# Silence Neo4j server-notification logging. neo4j-agent-memory issues vector
+# recall via db.index.vector.queryNodes, which Aura now flags as deprecated; the
+# driver logs one WARNING-level notification per call to the "neo4j.notifications"
+# logger (neo4j/_async/work/result.py). The Cypher lives inside the memory SDK and
+# MemoryClient builds its own driver, so we cannot rewrite the query or pass
+# driver-level notification filters from here. Raising just this logger's level to
+# ERROR drops the deprecation noise from the notebook output while leaving genuine
+# errors intact.
+logging.getLogger("neo4j.notifications").setLevel(logging.ERROR)
 
 
 def build_memory_settings() -> MemorySettings:
