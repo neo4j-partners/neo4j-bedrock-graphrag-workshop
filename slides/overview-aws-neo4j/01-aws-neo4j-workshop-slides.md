@@ -47,27 +47,15 @@ By the end, an agent can answer: "Which risk factors expose BlackRock's portfoli
 
 Two platforms solve **different problems well**.
 
-**AWS** provides managed foundation models (Bedrock), development environments (SageMaker), serverless agent hosting (AgentCore), and the data foundation: an Amazon S3 + Apache Iceberg lakehouse, governed by AWS Lake Formation and the Glue Data Catalog, with AWS Glue (or Amazon EMR) Spark pipelines that refine and load enterprise data into the graph.
+**AWS** provides managed foundation models (Bedrock), development environments (SageMaker), serverless agent hosting (AgentCore), and a governed data lakehouse that feeds enterprise data into the graph.
 
 **Neo4j** provides a native graph database that stores entities and relationships as first-class structures, with built-in vector search and graph traversal.
 
-Together: AWS aggregates and governs enterprise data in the lakehouse and provides the reasoning and generation layer, while Neo4j makes relationships traversable for retrieval.
+Together: AWS aggregates and governs the data and provides the reasoning and generation layer, while Neo4j makes relationships traversable for retrieval.
 
 ---
 
 ![bg contain](dual-database-architecture.svg)
-
----
-
-![bg contain](workshop-architecture.svg)
-
----
-
-## Data Pipeline: AWS Lakehouse to Neo4j
-
-![Data pipeline from AWS lakehouse to Neo4j](data-pipeline-v2.svg)
-
-This workshop's graph is **pre-loaded**. You work with it directly from Lab 1. The optional Lab 2 rebuilds it from `financial_data.json` with Amazon Titan embeddings instead of running the full lakehouse job.
 
 ---
 
@@ -84,21 +72,11 @@ The workshop builds a knowledge graph from this data, connecting companies, prod
 
 ---
 
-## The Knowledge Graph Schema
+## Data Pipeline: AWS Lakehouse to Neo4j
 
-```
-(Company)-[:OFFERS]->(Product)
-(Company)-[:FACES_RISK]->(RiskFactor)
-(Company)-[:COMPETES_WITH]->(Company)
-(Company)-[:PARTNERS_WITH]->(Company)
-(AssetManager)-[:OWNS {shares}]->(Company)
-```
+![Data pipeline from AWS lakehouse to Neo4j](data-pipeline-v2.svg)
 
-Four entity types connected by typed relationships that reflect real-world structure. Multi-hop questions follow the connections directly.
-
----
-
-![bg contain](financial-data-model.svg)
+This workshop's graph is **pre-loaded**. You work with it directly from Lab 1. The optional Lab 2 rebuilds it from `financial_data.json` with Amazon Titan embeddings instead of running the full lakehouse job.
 
 ---
 
@@ -110,7 +88,7 @@ section { font-size: 95%; }
 
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
-| **Data Pipeline** | AWS Glue / EMR + S3 Iceberg lakehouse (Lake Formation) + Neo4j Spark Connector | Govern, refine, and load enterprise data into the graph |
+| **Data Pipeline** | AWS Glue + S3 Iceberg lakehouse + Neo4j Spark Connector | Govern and load enterprise data into the graph |
 | **Knowledge Graph** | Neo4j Aura | Store entities, relationships, vector embeddings |
 | **Reasoning** | Anthropic Claude (via Bedrock) | Tool selection, response generation |
 | **Embeddings** | Amazon Titan Text Embeddings V2 (via Bedrock) | Vector representations for semantic search |

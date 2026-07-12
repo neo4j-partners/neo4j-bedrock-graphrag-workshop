@@ -1,68 +1,62 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1361 726" font-family="'Poppins','Nunito','Segoe UI',sans-serif">
   <defs>
     <marker id="lpg-arrow" markerWidth="12" markerHeight="12" refX="8.5" refY="5" orient="auto">
-      <path d="M0,0 L10,5 L0,10 z" fill="#cdd8de"/>
+      <path d="M0,0 L10,5 L0,10 z" fill="#333333"/>
     </marker>
   </defs>
 
   <!-- ===== background ===== -->
-  <rect x="0" y="0" width="1361" height="726" fill="#0d6b92"/>
-  <!-- top-right dark blob -->
-  <path d="M800,0 H1361 V300 C1240,300 1170,150 1120,80 C1060,0 900,0 800,0 Z" fill="#0a4a68"/>
-  <!-- bottom-left cyan blob -->
-  <path d="M0,726 V560 C120,560 200,660 320,726 Z" fill="#16aec2"/>
-  <!-- bottom-right cyan blob -->
-  <path d="M1361,726 V600 C1230,600 1120,690 1030,726 Z" fill="#16aec2"/>
+  <rect x="0" y="0" width="1361" height="726" fill="#ffffff"/>
 
   <!-- ===== title ===== -->
-  <text x="630" y="92" text-anchor="middle" font-size="58" font-weight="700" fill="#ffffff">The power of the Label</text>
-  <text x="630" y="160" text-anchor="middle" font-size="58" font-weight="700" fill="#ffffff">Property Graph</text>
+  <text x="630" y="92" text-anchor="middle" font-size="58" font-weight="700" fill="#000000">The power of the Label</text>
+  <text x="630" y="160" text-anchor="middle" font-size="58" font-weight="700" fill="#000000">Property Graph</text>
 
   <!-- ===== relationship arrows ===== -->
-  <line x1="307" y1="407" x2="614" y2="407" stroke="#cdd8de" stroke-width="3" marker-end="url(#lpg-arrow)"/>
-  <line x1="804" y1="407" x2="1121" y2="407" stroke="#cdd8de" stroke-width="3" marker-end="url(#lpg-arrow)"/>
+  <line x1="307" y1="407" x2="614" y2="407" stroke="#333333" stroke-width="3" marker-end="url(#lpg-arrow)"/>
+  <line x1="804" y1="407" x2="1121" y2="407" stroke="#333333" stroke-width="3" marker-end="url(#lpg-arrow)"/>
 
   <!-- relationship labels -->
-  <text x="461" y="378" text-anchor="middle" font-size="30" font-weight="700" fill="#ffffff">:HAS_ACCOUNT</text>
-  <text x="461" y="402" text-anchor="middle" font-size="16" fill="#ffffff">opened_date: 2008-01-20</text>
-  <text x="963" y="378" text-anchor="middle" font-size="30" font-weight="700" fill="#ffffff">:HAS_TRANSACTIONS</text>
+  <text x="461" y="378" text-anchor="middle" font-size="30" font-weight="700" fill="#000000">:HAS_ACCOUNT</text>
+  <text x="461" y="402" text-anchor="middle" font-size="16" fill="#000000">opened_date: 2008-01-20</text>
+  <text x="963" y="378" text-anchor="middle" font-size="30" font-weight="700" fill="#000000">:HAS_TRANSACTIONS</text>
 
   <!-- ===== nodes ===== -->
   <circle cx="190" cy="407" r="113" fill="#0b3a57"/>
   <text x="190" y="416" text-anchor="middle" font-size="27" font-weight="700" fill="#ffffff">Person</text>
 
   <circle cx="710" cy="407" r="90" fill="#f2a01e"/>
-  <text x="710" y="416" text-anchor="middle" font-size="26" font-weight="700" fill="#ffffff">Account</text>
+  <text x="710" y="416" text-anchor="middle" font-size="26" font-weight="700" fill="#000000">Account</text>
 
   <circle cx="1227" cy="407" r="102" fill="#4ea6dd"/>
-  <text x="1227" y="416" text-anchor="middle" font-size="26" font-weight="700" fill="#1a6ba3">Transaction</text>
+  <text x="1227" y="416" text-anchor="middle" font-size="26" font-weight="700" fill="#000000">Transaction</text>
 
   <!-- ===== top annotations ===== -->
   <!-- relationships can have properties -->
-  <text x="447" y="285" text-anchor="middle" font-size="21" fill="#ffffff"><tspan font-weight="700">Relationships</tspan> can have</text>
-  <text x="447" y="311" text-anchor="middle" font-size="21" fill="#ffffff"><tspan font-weight="700">properties</tspan> (name/value pairs)</text>
-  <path d="M352,318 Q352,334 447,334 Q457,334 457,342 Q457,334 467,334 Q542,334 542,318" fill="none" stroke="#cdd8de" stroke-width="2"/>
+  <text x="447" y="285" text-anchor="middle" font-size="21" fill="#000000"><tspan font-weight="700">Relationships</tspan> can have</text>
+  <text x="447" y="311" text-anchor="middle" font-size="21" fill="#000000"><tspan font-weight="700">properties</tspan> (name/value pairs)</text>
+  <path d="M352,318 Q352,334 447,334 Q457,334 457,342 Q457,334 467,334 Q542,334 542,318" fill="none" stroke="#333333" stroke-width="2"/>
 
   <!-- relationships are directional -->
-  <text x="963" y="291" text-anchor="middle" font-size="21" fill="#ffffff"><tspan font-weight="700">Relationships</tspan> are directional</text>
-  <path d="M828,318 Q828,334 953,334 Q963,334 963,342 Q963,334 973,334 Q1098,334 1098,318" fill="none" stroke="#cdd8de" stroke-width="2"/>
+  <text x="963" y="291" text-anchor="middle" font-size="21" fill="#000000"><tspan font-weight="700">Relationships</tspan> are directional</text>
+  <path d="M828,318 Q828,334 953,334 Q963,334 963,342 Q963,334 973,334 Q1098,334 1098,318" fill="none" stroke="#333333" stroke-width="2"/>
 
   <!-- ===== bottom annotations ===== -->
   <!-- Person node properties -->
-  <text x="118" y="527" font-size="18" fill="#ffffff"><tspan font-weight="700">name:</tspan> Amy Peters</text>
-  <text x="118" y="549" font-size="18" font-weight="700" fill="#ffffff">date_of_birth: <tspan font-weight="400">1984-03-01</tspan></text>
-  <text x="118" y="571" font-size="18" font-weight="700" fill="#ffffff">account_no: <tspan font-weight="400">1</tspan></text>
-  <path d="M120,600 Q120,584 185,584 Q195,584 195,576 Q195,584 205,584 Q262,584 262,600" fill="none" stroke="#cdd8de" stroke-width="2"/>
-  <text x="191" y="638" text-anchor="middle" font-size="21" font-weight="700" fill="#ffffff">Nodes can have properties</text>
-  <text x="191" y="662" text-anchor="middle" font-size="20" fill="#ffffff">(name/value pairs)</text>
+  <text x="118" y="527" font-size="18" fill="#000000"><tspan font-weight="700">name:</tspan> Amy Peters</text>
+  <text x="118" y="549" font-size="18" font-weight="700" fill="#000000">date_of_birth: <tspan font-weight="400">1984-03-01</tspan></text>
+  <text x="118" y="571" font-size="18" font-weight="700" fill="#000000">account_no: <tspan font-weight="400">1</tspan></text>
+  <path d="M120,600 Q120,584 185,584 Q195,584 195,576 Q195,584 205,584 Q262,584 262,600" fill="none" stroke="#333333" stroke-width="2"/>
+  <text x="191" y="638" text-anchor="middle" font-size="21" font-weight="700" fill="#000000">Nodes can have properties</text>
+  <text x="191" y="662" text-anchor="middle" font-size="20" fill="#000000">(name/value pairs)</text>
 
   <!-- relationships connect nodes -->
-  <path d="M855,468 Q855,484 953,484 Q963,484 963,476 Q963,484 973,484 Q1075,484 1075,468" fill="none" stroke="#cdd8de" stroke-width="2"/>
-  <text x="963" y="527" text-anchor="middle" font-size="21" fill="#ffffff"><tspan font-weight="700">Relationships</tspan> connect nodes</text>
-  <text x="963" y="551" text-anchor="middle" font-size="21" font-weight="700" fill="#ffffff">are represent actions <tspan font-weight="400">(verbs)</tspan></text>
+  <path d="M855,468 Q855,484 953,484 Q963,484 963,476 Q963,484 973,484 Q1075,484 1075,468" fill="none" stroke="#333333" stroke-width="2"/>
+  <text x="963" y="527" text-anchor="middle" font-size="21" fill="#000000"><tspan font-weight="700">Relationships</tspan> connect nodes</text>
+  <text x="963" y="551" text-anchor="middle" font-size="21" font-weight="700" fill="#000000">are represent actions <tspan font-weight="400">(verbs)</tspan></text>
 
   <!-- nodes represent objects -->
-  <path d="M1148,528 Q1148,544 1217,544 Q1227,544 1227,536 Q1227,544 1237,544 Q1308,544 1308,528" fill="none" stroke="#cdd8de" stroke-width="2"/>
-  <text x="1227" y="583" text-anchor="middle" font-size="21" font-weight="700" fill="#ffffff">Nodes represent</text>
-  <text x="1227" y="607" text-anchor="middle" font-size="21" font-weight="700" fill="#ffffff">objects <tspan font-weight="400">(nouns)</tspan></text>
+  <path d="M1148,528 Q1148,544 1217,544 Q1227,544 1227,536 Q1227,544 1237,544 Q1308,544 1308,528" fill="none" stroke="#333333" stroke-width="2"/>
+  <text x="1227" y="583" text-anchor="middle" font-size="21" font-weight="700" fill="#000000">Nodes represent</text>
+  <text x="1227" y="607" text-anchor="middle" font-size="21" font-weight="700" fill="#000000">objects <tspan font-weight="400">(nouns)</tspan></text>
 </svg>
