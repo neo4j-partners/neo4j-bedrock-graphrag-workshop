@@ -17,7 +17,7 @@ Before starting this lab, make sure you have:
 - `CONFIG.txt` at the project root filled in with `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD`, `MODEL_ID`, and `REGION`
 - A running environment (SageMaker Studio or GitHub Codespace)
 
-> **Note:** This lab uses the same Neo4j Aura instance from the earlier labs. The knowledge graph — including document chunks, chunk embeddings, and the `chunkEmbeddings` vector index — must already be loaded. New to Strands agents? See the [Appendix - What Is an Agent?](../zz_Appendix_What_Is_An_Agent) for the basics.
+> **Note:** This lab uses the same Neo4j Aura instance from the earlier labs. The knowledge graph — including document chunks, chunk embeddings, and the `chunkEmbeddings` vector index — must already be loaded.
 
 ## Notebooks
 

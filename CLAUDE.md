@@ -12,7 +12,6 @@ This is a hands-on workshop teaching GraphRAG (Graph Retrieval-Augmented Generat
 - **Part 2 (Labs 2-4)**: GraphRAG data pipeline, semantic search with neo4j-graphrag, and a Strands GraphRAG agent
 - **Part 3 (Lab 5)**: Agent memory with Neo4j
 - **Part 4 (Lab 6)**: Neo4j MCP server
-- **Appendix**: What is an agent (basic Strands agent + AgentCore deployment)
 
 ## Key Configuration
 
@@ -57,13 +56,6 @@ Three notebooks using Strands Agents SDK with MCP to search a Neo4j knowledge gr
 - `03_text2cypher_agent.ipynb`: Text2Cypher pattern — autonomous agent writes its own Cypher
 
 Uses `lib/data_utils.py` for Bedrock embeddings (lightweight — no neo4j or neo4j-graphrag dependency). All MCP access via Strands `MCPClient` with `streamablehttp_client` transport. The MCP server is pre-deployed with full embeddings by the lab administrator.
-
-### Appendix - What Is an Agent?
-Location: `zz_Appendix_What_Is_An_Agent/`
-
-Two notebooks (reference material, moved out of the main path):
-- `01_basic_strands_agent.ipynb`: Uses `strands.Agent` with `strands.models.BedrockModel` and `@tool` decorator. Defines simple tools (get_current_time, add_numbers), creates an agent, tests it with queries including sample SEC filing data.
-- `02_deploy_to_agentcore.ipynb`: Deploys the agent to AgentCore Runtime via `bedrock-agentcore-starter-toolkit` using `direct_code_deploy`. Agent code is pre-built in `agentcore_deploy/` (agent.py + pyproject.toml).
 
 ## Shared Utilities
 

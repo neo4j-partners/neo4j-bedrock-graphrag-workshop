@@ -9,8 +9,8 @@
 #   ./test_solutions.sh .env.gold 8-11   # Run solutions 8 through 11
 #
 # The env file is sourced into the shell environment (your .env is not modified).
-# Solutions 1-3 are skipped by default because they are destructive (delete data).
-# Lab 4 solutions (9-11) require MCP_GATEWAY_URL and MCP_ACCESS_TOKEN in the env file.
+# Data-writing solutions (1 load-and-query, 8 data load, 9 embeddings)
+# are skipped by default. Lab 5 solutions (5-7) require MCP_GATEWAY_URL and MCP_ACCESS_TOKEN.
 
 set -euo pipefail
 
@@ -35,9 +35,9 @@ usage() {
     echo "  range           Optional: run a range (e.g., 8-11)"
     echo ""
     echo "Examples:"
-    echo "  $0 .env.gold          # Run all safe solutions (4+)"
-    echo "  $0 .env.gold 8        # Run only solution 8"
-    echo "  $0 .env.gold 8-11     # Run solutions 8 through 11"
+    echo "  $0 .env.gold          # Run all safe solutions (skips data-writing)"
+    echo "  $0 .env.gold 4        # Run only solution 4"
+    echo "  $0 .env.gold 4-6      # Run solutions 4 through 6"
     exit 1
 }
 
@@ -60,13 +60,15 @@ fi
 
 # --- Determine which solutions to run ---
 # Total solutions (from main.py SOLUTIONS list)
-TOTAL=22
+TOTAL=10
 
-# Default: skip destructive solutions 1-3
-DEFAULT_START=4
-DEFAULT_END=$TOTAL
+# Solutions skipped by default (data-writing):
+#   1 Load Data and Query
+#   8 Data Loading (deletes all)  9 Embeddings
+DEFAULT_SKIP=(1 8 9)
 
 if [[ -n "$RANGE" ]]; then
+    RANGE_GIVEN=true
     if [[ "$RANGE" =~ ^([0-9]+)-([0-9]+)$ ]]; then
         START="${BASH_REMATCH[1]}"
         END="${BASH_REMATCH[2]}"
@@ -78,8 +80,9 @@ if [[ -n "$RANGE" ]]; then
         exit 1
     fi
 else
-    START=$DEFAULT_START
-    END=$DEFAULT_END
+    RANGE_GIVEN=false
+    START=1
+    END=$TOTAL
 fi
 
 # --- Load env vars from file (no .env copy) ---
@@ -99,32 +102,20 @@ fi
 
 # --- Solution metadata (matches main.py SOLUTIONS list) ---
 NAMES=(
-    "Data Loading Fundamentals"              #  1
-    "Embeddings"                             #  2
-    "Entity Extraction"                      #  3
-    "Full Dataset Queries"                   #  4
-    "Vector Retriever"                       #  5
-    "Vector Cypher Retriever"                #  6
-    "Text2Cypher Retriever"                  #  7
-    "Basic Strands Agent (Lab 3)"            #  8
-    "Vector Search via MCP (Lab 4)"          #  9
-    "Graph-Enriched Search via MCP (Lab 4)"  # 10
-    "Fulltext & Hybrid Search (Lab 4)"       # 11
-    "Simple Agent"                           # 12
-    "Context Provider Intro"                 # 13
-    "Fulltext Search"                        # 14
-    "Hybrid Search"                          # 15
-    "Fulltext Context Provider"              # 16
-    "Vector Context Provider"                # 17
-    "Graph-Enriched Provider"                # 18
-    "Memory Context Provider"                # 19
-    "Entity Extraction Pipeline"             # 20
-    "Memory Tools Agent"                     # 21
-    "Reasoning Memory"                       # 22
+    "Load Data and Query (Lab 4)"            #  1
+    "Vector Retriever (Lab 4)"               #  2
+    "VectorCypher Retriever (Lab 4)"         #  3
+    "Strands GraphRAG Agent (Lab 4)"         #  4
+    "Intro to Strands + MCP (Lab 5)"         #  5
+    "Graph-Enriched Search via MCP (Lab 5)"  #  6
+    "Text2Cypher Agent (Lab 5)"              #  7
+    "Data Loading (Lab 6)"                   #  8
+    "Embeddings (Lab 6)"                     #  9
+    "VectorCypher Retriever (Lab 6)"         # 10
 )
 
 # Solutions that require MCP
-MCP_SOLUTIONS=(9 10 11)
+MCP_SOLUTIONS=(5 6 7)
 
 # --- Run solutions ---
 PASS=0
@@ -135,6 +126,18 @@ RESULTS=()
 for i in $(seq "$START" "$END"); do
     idx=$((i - 1))
     name="${NAMES[$idx]:-Solution $i}"
+
+    # Skip data-writing solutions unless an explicit number/range was given
+    if [[ "$RANGE_GIVEN" == "false" ]]; then
+        for skip in "${DEFAULT_SKIP[@]}"; do
+            if [[ "$i" -eq "$skip" ]]; then
+                echo -e "${YELLOW}[SKIP]${NC} ${BOLD}#${i}${NC} ${name} (data-writing; pass the number explicitly to run)"
+                RESULTS+=("SKIP|$i|$name|data-writing")
+                SKIP=$((SKIP + 1))
+                continue 2
+            fi
+        done
+    fi
 
     # Check if this solution needs MCP
     needs_mcp=false

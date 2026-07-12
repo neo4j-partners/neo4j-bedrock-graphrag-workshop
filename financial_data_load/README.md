@@ -215,23 +215,16 @@ Each solution runs with a 5-minute timeout. `test_solutions.sh` uses its own sol
 
 Solution numbers below match the `main.py solutions` menu and the `SOLUTIONS` list in `main.py`. Files live in `solution_srcs/`.
 
-### Lab 3: Intro to Bedrock and Agents (03_xx)
-
-| # | Solution | Description |
-|---|----------|-------------|
-| 1 | `03_01_basic_strands_agent.py` | Basic Strands agent with tools |
-| 2 | `03_02_deploy_to_agentcore.py` | Deploy agent to AgentCore |
-
 ### Lab 4: neo4j-graphrag Library (04_xx)
 
 Data loading and GraphRAG retrieval patterns using neo4j-graphrag:
 
 | # | Solution | Description |
 |---|----------|-------------|
-| 3 | `04_01_load_and_query.py` | Load data and query |
-| 4 | `04_02_vector_retriever.py` | Vector retriever |
-| 5 | `04_03_vector_cypher_retriever.py` | VectorCypher retriever |
-| 6 | `04_04_strands_graphrag_agent.py` | Strands GraphRAG agent |
+| 1 | `04_01_load_and_query.py` | Load data and query |
+| 2 | `04_02_vector_retriever.py` | Vector retriever |
+| 3 | `04_03_vector_cypher_retriever.py` | VectorCypher retriever |
+| 4 | `04_04_strands_graphrag_agent.py` | Strands GraphRAG agent |
 
 ### Lab 5: MCP Server (05_xx)
 
@@ -239,19 +232,19 @@ Strands Agents SDK with MCP to search a Neo4j knowledge graph:
 
 | # | Solution | Description |
 |---|----------|-------------|
-| 7 | `05_01_intro_strands_mcp.py` | Intro to Strands + MCP |
-| 8 | `05_02_graph_enriched_search.py` | Graph-enriched search via MCP |
-| 9 | `05_03_text2cypher_agent.py` | Text2Cypher agent |
+| 5 | `05_01_intro_strands_mcp.py` | Intro to Strands + MCP |
+| 6 | `05_02_graph_enriched_search.py` | Graph-enriched search via MCP |
+| 7 | `05_03_text2cypher_agent.py` | Text2Cypher agent |
 
 ### Lab 6: GraphRAG Pipeline (06_xx)
 
-Data pipeline patterns using neo4j-graphrag. **Solution 10 deletes all data.**
+Data pipeline patterns using neo4j-graphrag. **Solution 8 deletes all data.**
 
 | # | Solution | Description |
 |---|----------|-------------|
-| 10 | `06_01_data_loading.py` | Load financial documents into Neo4j |
-| 11 | `06_02_embeddings.py` | Generate and store vector embeddings |
-| 12 | `06_03_vector_cypher_retriever.py` | Vector search + custom Cypher |
+| 8 | `06_01_data_loading.py` | Load financial documents into Neo4j |
+| 9 | `06_02_embeddings.py` | Generate and store vector embeddings |
+| 10 | `06_03_vector_cypher_retriever.py` | Vector search + custom Cypher |
 
 ## AI Provider
 

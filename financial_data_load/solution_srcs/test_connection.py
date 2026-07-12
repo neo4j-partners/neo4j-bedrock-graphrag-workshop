@@ -5,9 +5,8 @@ Run with: uv run python main.py test
 """
 
 from neo4j_graphrag.schema import get_schema
-from openai import OpenAI
 
-from config import get_neo4j_driver, Neo4jConfig, get_agent_config, _get_azure_token
+from config import get_neo4j_driver, Neo4jConfig, BedrockConfig, get_llm
 
 
 def print_section(title: str, items: list[str]) -> None:
@@ -120,32 +119,18 @@ def get_constraints(driver) -> list[str]:
 
 
 def test_model_connection() -> bool:
-    """Test model connection via OpenAI or Azure AI Foundry."""
-    config = get_agent_config()
+    """Test LLM connection via AWS Bedrock."""
+    config = BedrockConfig()
 
-    if config.use_openai:
-        print("Provider: OpenAI")
-        print(f"Model: {config.model_name}")
-        print()
-        client = OpenAI(api_key=config.openai_api_key)
-    else:
-        token = _get_azure_token()
-        print("Provider: Azure AI Foundry")
-        print(f"Endpoint: {config.inference_endpoint}")
-        print(f"Model: {config.model_name}")
-        print()
-        client = OpenAI(
-            base_url=config.inference_endpoint,
-            api_key=token,
-        )
+    print("Provider: AWS Bedrock")
+    print(f"Model: {config.model_id}")
+    print(f"Region: {config.region}")
+    print()
 
     try:
-        response = client.chat.completions.create(
-            model=config.model_name,
-            messages=[{"role": "user", "content": "Say 'hello' in one word."}],
-            max_completion_tokens=10,
-        )
-        print(f"Model response: {response.choices[0].message.content}")
+        llm = get_llm()
+        response = llm.invoke("Say 'hello' in one word.")
+        print(f"Model response: {response.content}")
         return True
     except Exception as e:
         print(f"Model connection failed: {e}")

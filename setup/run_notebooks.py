@@ -10,13 +10,14 @@
 #     "python-dotenv>=1.0",
 #     # Lab dependencies, pre-provisioned so the neutralized %pip cells have
 #     # nothing left to install at run time. Mirrors the %pip lines in the
-#     # in-scope notebooks (Labs 3, 4, 6, Appendix).
+#     # in-scope notebooks (Labs 3, 4, 5, 6).
 #     "neo4j-graphrag[bedrock]>=1.18.0",
+#     "neo4j-agent-memory[bedrock]==0.5.0",
 #     "strands-agents",
 #     "strands-agents-tools",
 #     "mcp",
 #     "httpx",
-#     # Deploy-only (Lab 4 02 / Appendix 02), used only with --include-deploy.
+#     # Deploy-only (Lab 4 02), used only with --include-deploy.
 #     "bedrock-agentcore-starter-toolkit>=0.3.3",
 #     "bedrock-agentcore>=1.4.7",
 #     "pyyaml",
@@ -40,7 +41,6 @@ Usage:
     uv run setup/run_notebooks.py --labs 4            # a single lab
     uv run setup/run_notebooks.py --labs 3,4,6        # a list
     uv run setup/run_notebooks.py --labs 4-6          # a range
-    uv run setup/run_notebooks.py --labs appendix     # the appendix notebook
     uv run setup/run_notebooks.py --env setup/.env.gold
     uv run setup/run_notebooks.py --include-deploy    # also run deploy notebooks
 """
@@ -73,7 +73,7 @@ _PIP_MAGIC = re.compile(r"^(\s*)[%!]\s*(pip|pip3|conda|uv)\b")
 class Notebook:
     """One in-scope notebook and how the runner should treat it."""
 
-    lab: str  # "3", "4", "6", or "appendix"
+    lab: str  # "3", "4", "5", or "6"
     path: Path
     requires_mcp: bool = False
     is_deploy: bool = False
@@ -90,15 +90,11 @@ NOTEBOOKS: list[Notebook] = [
         REPO_ROOT / "Lab_4_GraphRAG_Agent" / "02_deploy_to_agentcore.ipynb",
         is_deploy=True,
     ),
+    Notebook("5", REPO_ROOT / "Lab_5_Agent_Memory" / "01_short_term_memory.ipynb"),
+    Notebook("5", REPO_ROOT / "Lab_5_Agent_Memory" / "02_long_term_memory.ipynb"),
     Notebook("6", REPO_ROOT / "Lab_6_MCP_Server" / "01_intro_strands_mcp.ipynb", requires_mcp=True),
     Notebook("6", REPO_ROOT / "Lab_6_MCP_Server" / "02_graph_enriched_search.ipynb", requires_mcp=True),
     Notebook("6", REPO_ROOT / "Lab_6_MCP_Server" / "03_text2cypher_agent.ipynb", requires_mcp=True),
-    Notebook("appendix", REPO_ROOT / "zz_Appendix_What_Is_An_Agent" / "01_basic_strands_agent.ipynb"),
-    Notebook(
-        "appendix",
-        REPO_ROOT / "zz_Appendix_What_Is_An_Agent" / "02_deploy_to_agentcore.ipynb",
-        is_deploy=True,
-    ),
 ]
 
 
@@ -114,15 +110,14 @@ class Result:
 # Lab selection
 # ---------------------------------------------------------------------------
 
-_KNOWN_LABS = ("3", "4", "6", "appendix")
+_KNOWN_LABS = ("3", "4", "5", "6")
 
 
 def parse_labs(spec: str | None) -> set[str]:
     """Turn a ``--labs`` spec into a set of lab tokens.
 
-    Accepts a single lab (``4``), a comma list (``3,4,6``), a numeric range
-    (``4-6``), and the literal ``appendix`` (or ``A``). ``None`` selects every
-    in-scope lab.
+    Accepts a single lab (``4``), a comma list (``3,4,6``), and a numeric range
+    (``4-6``). ``None`` selects every in-scope lab.
     """
     if spec is None:
         return set(_KNOWN_LABS)
@@ -132,9 +127,7 @@ def parse_labs(spec: str | None) -> set[str]:
         token = token.strip().lower()
         if not token:
             continue
-        if token in ("appendix", "a"):
-            selected.add("appendix")
-        elif re.fullmatch(r"\d+-\d+", token):
+        if re.fullmatch(r"\d+-\d+", token):
             start, end = (int(n) for n in token.split("-"))
             if start > end:
                 raise ValueError(f"invalid range '{token}': start > end")
@@ -144,7 +137,7 @@ def parse_labs(spec: str | None) -> set[str]:
         else:
             raise ValueError(f"invalid --labs token '{token}'")
 
-    # Numeric tokens outside the in-scope set (e.g. 5 from a 4-6 range) are
+    # Numeric tokens outside the in-scope set (e.g. 2 from a 1-3 range) are
     # dropped; that lab simply has no in-scope notebooks. An all-unknown spec
     # yields an empty set, which main() reports as an error.
     return selected & set(_KNOWN_LABS)
@@ -322,7 +315,7 @@ def main() -> int:
     parser.add_argument(
         "--labs",
         default=None,
-        help="Labs to run: '4', '3,4,6', '4-6', or 'appendix'. Default: all in-scope.",
+        help="Labs to run: '4', '3,4,6', or '4-6'. Default: all in-scope.",
     )
     parser.add_argument(
         "--env",
@@ -333,7 +326,7 @@ def main() -> int:
     parser.add_argument(
         "--include-deploy",
         action="store_true",
-        help="Also run deploy notebooks (Lab 4 02, Appendix 02). Off by default.",
+        help="Also run deploy notebooks (Lab 4 02). Off by default.",
     )
     parser.add_argument(
         "--timeout",

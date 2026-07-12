@@ -111,3 +111,36 @@ cd setup
 After regenerating any seed file (including `chunks.csv`), run `--refresh` so participants load the current data. The base URL it prints must match the `https://…cloudfront.net/sec-filings/` prefix used in `Lab_1_Aura_Setup/README.md`.
 
 ---
+
+## Validating Notebooks
+
+`run_notebooks.py` executes the workshop notebooks against a live graph and reports a pass or fail per notebook. It is the local analog of a CI check: each notebook runs end to end under [papermill](https://papermill.readthedocs.io/), and a clean run (no cell raised) counts as a pass. Use it before a workshop to confirm the notebooks still work against the current Neo4j and Bedrock setup.
+
+**The graph must already be loaded.** The runner does no data loading and skips the Lab 2 pipeline notebooks (which wipe and rebuild the graph). It validates only the read, retrieval, agent, and memory notebooks in Labs 3, 4, 5, and 6.
+
+```bash
+uv run setup/run_notebooks.py                  # all in-scope labs, default env
+uv run setup/run_notebooks.py --labs 4         # a single lab
+uv run setup/run_notebooks.py --labs 3,4,6     # a list
+uv run setup/run_notebooks.py --labs 4-6       # a range
+```
+
+The script is a `uv run` PEP 723 script: `uv` builds and caches its dependency environment on first run, so no separate install step is needed. Every lab dependency is pre-provisioned, and the runner neutralizes each notebook's `%pip`/`!pip` cells in memory before execution. The original notebook files are never modified.
+
+### Flags
+
+| Flag | Default | Purpose |
+|------|---------|---------|
+| `--labs` | all in-scope | Labs to run: `4`, `3,4,6`, or `4-6`. |
+| `--env` | root `.env`, else `CONFIG.txt` | Env file whose keys are injected into the environment before the kernel launches. Injected values take precedence over the notebooks' own `load_dotenv`, so no config file is rewritten. |
+| `--include-deploy` | off | Also run the deploy notebook (Lab 4 `02`), which has AWS side effects. Off by default. |
+| `--timeout` | 600 | Per-cell execution timeout in seconds. |
+| `--keep-temp` | off | Keep the prepared and executed temp notebooks for inspection. |
+
+### Behavior
+
+- **MCP notebooks (Lab 6)** are skipped when `MCP_GATEWAY_URL` or `MCP_ACCESS_TOKEN` is missing or still a `your-...` placeholder.
+- **Deploy notebooks** are skipped unless `--include-deploy` is passed.
+- The runner prints a summary table and exits nonzero if any notebook fails, so it can gate a CI or pre-workshop check.
+
+---

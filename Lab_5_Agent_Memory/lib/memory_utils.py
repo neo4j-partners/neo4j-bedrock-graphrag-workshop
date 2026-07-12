@@ -15,10 +15,9 @@
 
 from __future__ import annotations
 
-from neo4j_agent_memory import MemoryClient, MemorySettings
+from neo4j_agent_memory import EmbeddingConfig, EmbeddingProvider, MemoryClient, MemorySettings
 from neo4j_agent_memory import Neo4jConfig as MemoryNeo4jConfig
 from neo4j_agent_memory.config.settings import ExtractionConfig, ExtractorType
-from neo4j_agent_memory.embeddings import BedrockEmbedder
 from pydantic import SecretStr
 
 from lib.data_utils import BedrockConfig, Neo4jConfig
@@ -42,13 +41,17 @@ def build_memory_settings() -> MemorySettings:
     neo4j_cfg = Neo4jConfig()
     bedrock_cfg = BedrockConfig()
 
-    # Build the embedder explicitly so the region comes from CONFIG.txt's
-    # REGION key, the same key every other lab uses. The "bedrock/<model>"
-    # provider-string shorthand would instead read AWS_REGION, which the
-    # workshop CONFIG.txt does not set.
-    embedder = BedrockEmbedder(
+    # Configure the embedder via EmbeddingConfig with an explicit aws_region so
+    # the region comes from CONFIG.txt's REGION key, the same key every other
+    # lab uses. The "bedrock/<model>" provider-string shorthand would instead
+    # read AWS_REGION, which the workshop CONFIG.txt does not set. dimensions is
+    # pinned to Titan V2's 1024 (EmbeddingConfig defaults to OpenAI's 1536) so
+    # the memory vector index matches the vectors Titan actually produces.
+    embedding = EmbeddingConfig(
+        provider=EmbeddingProvider.BEDROCK,
         model=TITAN_EMBEDDING_MODEL,
-        region_name=bedrock_cfg.region,
+        dimensions=bedrock_cfg.embedding_dimensions,
+        aws_region=bedrock_cfg.region,
     )
 
     return MemorySettings(
@@ -57,7 +60,7 @@ def build_memory_settings() -> MemorySettings:
             username=neo4j_cfg.username,
             password=SecretStr(neo4j_cfg.password),
         ),
-        embedding=embedder,
+        embedding=embedding,
         extraction=ExtractionConfig(extractor_type=ExtractorType.NONE),
     )
 

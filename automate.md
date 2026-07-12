@@ -95,3 +95,35 @@ In order:
 4. **Retire `solution_srcs` (item 4).** Only after the notebooks self-validate, and only the `solutions` subcommand plus mirrors. Confirm before deleting.
 
 Not planned: Appendix validation (out of scope) and the Lab 2 data-load notebooks (destructive, out of scope).
+
+## Update (2026-07-11): solution_srcs migrated to neo4j-graphrag 1.18.0
+
+The `financial_data_load` mirrors were migrated off the `neo4j-partners` fork onto PyPI `neo4j-graphrag[bedrock]>=1.18.0`. This supersedes the earlier note in "Fork to PyPI API drift" above, which recorded `financial_data_load` as pinned to 1.14.0 and left untouched. The mirrors are no longer stale against 1.18.0, so item 4 (retire `solution_srcs`) is still the end goal but the mirrors run clean in the meantime.
+
+Changes made:
+
+- `financial_data_load/pyproject.toml`: bumped to `neo4j-graphrag[bedrock]>=1.18.0` and added the previously undeclared `strands-agents>=0.1.0` and `boto3>=1.42.0`. Six solutions import `strands` or `boto3` but relied on out-of-band venv installs.
+- `uv lock` + `uv sync`: regenerated the lock off PyPI. It resolved `neo4j-graphrag 1.18.0`, `strands-agents 1.47.0`, `boto3 1.42.73`, and dropped the local fork reference.
+- `solution_srcs/config.py`: `get_llm()` now passes `model_name=` to `BedrockLLM`. The fork used `model_id`, which 1.18.0 forwards into `boto3.client(...)` and raises `Session.client() got an unexpected keyword argument 'model_id'`.
+- `04_02`, `04_03`, `06_03`: `llm.model_id` prints changed to `llm.model_name`.
+- `solution_srcs/06_03_vector_cypher_retriever.py`: added a `result_formatter` so enriched context prints entity metadata instead of a raw `<Record ...>` repr.
+- `solution_srcs/test_connection.py`: the model test was leftover OpenAI/Azure code importing `openai` and nonexistent `get_agent_config`/`_get_azure_token`. Rewritten to test Bedrock via the workshop `get_llm()` and `BedrockConfig`.
+- `test_solutions.sh`: metadata was stale at 22 solutions with memory/context-provider names. Aligned to `main.py`'s 12 solutions, set `MCP_SOLUTIONS=(7 8 9)`, and replaced the contiguous default-start skip with a `DEFAULT_SKIP=(2 3 10 11)` set for the data-writing solutions.
+
+Tested and validated live against the loaded graph:
+
+| Check | Result |
+|-------|--------|
+| Solution 4, Vector Retriever | Pass |
+| Solution 5, VectorCypher Retriever | Pass |
+| Solution 6, Strands GraphRAG Agent | Pass, both tools exercised |
+| Solution 12, VectorCypher Retriever (Lab 6) | Pass, formatter output verified |
+| `main.py test` (test_connection.py) | Pass, Neo4j schema plus Bedrock LLM reply |
+| `test_solutions.sh .env 4` dispatch | Pass |
+| Default-skip selection logic | Verified: runs 1,4,5,6,12; skips 2,3,10,11 and MCP 7,8,9 |
+
+What remains untested this session:
+
+- Solutions 1 and 2 (Basic Strands Agent, Deploy to AgentCore). Solution 2 deploys with AWS side effects.
+- Solutions 3, 10, 11 (Load Data and Query, Data Loading, Embeddings). Skipped as data-writing per the graph-already-loaded assumption.
+- Solutions 7, 8, 9 (MCP). Not run this session; they need valid `MCP_GATEWAY_URL` and `MCP_ACCESS_TOKEN`.

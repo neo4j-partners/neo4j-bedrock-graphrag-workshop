@@ -470,13 +470,10 @@ def cmd_samples(args):
 
 # Solution definitions: (module_name, title, is_async, entry_func)
 # Module prefixes align with workshop labs:
-#   03_xx = Lab 3 (Intro to Bedrock and Agents)
 #   04_xx = Lab 4 (neo4j-graphrag Library)
 #   05_xx = Lab 5 (MCP Server)
 #   06_xx = Lab 6 (GraphRAG Pipeline)
 SOLUTIONS = [
-    ("solution_srcs.03_01_basic_strands_agent", "Basic Strands Agent (Lab 3)", False, "main"),
-    ("solution_srcs.03_02_deploy_to_agentcore", "Deploy to AgentCore (Lab 3)", False, "main"),
     ("solution_srcs.04_01_load_and_query", "Load Data and Query (Lab 4)", False, "main"),
     ("solution_srcs.04_02_vector_retriever", "Vector Retriever (Lab 4)", False, "main"),
     ("solution_srcs.04_03_vector_cypher_retriever", "VectorCypher Retriever (Lab 4)", False, "main"),
@@ -497,22 +494,19 @@ def _print_solutions_menu():
     print("\n" + "=" * 50)
     print("Workshop Solutions")
     print("=" * 50)
-    print("\nLab 3 - Intro to Bedrock and Agents:")
-    print("  1. Basic Strands Agent")
-    print("  2. Deploy to AgentCore")
     print("\nLab 4 - neo4j-graphrag Library:")
-    print("  3. Load Data and Query")
-    print("  4. Vector Retriever")
-    print("  5. VectorCypher Retriever")
-    print("  6. Strands GraphRAG Agent")
+    print("  1. Load Data and Query")
+    print("  2. Vector Retriever")
+    print("  3. VectorCypher Retriever")
+    print("  4. Strands GraphRAG Agent")
     print("\nLab 5 - MCP Server:")
-    print("  7. Intro to Strands + MCP")
-    print("  8. Graph-Enriched Search via MCP")
-    print("  9. Text2Cypher Agent")
-    print("\nLab 6 - GraphRAG Pipeline (WARNING: 10 will delete all data):")
-    print(" 10. Data Loading")
-    print(" 11. Embeddings")
-    print(" 12. VectorCypher Retriever")
+    print("  5. Intro to Strands + MCP")
+    print("  6. Graph-Enriched Search via MCP")
+    print("  7. Text2Cypher Agent")
+    print("\nLab 6 - GraphRAG Pipeline (WARNING: 8 will delete all data):")
+    print("  8. Data Loading")
+    print("  9. Embeddings")
+    print(" 10. VectorCypher Retriever")
     print("\n  A. Run all")
     print("  0. Exit")
     print("=" * 50)
@@ -575,7 +569,7 @@ def cmd_solutions(args):
     while True:
         _print_solutions_menu()
         try:
-            choice = input("\nSelect solution (0-12, A):").strip()
+            choice = input("\nSelect solution (0-10, A):").strip()
             if not choice:
                 continue
             if choice.upper() == "A":
@@ -762,7 +756,7 @@ def main():
     p_solutions = subparsers.add_parser(
         "solutions", help="Workshop solution runner")
     p_solutions.add_argument(
-        "choice", nargs="?", help="Solution number (1-12) or A for all")
+        "choice", nargs="?", help="Solution number (1-10) or A for all")
     p_solutions.set_defaults(func=cmd_solutions)
 
     args = parser.parse_args()
