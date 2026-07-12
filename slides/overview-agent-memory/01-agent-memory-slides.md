@@ -25,19 +25,6 @@ ul > li,
 ol > li {
   opacity: 1 !important;
 }
-
-/* Small source tags and per-slide footnotes */
-.src {
-  color: #6b7280;
-  font-size: 0.5em;
-  margin-top: 0.7em;
-}
-
-section footer,
-.footnote {
-  color: #6b7280;
-  font-size: 0.5em;
-}
 </style>
 
 # Agent Memory with Neo4j
@@ -45,22 +32,20 @@ section footer,
 Three Kinds of Memory in One Graph
 
 <!--
-Lab 5 gives the Lab 4 GraphRAG agent a memory. This deck covers the model
-behind it: three connected kinds of memory, stored as one graph. We focus on
-the memory concepts, not any managed memory product.
+This deck covers the model behind agent memory: three connected kinds of
+memory, stored as one graph. We focus on the memory concepts, not any managed
+memory product.
 -->
 
 ---
 
 ## What This Covers
 
-- **Agents are amnesiacs:** flat context windows forget the plan `[5][7]`
-- **Three connected layers:** short-term, long-term, reasoning `[1]`
-- **Context graph:** captures the "why," not just the "what" `[1][4]`
-- **Reasoning traces:** first-class nodes make agents auditable `[5]`
-- **One graph:** memory sits beside the knowledge graph `[1]`
-
-<div class="src">Sources: [1] context graphs, [4] hands-on, [5] multi-agent, [7] NAMS tour</div>
+- **Agents are amnesiacs:** flat context windows forget the plan
+- **Three connected layers:** short-term, long-term, reasoning
+- **Context graph:** captures the "why," not just the "what"
+- **Reasoning traces:** first-class nodes make agents auditable
+- **One graph:** memory sits beside the knowledge graph
 
 <!--
 Five ideas anchor the whole talk. Agents forget between calls. The fix is
@@ -73,17 +58,15 @@ Neo4j instance next to the domain knowledge graph.
 
 ## Why Stateless Agents Fail
 
-The Lab 4 agent answers each question in isolation.
+A stateless GraphRAG agent answers each question in isolation.
 
 **Ask two questions in a row:**
 
 1. "Tell me about Apple's risk factors."
 2. "What about their competitors?"
 
-- **The gap:** "their" has nothing to resolve against `[5]`
-- **Vector recall is not enough:** similarity gives recall, not understanding `[7]`
-
-<div class="src">Sources: [5] multi-agent, [7] NAMS tour</div>
+- **The gap:** "their" has nothing to resolve against
+- **Vector recall is not enough:** similarity gives recall, not understanding
 
 <!--
 The second question never names Apple. Continuity lived only in the model's
@@ -97,12 +80,10 @@ understanding of what connects to what.
 
 ## Agent Memory and Context Graphs
 
-- **Agent memory:** durable, queryable record of what an agent knows and has done `[1]`
-- **Context graph:** a knowledge graph that captures decision traces, grounded in real entities `[1][4]`
-- **The relationship:** the context graph *is* the memory, unified across three layers `[1]`
-- **"Sim City" model:** query any layer alone or all at once, scale each independently `[1]`
-
-<div class="src">Sources: [1] context graphs, [4] hands-on</div>
+- **Agent memory:** durable, queryable record of what an agent knows and has done
+- **Context graph:** a knowledge graph that captures decision traces, grounded in real entities
+- **The relationship:** the context graph *is* the memory, unified across three layers
+- **"Sim City" model:** query any layer alone or all at once, scale each independently
 
 <!--
 Agent memory and context graph are two names for the same thing at different
@@ -115,13 +96,11 @@ that connect, but that you can store, query, and scale on their own.
 
 ## Three Kinds of Memory
 
-- **Short-term:** conversation and session history `[1][7]`
-- **Long-term:** durable entities, facts, and preferences `[1][7]`
-- **Reasoning:** decision traces and tool calls `[1][5]`
+- **Short-term:** conversation and session history
+- **Long-term:** durable entities, facts, and preferences
+- **Reasoning:** decision traces and tool calls
 
 All three connected as nodes in **one graph**.
-
-<div class="src">Sources: [1] context graphs, [5] multi-agent, [7] NAMS tour</div>
 
 <!--
 This is the framework for the rest of the deck. Short-term is the conversation.
@@ -146,12 +125,10 @@ three colors.
 
 ## Short-Term Memory
 
-- **Scope:** one conversation, keyed by `session_id` `[3]`
-- **Schema:** `(Conversation)-[:FIRST_MESSAGE]->(Message)-[:NEXT_MESSAGE]->(Message)` `[5]`
-- **Recalled by:** `get_context(session_id=...)` `[6]`
-- **Role:** bridges general knowledge and the current task `[1]`
-
-<div class="src">Sources: [1] context graphs, [3] modeling, [5] multi-agent, [6] labs</div>
+- **Scope:** one conversation, keyed by `session_id`
+- **Schema:** `(Conversation)-[:FIRST_MESSAGE]->(Message)-[:NEXT_MESSAGE]->(Message)`
+- **Recalled by:** `get_context(session_id=...)`
+- **Role:** bridges general knowledge and the current task
 
 <!--
 Short-term memory is ordered conversation turns scoped to a session. It is what
@@ -163,12 +140,10 @@ what each agent is currently working on.
 
 ## Long-Term Memory
 
-- **Holds:** durable entities, facts, preferences across sessions `[1][3]`
-- **POLE+O entities:** Person, Organization, Location, Event, Object `[5][7]`
-- **Typed relationships:** `(Entity:Person)-[:WORKS_AT]->(Entity:Organization)` `[5]`
-- **Deduplicated:** the same entity resolves to one node `[7]`
-
-<div class="src">Sources: [1] context graphs, [3] modeling, [5] multi-agent, [7] NAMS tour</div>
+- **Holds:** durable entities, facts, preferences across sessions
+- **POLE+O entities:** Person, Organization, Location, Event, Object
+- **Typed relationships:** `(Entity:Person)-[:WORKS_AT]->(Entity:Organization)`
+- **Deduplicated:** the same entity resolves to one node
 
 <!--
 Long-term memory is the knowledge graph the agent grows. Entities are classified
@@ -182,13 +157,11 @@ ground truth.
 
 ## Reasoning Memory and Traces
 
-- **Reasoning memory:** decision traces and tool calls as first-class nodes `[1][5]`
-- **Schema:** `(Message)-[:TRIGGERED]->(ReasoningTrace)-[:HAS_STEP]->(ReasoningStep)` `[5]`
-- **Tool use:** `(ReasoningStep)-[:USED_TOOL]->(ToolCall)-[:CALL_OF]->(Tool)` `[5]`
-- **Provenance:** a `ToolCall` links back with `RETRIEVED` to the entity it touched `[5]`
-- **Why:** answers "why did the agent decide this?" `[5]`
-
-<div class="src">Sources: [1] context graphs, [5] multi-agent</div>
+- **Reasoning memory:** decision traces and tool calls as first-class nodes
+- **Schema:** `(Message)-[:TRIGGERED]->(ReasoningTrace)-[:HAS_STEP]->(ReasoningStep)`
+- **Tool use:** `(ReasoningStep)-[:USED_TOOL]->(ToolCall)-[:CALL_OF]->(Tool)`
+- **Provenance:** a `ToolCall` links back with `RETRIEVED` to the entity it touched
+- **Why:** answers "why did the agent decide this?"
 
 <!--
 This is the layer the old deck was missing. Reasoning traces are not log lines,
@@ -207,10 +180,8 @@ Traverse across all three layers in one query:
 (Message) -[:MENTIONED_IN]-> (Entity) <-[:RETRIEVED]- (ToolCall)
 ```
 
-- **Deterministic:** graph traversal, not a similarity threshold `[5]`
-- **Provenance chain:** one agent's reasoning links to another's findings `[5]`
-
-<div class="src">Sources: [5] multi-agent</div>
+- **Deterministic:** graph traversal, not a similarity threshold
+- **Provenance chain:** one agent's reasoning links to another's findings
 
 <!--
 Because the layers share one graph, you can walk from a message to the entity it
@@ -224,13 +195,11 @@ passing.
 
 ## Best Practices
 
-- **Design memory explicitly:** separate working from durable state `[2]`
-- **Capture the why:** reasoning and causal chains, not just actions `[4]`
-- **Traces as first-class nodes:** for explainability and audit `[5]`
-- **Deduplicate entities:** exact, then fuzzy, then semantic `[7]`
-- **Curate and compress:** messages to observations to a reflection `[7]`
-
-<div class="src">Sources: [2] agentic vs genai, [4] hands-on, [5] multi-agent, [7] NAMS tour</div>
+- **Design memory explicitly:** separate working from durable state
+- **Capture the why:** reasoning and causal chains, not just actions
+- **Traces as first-class nodes:** for explainability and audit
+- **Deduplicate entities:** exact, then fuzzy, then semantic
+- **Curate and compress:** messages to observations to a reflection
 
 <!--
 Treat memory as a first-class part of the architecture. Store durable state in a
@@ -250,9 +219,7 @@ a single active reflection.
 | **State** | Stateless | Stateful by design |
 | **Memory** | Optional | Central |
 
-Evolution: **LLM → RAG → GraphRAG → tool agents → agentic systems** `[2]`
-
-<div class="src">Sources: [2] agentic vs genai</div>
+Evolution: **LLM → RAG → GraphRAG → tool agents → agentic systems**
 
 <!--
 Memory is what separates a generative model from an agentic system. GenAI ends
@@ -265,14 +232,12 @@ that evolution path.
 
 ## Summary
 
-- **Memory is a graph:** short-term, long-term, and reasoning, connected `[1]`
-- **Context graph:** records the reasoning behind decisions `[1][4]`
-- **Reasoning traces:** first-class nodes make the agent auditable `[5]`
-- **One database, two roles:** knowledge graph and memory store `[1]`
+- **Memory is a graph:** short-term, long-term, and reasoning, connected
+- **Context graph:** records the reasoning behind decisions
+- **Reasoning traces:** first-class nodes make the agent auditable
+- **One database, two roles:** knowledge graph and memory store
 
-**Next:** Lab 6 serves graph retrieval as remote tools over the Neo4j MCP Server.
-
-<div class="src">Sources: [1] context graphs, [4] hands-on, [5] multi-agent</div>
+**Next:** serve graph retrieval as remote tools over the Neo4j MCP Server.
 
 <!--
 Structured memory in three connected layers is what lets an agent hold a plan,
@@ -282,7 +247,7 @@ instance as the SEC knowledge graph, no second datastore to keep in sync.
 
 ---
 
-## Sources
+## Appendix: References
 
 1. Context graphs: why AI agents need three types of memory (Webber) - neo4j.com/blog/agentic-ai/context-graph-ai-agent-memory/
 2. Agentic AI vs. generative AI (Krüger) - neo4j.com/blog/agentic-ai/agentic-ai-vs-generative-ai/
