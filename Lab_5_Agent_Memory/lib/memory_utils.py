@@ -18,6 +18,7 @@ from __future__ import annotations
 from neo4j_agent_memory import EmbeddingConfig, EmbeddingProvider, MemoryClient, MemorySettings
 from neo4j_agent_memory import Neo4jConfig as MemoryNeo4jConfig
 from neo4j_agent_memory.config.settings import ExtractionConfig, ExtractorType
+from neo4j_agent_memory.embeddings.bedrock import BedrockEmbedder
 from pydantic import SecretStr
 
 from lib.data_utils import BedrockConfig, Neo4jConfig
@@ -76,7 +77,23 @@ def build_memory_client() -> MemoryClient:
 
     and release it with ``await memory.close()``.
 
+    The ``EmbeddingConfig`` in ``build_memory_settings`` only sizes the vector
+    index; in neo4j-agent-memory 0.5.0 the client builds a concrete embedder
+    from that config for OpenAI and sentence-transformers only, and returns
+    ``None`` for every other provider, including Bedrock. Left that way, the
+    client has no embedder, ``generate_embedding=True`` silently writes vectors
+    of length zero, and semantic recall (``search_entities`` /
+    ``long_term.get_context``) finds nothing. So the Bedrock embedder is
+    constructed explicitly here and passed via ``embedder=``, which the client
+    adopts directly.
+
     Returns:
-        A ``MemoryClient`` bound to the shared ``MemorySettings``.
+        A ``MemoryClient`` bound to the shared ``MemorySettings`` with a working
+        Bedrock embedder.
     """
-    return MemoryClient(build_memory_settings())
+    bedrock_cfg = BedrockConfig()
+    embedder = BedrockEmbedder(
+        model=TITAN_EMBEDDING_MODEL,
+        region_name=bedrock_cfg.region,
+    )
+    return MemoryClient(build_memory_settings(), embedder=embedder)

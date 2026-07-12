@@ -1,29 +1,34 @@
-# Lab 2 - Building a GraphRAG Data Pipeline
+# Lab 2 - Chunking and Embeddings (Optional)
 
-Build a GraphRAG data pipeline from scratch using SEC 10-K financial filing data. Two notebooks progress from loading raw data into a knowledge graph to generating the embeddings and vector index that power semantic search.
+See how a GraphRAG data pipeline turns raw filing text into a searchable knowledge graph. One notebook walks through chunking, embedding generation, graph construction, and semantic search using SEC 10-K financial filing data.
+
+**This lab is optional.** Lab 1 already loaded the complete knowledge graph, so every downstream lab is ready without it. Lab 2 exists to show *how* that pipeline works.
 
 ## What You'll Learn
 
-- **Data Loading**: Build a two-layer knowledge graph — structured entities (Company, Product, RiskFactor) and unstructured document chunks — connected by cross-links
-- **Embeddings**: Generate vector embeddings with Amazon Titan Text Embeddings V2 and create a vector index for semantic search
+- **Chunking**: Split filing text into overlapping passages sized for embedding
+- **Embeddings**: Generate 1024-dimensional vectors with Amazon Titan Text Embeddings V2
+- **Graph pipeline**: Store chunks, embeddings, and their relationships alongside structured Company, Product, and Document entities
+- **Vector search**: Create a vector index and run a semantic query with `VectorRetriever`
+
+## Non-Destructive by Design
+
+The notebook builds everything in an isolated sandbox. Every demo node carries a `:Demo` label plus its own `Demo*` label, and the vector index is named `demoChunkEmbeddings`. Nothing touches the `:Company`, `:Chunk`, or `chunkEmbeddings` data that Lab 1 loaded. The final cell tears the sandbox down, so the notebook is safe to run as many times as you like.
 
 ## Prerequisites
 
 Before starting this lab, make sure you have:
 
-- Completed **Lab 1** (Neo4j Aura instance created and running)
+- Completed **Lab 1** (Neo4j Aura instance created and the knowledge graph loaded)
 - Filled in your credentials in `CONFIG.txt` at the project root
 - A running environment (SageMaker Studio or GitHub Codespace)
 
-**Note:** This lab wipes and rebuilds the graph from scratch using `financial_data.json`. It does not depend on data from previous labs.
-
-## Notebooks
+## Notebook
 
 | Notebook | Title | What You Build |
 |----------|-------|----------------|
-| [01_data_loading.ipynb](01_data_loading.ipynb) | Data Loading | Company, Product, RiskFactor, Document, and Chunk nodes linked by `OFFERS`, `FACES_RISK`, `FILED`, `FROM_DOCUMENT`, `NEXT_CHUNK`, and `FROM_CHUNK` relationships |
-| [02_embeddings.ipynb](02_embeddings.ipynb) | Embeddings | Vector embeddings on every Chunk node, plus a `chunkEmbeddings` vector index |
+| [01_chunking_and_embeddings.ipynb](01_chunking_and_embeddings.ipynb) | Chunking and Embeddings | A sandboxed `Demo*` subgraph: Company, Product, Document, and Chunk nodes with embeddings, a `demoChunkEmbeddings` vector index, and a semantic search over it |
 
 ## Next Steps
 
-After completing this lab, continue to [Lab 3 - Semantic Search and GraphRAG](../Lab_3_GraphRAG_Search) to build vector and graph-enriched retrieval over the knowledge graph.
+After completing this lab, continue to [Lab 3 - Semantic Search and GraphRAG](../Lab_3_GraphRAG_Search) to build vector and graph-enriched retrieval over the full knowledge graph.

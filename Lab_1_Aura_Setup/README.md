@@ -125,14 +125,13 @@ MERGE (c)-[:REPORTS]->(fm);
 
 So far you have loaded the **structured layer** — companies, products, risk factors, and the relationships between them. Now you add the **unstructured layer**: the SEC filing text split into chunks, each carrying a pre-computed 1024-dimensional embedding.
 
-This statement reads `chunks.csv`, where the embedding is stored as a semicolon-delimited list of floats, rebuilds it into a vector with `split()`/`toFloat()`, and attaches it to each Chunk node. The load is batched with `CALL { ... } IN TRANSACTIONS` because the file is large (~9 MB).
+This statement reads `chunks.csv`, where the embedding is stored as a semicolon-delimited list of floats, rebuilds it into a vector with `split()`/`toFloat()`, and attaches it to each Chunk node. The load is batched with `CALL (row) { ... } IN TRANSACTIONS` because the file is large (~9 MB).
 
-> **Run this statement on its own.** `CALL { ... } IN TRANSACTIONS` must execute as a single auto-committing query, so paste and run only this block (not alongside other statements). It may take a few seconds to complete.
+> **Run this statement on its own.** `CALL (row) { ... } IN TRANSACTIONS` must execute as a single auto-committing query, so paste and run only this block (not alongside other statements). It may take a few seconds to complete.
 
 ```cypher
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/chunks.csv' AS row
-CALL {
-    WITH row
+CALL (row) {
     MERGE (c:Chunk {chunkId: row.chunkId})
     SET c.index = toInteger(row.index), c.text = row.text
     WITH c, [x IN split(row.embedding, ';') | toFloat(x)] AS emb
