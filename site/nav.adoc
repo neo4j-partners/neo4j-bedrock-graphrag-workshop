@@ -20,7 +20,7 @@
 *** xref:lab3-sample-queries.adoc[Sample Queries]
 ** xref:lab4.adoc[Lab 4: Strands GraphRAG Agent and AgentCore]
 *** xref:lab4-instructions.adoc[Instructions]
-* xref:part3.adoc[Part 3: Agent Memory (Optional)]
+* xref:part3.adoc[Part 3: Agent Memory]
 ** xref:lab5.adoc[Lab 5: Agent Memory with Neo4j]
 *** xref:lab5-instructions.adoc[Instructions]
 * xref:part4.adoc[Part 4: Neo4j MCP Server (Optional)]

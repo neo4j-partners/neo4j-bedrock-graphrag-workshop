@@ -57,7 +57,7 @@ Attendees build and deploy the exact agent they saw in the opening demo. A produ
 * Run multi-hop questions the agent must traverse the graph to answer
 * Deploy to AgentCore Runtime and invoke the deployed agent via REST
 
-## 7. Agent Memory (Optional)
+## 7. Agent Memory
 
 Extend the agent with persistent memory using neo4j-agent-memory. One Aura database serves as both knowledge graph and memory store.
 

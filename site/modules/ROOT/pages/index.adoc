@@ -93,7 +93,7 @@ image::workshop-architecture.png[Workshop Architecture,800]
 | 30 min
 |===
 
-=== Part 3: Agent Memory (Optional)
+=== Part 3: Agent Memory
 
 [cols="1,3,1"]
 |===

@@ -1,6 +1,6 @@
-= Part 3: Agent Memory (Optional)
+= Part 3: Agent Memory
 
-Part 3 gives the Part 2 GraphRAG agent a memory. It is an optional part, designed for all-day sessions or take-home completion after the workshop.
+Part 3 gives the Part 2 GraphRAG agent a memory.
 
 The agent you built in xref:lab4.adoc[Lab 4] answers each question in isolation. A stateless agent starts every invocation from zero context: it has no record of what was asked a moment ago or what it answered. In a multi-turn conversation that breaks down quickly. Ask a follow-up like "What about their competitors?" and the agent has no way to resolve "their," because the previous turn is gone.
 

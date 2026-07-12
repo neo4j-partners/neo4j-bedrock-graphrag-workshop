@@ -1,6 +1,6 @@
 = Part 2: AWS ETL, Semantic Search, and GraphRAG
 
-This part is the core of the workshop. You set up the AWS environment, add the unstructured layer to the knowledge graph, and build retrieval that spans both the structured graph and the vector-indexed text.
+This part is the core of the workshop. You set up the AWS environment and build retrieval that spans both the structured graph and the vector-indexed text. The unstructured layer, chunked filing text with vector embeddings, was already loaded into the knowledge graph during setup, so this part focuses on querying across both layers rather than building them.
 
 You will work in Amazon SageMaker Studio, use the neo4j-graphrag Python library for semantic search and GraphRAG retrieval, and build a Strands agent that combines vector search with graph traversal and deploys to Amazon Bedrock AgentCore.
 

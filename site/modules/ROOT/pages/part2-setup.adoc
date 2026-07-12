@@ -1,6 +1,6 @@
 = Environment Setup: SageMaker Studio
 
-Part 2 moves from the no-code tools of Part 1 into code. You already signed in to AWS and enabled Amazon Bedrock model access in xref:lab0.adoc[Lab 0]. This page covers the one remaining piece of the environment: Amazon SageMaker Studio, the notebook environment you use for every coding lab that follows.
+Part 2 moves from graph exploration in Part 1 into code. You already signed in to AWS and enabled Amazon Bedrock model access in xref:lab0.adoc[Lab 0]. This page covers the one remaining piece of the environment: Amazon SageMaker Studio, the notebook environment you use for every coding lab that follows.
 
 TIP: Ready to start? Jump to the xref:part2-setup-instructions.adoc[Environment Setup Instructions] for step-by-step setup.
 
