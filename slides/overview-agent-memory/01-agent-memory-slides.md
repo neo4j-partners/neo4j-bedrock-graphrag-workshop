@@ -222,21 +222,22 @@ a single active reflection.
 
 ---
 
-## Where Memory Fits the Agent Strategy
+## Why Memory Makes an Agent
 
-| Dimension | Generative AI | Agentic AI |
+| Dimension | Without memory | With memory |
 |---|---|---|
-| **Output** | Content to read | State change, work done |
-| **State** | Stateless | Stateful by design |
-| **Memory** | Optional | Central |
+| **Continuity** | "their" resolves to nothing | short-term recalls Apple |
+| **Knowledge** | re-derived every call | long-term accumulates facts |
+| **Accountability** | opaque black box | reasoning traces show *why* |
 
-Evolution: **LLM → RAG → GraphRAG → tool agents → agentic systems**
+Memory is what turns a generative model into an agent.
 
 <!--
-Memory is what separates a generative model from an agentic system. GenAI ends
-with something to read; an agent ends with something done, and that requires
-state that persists. The knowledge graph is the durable memory backbone across
-that evolution path.
+Each row maps to one of the three layers. Without short-term memory the second
+question has nothing to resolve "their" against. Without long-term memory the
+agent re-derives the same facts every call instead of accumulating them. Without
+reasoning memory its decisions are opaque. A generative model ends with text to
+read; an agent ends with work done, and that requires state that persists.
 -->
 
 ---
