@@ -211,7 +211,7 @@ The full production pipeline is the AWS lakehouse pattern shown in the workshop 
 
 ---
 
-![bg contain](data-pipeline-v2.png)
+![bg contain](data-pipeline-v2.svg)
 
 ---
 

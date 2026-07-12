@@ -57,17 +57,20 @@ API minutiae correctly confined to the notebooks: `upsert_vectors`/`create_vecto
 
 ## Part 2: Plan to Fix and Align
 
-### Open decisions (need your input before execution)
+### Decisions (resolved)
 
-The plan branches on these. They are asked as questions alongside this document.
+- **D1 (→ C1, L0-a, L0-b): Bedrock access is enabled by default.** The site Lab 0 page becomes a Playground **verification** step (with the one-time Anthropic use-case form as a caveat) and drops the "Manage model access → Save changes" procedure. Align `lab0.adoc` and `lab0-instructions.adoc` to the README.
+- **D2 (→ C3): AuraDB Free (permanent) is canonical.** Update the site's `lab1-instructions.adoc` from the Professional 14-day-trial path to the AuraDB Free path in `Aura_Free_Trial.md`. **See Open Item O2 — this needs a GDS-support check first.**
+- **D4 (→ C7): Claude Sonnet 4.6 is correct.** Update `lib/data_utils.py` `MODEL_ID` default and its three copies to `us.anthropic.claude-sonnet-4-6`; the README already says 4.6. **O3 resolved — exact ID confirmed from AWS docs (see Open Items below).**
+- **D5 (backfill scope): Everything, including Tier 4.** Fix all contradictions, add all Tier 2 substantive site gaps, add the Tier 3 slide concepts, and add the Tier 4 API minutiae to the site instructions. All eight agents run.
 
-- **D1 (→ C1, L0-a, L0-b):** For the workshop's AWS accounts, is Bedrock model access enabled by default, or must attendees enable it manually? Determines whether the site's "enable model access" procedure is replaced by a verification-only step.
-- **D2 (→ C3):** Which Aura path is canonical — AuraDB Free (permanent) or Professional (14-day trial with Graph Analytics plugin + vector-optimized)? Affects whether GDS/vector features are available for the explore lab.
-- **D3 (→ C4):** Standardize the Lab 1 exploration on Louvain, Degree Centrality, or keep both?
-- **D4 (→ C7):** Correct Claude model — Sonnet 4.5 (matches code) or 4.6 (matches Lab 0 README)?
-- **D5 (backfill scope):** How much of Tier 2 (site gaps) and Tier 3 (slide concepts) to add — contradictions only, contradictions + substantive site gaps, or contradictions + gaps + slide concepts?
+For every contradiction the plan treats the **runnable notebook/library code as the source of truth** and updates the site to match: C2 (Lab 5 extraction), C5 (Lab 4 two-tool), C6 (Lab 3 query).
 
-For every contradiction except the ones above, the plan treats the **runnable notebook/library code as the source of truth** and updates the site to match (C2 Lab 5 extraction, C5 Lab 4 two-tool, C6 Lab 3 query are all "fix the site").
+### Open items
+
+- **O1 (→ C4): RESOLVED — Degree Centrality.** Standardize Lab 1 exploration on Degree Centrality (rank/size nodes by `COMPETES_WITH` edge count) on both the site and the lab. Update `lab1-explore.adoc` from Louvain to Degree Centrality to match `EXPLORE.md`.
+- **O2 (→ D2): RESOLVED — AuraDB Free supports GDS.** Confirmed; Agent B re-points the site to the AuraDB Free tier and keeps the GDS-based explore step.
+- **O3 (→ D4): RESOLVED — exact Sonnet 4.6 model ID confirmed from AWS Bedrock docs.** The US geo cross-region inference-profile ID is `us.anthropic.claude-sonnet-4-6` (base model ID `anthropic.claude-sonnet-4-6`; other geos: `eu.` / `au.` / `jp.`; global: `global.anthropic.claude-sonnet-4-6`). Unlike 4.5, the 4.6 ID carries no date or `-vN:0` version suffix. Note the docs also show 4.6 has no In-Region availability in `us-east-1` / `us-west-2` (Geo and Global only), so the `us.`-prefixed geo profile is the correct drop-in for the current `us.anthropic.claude-sonnet-4-5-20250929-v1:0`. Source: https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-anthropic-claude-sonnet-4-6.html (launch Feb 17, 2026).
 
 ### Execution with parallel agents
 
@@ -81,16 +84,16 @@ The work decomposes cleanly because each lab's site pages and each slide deck ar
 
 | Agent | Owns | Fixes |
 |-------|------|-------|
-| A — Lab 0 site | `lab0.adoc`, `lab0-instructions.adoc` | C1; add L0-a Playground smoke test, L0-b troubleshooting |
-| B — Lab 1 site | `lab1-instructions.adoc`, `lab1-explore.adoc`, `Aura_Free_Trial.md` / `EXPLORE.md` if reconciled | C3, C4 |
-| C — Lab 3 site | `lab3.adoc`, `lab3-instructions.adoc` | C6; add L3-a formatter/`RetrieverResultItem`, L3-b context inspection, L3-c driver gotcha |
-| D — Lab 4 site | `lab4.adoc`, `lab4-instructions.adoc` | C5; add L4-a `agent.messages`, L4-b app handler, L4-c warm-microVM, L4-d yaml fields |
-| E — Lab 5 site | `lab5.adoc`, `lab5-instructions.adoc`, `part3.adoc` | C2; add L5-a `search_facts`/`search_preferences`, L5-b threshold |
-| F — Lab 6 site | `lab6.adoc`, `lab6-instructions.adoc` | add L6-a Text2Cypher guardrails |
+| A — Lab 0 site | `lab0.adoc`, `lab0-instructions.adoc` | C1 (verification step per D1); add L0-a Playground smoke test, L0-b troubleshooting |
+| B — Lab 1 site | `lab1-instructions.adoc`, `lab1-explore.adoc`, `Aura_Free_Trial.md` / `EXPLORE.md` | C3 (→ AuraDB Free per D2), C4 (per O1); **gated on O1 + O2** |
+| C — Lab 3 site | `lab3.adoc`, `lab3-instructions.adoc` | C6; add L3-a formatter/`RetrieverResultItem`, L3-b context inspection, L3-c driver gotcha; Tier 4 (`upsert_vectors`/`elementId` shapes) |
+| D — Lab 4 site | `lab4.adoc`, `lab4-instructions.adoc` | C5; add L4-a `agent.messages`, L4-b app handler, L4-c warm-microVM, L4-d yaml fields; Tier 4 (CLI flags, ARM64, preflight) |
+| E — Lab 5 site | `lab5.adoc`, `lab5-instructions.adoc`, `part3.adoc` | C2; add L5-a `search_facts`/`search_preferences`, L5-b threshold; Tier 4 (`adopt_existing_graph` sig, dedup `.action`) |
+| F — Lab 6 site | `lab6.adoc`, `lab6-instructions.adoc` | add L6-a Text2Cypher guardrails; Tier 4 (MCP auth-header/context-manager wiring) |
 | G — agent-agentcore deck | `slides/overview-agent-agentcore/01-agent-agentcore-slides.md` | S-a two-tool selection, S-b deployment concept |
 | H — mcp deck | `slides/overview-mcp/01-mcp-slides.md` | S-c Text2Cypher prompt concept |
 
-Agents B–H are gated on D-answers only where noted (B needs D2/D3; A needs D1; the model-version fix is coordinator-owned per D4). Agents C, D, E, F, G, H can start as soon as D5 sets scope.
+Because D5 selected "everything incl. Tier 4," each site agent (C–F) also folds the relevant Tier 4 minutiae into its lab pages. Gating: all open items (O1, O2, O3) are now resolved, so every agent A–H can start immediately. The C7 model-version fix stays coordinator-owned (it touches the shared/duplicated `data_utils.py` copies) and uses the confirmed ID `us.anthropic.claude-sonnet-4-6`.
 
 **Phase 2 — Coordinator (serial, last):** apply the C7 model-version fix across the `data_utils.py` copies; rebuild slides under Node 22 (`PATH="/opt/homebrew/opt/node@22/bin:..." node scripts/build-slides.mjs`) and rebuild the Antora site (`cd site && npm run build`); run the verification sweep below.
 

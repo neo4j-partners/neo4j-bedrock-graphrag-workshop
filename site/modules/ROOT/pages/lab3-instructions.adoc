@@ -48,7 +48,107 @@ Both notebooks live in `Lab_3_GraphRAG_Search/`.
 | Graph-enriched retrieval using `VectorCypherRetriever`, adding filing metadata, companies, products, and risk factors to vector search results
 |===
 
+== Walkthrough
+
+=== Notebook 01: Vector Retriever
+
+. **Connect with query notifications disabled.** The retrievers call the server procedure `db.index.vector.queryNodes`, which Aura now flags as deprecated. Passing `notifications_min_severity='OFF'` when you build the driver stops it from logging one deprecation WARNING per search:
++
+[source,python]
+----
+# notifications_min_severity='OFF' tells the server not to send query
+# notifications. The retrievers below run db.index.vector.queryNodes, which Aura
+# now flags as a deprecation; without this the driver logs one WARNING per search.
+driver = GraphDatabase.driver(
+    NEO4J_URI,
+    auth=(NEO4J_USERNAME, NEO4J_PASSWORD),
+    notifications_min_severity='OFF',
+)
+driver.verify_connectivity()
+----
++
+. **Search for chunks.** Initialize a `VectorRetriever` over the `chunkEmbeddings` index and call `search(query_text=..., top_k=5)` to get the most similar chunks. Each result carries its cosine similarity in `item.metadata['score']`.
+. **Answer with the GraphRAG pipeline and inspect the context.** Wrap the retriever in `GraphRAG`. Pass `retriever_config={'top_k': N}` to control how many chunks are retrieved, and `return_context=True` to attach the retrieved chunks to the response so you can see exactly what the LLM received via `response.retriever_result.items`:
++
+[source,python]
+----
+rag = GraphRAG(llm=llm, retriever=vector_retriever)
+
+query = "What are the key risk factors mentioned in Apple's 10-K filing?"
+response = rag.search(query, retriever_config={'top_k': 5}, return_context=True)
+
+print(f'Query: "{query}"')
+print(f'Chunks retrieved: {len(response.retriever_result.items)}\n')
+print('Answer:')
+print(response.answer)
+----
+
+=== Notebook 02: VectorCypher Retriever
+
+. **Define the retrieval query.** A Cypher query runs on each matched chunk. It receives the `node` and `score` variables, traverses to the source document and the company that filed it, and gathers products and risk factors with chunk-scoped `collect { ... }` subqueries. See the full query and why the subqueries avoid a cartesian product in xref:lab3.adoc[Lab 3: Semantic Search and GraphRAG].
+. **Format each record.** Pass a `result_formatter` so the retriever separates the chunk text (the `content` sent to the LLM) from the structured graph metadata. Without a formatter, the default serializes the entire record into a single string:
++
+[source,python]
+----
+def format_record(record: neo4j.Record) -> RetrieverResultItem:
+    """Separate chunk text (content for LLM) from structured graph metadata."""
+    metadata = record.get("metadata") or {}
+    metadata["score"] = record.get("score")
+    return RetrieverResultItem(
+        content=record.get("text", ""),
+        metadata=metadata,
+    )
+
+vector_cypher_retriever = VectorCypherRetriever(
+    driver=driver,
+    index_name='chunkEmbeddings',
+    embedder=embedder,
+    retrieval_query=RETRIEVAL_QUERY,
+    result_formatter=format_record,
+)
+----
++
+. **Search and inspect the enriched metadata.** Each `item.metadata` now carries `company`, `products`, `risks`, and `score` alongside the chunk text in `item.content`. As in Notebook 01, building a `GraphRAG` pipeline and calling `search(query, retriever_config={'top_k': 5}, return_context=True)` exposes the enriched matches through `response.retriever_result.items`.
+
+=== Reference: How the Vector Index Was Built
+
+The `chunkEmbeddings` index and its embeddings were created by the Lab 1 seed load; xref:lab2.adoc[Lab 2] rebuilds the same pipeline in an isolated sandbox. Two neo4j-graphrag index utilities do the work.
+
+`upsert_vectors` stores each embedding on its chunk node. The `ids` list holds Neo4j element ids in the same order as the `embeddings` list, so the vector written to each node matches the chunk it was generated from:
+
+[source,python]
+----
+upsert_vectors(
+    driver,
+    ids=chunk_ids,
+    embedding_property='embedding',
+    embeddings=chunk_embeddings,
+)
+----
+
+Those element ids come from returning `elementId()` ordered by the chunk index, which keeps the id list aligned with the embedding list:
+
+[source,cypher]
+----
+MATCH (ch:DemoChunk:Demo)
+RETURN elementId(ch) AS id
+ORDER BY ch.index
+----
+
+`create_vector_index` then defines the index over the embedding property, matching the 1024 dimensions of Amazon Titan Text Embeddings V2 and cosine similarity:
+
+[source,python]
+----
+create_vector_index(
+    driver,
+    name=DEMO_INDEX,
+    label='DemoChunk',
+    embedding_property='embedding',
+    dimensions=1024,
+    similarity_fn='cosine',
+)
+----
+
 == Next Steps
 
 After completing these notebooks, explore the xref:lab3-sample-queries.adoc[Lab 3: Sample Queries] for more Cypher examples, then continue to xref:lab4.adoc[Lab 4: Strands GraphRAG Agent and AgentCore] to wrap the retriever in an agent and deploy it to Bedrock AgentCore.
-</content>

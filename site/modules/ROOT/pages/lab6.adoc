@@ -46,6 +46,24 @@ MCP supports multiple transport mechanisms:
 
 This lab uses Streamable HTTP to connect to an MCP Gateway running on AWS.
 
+=== Connecting the MCP Client
+
+Strands wraps the transport in an `MCPClient`. The notebook passes a factory that opens a `streamablehttp_client` against the gateway URL and attaches the access token as a bearer `Authorization` header:
+
+[source,python]
+----
+mcp_client = MCPClient(lambda: streamablehttp_client(
+    url=MCP_GATEWAY_URL,
+    headers={"Authorization": f"Bearer {MCP_ACCESS_TOKEN}"},
+))
+mcp_client.__enter__()
+
+# Discover available tools from the MCP server
+mcp_tools = mcp_client.list_tools_sync()
+----
+
+`MCPClient` is a context manager. In an interactive notebook you call `__enter__()` explicitly to keep a single connection open across cells for the whole session, then call `mcp_client.__exit__(None, None, None)` at the end to close it. In a script you would use a `with mcp_client:` block instead so the connection closes automatically. The `Authorization` header is what the AgentCore Gateway checks before routing the request to the MCP server, so both `MCP_GATEWAY_URL` and `MCP_ACCESS_TOKEN` from `CONFIG.txt` are required.
+
 === Neo4j MCP Server Tools
 
 The https://github.com/neo4j/mcp[Neo4j MCP Server] is Neo4j's official MCP server. It requires APOC (a standard Neo4j plugin for schema introspection and utility procedures). In this workshop it is deployed in read-only mode, exposing two tools:
@@ -123,6 +141,49 @@ Without the schema step, an LLM might generate `MATCH (c:Corp)-[:HAS_PRODUCT]->(
 
 With schema retrieval, the agent sees the actual labels (`Company`, `Product`, `RiskFactor`, `AssetManager`) and relationship types (`OFFERS`, `FACES_RISK`, `COMPETES_WITH`, `PARTNERS_WITH`, `OWNS`, `FILED`, `FROM_DOCUMENT`) before writing any query. The generated Cypher uses the correct vocabulary, and empty results genuinely mean no matching data rather than a query targeting non-existent schema elements.
 ====
+
+== System-Prompt Guardrails
+
+Text2Cypher hands the LLM a lot of freedom: it writes original queries rather than selecting from reviewed templates. The system prompt is where you constrain that freedom. It is the prompt-engineering layer that keeps the autonomous agent's generated Cypher safe, current, and correct:
+
+[source,python]
+----
+SYSTEM_PROMPT = """You are a Neo4j database assistant with access to a knowledge graph
+containing SEC 10-K financial filing data (companies, products, services, risk factors,
+financial metrics, executives, asset manager holdings).
+
+Rules:
+1. Always retrieve the database schema before writing Cypher queries.
+2. Only use read-only Cypher (MATCH, RETURN, WITH, WHERE, ORDER BY, LIMIT).
+3. Include LIMIT clauses to avoid excessive results.
+4. Use COALESCE() or IS NOT NULL for properties that might be missing.
+5. Format results clearly and cite actual data from query results.
+6. Modern Cypher syntax:
+   - Use elementId(n) instead of id(n); id() is removed in Neo4j 5+
+   - Use COUNT{ pattern } instead of size((pattern)) for counting pattern occurrences
+   - Use EXISTS{ pattern } instead of exists((pattern)) for checking pattern existence
+   - Always use $parameter syntax for dynamic values, never string concatenation
+"""
+----
+
+=== Safety and Correctness Rules
+
+Rules 2 through 4 keep the generated Cypher safe and robust:
+
+* **Read-only allowlist** (rule 2): the agent is told to use only `MATCH`, `RETURN`, `WITH`, `WHERE`, `ORDER BY`, and `LIMIT`. This keeps queries read-only at the prompt level. It complements, rather than replaces, the server-side `EXPLAIN` guard in `read_neo4j_cypher` (which rejects any query containing write clauses). Defense in depth: the prompt discourages writes, and the server blocks them.
+* **Mandatory `LIMIT`** (rule 3): every query must cap its result set. This prevents a single broad question from pulling back thousands of rows, which would waste tokens and could overrun the model's context window.
+* **`COALESCE()` / `IS NOT NULL`** (rule 4): properties can be missing on some nodes. Handling nulls explicitly stops a query from silently dropping rows or returning `null` where the user expects a value.
+
+=== Modern Cypher Rules
+
+Rule 6 steers the model toward current Neo4j 5+ syntax. LLMs are trained on large corpora of older Cypher, so without guidance they may emit deprecated or removed functions that fail against a modern database:
+
+* Use `elementId(n)` instead of `id(n)`; `id()` is removed in Neo4j 5+.
+* Use `COUNT{ pattern }` instead of `size((pattern))` for counting pattern occurrences.
+* Use `EXISTS{ pattern }` instead of `exists((pattern))` for checking pattern existence.
+* Always use `$parameter` syntax for dynamic values, never string concatenation (which also avoids Cypher injection).
+
+Together with the schema-first rule (rule 1), these guardrails turn a general-purpose LLM into a reliable graph-query author: it grounds queries in the real schema, writes syntax the current database accepts, and stays within read-only, bounded, null-safe bounds.
 
 == Why a Specialized Graph Agent
 

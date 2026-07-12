@@ -1,13 +1,13 @@
 = Lab 0: Sign In to AWS
 
-Lab 0 is where the workshop starts. You sign in to AWS, either with the workshop OneBlink credentials or your own account, and enable Amazon Bedrock model access so the coding labs can call Anthropic Claude and Amazon Titan Text Embeddings V2.
+Lab 0 is where the workshop starts. You sign in to AWS, either with the workshop OneBlink credentials or your own account, and verify that Amazon Bedrock is reachable so the coding labs can call Anthropic Claude and Amazon Titan Text Embeddings V2.
 
 TIP: Ready to start? Jump to xref:lab0-instructions.adoc[Lab 0 Instructions: Sign In to AWS] for step-by-step directions.
 
 .**At a Glance**
 
 * **AWS Console access**: sign in through workshop-provided OneBlink credentials or your own AWS account
-* **Amazon Bedrock model access**: enable Anthropic Claude (reasoning and tool use) and Amazon Titan Text Embeddings V2 (`amazon.titan-embed-text-v2:0`, 1024-dimension) for embeddings
+* **Amazon Bedrock verification**: confirm access to Anthropic Claude (reasoning and tool use) and Amazon Titan Text Embeddings V2 (`amazon.titan-embed-text-v2:0`, 1024-dimension) for embeddings by running a quick Playground smoke test
 * **Region**: use `us-east-1` (US East, N. Virginia) for the widest model availability
 
 == Amazon Bedrock
@@ -17,8 +17,10 @@ Amazon Bedrock is a managed service that provides API access to foundation model
 * **Anthropic Claude** for reasoning, tool selection, and response generation
 * **Amazon Titan Text Embeddings V2** (`amazon.titan-embed-text-v2:0`, 1024 dimensions) for generating vector representations of text chunks
 
-Model access is not enabled by default. You enable access to both models as part of this lab so the coding labs in Part 2 can call them. Use the **US East (N. Virginia) / us-east-1** region for the widest model availability.
+Access to Amazon Bedrock foundation models is enabled by default in commercial AWS regions, so there is no separate model access request step. In this lab you simply verify that Bedrock responds by running a short prompt in the Bedrock Playground. Use the **US East (N. Virginia) / us-east-1** region for the widest model availability.
+
+NOTE: The first time you invoke an Anthropic model in a brand-new account, you may be prompted to complete a one-time use case form. After you submit it, access is granted immediately.
 
 == Next Steps
 
-Continue to xref:lab0-instructions.adoc[Lab 0 Instructions: Sign In to AWS] to sign in and enable Bedrock model access. Then move on to xref:lab1.adoc[Lab 1: Neo4j Aura Setup and Exploration].
+Continue to xref:lab0-instructions.adoc[Lab 0 Instructions: Sign In to AWS] to sign in and verify Bedrock access. Then move on to xref:lab1.adoc[Lab 1: Neo4j Aura Setup and Exploration].

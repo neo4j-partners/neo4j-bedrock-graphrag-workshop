@@ -126,6 +126,33 @@ The schema step is critical. Empty results genuinely mean no matching data rathe
 
 ---
 
+## Guardrails in the System Prompt
+
+Schema grounding tells the agent *what* to query. The system prompt also constrains *how* it queries, through explicit rules baked into the prompt:
+
+- **Read-only allowlist**: permit only `MATCH`, `RETURN`, `WITH`, `WHERE`, `ORDER BY`, `LIMIT`. No `CREATE`, `MERGE`, `SET`, or `DELETE`.
+- **Mandatory `LIMIT`**: cap result size so a broad question cannot flood the context window.
+- **Null safety**: use `COALESCE()` or `IS NOT NULL` for properties that may be missing.
+
+Guardrails turn a capable-but-unpredictable generator into a bounded one, before the query ever reaches the database.
+
+---
+
+## Modern Cypher Rules
+
+The prompt also steers the agent toward current Neo4j 5+ syntax, so generated queries do not fail on removed or deprecated constructs:
+
+- **`elementId(n)`** instead of `id(n)`; `id()` is removed in Neo4j 5+
+- **`COUNT{ pattern }`** instead of `size((pattern))` for counting
+- **`EXISTS{ pattern }`** instead of `exists((pattern))` for existence checks
+- **`$parameter`** syntax for dynamic values, never string concatenation
+
+Parameterization is both a correctness and a safety measure: values are bound, not spliced into query text.
+
+This is prompt engineering as a control surface. The `read_neo4j_cypher` tool still runs `EXPLAIN` as a final backstop, but the prompt keeps most bad queries from being written at all.
+
+---
+
 <style scoped>
 section { font-size: 25px; }
 </style>
@@ -187,6 +214,7 @@ The Cypher Templates pattern (pre-written vector search plus graph traversal) wa
 - **Cypher Templates**: reliable, pre-written queries, covered earlier in Lab 3 and available over MCP in Lab 6
 - **Text2Cypher**: flexible, agent-generated queries after schema discovery, over MCP (Lab 6)
 - **Schema-first**: critical for accurate Cypher generation
+- **Guardrails**: prompt rules constrain Text2Cypher to read-only, limited, modern-syntax queries
 - **Production pattern**: framework-agnostic, one server for any framework, on AWS Marketplace
 
 The agents use the knowledge graph from Labs 1-3 as their intelligence layer.

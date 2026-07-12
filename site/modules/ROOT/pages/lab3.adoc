@@ -73,11 +73,22 @@ Notebook 02 extends vector search with the `VectorCypherRetriever`. After the ve
 ----
 MATCH (node)-[:FROM_DOCUMENT]->(doc:Document)
 OPTIONAL MATCH (doc)<-[:FILED]-(company:Company)
-OPTIONAL MATCH (company)-[:FACES_RISK]->(risk:RiskFactor)
-OPTIONAL MATCH (product:Product)-[:FROM_CHUNK]->(node)
+WITH node, doc, score, company
+RETURN node.text AS text,
+       score,
+       {document: doc.accessionNumber,
+        filingType: doc.filingType,
+        company: company.name,
+        products: collect { MATCH (p:Product)-[:FROM_CHUNK]->(node) RETURN p.name },
+        risks: collect { MATCH (r:RiskFactor)-[:FROM_CHUNK]->(node) RETURN r.name }
+       } AS metadata
 ----
 
-The LLM now receives the matched chunk alongside the filing accession number, company name, product list, and risk factor labels, producing answers grounded in both unstructured text and structured knowledge graph relationships.
+The query traverses from the matched chunk (`node`) to its source document and the company that filed it, then gathers the products and risk factors the chunk mentions. Products and risks are collected with separate `collect { ... }` subqueries scoped to the matched chunk (via `FROM_CHUNK`), not pulled in with additional top-level `MATCH` clauses. Matching two independent fan-outs in the same pattern (every product paired with every risk) would produce a cartesian product; the chunk-scoped `collect { ... }` subqueries keep each list scoped to what the chunk actually mentions and avoid that blow-up.
+
+A custom `result_formatter` then maps each returned record into a `RetrieverResultItem`, separating the chunk text (passed to the LLM as context) from the structured metadata (available for programmatic inspection). Without a formatter, the retriever's default serializes the entire record into a single string, mixing the chunk text and metadata together.
+
+The LLM now receives the matched chunk alongside the filing accession number, filing type, company name, product list, and risk factor labels, producing answers grounded in both unstructured text and structured knowledge graph relationships.
 
 == What the Library Does Under the Hood
 
@@ -132,5 +143,3 @@ This lab covers the **Cypher Templates** pattern from Neo4j's https://graphrag.c
 == Next Steps
 
 Continue to xref:lab3-instructions.adoc[Lab 3 Instructions] to work through the notebooks. After completing this lab, proceed to xref:lab4.adoc[Lab 4: Strands GraphRAG Agent and AgentCore] to wrap this retriever in an agent and deploy it.
-</content>
-</invoke>

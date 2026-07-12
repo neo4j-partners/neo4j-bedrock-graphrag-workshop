@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1300" font-family="'Comic Sans MS','Segoe Print','Bradley Hand',cursive">
+  <defs>
+    <marker id="dd-blue" markerWidth="12" markerHeight="12" refX="8.5" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1971c2"/>
+    </marker>
+    <marker id="dd-green" markerWidth="12" markerHeight="12" refX="8.5" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#2f9e44"/>
+    </marker>
+    <marker id="dd-red" markerWidth="12" markerHeight="12" refX="8.5" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#e03131"/>
+    </marker>
+    <marker id="dd-purple" markerWidth="12" markerHeight="12" refX="8.5" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#9c36b5"/>
+    </marker>
+    <marker id="dd-gray" markerWidth="12" markerHeight="12" refX="8.5" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#adb5bd"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1600" height="1300" fill="#ffffff"/>
+
+  <!-- Title -->
+  <text x="800" y="58" text-anchor="middle" font-size="40" fill="#222">SEC 10-K Financial Data: Dual Database Architecture</text>
+  <text x="800" y="98" text-anchor="middle" font-size="21" fill="#868e96">20 companies  |  ~60 products  |  ~50 risk factors  |  ~15 asset managers  |  ~25K daily prices</text>
+
+  <!-- divider -->
+  <line x1="800" y1="150" x2="800" y2="1250" stroke="#ced4da" stroke-width="2" stroke-dasharray="3 9"/>
+
+  <!-- ===================== LEFT: Amazon S3 Tables lakehouse ===================== -->
+  <rect x="40" y="150" width="730" height="1100" rx="24" fill="#eef4ff" stroke="#4a90e2" stroke-width="3"/>
+  <text x="405" y="210" text-anchor="middle" font-size="34" fill="#2f6fd0">Amazon S3 Tables (Iceberg)</text>
+  <text x="405" y="246" text-anchor="middle" font-size="22" fill="#4a90e2">Time-Series Analytics + Athena SQL</text>
+
+  <!-- companies -->
+  <rect x="110" y="290" width="430" height="80" rx="14" fill="#a5c8ff" stroke="#1971c2" stroke-width="2.5"/>
+  <text x="325" y="338" text-anchor="middle" font-size="24" fill="#0b3d66">companies  (20 rows)</text>
+  <rect x="560" y="302" width="120" height="52" rx="10" fill="#ffec99" stroke="#f08c00" stroke-width="2"/>
+  <text x="620" y="336" text-anchor="middle" font-size="20" fill="#b8730a">shared</text>
+
+  <!-- companies -> daily_prices -->
+  <line x1="325" y1="370" x2="325" y2="428" stroke="#1971c2" stroke-width="2.5" marker-end="url(#dd-blue)"/>
+  <text x="368" y="404" font-size="18" fill="#5a7fa8">ticker</text>
+
+  <!-- daily_prices -->
+  <rect x="110" y="430" width="500" height="100" rx="14" fill="#8bb8f2" stroke="#1971c2" stroke-width="2.5"/>
+  <text x="360" y="472" text-anchor="middle" font-size="24" fill="#0b3d66">daily_prices  (~25,200 rows)</text>
+  <text x="360" y="504" text-anchor="middle" font-size="22" fill="#0b3d66">Partitioned by ticker</text>
+
+  <!-- daily_prices -> price_rollups -->
+  <line x1="325" y1="530" x2="325" y2="588" stroke="#1971c2" stroke-width="2.5" marker-end="url(#dd-blue)"/>
+  <text x="378" y="564" font-size="18" fill="#5a7fa8">aggregation</text>
+
+  <!-- price_rollups -->
+  <rect x="110" y="590" width="430" height="72" rx="14" fill="#a5c8ff" stroke="#1971c2" stroke-width="2.5"/>
+  <text x="325" y="634" text-anchor="middle" font-size="24" fill="#0b3d66">price_rollups  (weekly / monthly)</text>
+
+  <text x="405" y="702" text-anchor="middle" font-size="18" fill="#868e96">open, high, low, close, volume</text>
+  <text x="405" y="730" text-anchor="middle" font-size="18" fill="#868e96">7-day / 30-day / 90-day rolling averages</text>
+  <text x="405" y="758" text-anchor="middle" font-size="18" fill="#868e96">volatility (STDDEV), percent change</text>
+
+  <!-- Optimized For (left) -->
+  <rect x="80" y="800" width="650" height="420" rx="16" fill="none" stroke="#4a90e2" stroke-width="2" stroke-dasharray="9 7"/>
+  <text x="112" y="848" font-size="26" fill="#2f6fd0">Optimized For:</text>
+  <g font-size="22" fill="#37475a">
+    <text x="112" y="900">Daily OHLCV price aggregations (AVG, STDDEV)</text>
+    <text x="112" y="945">Rolling averages (7-day, 30-day, 90-day)</text>
+    <text x="112" y="990">Volatility and trend analysis over time</text>
+    <text x="112" y="1035">Cross-company price correlation</text>
+    <text x="112" y="1080">Sector-level performance aggregations</text>
+    <text x="112" y="1125">Natural language queries via Amazon Quick Suite</text>
+    <text x="112" y="1170">SQL-based reporting &amp; dashboards (Athena)</text>
+  </g>
+
+  <!-- ===================== RIGHT: Neo4j Aura ===================== -->
+  <rect x="830" y="150" width="730" height="1100" rx="24" fill="#e8fbf8" stroke="#2bb3a3" stroke-width="3"/>
+  <text x="1195" y="210" text-anchor="middle" font-size="34" fill="#1a9e8f">Neo4j Aura (Knowledge Graph)</text>
+  <text x="1195" y="246" text-anchor="middle" font-size="22" fill="#2bb3a3">Relationships + Traversals + Cypher</text>
+
+  <!-- edges (drawn before nodes) -->
+  <!-- OFFERS: Company -> Product -->
+  <line x1="1110" y1="356" x2="1035" y2="432" stroke="#2f9e44" stroke-width="2.5" marker-end="url(#dd-green)"/>
+  <text x="1038" y="400" text-anchor="middle" font-size="18" fill="#2f9e44">OFFERS</text>
+  <!-- FACES_RISK: Company -> RiskFactor -->
+  <line x1="1185" y1="360" x2="1228" y2="442" stroke="#2f9e44" stroke-width="2.5" marker-end="url(#dd-green)"/>
+  <text x="1258" y="408" text-anchor="middle" font-size="18" fill="#2f9e44">FACES_RISK</text>
+  <!-- OWNS: AssetManager -> Product -->
+  <line x1="992" y1="570" x2="1007" y2="514" stroke="#e03131" stroke-width="2.5" marker-end="url(#dd-red)"/>
+  <text x="946" y="548" text-anchor="middle" font-size="18" fill="#e03131">OWNS</text>
+  <!-- COMPETES_WITH / PARTNERS_WITH self loop on Company -->
+  <path d="M1073,306 C1008,283 1008,343 1056,333" fill="none" stroke="#adb5bd" stroke-width="2" stroke-dasharray="8 6" marker-end="url(#dd-gray)"/>
+  <text x="960" y="300" text-anchor="middle" font-size="16" fill="#868e96">COMPETES_WITH</text>
+  <text x="960" y="322" text-anchor="middle" font-size="16" fill="#868e96">PARTNERS_WITH</text>
+  <!-- FILED: Company -> Document -->
+  <line x1="1245" y1="318" x2="1348" y2="326" stroke="#9c36b5" stroke-width="2.5" marker-end="url(#dd-purple)"/>
+  <text x="1300" y="300" text-anchor="middle" font-size="18" fill="#9c36b5">FILED</text>
+  <!-- FROM_DOCUMENT: Chunk -> Document -->
+  <line x1="1445" y1="480" x2="1445" y2="372" stroke="#9c36b5" stroke-width="2.5" marker-end="url(#dd-purple)"/>
+  <text x="1434" y="432" text-anchor="end" font-size="16" fill="#9c36b5">FROM_DOCUMENT</text>
+
+  <!-- nodes -->
+  <!-- Company (shared, green) -->
+  <ellipse cx="1150" cy="320" rx="95" ry="42" fill="#d3f9d8" stroke="#2f9e44" stroke-width="3"/>
+  <text x="1150" y="328" text-anchor="middle" font-size="23" fill="#1e7a33">Company (20)</text>
+  <!-- Product (red) -->
+  <ellipse cx="1010" cy="470" rx="88" ry="40" fill="#ffe3e3" stroke="#e03131" stroke-width="2.5"/>
+  <text x="1010" y="478" text-anchor="middle" font-size="22" fill="#c92a2a">Product (~60)</text>
+  <!-- RiskFactor (red) -->
+  <ellipse cx="1240" cy="480" rx="95" ry="40" fill="#ffe3e3" stroke="#e03131" stroke-width="2.5"/>
+  <text x="1240" y="488" text-anchor="middle" font-size="22" fill="#c92a2a">RiskFactor (~50)</text>
+  <!-- AssetManager (red) -->
+  <ellipse cx="985" cy="610" rx="100" ry="42" fill="#ffe3e3" stroke="#e03131" stroke-width="2.5"/>
+  <text x="985" y="618" text-anchor="middle" font-size="21" fill="#c92a2a">AssetManager (~15)</text>
+  <!-- Document (purple) -->
+  <ellipse cx="1440" cy="330" rx="88" ry="38" fill="#f3e8fd" stroke="#9c36b5" stroke-width="2.5"/>
+  <text x="1440" y="338" text-anchor="middle" font-size="21" fill="#862e9c">Document (~20)</text>
+  <!-- Chunk (purple) -->
+  <ellipse cx="1445" cy="520" rx="85" ry="38" fill="#f3e8fd" stroke="#9c36b5" stroke-width="2.5"/>
+  <text x="1445" y="528" text-anchor="middle" font-size="21" fill="#862e9c">Chunk (~480)</text>
+  <text x="1445" y="580" text-anchor="middle" font-size="17" fill="#868e96">text + embedding</text>
+
+  <!-- Legend -->
+  <rect x="870" y="700" width="620" height="150" rx="16" fill="none" stroke="#adb5bd" stroke-width="2" stroke-dasharray="9 7"/>
+  <circle cx="910" cy="742" r="13" fill="#d3f9d8" stroke="#2f9e44" stroke-width="2.5"/>
+  <text x="940" y="750" font-size="21" fill="#37475a">Shared with Lakehouse</text>
+  <circle cx="910" cy="782" r="13" fill="#ffe3e3" stroke="#e03131" stroke-width="2.5"/>
+  <text x="940" y="790" font-size="21" fill="#37475a">Neo4j only (graph-exclusive)</text>
+  <circle cx="910" cy="822" r="13" fill="#f3e8fd" stroke="#9c36b5" stroke-width="2.5"/>
+  <text x="940" y="830" font-size="21" fill="#37475a">GraphRAG / Semantic Search</text>
+
+  <!-- Optimized For (right) -->
+  <rect x="870" y="880" width="640" height="340" rx="16" fill="none" stroke="#2bb3a3" stroke-width="2" stroke-dasharray="9 7"/>
+  <text x="902" y="928" font-size="26" fill="#1a9e8f">Optimized For:</text>
+  <g font-size="21" fill="#2a5c52">
+    <text x="902" y="978">Multi-hop relationship traversals (no JOINs)</text>
+    <text x="902" y="1018">Competitive landscape: Company &gt; COMPETES_WITH &gt; Company</text>
+    <text x="902" y="1058">Risk propagation across connected companies</text>
+    <text x="902" y="1098">Portfolio overlap: AssetManager &gt; OWNS &gt; Company</text>
+    <text x="902" y="1138">Vector + fulltext search on 10-K filings</text>
+    <text x="902" y="1178">GraphRAG retrieval with entity extraction</text>
+  </g>
+</svg>

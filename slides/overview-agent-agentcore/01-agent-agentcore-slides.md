@@ -98,7 +98,7 @@ bedrock_model = BedrockModel(
 agent = Agent(
     model=bedrock_model,
     system_prompt="You are a financial research assistant.",
-    tools=[graphrag_search],  # defined on the next slide
+    tools=[semantic_search, graph_enriched_search],  # two tools
 )
 ```
 
@@ -107,20 +107,33 @@ agent = Agent(
 ## Tools with the @tool Decorator
 
 - **Tool**: a Python function the LLM can call
-- **Wraps a retriever**: this tool calls a `VectorCypherRetriever` for graph-enriched context
 - **Docstring**: becomes the tool description the LLM reads to decide when to call it
-- **Return value**: chunks plus connected entities the agent interprets
+- **Return value**: text the agent interprets, then reasons over
+
+This agent exposes **two** tools, each wrapping a different retriever. The model reads both docstrings and chooses per question.
 
 ```python
 @tool
-def graphrag_search(query: str, top_k: int = 5) -> str:
-    """Search SEC 10-K filings with graph-enriched context.
+def semantic_search(query: str, top_k: int = 5) -> str:
+    """Search filing chunks by meaning. Use for broad or
+    thematic questions where the text alone answers."""
 
-    Use for questions about specific companies, products, or
-    risk factors. Graph traversal adds connected entities to
-    each retrieved chunk.
-    """
+@tool
+def graph_enriched_search(query: str, top_k: int = 5) -> str:
+    """Search chunks AND return connected entities. Use for
+    questions about specific companies, products, or risks."""
 ```
+
+---
+
+## Two Retrieval Strategies, One Agent
+
+The agent wraps **two** retrievers from Lab 3 as separate tools:
+
+- **`semantic_search`** (plain vector search, `VectorRetriever`): returns chunks ranked by meaning. Best for broad or thematic questions where the text alone answers.
+- **`graph_enriched_search`** (vector plus Cypher, `VectorCypherRetriever`): returns those chunks *and* the entities each one connects to (companies, products, risk factors). Best when the question names specific companies or relationships.
+
+The system prompt describes both strategies. The model reasons about the question and calls the one that fits, so the choice is the model's, not hand-written routing logic.
 
 ---
 
@@ -146,7 +159,41 @@ Lab 4 deploys the **GraphRAG agent you just built** to **AgentCore Runtime**, th
 3. Run the toolkit's deploy step: it uploads to S3 and provisions an isolated microVM
 4. Invoke the deployed agent over a **REST endpoint**, via the `agentcore` CLI or `boto3`
 
-Each session runs in an **isolated microVM** with dedicated CPU, memory, and filesystem, terminated and sanitized after completion. No infrastructure to manage, and the endpoint scales on demand.
+Each session runs in an **isolated microVM** with dedicated CPU, memory, and filesystem. No infrastructure to manage, and the endpoint scales on demand.
+
+---
+
+## The AgentCore Handler Contract
+
+Deployment wraps the same agent code in two AgentCore primitives:
+
+- **`app = BedrockAgentCoreApp()`**: the application object the runtime hosts
+- **`@app.entrypoint`**: marks the one handler the runtime calls for every request
+
+```python
+app = BedrockAgentCoreApp()
+
+@app.entrypoint
+async def invoke(payload: dict = None):
+    prompt = payload.get("prompt")
+    agent = Agent(model=model, system_prompt=SYSTEM_PROMPT, tools=TOOLS)
+    response = agent(prompt)
+    yield {"type": "chunk", "data": str(response)}
+    yield {"type": "complete"}
+```
+
+The handler pulls the `prompt` out of the request payload and **yields** result events the runtime streams back to the caller.
+
+---
+
+## Warm microVM: Build Once, Fresh Agent Per Request
+
+The runtime keeps a microVM **warm** between requests, so the code splits work by lifetime:
+
+- **Module level, once per microVM**: build the Neo4j driver, embedder, and both retrievers. These are expensive, so they are created when the module loads and reused across invocations while the microVM stays warm.
+- **Per request, inside the handler**: build a **fresh `Agent`** each time. A new agent means no conversation state leaks between requests that happen to share the same warm microVM.
+
+Expensive shared resources persist; per-conversation state does not.
 
 ---
 
@@ -154,8 +201,8 @@ Each session runs in an **isolated microVM** with dedicated CPU, memory, and fil
 
 - **ReAct pattern**: reason, act, observe, repeat, the foundation for the GraphRAG agent
 - **Strands SDK**: model-driven, AWS-native, tools defined with the `@tool` decorator
-- **GraphRAG tool**: wraps the `VectorCypherRetriever` so the agent answers from chunks plus connected entities
+- **Two retrieval tools**: `semantic_search` (plain vector) and `graph_enriched_search` (vector plus Cypher); the model picks per question
 - **Specialized graph agent**: one focused job, ready to slot behind a supervisor in production
-- **AgentCore Runtime**: deploy your own agent with the `bedrock-agentcore-starter-toolkit` and invoke it over REST
+- **AgentCore Runtime**: an app plus an `@app.entrypoint` handler; retrievers built once on a warm microVM, a fresh agent per request
 
 You build the agent, then deploy the exact artifact from the opening demo.

@@ -1,6 +1,6 @@
 = Lab 0 Instructions: Sign In to AWS
 
-Follow these steps to sign in to AWS and enable Amazon Bedrock model access for the coding labs.
+Follow these steps to sign in to AWS and verify Amazon Bedrock access for the coding labs.
 
 TIP: For concepts and background, see xref:lab0.adoc[Lab 0: Sign In to AWS].
 
@@ -56,13 +56,41 @@ Amazon Bedrock is available in select regions. For this workshop, use **US East 
 1. Click the region selector in the top-right corner of the console
 2. Select **US East (N. Virginia)**
 
-== Enable Bedrock Model Access
+== Verify Bedrock Access
+
+Access to Amazon Bedrock foundation models is enabled by default in commercial AWS regions, so there is no separate model access request step. Instead, you verify that Bedrock responds by running a short prompt in the Bedrock Playground.
 
 1. In the AWS Console search bar, type **Bedrock** and select **Amazon Bedrock**
-2. In the left sidebar, click **Model access** to verify which models are available
+2. In the left sidebar under **Test**, click **Playground**
+3. Click **Select model**, choose **Anthropic** as the provider, select the Claude model, then click **Apply**
+4. Enter the following test prompt and run it:
++
+[quote]
+____
+In 2-3 sentences, explain what GraphRAG is and why a knowledge graph like Neo4j can improve retrieval-augmented generation compared to plain vector search.
+____
+5. If you get a response, your Bedrock access is working and you are ready for the labs.
 
-NOTE: If this is your first time using Bedrock, you may need to request access to specific models. Click **Manage model access**, enable **Amazon Titan Text Embeddings V2** (usually approved instantly) and **Anthropic Claude** (may take a few minutes), then click **Save changes**.
+NOTE: The first time you invoke an Anthropic model in a brand-new account, you may be prompted to complete a one-time use case form. After you submit it, access is granted immediately.
+
+== Troubleshooting
+
+=== "Access Denied" when accessing Bedrock
+
+* Verify your IAM user has the `AmazonBedrockFullAccess` policy attached
+* Check that you are in a supported region (`us-east-1` recommended)
+
+=== Model returns "Access Denied" on first invoke
+
+* Foundation model access is enabled by default, but the account needs AWS Marketplace permissions for the automatic subscription to complete
+* For a brand-new account, complete the one-time Anthropic use case form when prompted, then retry
+* Confirm the account has a valid payment method configured
+
+=== Cannot find Bedrock in services
+
+* Ensure you are in a region that supports Bedrock
+* Try switching to **US East (N. Virginia) / us-east-1**
 
 == Next Steps
 
-With AWS sign-in complete and Bedrock model access enabled, continue to xref:lab1.adoc[Lab 1: Neo4j Aura Setup and Exploration].
+With AWS sign-in complete and Bedrock access verified, continue to xref:lab1.adoc[Lab 1: Neo4j Aura Setup and Exploration].

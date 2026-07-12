@@ -1,13 +1,14 @@
 = Lab 4: Strands GraphRAG Agent and AgentCore
 
-In Lab 3 you built retrieval pipelines where the developer decided which retriever to run for each question. This lab hands that decision to the model. You wrap the `VectorCypherRetriever` from Lab 3 as a Strands `@tool` function, build a Strands agent around it, and then deploy that agent to Amazon Bedrock AgentCore Runtime so every attendee has their own REST-invokable GraphRAG agent. This is the agent behind the workshop's opening hero-question demo.
+In Lab 3 you built retrieval pipelines where the developer decided which retriever to run for each question. This lab hands that decision to the model. You wrap *both* retrievers from Lab 3 as Strands `@tool` functions, `semantic_search` (the `VectorRetriever`) and `graph_enriched_search` (the `VectorCypherRetriever`), build a Strands agent that chooses between them per question, then deploy that agent to Amazon Bedrock AgentCore Runtime so every attendee has their own REST-invokable GraphRAG agent. This is the agent behind the workshop's opening hero-question demo.
 
 TIP: Ready to start? Jump to the xref:lab4-instructions.adoc[Lab 4 Instructions] for the step-by-step notebook walkthrough.
 
 .**At a Glance**
 
-* **Wrap retrieval as a tool**: expose the Lab 3 `VectorCypherRetriever` as a Strands `@tool` function
-* **Build the agent**: combine `Agent`, `BedrockModel`, and the retrieval tool into a ReAct loop that answers SEC 10-K questions
+* **Wrap retrieval as tools**: expose both Lab 3 retrievers as Strands `@tool` functions, `semantic_search` and `graph_enriched_search`
+* **Build the agent**: combine `Agent`, `BedrockModel`, and the two tools into a ReAct loop that picks a retrieval strategy per question
+* **Inspect tool selection**: walk the ReAct history in `agent.messages` to see which tool the agent called and why
 * **Deploy to AgentCore**: use `direct_code_deploy` to host the agent on Bedrock AgentCore Runtime
 * **Invoke remotely**: call the deployed agent through a REST endpoint via boto3 or the agentcore CLI
 
@@ -15,13 +16,22 @@ TIP: Ready to start? Jump to the xref:lab4-instructions.adoc[Lab 4 Instructions]
 
 The `GraphRAG` pipeline in Lab 3 runs one retriever per call and returns an answer. It works well when you already know the retrieval strategy. Real questions are more varied. Some need a single passage, others need the company, its products, and its risk factors traversed from that passage.
 
-A Strands agent moves that choice into a reasoning loop. You give the agent a tool and a description of what it does, and the model decides when to call it, reads the results, and either answers or calls again. This is the same `Agent` plus `BedrockModel` plus `@tool` pattern from the agent fundamentals material, now backed by a tool that searches your knowledge graph.
+A Strands agent moves that choice into a reasoning loop. You give the agent tools and a description of what each one does, and the model decides which to call, reads the results, and either answers or calls again. This is the same `Agent` plus `BedrockModel` plus `@tool` pattern from the agent fundamentals material, now backed by tools that search your knowledge graph.
 
-To wrap the retriever, you define a Python function that takes a natural-language query, runs the `VectorCypherRetriever` against the `chunkEmbeddings` index, traverses the graph to companies, products, and risk factors, and returns the formatted context. The `@tool` decorator turns that function into a tool the agent can call. The function's docstring tells the model what the tool retrieves and when to use it, so write it as instructions to the model rather than notes to a developer.
+You wrap the two Lab 3 retrievers as two tools:
 
-image::agent_tools.png[Strands agent with a GraphRAG tool,800]
+* `semantic_search` runs the `VectorRetriever` over the `chunkEmbeddings` index and returns matched chunks with similarity scores. It fits broad or thematic questions where the text alone answers.
+* `graph_enriched_search` runs the `VectorCypherRetriever` over the same index, then traverses the graph to the filing company, its products, and its risk factors, returning the chunk text plus that structured entity context. It fits entity-specific questions.
 
-When the agent receives a question like "What cybersecurity risks does Apple face?", the ReAct loop reasons that graph-enriched retrieval fits, calls the tool, reads the chunk text along with the filing company, products, and risk factors, and composes a grounded answer. The agent traverses the graph without any hardcoded retrieval logic in the caller.
+The `@tool` decorator turns each function into a tool the agent can call. The function's docstring tells the model what the tool retrieves and when to use it, so write it as instructions to the model rather than notes to a developer. The system prompt then reinforces the split: `semantic_search` for broad or thematic questions, `graph_enriched_search` when the question involves specific companies or relationships.
+
+image::agent_tools.png[Strands agent choosing between two GraphRAG tools,800]
+
+The point of the lab is the agent *choosing* between the two strategies. When it receives a broad question like "Summarize the key themes across the 10-K filings", the ReAct loop reasons that plain semantic search suffices and calls `semantic_search`. When it receives an entity-specific question like "What cybersecurity risks does Apple face?", it calls `graph_enriched_search`, reads the chunk text along with the filing company, products, and risk factors, and composes a grounded answer. A comparison such as "Compare the risk factors between Apple and Microsoft" may drive several tool calls. The agent traverses the graph without any hardcoded retrieval logic in the caller.
+
+=== Inspecting Tool Selection
+
+Because the model, not the developer, picks the strategy, you want to see what it chose. After each invocation the agent's conversation history in `agent.messages` holds every message in the ReAct loop. Iterate the messages and read the `toolUse` blocks (the tool name and its input) and the `toolResult` blocks (the data the tool returned) to confirm which retriever the agent selected for a given question and what it got back.
 
 For agent fundamentals (the ReAct loop, tools, and the Bedrock model wiring), see xref:appendix-agent.adoc[the agent fundamentals appendix].
 
@@ -33,19 +43,43 @@ A local agent runs only while your notebook is open. To make it a service that o
 
 AgentCore Runtime is serverless hosting for agents. Each agent session runs in its own isolated microVM, so sessions do not share memory or state. The runtime auto-scales with demand, exposes the agent through a REST endpoint, and leaves you with no servers, containers, or clusters to manage. You deploy agent code and get back an invokable endpoint.
 
+=== The App and Entrypoint Handler Contract
+
+To run under AgentCore Runtime, the agent code follows a small contract from the `bedrock-agentcore` SDK. You create a `BedrockAgentCoreApp` at module level and decorate one async handler with `@app.entrypoint`. The runtime calls that handler for each request, passing a `payload` dict; the handler reads the prompt (from a `prompt`, `message`, `query`, or `input` key), runs the agent, and *yields* result events (chunks, a completion marker, or an error). A final `if __name__ == "__main__": app.run(port=8080)` lets the same file run locally for testing.
+
+The deployed `agent.py` reuses the exact retrievers and tools from notebook 01: it imports `SYSTEM_PROMPT`, `build_retrievers`, and `make_tools` from the shared `graphrag_agent.py`, so the deployed agent is the same two-tool GraphRAG agent you tested locally.
+
+=== The Warm-microVM Initialization Pattern
+
+An AgentCore microVM stays warm between requests, so how the code splits work between module load and the request handler matters. The Neo4j driver, the Bedrock embedder, and the two retrievers are expensive to build, so `agent.py` builds them *once* at module level (via `build_retrievers` and `make_tools`) and reuses them across invocations while the microVM is warm.
+
+The `Agent` itself is different. It accumulates conversation state in `agent.messages`, so a module-level agent shared across requests would leak one caller's history into the next. The handler therefore constructs a *fresh* `Agent` (with a `BedrockModel` and the shared `TOOLS`) on every request. Heavy shared resources are built once; per-request state is isolated.
+
+NOTE: The runtime has no `CONFIG.txt`. The Neo4j and Bedrock values come from module-level constants that the deploy notebook templates in from your `CONFIG.txt`, rather than from `build_graphrag_agent()` (which reads `CONFIG.txt` and is only for notebooks).
+
 === Deploying with direct_code_deploy
 
 This lab uses the `direct_code_deploy` path from the https://github.com/aws/bedrock-agentcore-starter-toolkit[bedrock-agentcore-starter-toolkit]. It packages your agent from source, with no Dockerfile to write:
 
-* **The deployment package** is your agent code (`agent.py`) plus a `pyproject.toml` that declares its dependencies.
-* **A `.bedrock_agentcore.yaml` config** specifies the entrypoint, the runtime, and the IAM execution role the agent assumes at run time.
-* **Running the deploy** packages the code, uploads it to S3, and creates the AgentCore runtime for you.
+* **The deployment package** is your agent code (`agent.py`), the imported `graphrag_agent.py`, and a `pyproject.toml` that declares its dependencies. Only the `agentcore_deploy/` directory is bundled.
+* **A `.bedrock_agentcore.yaml` config** specifies the entrypoint, the runtime, and the AWS settings. The notebook generates it programmatically to avoid interactive CLI prompts.
+* **Running the deploy** packages the code, cross-compiles the dependencies for Linux ARM64 using prebuilt wheels, uploads to S3, and creates the AgentCore runtime for you.
 
-Once the runtime is created, you invoke the agent through its REST endpoint. From Python that is the `bedrock-agentcore` boto3 client calling `invoke_agent_runtime` with the agent ARN and your prompt. You can also invoke it from the `agentcore` CLI. Every attendee ends up with their own deployed agent ARN they can call on demand.
+The generated config sets these fields under the agent entry:
+
+* `deployment_type: direct_code_deploy` and `language: python`.
+* `runtime_type: PYTHON_3_13` (the runtime Python version).
+* `platform: linux/arm64` (the runtime CPU architecture).
+* An `aws` block with `execution_role_auto_create: True` (the toolkit creates the runtime execution role), `s3_auto_create: True`, and `ecr_auto_create: False`.
+* `network_configuration` (`network_mode: PUBLIC`), `protocol_configuration` (`server_protocol: HTTP`), and `observability` (`enabled: True`).
+
+Because the runtime is ARM64, the toolkit cross-compiles dependencies for `linux/arm64` from prebuilt wheels rather than building on your machine, so no Docker is required. `neo4j-graphrag` ships as a pure-Python wheel on PyPI and installs cleanly under this cross-compilation.
+
+Once the runtime is created, you invoke the agent through its REST endpoint. From Python that is the `bedrock-agentcore` boto3 client calling `invoke_agent_runtime` with the agent ARN and your prompt. You can also invoke it from the `agentcore` CLI with `agentcore invoke`. The deploy command is `agentcore deploy --auto-update-on-conflict` (the flag updates the agent in place if it already exists), and `agentcore destroy` removes it. Every attendee ends up with their own deployed agent ARN they can call on demand.
 
 === IAM and Hosted Environments
 
-The AgentCore deployment depends on IAM resources that the workshop administrator provisions ahead of time, including the execution role the runtime assumes. See xref:admin-setup.adoc[the admin setup guide] for what is created.
+The AgentCore deployment depends on IAM resources that the workshop administrator provisions ahead of time, including the execution role the runtime assumes. See xref:admin-setup.adoc[the admin setup guide] for what is created. As a preflight, notebook 02 detects your SageMaker execution role and checks that the `BedrockAgentCoreLabDeployPolicy` deployment policy is attached before it tries to deploy, so a missing permission fails early with a clear message rather than mid-deploy.
 
 NOTE: In hosted OneBlink environments the deploy step may lack the permissions to create the runtime. If that happens, review the deployment code in the notebook to understand each step, then run the full deploy later in your own AWS account where you hold the required permissions.
 
@@ -71,4 +105,3 @@ Notebook 02 is optional. It reads your Neo4j credentials from `CONFIG.txt` and w
 == Next Steps
 
 Continue to xref:lab4-instructions.adoc[Lab 4 Instructions] to work through the notebook. After completing this lab, move on to Part 3, xref:lab5.adoc[Lab 5: Agent Memory with Neo4j], and Part 4, xref:lab6.adoc[Lab 6: Neo4j MCP Agent]. For a refresher on agent fundamentals, see xref:appendix-agent.adoc[the agent fundamentals appendix].
-</content>

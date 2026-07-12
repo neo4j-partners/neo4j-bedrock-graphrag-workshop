@@ -9,7 +9,7 @@ TIP: Ready to start? Jump to the xref:lab5-instructions.adoc[Lab 5 Instructions]
 .**At a Glance**
 
 * **The stateless problem**: why an agent that starts every call from zero context fails in multi-turn conversations
-* **Short-term and long-term memory**: recent turns versus extracted entities and facts, both in Neo4j
+* **Short-term and long-term memory**: recent turns versus durable entities and facts you write explicitly, both in Neo4j
 * **One database, two roles**: Neo4j as the GraphRAG knowledge graph and the agent memory store at the same time
 * **A three-turn demo**: reference resolution and cross-turn summary powered by memory
 
@@ -30,7 +30,7 @@ A stateless agent handles the first question and loses it. On the second questio
 The https://github.com/neo4j-labs/agent-memory[neo4j-agent-memory] library gives the agent two kinds of memory backed by Neo4j:
 
 * **Short-term memory** holds the recent conversation turns verbatim: the questions asked and the answers given. This is what lets the agent resolve "their" to Apple, because the prior turn is still available.
-* **Long-term memory** holds entities and facts extracted from the conversation over time. Instead of storing raw text, it distills durable knowledge such as "the user is interested in Apple" or "Apple competes with Samsung," which persists beyond the current session.
+* **Long-term memory** holds durable entities, facts, and preferences that you write explicitly, such as "Apple is an organization" or "Apple competes with Microsoft," which persist beyond the current session. There is no automatic extractor LLM: the notebooks configure `ExtractorType.NONE` and record long-term knowledge with deliberate `add_entity`, `add_fact`, and `add_preference` calls, so what the agent remembers is developer-controlled rather than inferred from raw text.
 
 Together they mirror how people converse. Short-term memory tracks the thread of the current discussion, and long-term memory retains what matters after the discussion ends.
 
@@ -73,7 +73,7 @@ You take the Lab 4 Strands GraphRAG agent and wrap it with neo4j-agent-memory ac
 `02_long_term_memory.ipynb`, the durable knowledge layer:
 
 * Persist entities, facts, and preferences with `add_entity`, `add_fact`, and `add_preference`.
-* Recall them from a brand-new session with `search_entities` and `long_term.get_context`, showing the knowledge is not tied to a single conversation.
+* Recall them from a brand-new session with the matching semantic lookups, `search_entities`, `search_facts`, and `search_preferences`, plus `long_term.get_context`, showing the knowledge is not tied to a single conversation.
 
 The GraphRAG tool from Lab 4 stays the same. Memory wraps around it. Notebook `01` imports the Lab 4 agent directly rather than rebuilding it, so everything new is the memory layer.
 

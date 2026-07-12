@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 620" font-family="'Comic Sans MS','Segoe Print','Bradley Hand',cursive">
+  <defs>
+    <marker id="dp-blue" markerWidth="12" markerHeight="12" refX="8.5" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1971c2"/>
+    </marker>
+    <marker id="dp-orange" markerWidth="12" markerHeight="12" refX="8.5" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#e8590c"/>
+    </marker>
+    <marker id="dp-green" markerWidth="12" markerHeight="12" refX="8.5" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#2f9e44"/>
+    </marker>
+    <marker id="dp-teal" markerWidth="12" markerHeight="12" refX="8.5" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1098ad"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1500" height="620" fill="#ffffff"/>
+
+  <!-- Title -->
+  <text x="40" y="58" font-size="42" fill="#222">Data Pipeline</text>
+
+  <!-- ===== Group A: Amazon S3 Tables ===== -->
+  <rect x="40" y="100" width="310" height="480" rx="20" fill="#f6f2ff" stroke="#7048e8" stroke-width="2.5" stroke-dasharray="10 8"/>
+  <text x="195" y="140" text-anchor="middle" font-size="26" fill="#6741d9">Amazon S3 Tables</text>
+  <text x="195" y="168" text-anchor="middle" font-size="18" fill="#845ef7">(Apache Iceberg)</text>
+
+  <rect x="70" y="195" width="250" height="150" rx="16" fill="#dbe4ff" stroke="#1971c2" stroke-width="2.5"/>
+  <text x="195" y="240" text-anchor="middle" font-size="24" fill="#1a4d80">CSV Seed Data</text>
+  <text x="195" y="288" text-anchor="middle" font-size="18" fill="#1a4d80">companies, products,</text>
+  <text x="195" y="314" text-anchor="middle" font-size="18" fill="#1a4d80">risk factors, ownership</text>
+
+  <rect x="70" y="420" width="250" height="100" rx="16" fill="#ffe3c9" stroke="#e8590c" stroke-width="2.5"/>
+  <text x="195" y="478" text-anchor="middle" font-size="24" fill="#b34700">10-K Filing Text</text>
+
+  <!-- ===== Group B: Amazon SageMaker ===== -->
+  <rect x="430" y="100" width="330" height="480" rx="20" fill="#f6f2ff" stroke="#7048e8" stroke-width="2.5" stroke-dasharray="10 8"/>
+  <text x="595" y="150" text-anchor="middle" font-size="26" fill="#6741d9">Amazon SageMaker</text>
+
+  <rect x="465" y="200" width="260" height="140" rx="16" fill="#dbe4ff" stroke="#1971c2" stroke-width="2.5"/>
+  <text x="595" y="262" text-anchor="middle" font-size="24" fill="#1a4d80">Load Nodes &amp;</text>
+  <text x="595" y="292" text-anchor="middle" font-size="24" fill="#1a4d80">Relationships</text>
+
+  <rect x="465" y="390" width="260" height="155" rx="16" fill="#ffe3c9" stroke="#e8590c" stroke-width="2.5"/>
+  <text x="595" y="440" text-anchor="middle" font-size="24" fill="#b34700">Chunk + Embed</text>
+  <text x="595" y="488" text-anchor="middle" font-size="18" fill="#b34700">FixedSizeSplitter +</text>
+  <text x="595" y="514" text-anchor="middle" font-size="18" fill="#b34700">Titan Embeddings</text>
+
+  <!-- ===== flow arrows into SageMaker ===== -->
+  <line x1="322" y1="270" x2="461" y2="270" stroke="#1971c2" stroke-width="3" marker-end="url(#dp-blue)"/>
+  <line x1="322" y1="470" x2="461" y2="467" stroke="#e8590c" stroke-width="3" marker-end="url(#dp-orange)"/>
+
+  <!-- ===== Neo4j Aura hero ===== -->
+  <rect x="885" y="245" width="255" height="130" rx="18" fill="#d3f9d8" stroke="#2f9e44" stroke-width="3"/>
+  <text x="1012" y="325" text-anchor="middle" font-size="34" fill="#1e7a33">Neo4j Aura</text>
+
+  <!-- SageMaker -> Neo4j -->
+  <line x1="727" y1="270" x2="881" y2="295" stroke="#1971c2" stroke-width="3" marker-end="url(#dp-blue)"/>
+  <line x1="727" y1="465" x2="881" y2="340" stroke="#e8590c" stroke-width="3" marker-end="url(#dp-orange)"/>
+
+  <!-- ===== outputs ===== -->
+  <rect x="815" y="450" width="185" height="120" rx="16" fill="#d3f9d8" stroke="#2f9e44" stroke-width="2.5"/>
+  <text x="907" y="502" text-anchor="middle" font-size="21" fill="#1e7a33">Nodes &amp;</text>
+  <text x="907" y="528" text-anchor="middle" font-size="21" fill="#1e7a33">Relationships</text>
+
+  <rect x="1025" y="450" width="195" height="120" rx="16" fill="#c5f6fa" stroke="#1098ad" stroke-width="2.5"/>
+  <text x="1122" y="492" text-anchor="middle" font-size="21" fill="#0b6b7a">Vector Index</text>
+  <text x="1122" y="522" text-anchor="middle" font-size="17" fill="#0b6b7a">chunkEmbeddings</text>
+  <text x="1122" y="544" text-anchor="middle" font-size="17" fill="#0b6b7a">1024 dims</text>
+
+  <rect x="1245" y="450" width="215" height="120" rx="16" fill="#c5f6fa" stroke="#1098ad" stroke-width="2.5"/>
+  <text x="1352" y="492" text-anchor="middle" font-size="21" fill="#0b6b7a">Fulltext Indexes</text>
+  <text x="1352" y="522" text-anchor="middle" font-size="17" fill="#0b6b7a">search_chunks</text>
+  <text x="1352" y="544" text-anchor="middle" font-size="17" fill="#0b6b7a">search_entities</text>
+
+  <!-- Neo4j -> outputs -->
+  <line x1="990" y1="378" x2="920" y2="446" stroke="#2f9e44" stroke-width="2.5" marker-end="url(#dp-green)"/>
+  <line x1="1030" y1="378" x2="1105" y2="446" stroke="#1098ad" stroke-width="2.5" marker-end="url(#dp-teal)"/>
+  <line x1="1075" y1="375" x2="1320" y2="446" stroke="#1098ad" stroke-width="2.5" marker-end="url(#dp-teal)"/>
+</svg>

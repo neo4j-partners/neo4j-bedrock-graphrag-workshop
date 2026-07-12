@@ -1,13 +1,14 @@
 = Lab 4 Instructions: Strands GraphRAG Agent and AgentCore
 
-Follow this notebook to build a Strands agent that wraps the Lab 3 `VectorCypherRetriever` as a tool, test it locally against your knowledge graph, then deploy it to Amazon Bedrock AgentCore Runtime and invoke it over REST.
+Follow these notebooks to build a Strands agent that wraps *both* Lab 3 retrievers as tools, `semantic_search` (the `VectorRetriever`) and `graph_enriched_search` (the `VectorCypherRetriever`), and lets the model choose between them per question. You test it locally against your knowledge graph, then deploy it to Amazon Bedrock AgentCore Runtime and invoke it over REST.
 
 TIP: For concepts and background, see xref:lab4.adoc[Lab 4: Strands GraphRAG Agent and AgentCore].
 
 == What You'll Learn
 
-* **Wrap retrieval as a tool**: expose the Lab 3 `VectorCypherRetriever` as a Strands `@tool` function
-* **Build and test the agent**: create an `Agent` with a `BedrockModel` and the retrieval tool, then run natural-language SEC 10-K questions locally
+* **Wrap retrieval as tools**: expose both Lab 3 retrievers as Strands `@tool` functions, `semantic_search` and `graph_enriched_search`
+* **Build and test the agent**: create an `Agent` with a `BedrockModel` and the two tools, then run natural-language SEC 10-K questions locally and watch the model pick a retriever per question
+* **Inspect tool selection**: walk the ReAct history in `agent.messages` to see the `toolUse` and `toolResult` blocks for each turn
 * **Deploy to AgentCore**: package and deploy the agent with `direct_code_deploy` from the bedrock-agentcore-starter-toolkit
 * **Invoke remotely**: call the deployed agent through its REST endpoint via boto3 and the agentcore CLI
 
@@ -38,17 +39,197 @@ The notebooks live in `Lab_4_GraphRAG_Agent/`.
 
 === Walkthrough: Notebook 01 (build and test)
 
-. **Build the retrieval tool.** Wrap the Lab 3 `VectorCypherRetriever` in a Python function decorated with `@tool`. The function embeds the query, runs vector search over the `chunkEmbeddings` index, traverses the graph to companies, products, and risk factors, and returns the formatted context. Write the docstring as instructions to the model.
-. **Assemble the agent.** Create a Strands `Agent` with a `BedrockModel` and the retrieval tools, then give it a system prompt that frames it as a SEC 10-K analyst.
-. **Test locally.** Ask natural-language questions such as the workshop's hero question and confirm the agent calls the tool, traverses the graph, and returns grounded answers.
+==== 1. Initialize both retrievers
+
+Set up the two Lab 3 retrievers against the `chunkEmbeddings` index: `VectorRetriever` returns matched chunks only, and `VectorCypherRetriever` runs the Lab 3 retrieval query and a `result_formatter` to add company, product, and risk-factor context to each chunk.
+
+NOTE: The driver is opened with `notifications_min_severity='OFF'`. The retrievers run `db.index.vector.queryNodes`, which Aura now flags as deprecated; without this the driver logs one warning per search.
+
+==== 2. Wrap the retrievers as two tools
+
+The `@tool` decorator turns each function into something the agent can call. The docstring is what the model reads to decide *when* to use each tool, so it is written as instructions to the model, not notes to a developer.
+
+[source,python]
+----
+@tool
+def semantic_search(query: str, top_k: int = 5) -> str:
+    """Search SEC 10-K filing chunks by semantic similarity.
+    ... use for broad or thematic questions ...
+    """
+    result = vector_retriever.search(query_text=query, top_k=top_k)
+    chunks = []
+    for item in result.items:
+        score = item.metadata.get('score', 0.0)
+        chunks.append(f"[Score: {score:.4f}] {item.content}")
+    return "\n\n".join(chunks)
+
+
+@tool
+def graph_enriched_search(query: str, top_k: int = 5) -> str:
+    """Search SEC 10-K filing chunks with graph-enriched context.
+    ... use when the question involves specific companies, products, or risk factors ...
+    """
+    result = vector_cypher_retriever.search(query_text=query, top_k=top_k)
+    chunks = []
+    for item in result.items:
+        meta = item.metadata or {}
+        header = (f"[Score: {meta.get('score', 0):.4f}] "
+                  f"Company: {meta.get('company', 'N/A')} | "
+                  f"Products: {meta.get('products', [])} | "
+                  f"Risks: {meta.get('risks', [])}")
+        chunks.append(f"{header}\n{item.content}")
+    return "\n\n".join(chunks)
+----
+
+==== 3. Assemble the agent
+
+Create a Strands `Agent` with a `BedrockModel` and *both* tools, then give it a system prompt that frames it as a SEC 10-K analyst and describes when to use each tool. Strands runs the ReAct loop internally: the model reasons about which tool fits, calls it, observes the results, and synthesizes an answer.
+
+[source,python]
+----
+bedrock_model = BedrockModel(
+    model_id=MODEL_ID,
+    region_name=REGION,
+    temperature=0,
+)
+
+agent = Agent(
+    model=bedrock_model,
+    system_prompt="...",  # frames the model as a SEC 10-K analyst and
+                          # explains when to use each of the two tools
+    tools=[semantic_search, graph_enriched_search],
+)
+----
+
+==== 4. Test locally and watch the tool choice
+
+Ask questions that should trigger different tool choices and confirm the agent picks the right retriever:
+
+* A broad question like "Summarize the key themes across the 10-K filings." should pick `semantic_search`.
+* An entity-specific question like "What products does Apple offer and what risks do they face?" should pick `graph_enriched_search`.
+* A comparison like "Compare the risk factors between Apple and Microsoft." may use both tools or multiple calls.
+
+==== 5. Inspect tool usage
+
+After an invocation, `agent.messages` holds every message in the ReAct loop. Walk them and read the `toolUse` blocks (tool name and input) and the `toolResult` blocks (the data returned) to see exactly which tools the agent chose and what it got back.
+
+[source,python]
+----
+for msg in agent.messages:
+    role = msg['role']
+    for content in msg.get('content', []):
+        if 'toolUse' in content:
+            tool_use = content['toolUse']
+            print(f"[{role}] Called tool: {tool_use['name']}")
+            print(f"         Input: {tool_use['input']}")
+            print()
+        elif 'toolResult' in content:
+            tool_result = content['toolResult']
+            status = tool_result.get('status', 'unknown')
+            result_text = ''
+            for block in tool_result.get('content', []):
+                if 'text' in block:
+                    result_text = block['text'][:200]
+                    break
+            print(f"[{role}] Tool result ({status}): {result_text}...")
+            print()
+----
 
 === Walkthrough: Notebook 02 (deploy, optional)
 
-. **Fill the package from `CONFIG.txt`.** The notebook reads your Neo4j credentials and writes them into `agentcore_deploy/agent.py`, so you never retype the values from Lab 1. The populated `agent.py` is git-ignored.
-. **Deploy to AgentCore.** Use `direct_code_deploy` from the bedrock-agentcore-starter-toolkit. The deployment package is the agent code (`agent.py`) plus `pyproject.toml`, and the `.bedrock_agentcore.yaml` config specifies the entrypoint, runtime, and IAM execution role. Running the deploy packages the code, uploads it to S3, and creates the runtime.
-. **Invoke remotely.** Call the deployed agent through its REST endpoint using the `bedrock-agentcore` boto3 client's `invoke_agent_runtime` with the agent ARN, or through the `agentcore` CLI.
+==== 1. Preflight the deployment permissions
+
+The notebook detects your SageMaker execution role and checks that the `BedrockAgentCoreLabDeployPolicy` deployment policy is attached before it tries to deploy, so a missing permission fails early with a clear message. In hosted workshops the role often lacks `iam:ListAttachedRolePolicies`, so the check warns and continues rather than blocking accounts that do have the permission.
+
+==== 2. Fill the package from CONFIG.txt
+
+The notebook reads your Neo4j credentials from `CONFIG.txt` and rewrites the placeholder constants in `agentcore_deploy/agent.py` in place (the cell is idempotent, so you can re-run it after editing `CONFIG.txt`). It also copies the canonical `lib/graphrag_agent.py` into `agentcore_deploy/` so `direct_code_deploy`, which bundles only that directory, can import the shared retrievers and tools. The populated `agent.py` and the copied module are git-ignored.
+
+==== 3. Understand the app and entrypoint handler
+
+The deployed `agent.py` wraps the same agent in the `bedrock-agentcore` handler contract. A `BedrockAgentCoreApp` is created at module level, and one async handler is decorated with `@app.entrypoint`. The runtime calls that handler per request with a `payload` dict; the handler reads the prompt, runs the agent, and yields result events.
+
+[source,python]
+----
+app = BedrockAgentCoreApp()
+
+# Module-level initialization: run once and reused across invocations while the
+# microVM stays warm. The driver, embedder, retrievers, and tools are expensive
+# to build, so they live here rather than inside the request handler.
+_driver, vector_retriever, vector_cypher_retriever = build_retrievers(
+    NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD, REGION
+)
+TOOLS = make_tools(vector_retriever, vector_cypher_retriever)
+
+
+@app.entrypoint
+async def invoke(payload: dict = None):
+    """AgentCore Runtime handler."""
+    prompt = (
+        payload.get("prompt")
+        or payload.get("message")
+        or payload.get("query")
+        or payload.get("input")
+    )
+    model = BedrockModel(model_id=MODEL_ID, region_name=REGION, temperature=0)
+    # Build a fresh agent per request so conversation state does not leak
+    # between invocations sharing a warm microVM.
+    agent = Agent(model=model, system_prompt=SYSTEM_PROMPT, tools=TOOLS)
+    response = agent(prompt)
+    yield {"type": "chunk", "data": str(response)}
+    yield {"type": "complete"}
+----
+
+The heavy shared resources (driver, embedder, retrievers, tools) are built once at module level and reused while the microVM stays warm. The `Agent` accumulates state in `agent.messages`, so a fresh one is built per request to avoid leaking one caller's history into the next. The runtime has no `CONFIG.txt`, so `NEO4J_URI`, `MODEL_ID`, and the rest come from the constants the previous step templated in.
+
+==== 4. Generate the config and deploy
+
+AgentCore needs a `.bedrock_agentcore.yaml` config. The notebook writes it programmatically to avoid interactive prompts, setting `deployment_type: direct_code_deploy`, `runtime_type: PYTHON_3_13`, and `platform: linux/arm64`, plus an `aws` block with `execution_role_auto_create: True`, network mode `PUBLIC`, protocol `HTTP`, and observability enabled.
+
+[source,yaml]
+----
+agents:
+  graphrag_strands_agent:
+    name: graphrag_strands_agent
+    language: python
+    entrypoint: <abs path>/agentcore_deploy/agent.py
+    deployment_type: direct_code_deploy
+    runtime_type: PYTHON_3_13
+    platform: linux/arm64
+    source_path: <abs path>/agentcore_deploy
+    aws:
+      account: <account id>
+      region: us-east-1
+      execution_role_auto_create: true
+      ecr_auto_create: false
+      s3_auto_create: true
+      network_configuration:
+        network_mode: PUBLIC
+      protocol_configuration:
+        server_protocol: HTTP
+      observability:
+        enabled: true
+default_agent: graphrag_strands_agent
+----
+
+Then deploy. The toolkit cross-compiles the dependencies for `linux/arm64` from prebuilt wheels, so no Docker is required; `neo4j-graphrag` ships as a pure-Python wheel and installs cleanly. The `--auto-update-on-conflict` flag updates the agent in place if it already exists.
+
+[source,bash]
+----
+cd agentcore_deploy && agentcore deploy --auto-update-on-conflict
+----
+
+==== 5. Invoke remotely
+
+Invoke through the REST endpoint from the `agentcore` CLI, or programmatically with the `bedrock-agentcore` boto3 client's `invoke_agent_runtime` (reading the deployed agent ARN back from the generated `.bedrock_agentcore.yaml`). The hero question is entity-specific, so the agent picks `graph_enriched_search`.
+
+[source,bash]
+----
+cd agentcore_deploy && agentcore invoke '{"prompt": "What are NVIDIA'"'"'s biggest risk factors, and which of its products are most exposed?"}'
+----
+
+Run `agentcore destroy` when you are done to remove the deployed runtime while keeping your local files.
 
 == Next Steps
 
 After completing this notebook, continue to Part 3, xref:lab5.adoc[Lab 5: Agent Memory with Neo4j].
-</content>

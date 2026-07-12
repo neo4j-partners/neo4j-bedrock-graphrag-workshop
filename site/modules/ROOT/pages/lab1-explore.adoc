@@ -58,32 +58,41 @@ image::lab1-company-graph.png[Company Graph]
 * Click on a relationship to see its type and properties
 * Double-click a node to expand and see more connections
 
-== Access Graph Data Science
+== Explore the Competitive Landscape
 
-Click the **Graph Data Science** button in the left toolbar to open the data science panel.
+Clear the current search and build a new pattern:
+
+1. Type `Company`
+2. Select the **COMPETES_WITH** relationship
+3. Select **Company**
+
+This creates the pattern: `Company -- COMPETES_WITH -> Company`
+
+The visualization shows which filing companies compete with which other companies. You will see Microsoft with the most competitor edges, followed by NVIDIA and Apple. The outer ring of smaller nodes are mentioned companies (Alphabet, Oracle, Samsung, and others) that appear in filings but are not filing companies themselves.
+
+== Apply Degree Centrality
+
+NOTE: This requires Graph Analytics to be enabled on your Aura instance. In the Aura Console, open your instance settings and, under **Graph Analytics**, select **Plugin**. If it is not enabled, you will see a 403 error when applying an algorithm.
+
+With the competitive landscape still on the canvas, open the **Graph Data Science** panel by clicking the connected-nodes icon in the left toolbar.
 
 image::lab1-gds-panel.png[Graph Data Science]
 
-== Apply Community Detection
-
-Louvain is a community detection algorithm that identifies clusters of nodes which are more densely connected to each other than to the rest of the graph. It assigns each node a community ID, an arbitrary numeric label such as 634 or 485. The number itself has no ranking or magnitude; what matters is which nodes share the same ID, meaning they belong to the same cluster. Nodes in the same community share similar connection patterns, even if they aren't directly connected to each other.
+Degree Centrality counts the number of relationships each node has. In this competitive graph, it answers the question: which company has the most competitive connections?
 
 1. Click **Add algorithm**
-2. Select **Louvain** from the Algorithm dropdown
+2. Select **Degree Centrality** from the Algorithm dropdown
 3. Click **Apply algorithm** to run the analysis
-4. Under **Rule-based styling**, toggle on **Unique colors**. This assigns a distinct color to each community
 
-image::lab1-community-results.png[Community Detection Results]
+image::lab1-community-results.png[Degree Centrality Results]
 
-== Analyze the Results
+== Size Nodes Based on Scores
 
-The graph now displays nodes colored by community. Each color represents a cluster of nodes that are densely connected to each other:
+After the algorithm completes, click **Size nodes based on scores** to visually represent the centrality: nodes with more competitive connections appear larger.
 
-* The **large teal community** contains risk factors that are broadly shared across many companies: systemic risks like regulatory compliance, cybersecurity, and macroeconomic conditions
-* The **smaller colored communities** (pink, yellow, blue, orange) in the lower-left group companies with their unique or niche risk factors: risks specific to a particular company or small set of companies
-* **Asset managers** appear in the community of the companies they are most connected to, revealing which investor portfolios are concentrated in similar risk profiles
+Microsoft dominates the visualization (32 competitor edges), making it immediately obvious which filing company operates in the most competitive markets. Mentioned companies like Alphabet and Oracle stay small because they only have a single incoming edge.
 
-This is more revealing than simply counting connections. Community detection shows _which_ companies share _the same_ risks, not just how many risks each company has. Companies in the same small community face a similar set of risks, which has real implications for portfolio diversification. An investor holding companies in the same community has concentrated risk exposure.
+This ranking is more useful than a raw edge list. Degree Centrality surfaces the most connected companies at a glance, which is a common first step when analyzing a network: find the hubs, then investigate why they are so central.
 
 == Additional Exploration Ideas
 
@@ -95,12 +104,11 @@ Company -- OFFERS -> Product
 ----
 Reveals products and services mentioned in filings.
 
-=== Explore Competitive Landscape
+=== Partner Network
 ----
-Company -- COMPETES_WITH -> Company
 Company -- PARTNERS_WITH -> Company
 ----
-Shows competitive and partnership relationships between companies.
+Shows supply chain and strategic partnerships. NVIDIA's partner list reveals its semiconductor supply chain.
 
 === Compare Risk Factors
 Click on a specific RiskFactor node and expand to see which companies share that risk.

@@ -35,49 +35,33 @@ image::lab1-oneblink-sso.png[Continue with OneBlink SSO]
 +
 WARNING: The email field may be pre-populated with an incorrect address. Be sure to clear it and enter the email from your OneBlink credentials.
 
-=== Option B: Free Trial Signup (For self-paced learning)
+=== Option B: Free Signup (For self-paced learning)
 
-If you are completing this lab independently or your organizer has instructed you to create a free trial:
+If you are completing this lab independently or your organizer has instructed you to create a free account:
 
 1. Navigate to https://console-preview.neo4j.io/[console-preview.neo4j.io]
 2. Click **Don't have an account? Sign up**
 3. Follow the sign-up process to create your Neo4j Aura account
-4. When prompted, select **AWS** as the cloud provider and **US East (N. Virginia)** as the region
+4. When prompted to create your instance, select the **AuraDB Free** tier. This is a permanent free instance with no expiry.
 +
-image::lab1-free-trial-region.png[Free trial region selection]
-5. Click **Start 14-day free trial**
-6. **Save your credentials immediately.** Click **Download to continue**. The password is only shown once.
+image::lab1-free-trial-region.png[AuraDB Free tier selection]
+5. Your free instance is created automatically. **Save your credentials immediately.** Click **Download to continue**. The password is only shown once.
 +
-image::lab1-free-trial-credentials.png[Free trial credentials]
+image::lab1-free-trial-credentials.png[Free instance credentials]
 
-NOTE: If you signed up using the Free Trial option, your instance was already created during signup. Skip ahead to <<Part 3: Load the Knowledge Graph>>.
+NOTE: If you signed up using the Free Signup option, your instance was already created during signup. Skip ahead to <<Part 3: Load the Knowledge Graph>>.
 
 == Part 2: Create Your Database Instance
 
 1. After logging in, click on **Instances** in the left sidebar under "Data services", then click **Create instance**
 +
 image::lab1-create-instance.png[Create Instance]
-2. Configure your new instance:
-+
-IMPORTANT: 3 key settings to watch when creating your instance! +
-**1.** Select **Professional**. Do _not_ select Business Critical +
-**2.** Set **Graph Analytics** to **Plugin** +
-**3.** Enable **Vector-optimized** (under Additional settings)
-+
-[cols="1,2"]
-|===
-| Setting | Value
-
-| **Tier** | Professional
-| **Instance name** | A unique name based on your name (e.g., `ryans-lab-instance`)
-| **Sizing** | 4 GB RAM / 1 CPU
-| **Graph Analytics** | Plugin
-| **Vector-optimized** | Enabled (under Additional settings)
-|===
-
-3. Click **Create** to provision your database instance
+2. Select the **AuraDB Free** tier. This is a permanent free instance with no expiry. Give your instance a unique name based on your name (e.g., `ryans-lab-instance`).
 +
 image::lab1-configure-instance.png[Configure Instance]
+3. Click **Create** to provision your database instance
+
+NOTE: You do not need to choose a size, tier, or add-ons for the free instance. The Graph Analytics plugin used in xref:lab1-explore.adoc[the exploration step] is enabled later from your instance settings, when you need it.
 
 === Save Your Credentials
 
@@ -199,7 +183,7 @@ MERGE (c)-[:REPORTS]->(fm);
 
 === Step 4: Load Document Chunks and Embeddings
 
-So far you have loaded the **structured half** — companies, products, risk factors, and the relationships between them. Now you add the **unstructured half**: the SEC filing text split into chunks, each carrying a pre-computed 1024-dimensional embedding.
+So far you have loaded the **structured half**: companies, products, risk factors, and the relationships between them. Now you add the **unstructured half**: the SEC filing text split into chunks, each carrying a pre-computed 1024-dimensional embedding.
 
 This statement reads `chunks.csv`, where the embedding is stored as a semicolon-delimited list of floats, rebuilds it into a vector with `split()`/`toFloat()`, and attaches it to each Chunk node. The load is batched with `CALL { ... } IN TRANSACTIONS` because the file is large (~9 MB).
 

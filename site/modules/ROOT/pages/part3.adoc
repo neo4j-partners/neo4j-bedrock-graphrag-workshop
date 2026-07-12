@@ -4,7 +4,7 @@ Part 3 gives the Part 2 GraphRAG agent a memory.
 
 The agent you built in xref:lab4.adoc[Lab 4] answers each question in isolation. A stateless agent starts every invocation from zero context: it has no record of what was asked a moment ago or what it answered. In a multi-turn conversation that breaks down quickly. Ask a follow-up like "What about their competitors?" and the agent has no way to resolve "their," because the previous turn is gone.
 
-This part adds a memory layer so the agent remembers across turns. It stores conversation history and extracted facts in the same Neo4j Aura instance that already holds the SEC 10-K knowledge graph, so one database serves both retrieval and agent state.
+This part adds a memory layer so the agent remembers across turns. It stores conversation history and durable facts you write explicitly, both in the same Neo4j Aura instance that already holds the SEC 10-K knowledge graph, so one database serves both retrieval and agent state.
 
 == Labs
 

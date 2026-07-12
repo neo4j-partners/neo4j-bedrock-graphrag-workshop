@@ -115,32 +115,78 @@ The `Conversation` and `Message` nodes sit in the same database as the `Company`
 
 == Notebook 2: Long-Term Memory
 
-Long-term memory holds durable knowledge that outlives a single conversation. Write entities, facts, and preferences explicitly:
+Long-term memory holds durable knowledge that outlives a single conversation. There is no automatic extractor: the memory client is configured with `ExtractorType.NONE`, so nothing is inferred from raw text. You write each entity, fact, and preference explicitly with `add_entity`, `add_fact`, and `add_preference`.
+
+=== 1. Write Durable Knowledge
+
+Three explicit write methods cover the three kinds of long-term memory. `add_entity` returns an `(entity, dedup_result)` tuple: the second value tells you whether the entity was newly created or merged into an existing one, exposed as `dedup.action`. `add_fact` takes its object via the `obj=` argument. `add_preference` records how the user wants answers shaped.
 
 [source,python]
 ----
 from neo4j_agent_memory.memory.long_term import EntityType
 
+# An entity worth remembering across sessions.
 entity, dedup = await memory.long_term.add_entity(
-    name="Apple", entity_type=EntityType.ORGANIZATION,
+    name="Apple",
+    entity_type=EntityType.ORGANIZATION,
+    description="Consumer electronics and services company; SEC 10-K filer.",
 )
+print(f"Entity: {entity.name} ({entity.type}) - dedup action: {dedup.action}")
+
+# A fact: subject, predicate, object.
 fact = await memory.long_term.add_fact(
-    subject="Apple", predicate="COMPETES_WITH", obj="Microsoft",
+    subject="Apple",
+    predicate="COMPETES_WITH",
+    obj="Microsoft",
 )
+print(f"Fact: {fact.subject} {fact.predicate} {fact.object}")
+
+# A preference: how this user likes their answers.
 pref = await memory.long_term.add_preference(
-    category="analysis", preference="Prefers concise risk summaries as bullet points.",
+    category="analysis",
+    preference="Prefers concise risk summaries as bullet points.",
 )
+print(f"Preference [{pref.category}]: {pref.preference}")
 ----
 
-Then recall them from a fresh session, proving the knowledge is stored rather than tied to a conversation:
+=== 2. Recall in a Fresh Session
+
+The knowledge above was written with no `session_id`, so it belongs to the store rather than to a conversation. A brand-new session can still find it. Each write method has a matching semantic lookup: `search_entities`, `search_facts`, and `search_preferences`. They match by meaning rather than exact wording, and `long_term.get_context` bundles the relevant entities and preferences into one string ready for an LLM prompt.
 
 [source,python]
 ----
-entities = await memory.long_term.search_entities("technology company", limit=5, threshold=0.5)
+entities = await memory.long_term.search_entities(
+    "technology company", limit=5, threshold=0.5
+)
+facts = await memory.long_term.search_facts(
+    "Who does Apple compete with?", limit=5, threshold=0.5
+)
+prefs = await memory.long_term.search_preferences(
+    "How should answers be formatted?", limit=5, threshold=0.5
+)
+
 context = await memory.long_term.get_context("What do we know about Apple?")
 ----
 
-An optional cell uses `adopt_existing_graph` to layer long-term memory over the existing SEC 10-K `Company` nodes, so later mentions link to the companies you already have instead of duplicates.
+Each lookup ranks by vector similarity, so it takes a `threshold`. The default is `0.7`. A topical query such as "technology company" rarely scores as high against a stored name as an exact match would, so the notebook passes `threshold=0.5` to accept a semantically related result. Raise the threshold toward `0.7` for stricter, higher-precision recall; lower it to cast a wider net.
+
+=== 3. Optional: Adopt the Existing SEC Graph
+
+The graph already holds `Company` nodes from the SEC 10-K seed load. This optional cell uses `adopt_existing_graph` to layer long-term memory over those existing nodes instead of creating parallel `Entity` nodes, so when a message later mentions "Apple" it links to the company you already have rather than a duplicate. The operation is idempotent.
+
+`adopt_existing_graph` takes a `label_to_type` map (node label to memory entity type) and a `name_property_per_label` map (which property holds each label's name). It returns a report whose `total_migrated`, `total_already_adopted`, and `total_skipped` fields tally what happened.
+
+[source,python]
+----
+report = await memory.schema.adopt_existing_graph(
+    label_to_type={"Company": "ORGANIZATION"},
+    name_property_per_label={"Company": "name"},
+)
+print(
+    f"Adopted {report.total_migrated} nodes "
+    f"({report.total_already_adopted} already adopted, {report.total_skipped} skipped)."
+)
+----
 
 == Next Steps
 

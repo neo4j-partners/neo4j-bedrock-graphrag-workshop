@@ -55,6 +55,10 @@ Together: AWS aggregates and governs enterprise data in the lakehouse and provid
 
 ---
 
+![bg contain](dual-database-architecture.svg)
+
+---
+
 ![bg contain](workshop-architecture.png)
 
 ---
