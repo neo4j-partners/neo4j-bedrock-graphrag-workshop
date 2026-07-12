@@ -24,9 +24,9 @@ In the AWS Console, navigate to **Amazon Bedrock > Model access** and enable:
 
 This is a manual console step and cannot be scripted.
 
-### 2. Set Up AgentCore IAM & Resources (Lab 3 Deployment)
+### 2. Set Up AgentCore IAM & Resources (Lab 4 Deployment)
 
-Lab 3's AgentCore deployment requires IAM roles, an S3 bucket, and a deployment policy. This is a **two-step process** because SageMaker execution roles are auto-created when participants set up their domains (Quick Setup), so the admin cannot attach policies to roles that don't exist yet.
+Lab 4's AgentCore deployment requires IAM roles, an S3 bucket, and a deployment policy. This is a **two-step process** because SageMaker execution roles are auto-created when participants set up their domains (Quick Setup), so the admin cannot attach policies to roles that don't exist yet.
 
 **Step 2a — Run before the workshop:**
 
@@ -51,7 +51,7 @@ To specify a different region:
 ./grant_sagemaker_access.sh
 ```
 
-This finds all `AmazonSageMaker-ExecutionRole-*` roles in the account and attaches the managed policy created in Step 2a. The script is idempotent — re-run it whenever new participants join. If a participant hits a permissions error in Lab 3, this is the fix.
+This finds all `AmazonSageMaker-ExecutionRole-*` roles in the account and attaches the managed policy created in Step 2a. The script is idempotent — re-run it whenever new participants join. If a participant hits a permissions error in Lab 4, this is the fix.
 
 See [sagemaker-roles.md](sagemaker-roles.md) for a detailed explanation of the timing issue.
 
@@ -61,14 +61,13 @@ Ensure the following fields are set in `CONFIG.txt` before distributing to parti
 
 | Field | Source | Required By |
 |-------|--------|-------------|
-| `NEO4J_URI` | Lab 1 — Aura instance creation | Labs 1, 2, 4, 6 |
-| `NEO4J_USERNAME` | Lab 1 — Aura instance creation | Labs 1, 2, 4, 6 |
-| `NEO4J_PASSWORD` | Lab 1 — Aura instance creation | Labs 1, 2, 4, 6 |
+| `NEO4J_URI` | Lab 1 — Aura instance creation | Labs 1-5 |
+| `NEO4J_USERNAME` | Lab 1 — Aura instance creation | Labs 1-5 |
+| `NEO4J_PASSWORD` | Lab 1 — Aura instance creation | Labs 1-5 |
 | `MODEL_ID` | Pre-configured default | Labs 3, 4, 5, 6 |
-| `EMBEDDING_DIMENSIONS` | Pre-configured default (1024) | Labs 4, 6 |
 | `REGION` | Pre-configured default | Labs 3, 4, 5, 6 |
-| `MCP_GATEWAY_URL` | MCP server deployment | Lab 5 |
-| `MCP_ACCESS_TOKEN` | MCP server deployment | Lab 5 |
+| `MCP_GATEWAY_URL` | MCP server deployment | Lab 6 |
+| `MCP_ACCESS_TOKEN` | MCP server deployment | Lab 6 |
 
 ### 4. SageMaker Lifecycle Configuration (Optional)
 

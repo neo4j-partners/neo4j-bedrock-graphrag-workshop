@@ -4,7 +4,7 @@ In this lab, you will set up your Neo4j Aura database, load a complete financial
 
 ## Prerequisites
 
-- Completed **Lab 0** (environment setup)
+- Completed **Lab 0** (Sign In to AWS)
 - A valid email address
 
 ## Part 1: Neo4j Aura Signup

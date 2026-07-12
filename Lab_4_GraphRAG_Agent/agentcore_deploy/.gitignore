@@ -1,0 +1,4 @@
+# Copied from ../lib/graphrag_agent.py at deploy time by
+# 02_deploy_to_agentcore.ipynb. Canonical source lives in ../lib/; this copy
+# exists only so direct_code_deploy (which bundles this directory) can import it.
+graphrag_agent.py

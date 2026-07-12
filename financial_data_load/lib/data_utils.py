@@ -20,9 +20,22 @@ from neo4j_graphrag.schema import get_schema as _lib_get_schema
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# Load configuration from financial_data_load/.env
-_env_file = Path(__file__).parent.parent / ".env"
-load_dotenv(_env_file)
+# Load configuration. The financial_data_load test harness uses its own
+# financial_data_load/.env; it falls back to the project-root CONFIG.txt.
+# Exactly one source is authoritative per run. Preferring the local .env keeps
+# the destructive load/rebuild harness off the workshop CONFIG.txt instance.
+_root = Path(__file__).resolve().parents[2]
+_env_file = _root / "financial_data_load" / ".env"
+_config_file = _root / "CONFIG.txt"
+if _env_file.exists():
+    load_dotenv(_env_file)
+elif _config_file.exists():
+    load_dotenv(_config_file)
+else:
+    raise FileNotFoundError(
+        f"No config found. Expected {_env_file} (test harness) or "
+        f"{_config_file} (workshop)."
+    )
 
 
 # =============================================================================

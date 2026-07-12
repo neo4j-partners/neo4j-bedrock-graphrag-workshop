@@ -7,6 +7,7 @@ Wrap the retrievers you built in Lab 3 as agent tools and let a Strands agent de
 - **Retrievers as Tools**: Wrap `VectorRetriever` and `VectorCypherRetriever` as Strands `@tool` functions
 - **Agent-Driven Retrieval**: Build an agent with `BedrockModel` that chooses the retrieval strategy per question
 - **Tool Selection Reasoning**: Inspect the ReAct loop to see which tool the agent called and why
+- **Deploy to AgentCore**: Package the same agent and deploy it to Amazon Bedrock AgentCore Runtime with `direct_code_deploy`, then invoke it over REST
 
 ## Prerequisites
 
@@ -23,6 +24,11 @@ Before starting this lab, make sure you have:
 | Notebook | Title | What You Build |
 |----------|-------|----------------|
 | [01_strands_graphrag_agent.ipynb](01_strands_graphrag_agent.ipynb) | Strands GraphRAG Agent | An agent that wraps both retrievers as tools and selects the right one based on the question |
+| [02_deploy_to_agentcore.ipynb](02_deploy_to_agentcore.ipynb) | Deploy to AgentCore Runtime | The same agent deployed to Bedrock AgentCore Runtime with `direct_code_deploy`, invoked over REST via the CLI and boto3 |
+
+Notebook 02 reads your Neo4j credentials from `CONFIG.txt` and writes them into the deployment package (`agentcore_deploy/agent.py`), so you never retype the values from Lab 1. The repo copy of `agent.py` is a template with placeholder tokens; the notebook rewrites it in place with your real values at deploy time. Do not commit that filled copy back, and the generated `.bedrock_agentcore.yaml` is already git-ignored.
+
+> **Note:** Notebook 02 is optional. In hosted OneBlink environments the SageMaker role may lack the IAM permissions to create the AgentCore runtime. If the deploy step fails, review the code to understand each step, then run the full deploy later in your own AWS account.
 
 ## Next Steps
 

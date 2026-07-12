@@ -49,9 +49,9 @@ The AgentCore deployment depends on IAM resources that the workshop administrato
 
 NOTE: In hosted OneBlink environments the deploy step may lack the permissions to create the runtime. If that happens, review the deployment code in the notebook to understand each step, then run the full deploy later in your own AWS account where you hold the required permissions.
 
-== Notebook
+== Notebooks
 
-This lab has a single notebook in `Lab_4_GraphRAG_Agent/`:
+This lab has two notebooks in `Lab_4_GraphRAG_Agent/`:
 
 [cols="1,2,3"]
 |===
@@ -59,8 +59,14 @@ This lab has a single notebook in `Lab_4_GraphRAG_Agent/`:
 
 | `01_strands_graphrag_agent.ipynb`
 | Strands GraphRAG Agent
-| A Strands agent that wraps the Lab 3 `VectorCypherRetriever` as a `@tool`, tested locally, then deployed to Bedrock AgentCore Runtime and invoked over REST
+| A Strands agent that wraps the Lab 3 retrievers as `@tool` functions and selects the right one per question, built and tested locally
+
+| `02_deploy_to_agentcore.ipynb`
+| Deploy to AgentCore Runtime
+| The same agent deployed to Bedrock AgentCore Runtime with `direct_code_deploy`, then invoked over REST via the agentcore CLI and boto3
 |===
+
+Notebook 02 is optional. It reads your Neo4j credentials from `CONFIG.txt` and writes them into the deployment package, so you never retype the values from Lab 1.
 
 == Next Steps
 

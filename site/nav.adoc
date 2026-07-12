@@ -10,7 +10,7 @@
 *** xref:lab1-explore.adoc[Explore with Neo4j]
 *** xref:sample-queries.adoc[Sample Cypher Queries]
 * xref:part2.adoc[Part 2: AWS ETL, Semantic Search, and GraphRAG]
-** xref:part2-setup.adoc[Environment Setup: AWS and SageMaker]
+** xref:part2-setup.adoc[Environment Setup: SageMaker Studio]
 *** xref:part2-setup-instructions.adoc[Setup Instructions]
 ** xref:lab2.adoc[Lab 2: Data Pipeline (Optional)]
 *** xref:lab2-instructions.adoc[Instructions]

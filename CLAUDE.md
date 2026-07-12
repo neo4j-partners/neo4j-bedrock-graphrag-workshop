@@ -23,7 +23,7 @@ All credentials are stored in `CONFIG.txt` at the project root (gitignored). The
 ### Lab 2 - GraphRAG Data Pipeline (Optional)
 Location: `Lab_2_Data_Pipeline/`
 
-Three notebooks covering data loading, embedding generation, and vector-cypher retrieval. Wipes the graph and rebuilds from `financial_data.json` (isolated sandbox). Uses neo4j-graphrag with Bedrock support (`neo4j-graphrag[bedrock]` from `neo4j-partners/neo4j-graphrag-python@bedrock-embeddings`).
+Three notebooks covering data loading, embedding generation, and vector-cypher retrieval. Wipes the graph and rebuilds from `financial_data.json` (isolated sandbox). Uses neo4j-graphrag with Bedrock support (`neo4j-graphrag[bedrock]>=1.18.0` from PyPI).
 - `01_data_loading.ipynb`, `02_embeddings.ipynb`, `03_vector_cypher_retriever.ipynb`
 
 ### Lab 3 - Semantic Search and GraphRAG (neo4j-graphrag Library)
@@ -33,7 +33,7 @@ Two notebooks using the neo4j-graphrag Python library with direct Python driver 
 - `01_vector_retriever.ipynb`: `VectorRetriever` + `GraphRAG` pipeline for semantic question answering
 - `02_vector_cypher_retriever.ipynb`: `VectorCypherRetriever` with custom Cypher retrieval query traversing companies, products, risk factors
 
-Uses `lib/data_utils.py` for embedder/LLM helpers. All Neo4j access is via `neo4j.GraphDatabase.driver()` (no MCP). Both notebooks assume the seed load (Lab 0) already populated the graph with chunks, embeddings, and the vector index.
+Uses `lib/data_utils.py` for embedder/LLM helpers. All Neo4j access is via `neo4j.GraphDatabase.driver()` (no MCP). Both notebooks assume the seed load (Lab 1) already populated the graph with chunks, embeddings, and the vector index.
 
 ### Lab 4 - Strands GraphRAG Agent
 Location: `Lab_4_GraphRAG_Agent/`
@@ -97,4 +97,4 @@ The notebooks are designed for AWS SageMaker Studio but work locally with:
 
 ## Dependencies
 
-Labs 2, 3, and 4 install neo4j-graphrag via `%pip install` in notebook cells: `neo4j-graphrag[bedrock]` from the neo4j-partners fork (`neo4j-partners/neo4j-graphrag-python@bedrock-embeddings`).
+Labs 2, 3, and 4 install neo4j-graphrag via `%pip install` in notebook cells: `neo4j-graphrag[bedrock]>=1.18.0` from PyPI. Bedrock support is upstreamed and released as of 1.18.0, so the neo4j-partners git fork is no longer used.

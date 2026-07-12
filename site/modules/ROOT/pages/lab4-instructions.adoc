@@ -19,9 +19,9 @@ TIP: For concepts and background, see xref:lab4.adoc[Lab 4: Strands GraphRAG Age
 
 NOTE: The AgentCore deployment relies on IAM resources the workshop administrator provisions ahead of time, including the runtime execution role. See xref:admin-setup.adoc[the admin setup guide] for details. In hosted OneBlink environments the deploy step may lack the permissions to create the runtime; if so, review the deployment code to understand each step, then run the full deploy later in your own AWS account.
 
-== Notebook
+== Notebooks
 
-The notebook lives in `Lab_4_GraphRAG_Agent/`.
+The notebooks live in `Lab_4_GraphRAG_Agent/`.
 
 [cols="1,2,3"]
 |===
@@ -29,14 +29,22 @@ The notebook lives in `Lab_4_GraphRAG_Agent/`.
 
 | `01_strands_graphrag_agent.ipynb`
 | Strands GraphRAG Agent
-| Wrap the `VectorCypherRetriever` as a `@tool`, build and test the agent locally, then deploy to AgentCore and invoke it over REST
+| Wrap the Lab 3 retrievers as `@tool` functions, build the agent, and test it locally
+
+| `02_deploy_to_agentcore.ipynb`
+| Deploy to AgentCore Runtime
+| Deploy the same agent with `direct_code_deploy`, then invoke it over REST via the agentcore CLI and boto3
 |===
 
-=== Walkthrough
+=== Walkthrough: Notebook 01 (build and test)
 
 . **Build the retrieval tool.** Wrap the Lab 3 `VectorCypherRetriever` in a Python function decorated with `@tool`. The function embeds the query, runs vector search over the `chunkEmbeddings` index, traverses the graph to companies, products, and risk factors, and returns the formatted context. Write the docstring as instructions to the model.
-. **Assemble the agent.** Create a Strands `Agent` with a `BedrockModel` and the retrieval tool, then give it a system prompt that frames it as a SEC 10-K analyst.
+. **Assemble the agent.** Create a Strands `Agent` with a `BedrockModel` and the retrieval tools, then give it a system prompt that frames it as a SEC 10-K analyst.
 . **Test locally.** Ask natural-language questions such as the workshop's hero question and confirm the agent calls the tool, traverses the graph, and returns grounded answers.
+
+=== Walkthrough: Notebook 02 (deploy, optional)
+
+. **Fill the package from `CONFIG.txt`.** The notebook reads your Neo4j credentials and writes them into `agentcore_deploy/agent.py`, so you never retype the values from Lab 1. The populated `agent.py` is git-ignored.
 . **Deploy to AgentCore.** Use `direct_code_deploy` from the bedrock-agentcore-starter-toolkit. The deployment package is the agent code (`agent.py`) plus `pyproject.toml`, and the `.bedrock_agentcore.yaml` config specifies the entrypoint, runtime, and IAM execution role. Running the deploy packages the code, uploads it to S3, and creates the runtime.
 . **Invoke remotely.** Call the deployed agent through its REST endpoint using the `bedrock-agentcore` boto3 client's `invoke_agent_runtime` with the agent ARN, or through the `agentcore` CLI.
 

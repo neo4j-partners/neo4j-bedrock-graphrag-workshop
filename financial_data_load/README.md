@@ -434,25 +434,24 @@ Regenerates the stored `seed-data/chunks.jsonl` vectors with Amazon Titan Text E
 uv run financial_data_load/regenerate_titan_embeddings.py [--region us-east-1]
 ```
 
-### `export_seed_data/test_load.py` — Verify the structured load
+### `export_seed_data/load-data.py` — Load the full graph from `seed-data/`
 
-Loads the structured CSVs into a clean database using the same Cypher pattern as Lab 1's README (constraints, nodes, relationships, fulltext index), reading local CSVs via `UNWIND` instead of `LOAD CSV` from CloudFront. Confirms the committed CSVs load cleanly before distribution.
+Standalone loader that builds the complete knowledge graph from the local `seed-data/` files and keeps it. It mirrors the Cypher in Lab 1's README (constraints, nodes, relationships, chunks, vector index, chunk links, fulltext index), reading local CSV / JSONL via `UNWIND` instead of `LOAD CSV` from CloudFront:
 
-```bash
-cd financial_data_load/export_seed_data
-uv run test_load.py
-```
+- **Structured layer**: companies, products, risk factors, asset managers, documents, financial metrics, and their relationships (OFFERS, FACES_RISK, OWNS, COMPETES_WITH, PARTNERS_WITH, FILED, REPORTS).
+- **Unstructured layer**: all chunks with Titan embeddings (`chunks.jsonl`), the `chunkEmbeddings` vector index, and the FROM_DOCUMENT, NEXT_CHUNK, and FROM_CHUNK links.
 
-### `export_seed_data/test_roundtrip.py` — Verify the full load path
-
-Round-trip test that loads every seed file (`chunks.jsonl` + `chunk_documents.csv` + `chunk_sequence.csv` + `entity_chunks.csv`), reads the data back, and verifies it matches. Exercises the complete load path including embeddings.
+After loading it prints node/relationship counts and index states for verification.
 
 ```bash
 cd financial_data_load/export_seed_data
-uv run test_roundtrip.py
+uv run load-data.py                    # load into .env target (confirm before clearing)
+uv run load-data.py --yes              # skip the clear confirmation
+uv run load-data.py --no-clear         # load without wiping first (MERGE is idempotent)
+uv run load-data.py --env ../.env.gold # load into a different instance
 ```
 
-Both test scripts use the empty test database configured in `financial_data_load/.env.gold`, keeping the production Aura instance untouched.
+Reads Neo4j credentials from `financial_data_load/.env` by default (`--env` overrides). The target database is cleared first unless `--no-clear` is given; clearing prompts for confirmation unless `--yes` is passed.
 
 ## Cleanup
 

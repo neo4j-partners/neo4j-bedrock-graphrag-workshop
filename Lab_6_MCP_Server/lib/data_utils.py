@@ -12,14 +12,21 @@ from dotenv import load_dotenv
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# Load configuration from project root (lib/ -> Lab_6_MCP_Server/ -> project root)
-_config_file = Path(__file__).parent.parent.parent / "CONFIG.txt"
-load_dotenv(_config_file)
-
-# Also load .env if it exists (for backward compatibility)
-_env_file = Path(__file__).parent.parent.parent / ".env"
-if _env_file.exists():
-    load_dotenv(_env_file, override=True)
+# Load configuration. Workshop notebooks use the project-root CONFIG.txt;
+# local testing falls back to financial_data_load/.env. Exactly one source is
+# authoritative per run.
+_root = Path(__file__).resolve().parents[2]
+_config_file = _root / "CONFIG.txt"
+_fallback_env = _root / "financial_data_load" / ".env"
+if _config_file.exists():
+    load_dotenv(_config_file)
+elif _fallback_env.exists():
+    load_dotenv(_fallback_env)
+else:
+    raise FileNotFoundError(
+        f"No config found. Expected {_config_file} (workshop) or "
+        f"{_fallback_env} (local testing)."
+    )
 
 
 class BedrockConfig(BaseSettings):
