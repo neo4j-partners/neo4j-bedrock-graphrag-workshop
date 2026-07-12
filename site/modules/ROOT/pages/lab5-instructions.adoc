@@ -2,23 +2,27 @@
 
 Follow these steps to add short-term and long-term memory to the Lab 4 GraphRAG agent using the neo4j-agent-memory library. The memory graph lives in the same Neo4j Aura instance as the SEC 10-K knowledge graph, so the agent reads its domain knowledge and its conversation state from one connection.
 
-NOTE: The hands-on notebook for this lab is in development. The `Lab_5_Agent_Memory/` directory will hold it when it ships. The steps below describe the design and the code you will run, so you can follow the flow now and execute it once the notebook lands.
+The lab is two notebooks in `Lab_5_Agent_Memory/`:
+
+* `01_short_term_memory.ipynb`: the conversational recall layer.
+* `02_long_term_memory.ipynb`: the durable knowledge layer.
 
 TIP: For concepts and background, see xref:lab5.adoc[Lab 5: Agent Memory with Neo4j].
 
 == What You'll Learn
 
-* **Configure memory**: point a `MemoryClient` at the existing Aura instance using Titan Text Embeddings V2
+* **Configure memory**: build a `MemoryClient` against the existing Aura instance using Titan Text Embeddings V2
 * **Write to memory**: record each question and answer in short-term memory after a turn completes
 * **Read from memory**: inject prior conversation context into the prompt before each invocation
-* **Verify in Neo4j**: inspect the `Conversation`, `Message`, and `Entity` nodes in Neo4j Browser
+* **Persist knowledge**: store entities, facts, and preferences that survive across sessions
+* **Verify in Neo4j**: inspect the memory nodes in Neo4j Browser
 
 == Prerequisites
 
-* Completed **Lab 4**: the GraphRAG agent from xref:lab4.adoc[Lab 4: Strands GraphRAG Agent and AgentCore], deployed or running locally
+* Completed **Lab 4**: the GraphRAG agent from xref:lab4.adoc[Lab 4: Strands GraphRAG Agent and AgentCore], running locally or deployed
 * Completed the **Part 2 environment setup**: see xref:part2-setup-instructions.adoc[Part 2 Setup Instructions]
 
-NOTE: This lab uses the same Neo4j Aura instance and the same Bedrock configuration as Part 2. The memory layer adds `Conversation`, `Message`, and `Entity` nodes to that database. It does not clear or reload the 10-K knowledge graph.
+NOTE: This lab uses the same Neo4j Aura instance and the same Bedrock configuration as Part 2. The memory layer adds `Conversation`, `Message`, `Entity`, `Fact`, and `Preference` nodes to that database. It does not clear or reload the 10-K knowledge graph.
 
 === CONFIG.txt
 
@@ -32,90 +36,106 @@ NEO4J_PASSWORD=your-password-from-lab-0
 REGION=us-east-1
 ----
 
-The embedding model is Amazon Titan Text Embeddings V2 (`bedrock/amazon.titan-embed-text-v2:0`), which produces 1024-dimensional vectors. No new models are needed.
+The embedding model is Amazon Titan Text Embeddings V2 (`amazon.titan-embed-text-v2:0`), which produces 1024-dimensional vectors. No new models are needed.
 
-== Steps
+== Notebook 1: Short-Term Memory
 
-=== 1. Configure the MemoryClient
+=== 1. Build and Connect the MemoryClient
 
-Point a `MemoryClient` at the existing Aura instance and set Titan Text Embeddings V2 as the embedder. This is the same database and the same embedding model already in use, so there is nothing new to provision.
-
-[source,python]
-----
-from neo4j_agent_memory import MemoryClient
-
-memory = MemoryClient(
-    neo4j_uri=NEO4J_URI,
-    neo4j_username=NEO4J_USERNAME,
-    neo4j_password=NEO4J_PASSWORD,
-    embedding_model="bedrock/amazon.titan-embed-text-v2:0",
-    conversation_id="lab5-demo",
-)
-----
-
-=== 2. Write Each Turn to Memory
-
-After the Lab 4 agent produces an answer, record both the question and the answer in short-term memory. Wrapping the existing agent call keeps the GraphRAG tool unchanged; memory is added around it.
+`neo4j-agent-memory` is asynchronous, so every memory call is awaited. The Lab 5 helper reads `CONFIG.txt` and wires a client over the existing Aura instance with Titan embeddings. Open it, then connect.
 
 [source,python]
 ----
-def answer_with_memory(question: str) -> str:
-    # inject prior context (step 3), then run the Lab 4 agent
-    answer = graphrag_agent(question)
+from graphrag_agent import build_graphrag_agent
+from lib.memory_utils import build_memory_client
 
-    # write this turn to short-term memory
-    memory.add_message(role="user", content=question)
-    memory.add_message(role="assistant", content=answer)
+graphrag = build_graphrag_agent()   # the Lab 4 agent, imported not rebuilt
+agent = graphrag.agent
 
+memory = build_memory_client()
+await memory.connect()
+----
+
+=== 2. Wrap the Agent with Memory
+
+Two lines of memory work surround each agent call: read context before, write the turn after. Clearing `agent.messages` each turn means the continuity you see comes from Neo4j-backed memory, not the model's own context window.
+
+[source,python]
+----
+async def ask(question: str, session_id: str) -> str:
+    context = await memory.get_context(question, session_id=session_id)
+    prompt = f"{context}\n\nUser question: {question}" if context else question
+
+    agent.messages = []
+    answer = str(agent(prompt))
+
+    await memory.short_term.add_message(session_id, "user", question)
+    await memory.short_term.add_message(session_id, "assistant", answer)
     return answer
 ----
 
-=== 3. Inject Prior Context Before Each Invocation
+=== 3. Run the Three-Turn Demo
 
-Before the agent runs, call `get_context` to pull relevant prior conversation from memory and prepend it to the prompt. This is what lets the agent resolve references like "their" to the entity from an earlier turn.
-
-[source,python]
-----
-def answer_with_memory(question: str) -> str:
-    context = memory.get_context(query=question)
-
-    prompt = f"""Prior conversation:
-{context}
-
-Current question: {question}"""
-
-    answer = graphrag_agent(prompt)
-
-    memory.add_message(role="user", content=question)
-    memory.add_message(role="assistant", content=answer)
-
-    return answer
-----
-
-=== 4. Run the Three-Turn Demo and Inspect the Graph
-
-Call the memory-wrapped agent three times in sequence and observe how each turn builds on the last:
+Call the memory-wrapped agent three times in one session and watch each turn build on the last:
 
 [source,python]
 ----
-answer_with_memory("Tell me about Apple's risk factors.")
-answer_with_memory("What about their competitors?")
-answer_with_memory("Summarize what we discussed.")
+SESSION = "apple-research"
+await ask("Tell me about Apple's risk factors.", SESSION)
+await ask("What about their competitors?", SESSION)
+await ask("Summarize what we discussed.", SESSION)
 ----
 
 * **Turn 1** answers from GraphRAG retrieval against the 10-K graph.
 * **Turn 2** resolves "their" to Apple using short-term memory, then answers about Apple's competitors.
 * **Turn 3** returns a coherent summary that spans both prior turns.
 
-Then open Neo4j Browser and run:
+=== 4. Inspect the Conversation in Neo4j
 
-[source,cypher]
+The memory client exposes the graph via `memory.graph`. Read back this session's messages:
+
+[source,python]
 ----
-MATCH (c:Conversation {id: "lab5-demo"})-[:HAS_MESSAGE]->(m:Message)
-RETURN c, m
+rows = await memory.graph.execute_read(
+    """
+    MATCH (c:Conversation {session_id: $session_id})-[:HAS_MESSAGE]->(m:Message)
+    RETURN m.role AS role, m.content AS content, m.timestamp AS timestamp
+    ORDER BY m.timestamp
+    """,
+    {"session_id": SESSION},
+)
 ----
 
-The `Conversation`, `Message`, and `Entity` nodes appear in the same database as the `Company`, `Product`, and `RiskFactor` nodes from the 10-K graph, so you can see conversation state and domain knowledge side by side.
+The `Conversation` and `Message` nodes sit in the same database as the `Company`, `Product`, and `RiskFactor` nodes from the 10-K graph.
+
+== Notebook 2: Long-Term Memory
+
+Long-term memory holds durable knowledge that outlives a single conversation. Write entities, facts, and preferences explicitly:
+
+[source,python]
+----
+from neo4j_agent_memory.memory.long_term import EntityType
+
+entity, dedup = await memory.long_term.add_entity(
+    name="Apple", entity_type=EntityType.ORGANIZATION,
+)
+fact = await memory.long_term.add_fact(
+    subject="Apple", predicate="COMPETES_WITH", obj="Microsoft",
+)
+pref = await memory.long_term.add_preference(
+    category="analysis", preference="Prefers concise risk summaries as bullet points.",
+)
+----
+
+Then recall them from a fresh session, proving the knowledge is stored rather than tied to a conversation:
+
+[source,python]
+----
+entities = await memory.long_term.search_entities("technology company", limit=5)
+context = await memory.long_term.get_context("What do we know about Apple?")
+----
+
+An optional cell uses `adopt_existing_graph` to layer long-term memory over the existing SEC 10-K `Company` nodes, so later mentions link to the companies you already have instead of duplicates.
 
 == Next Steps
 

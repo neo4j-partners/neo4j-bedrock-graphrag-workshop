@@ -1,22 +1,36 @@
 # Lab 5: Agent Memory with Neo4j
 
-Add persistent memory across conversation turns to the Lab 4 Strands GraphRAG agent using
-[neo4j-agent-memory](https://github.com/neo4j-labs/agent-memory). The agent uses the same Neo4j Aura
-instance and Amazon Titan Text Embeddings V2 (`amazon.titan-embed-text-v2:0`) already configured in the
-earlier labs, storing `Conversation`, `Message`, and `Entity` nodes alongside the SEC 10-K knowledge graph.
+Add persistent memory to the Lab 4 Strands GraphRAG agent using
+[neo4j-agent-memory](https://github.com/neo4j-labs/agent-memory). The memory layer uses the same
+Neo4j Aura instance and Amazon Titan Text Embeddings V2 (`amazon.titan-embed-text-v2:0`) as the earlier
+labs, storing `Conversation`, `Message`, `Entity`, `Fact`, and `Preference` nodes alongside the SEC 10-K
+knowledge graph.
 
-> **Status:** the hands-on notebooks for this lab are in development. The conceptual walkthrough is available
-> in the workshop site under Part 3: Agent Memory.
+## Notebooks
 
-## What you build
+1. **`01_short_term_memory.ipynb`**, the conversational recall layer. Wraps the imported Lab 4 agent so
+   each turn is written to memory, and injects prior context before each question. The headline demo asks
+   about Apple's risk factors, then "their competitors", then a summary, showing cross-turn reference
+   resolution.
+2. **`02_long_term_memory.ipynb`**, the durable knowledge layer. Persists entities, facts, and
+   preferences with `add_entity` / `add_fact` / `add_preference`, then recalls them from a fresh session.
+   An optional cell adopts the existing SEC 10-K `Company` nodes as long-term entities.
 
-- Configure a `MemoryClient` against the existing Aura instance, using `bedrock/amazon.titan-embed-text-v2:0`
-  for embeddings.
-- Wrap the Lab 4 agent to write each turn to short-term memory.
-- Call `memory.get_context(query)` before each invocation to inject prior conversation.
+A third memory pillar, reasoning traces, is covered as an optional "Going Further" callout on the
+workshop site page rather than as a notebook.
 
-## The demo
+## Key facts
 
-1. "Tell me about Apple's risk factors" — answered from GraphRAG.
-2. "What about their competitors?" — the agent resolves "their" to Apple via memory.
-3. "Summarize what we discussed" — a coherent cross-turn summary.
+- **Async API:** every memory call is a coroutine, so the notebooks prefix each one with `await`.
+- **Bolt path against Aura:** the memory client connects with the direct Python driver, which is what
+  unlocks the write-Cypher inspection queries and `adopt_existing_graph`.
+- **Embedding-only:** Titan V2 supplies the vectors, no LLM is constructed, and entity extraction is
+  turned off. The notebooks write memory explicitly, so no extractor model is needed.
+- **Reuses the Lab 4 agent:** `01` imports `build_graphrag_agent` from Lab 4's `graphrag_agent` module
+  rather than rebuilding the agent, so everything new here is the memory wrapping.
+
+## Setup
+
+Shared setup lives in `lib/memory_utils.py` (`build_memory_client`) and `lib/data_utils.py`. Both notebooks
+open with a dependency install cell (`neo4j-agent-memory[bedrock]==0.5.0`) and read `CONFIG.txt` for the
+Neo4j and AWS credentials.

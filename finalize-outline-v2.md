@@ -72,9 +72,10 @@ Also completed in the same pass (not previously tracked):
 - The four lab copies (`Lab_2_Data_Pipeline`, `Lab_3_GraphRAG_Search`, `Lab_4_GraphRAG_Agent`, `Lab_6_MCP_Server`): load `CONFIG.txt` if it exists (workshop, authoritative), else `financial_data_load/.env` (local testing), else raise `FileNotFoundError` naming both.
 - The `financial_data_load` copy: load its own `financial_data_load/.env` if it exists (test harness, authoritative), else `CONFIG.txt`, else raise.
 
-### Lab 5 — Agent Memory Notebooks Unauthored
-- **Problem:** `Lab_5_Agent_Memory/` contains only a `README.md`.
+### Lab 5 — Agent Memory Notebooks (Authored 2026-07-11; execution deferred)
+- **Problem:** `Lab_5_Agent_Memory/` contained only a `README.md`.
 - **Required change:** Author two hands-on notebooks on `neo4j-agent-memory` that add a memory layer to the (now importable) Lab 4 Strands GraphRAG agent: short-term conversational memory and long-term durable knowledge. Reasoning traces move to an optional site callout, not a notebook. Add the matching site page content.
+- **Status:** Done. Both notebooks (`01_short_term_memory.ipynb`, `02_long_term_memory.ipynb`), `lib/memory_utils.py`, `lib/data_utils.py`, and `lib/__init__.py` are authored; `README.md`, `lab5.adoc`, and `lab5-instructions.adoc` are updated; the reasoning-traces "Going Further" callout is on the site page; nav already lists Lab 5. All code was statically verified (nbformat validity, `PyCF_ALLOW_TOP_LEVEL_AWAIT` syntax check, and every SDK attribute/label checked against `neo4j-agent-memory` v0.5.0 source). **Running the notebooks end-to-end against live Aura + Bedrock is deferred**, to be done in a workshop dry-run. Region is passed explicitly via `BedrockEmbedder(region_name=REGION)`, so no `AWS_REGION`/`REGION` rename was needed.
 
 #### Implementation Plan
 
@@ -99,7 +100,7 @@ Scope is deliberately capped: self-hosted bolt path against Aura, Titan embeddin
 **Stage 1: Foundation and setup.**
 - **Directory scaffold:** Add `01_short_term_memory.ipynb`, `02_long_term_memory.ipynb`, and `lib/data_utils.py` (copy of the Lab 4 helper for `get_llm`/embedder) under `Lab_5_Agent_Memory/`.
 - **Dependency cell:** `%pip install "neo4j-agent-memory[bedrock]==0.5.0"` alongside the existing Lab 4 installs. Pin the version so the notebook APIs stay stable.
-- **Config load:** Reuse `CONFIG.txt` keys `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD`, `MODEL_ID`, `REGION` via the same `data_utils` fallback loader (CONFIG.txt, else `financial_data_load/.env`); construct one shared `MemorySettings` reused across both notebooks. Put `MemoryClient` construction in `lib/data_utils.py` so each notebook opens with a one-line helper call.
+- **Config load:** Reuse `CONFIG.txt` keys `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD`, `MODEL_ID`, `REGION` via the same `data_utils` fallback loader (CONFIG.txt, else `financial_data_load/.env`); construct one shared `MemorySettings` reused across both notebooks. **As built:** `MemoryClient` construction lives in a new `lib/memory_utils.py` (`build_memory_client` / `build_memory_settings`) rather than in `data_utils.py`, so that copy stays a faithful, syncable clone of the shared helper and the `neo4j-agent-memory` dependency (and the SDK's own `Neo4jConfig`, aliased `MemoryNeo4jConfig`) is isolated. Each notebook still opens with a one-line helper call.
 - **Import the Lab 4 agent:** Call `build_graphrag_agent()` from `graphrag_agent.py` (see "Shared" above) so Lab 5 extends the known Lab 4 agent rather than rebuilding it. The one-line call is appropriate here because the agent is already-taught material; everything new in Lab 5 (the memory wrapping) stays fully visible.
 - **Smoke test:** Open a `MemoryClient`, write one message, call `get_context`, confirm the connection and that memory nodes land in Aura.
 
@@ -136,7 +137,7 @@ Scope is deliberately capped: self-hosted bolt path against Aura, Titan embeddin
 - [x] Add AgentCore deployment (notebook + `agentcore_deploy/`) to `Lab_4_GraphRAG_Agent`.
 - [ ] Extract `Lab_4_GraphRAG_Agent/lib/graphrag_agent.py`; point `agentcore_deploy/agent.py` and Lab 5 at it; leave notebook 01 inline.
 - [ ] Apply the CONFIG.txt-else-`financial_data_load/.env` fallback loader to all 5 `data_utils.py` copies.
-- [ ] Author the `Lab_5_Agent_Memory` notebooks on `neo4j-agent-memory`.
+- [x] Author the `Lab_5_Agent_Memory` notebooks on `neo4j-agent-memory`. (Statically verified against SDK v0.5.0; end-to-end execution against live Aura + Bedrock deferred to a dry-run.)
 
 **Hygiene**
 - [ ] Add the strategic-overview-slides page and the Call to Action closer page to the site.

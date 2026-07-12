@@ -12,20 +12,23 @@ from dotenv import load_dotenv
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# Load configuration. Workshop notebooks use the project-root CONFIG.txt;
-# local testing falls back to financial_data_load/.env. Exactly one source is
-# authoritative per run.
+# Load configuration. Local runs use the project-root .env; the workshop uses
+# CONFIG.txt; the test harness falls back to financial_data_load/.env. Exactly
+# one source is authoritative per run.
 _root = Path(__file__).resolve().parents[2]
+_env_file = _root / ".env"
 _config_file = _root / "CONFIG.txt"
 _fallback_env = _root / "financial_data_load" / ".env"
-if _config_file.exists():
+if _env_file.exists():
+    load_dotenv(_env_file)
+elif _config_file.exists():
     load_dotenv(_config_file)
 elif _fallback_env.exists():
     load_dotenv(_fallback_env)
 else:
     raise FileNotFoundError(
-        f"No config found. Expected {_config_file} (workshop) or "
-        f"{_fallback_env} (local testing)."
+        f"No config found. Expected {_env_file} (local), {_config_file} "
+        f"(workshop), or {_fallback_env} (test harness)."
     )
 
 

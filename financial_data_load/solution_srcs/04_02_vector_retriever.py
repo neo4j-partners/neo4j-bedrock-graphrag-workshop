@@ -54,7 +54,7 @@ def main():
         llm = get_llm()
 
         print("Connected to Neo4j!")
-        print(f"LLM: {llm.model_id}")
+        print(f"LLM: {llm.model_name}")
         print(f"Embedder: {embedder.model_id}")
 
         vector_retriever = VectorRetriever(

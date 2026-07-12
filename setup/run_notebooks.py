@@ -58,7 +58,11 @@ from dataclasses import dataclass
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_ENV = REPO_ROOT / "CONFIG.txt"
+# Default env follows the same precedence as the notebooks' lib/data_utils.py:
+# prefer the project-root .env (real local creds), fall back to CONFIG.txt.
+# This keeps the injected values (Option A) consistent with what the lib would
+# load itself, so neither clobbers the other.
+DEFAULT_ENV = REPO_ROOT / ".env" if (REPO_ROOT / ".env").exists() else REPO_ROOT / "CONFIG.txt"
 KERNEL_NAME = "graphrag-workshop"
 
 # Lines that install packages; neutralized before execution.

@@ -1,5 +1,5 @@
 # ---------------------------------------------------------------------------
-# COPIED from root lib/data_utils.py to simplify imports from Lab_4 notebooks.
+# COPIED from root lib/data_utils.py to simplify imports from Lab_5 notebooks.
 # Loads CONFIG.txt from the project root (two levels up from this file).
 #
 # If you change this file, update the root lib/data_utils.py as well.

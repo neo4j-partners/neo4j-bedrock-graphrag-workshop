@@ -1,8 +1,8 @@
 = Lab 5: Agent Memory with Neo4j
 
-This lab adds memory to the GraphRAG agent from xref:lab4.adoc[Lab 4]. The agent gains short-term memory for recent conversation turns and long-term memory for extracted entities and facts, both stored in the same Neo4j Aura instance that holds the SEC 10-K knowledge graph. The result is an agent that carries context across a conversation instead of answering every question from a blank slate.
+This lab adds memory to the GraphRAG agent from xref:lab4.adoc[Lab 4]. The agent gains short-term memory for recent conversation turns and long-term memory for durable entities, facts, and preferences, both stored in the same Neo4j Aura instance that holds the SEC 10-K knowledge graph. The result is an agent that carries context across a conversation instead of answering every question from a blank slate.
 
-NOTE: The hands-on notebook for this lab is in development. The `Lab_5_Agent_Memory/` directory will hold it when it ships. The conceptual walkthrough below is complete, so you can follow the design and the demo now and run the notebook once it lands.
+The lab ships as two notebooks in `Lab_5_Agent_Memory/`: `01_short_term_memory.ipynb` for the conversational recall layer and `02_long_term_memory.ipynb` for the durable knowledge layer.
 
 TIP: Ready to start? Jump to the xref:lab5-instructions.adoc[Lab 5 Instructions] for the step-by-step walkthrough.
 
@@ -36,13 +36,18 @@ Together they mirror how people converse. Short-term memory tracks the thread of
 
 == The Memory Graph Schema
 
-The memory layer stores its state as its own small graph, using three node types:
+The memory layer stores its state as its own small graph. Short-term memory uses two node types:
 
-* **`Conversation`**: one node per conversation session, the root that ties the turns together.
-* **`Message`**: one node per turn, holding the question or answer text and its order in the conversation.
-* **`Entity`**: extracted entities and facts that make up long-term memory.
+* **`Conversation`**: one node per conversation session, the root that ties the turns together, linked to its turns by `HAS_MESSAGE`.
+* **`Message`**: one node per turn, holding the question or answer text, chained in order by `NEXT_MESSAGE`.
 
-These nodes live in the *same* Aura instance as the SEC 10-K knowledge graph. Open Neo4j Browser after running the demo and you will see `Conversation`, `Message`, and `Entity` nodes sitting alongside the `Company`, `Product`, `RiskFactor`, and `Chunk` nodes from the 10-K graph, all in one database.
+Long-term memory adds three more:
+
+* **`Entity`**: a durable thing worth remembering, such as a company, deduplicated on write.
+* **`Fact`**: a subject, predicate, object statement, such as "Apple COMPETES_WITH Microsoft."
+* **`Preference`**: how the user likes their answers shaped.
+
+These nodes live in the *same* Aura instance as the SEC 10-K knowledge graph. Open Neo4j Browser after running the demo and you will see the memory nodes sitting alongside the `Company`, `Product`, `RiskFactor`, and `Chunk` nodes from the 10-K graph, all in one database.
 
 == One Database, Two Roles
 
@@ -57,13 +62,20 @@ The memory layer reuses the infrastructure Part 2 already configured. It connect
 
 == What You Build
 
-You take the Lab 4 Strands GraphRAG agent and wrap it with neo4j-agent-memory:
+You take the Lab 4 Strands GraphRAG agent and wrap it with neo4j-agent-memory across two notebooks.
+
+`01_short_term_memory.ipynb`, the conversational recall layer:
 
 * Configure a memory client against the existing Aura instance, using Titan Text Embeddings V2 for embeddings.
-* After each turn, write the question and answer to short-term memory.
-* Before each invocation, pull relevant prior context from memory and inject it into the prompt so the agent reasons with the full conversation, not just the latest question.
+* After each turn, write the question and answer to short-term memory with `add_message`.
+* Before each invocation, pull relevant prior context with `get_context` and inject it into the prompt so the agent reasons with the full conversation, not just the latest question.
 
-The GraphRAG tool from Lab 4 stays the same. Memory wraps around it.
+`02_long_term_memory.ipynb`, the durable knowledge layer:
+
+* Persist entities, facts, and preferences with `add_entity`, `add_fact`, and `add_preference`.
+* Recall them from a brand-new session with `search_entities` and `long_term.get_context`, showing the knowledge is not tied to a single conversation.
+
+The GraphRAG tool from Lab 4 stays the same. Memory wraps around it. Notebook `01` imports the Lab 4 agent directly rather than rebuilding it, so everything new is the memory layer.
 
 == What You See
 
@@ -73,7 +85,21 @@ Run the three-turn demo and watch memory change the agent's behavior:
 * **Turn 2: "What about their competitors?"** The agent reads short-term memory, resolves "their" to Apple from the previous turn, and answers about Apple's competitors. A stateless agent could not do this.
 * **Turn 3: "Summarize what we discussed."** The agent draws on the accumulated conversation to return a coherent summary that spans both prior turns, covering Apple's risk factors and its competitors.
 
-Then open Neo4j Browser. The memory nodes (`Conversation`, `Message`, and `Entity`) appear in the same database as the 10-K graph, so you can see the conversation state and the domain knowledge side by side.
+Then open Neo4j Browser. The memory nodes appear in the same database as the 10-K graph, so you can see the conversation state and the domain knowledge side by side.
+
+== Going Further: Reasoning Traces
+
+Short-term and long-term memory cover what the agent discussed and what it knows. A third pillar, *reasoning traces*, is the observability and audit layer: a record of the steps the agent took and the entities each step touched. The two notebooks in this lab do not use it, but it is worth knowing the shape.
+
+`neo4j-agent-memory` records a trace as a `ReasoningTrace` node with ordered `ReasoningStep` nodes, and each step links to the entities it referenced with a `TOUCHED` edge. That makes an audit one hop wide. To find every reasoning step that touched Apple:
+
+[source,cypher]
+----
+MATCH (e:Entity {name: 'Apple'})<-[:TOUCHED]-(s:ReasoningStep)<-[:HAS_STEP]-(rt:ReasoningTrace)
+RETURN rt, s, e
+----
+
+Because the trace, the steps, and the domain entities are all in one graph, you can answer "why did the agent say that?" by traversing from an answer back to the steps and the data that produced it. This is where memory in a graph pays off over memory in a flat log.
 
 == Next Steps
 
