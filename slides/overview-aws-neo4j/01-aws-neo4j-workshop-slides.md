@@ -65,13 +65,9 @@ Together: AWS aggregates and governs enterprise data in the lakehouse and provid
 
 ## Data Pipeline: AWS Lakehouse to Neo4j
 
-The **production pattern** for how SEC 10-K data reaches the graph, via AWS Glue (Spark) and the Neo4j Spark Connector:
+![Data pipeline from AWS lakehouse to Neo4j](data-pipeline-v2.svg)
 
-- Governed Apache Iceberg tables on Amazon S3, refined through the **medallion pattern** (bronze/silver/gold), cataloged in Glue and secured with Lake Formation
-- A Glue (or EMR) Spark job reads the silver/gold tables and writes nodes and relationships via the Neo4j Spark Connector
-- Rows become nodes, foreign keys become relationships, shared attributes become shared nodes
-
-This workshop's graph is **pre-loaded** — you work with it directly from Lab 1. The optional Lab 2 rebuilds it from `financial_data.json` with Amazon Titan embeddings instead of running the full lakehouse job.
+This workshop's graph is **pre-loaded**. You work with it directly from Lab 1. The optional Lab 2 rebuilds it from `financial_data.json` with Amazon Titan embeddings instead of running the full lakehouse job.
 
 ---
 
