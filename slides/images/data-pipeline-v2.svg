@@ -17,7 +17,7 @@
   <rect x="0" y="0" width="1500" height="620" fill="#ffffff"/>
 
   <!-- Title -->
-  <text x="40" y="58" font-size="42" fill="#222">Data Pipeline</text>
+  <text x="40" y="58" font-size="42" fill="#222">Data Pipeline: AWS Lakehouse to Neo4j</text>
 
   <!-- ===== Group A: Amazon S3 Tables ===== -->
   <rect x="40" y="100" width="310" height="480" rx="20" fill="#f6f2ff" stroke="#7048e8" stroke-width="2.5" stroke-dasharray="10 8"/>

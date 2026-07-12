@@ -82,8 +82,8 @@ understanding of what connects to what.
 
 - **Agent memory:** durable, queryable record of what an agent knows and has done
 - **Context graph:** a knowledge graph that captures decision traces, grounded in real entities
-- **The relationship:** the context graph *is* the memory, unified across three layers
-- **"Sim City" model:** query any layer alone or all at once, scale each independently
+- **The relationship:** the context graph *is* the memory — one model spanning short-term, long-term, and reasoning
+- **Composable:** store, query, and scale each layer on its own, yet keep them connected
 
 <!--
 Agent memory and context graph are two names for the same thing at different
@@ -125,49 +125,60 @@ three colors.
 
 ## Short-Term Memory
 
-- **Scope:** one conversation, keyed by `session_id`
-- **Schema:** `(Conversation)-[:FIRST_MESSAGE]->(Message)-[:NEXT_MESSAGE]->(Message)`
-- **Recalled by:** `get_context(session_id=...)`
-- **Role:** bridges general knowledge and the current task
+- **What it is:** the running conversation — the turns in the current session
+- **Like:** working memory, what the agent is actively holding
+- **Example:** resolves "their" back to Apple across two questions
+- **Scoped:** lives for one session, then fades — not meant to last
 
 <!--
-Short-term memory is ordered conversation turns scoped to a session. It is what
-resolves "their" to Apple. It also gives multi-agent systems a shared view of
-what each agent is currently working on.
+Short-term memory is the agent's working memory: ordered conversation turns
+scoped to one session. It is what resolves "their" to Apple. It also gives
+multi-agent systems a shared view of what each agent is currently working on.
+
+Under the hood it is keyed by session_id and modeled as a linked list of turns,
+(Conversation)-[:FIRST_MESSAGE]->(Message)-[:NEXT_MESSAGE]->(Message), recalled
+with a call like get_context(session_id=...).
 -->
 
 ---
 
 ## Long-Term Memory
 
-- **Holds:** durable entities, facts, preferences across sessions
-- **POLE+O entities:** Person, Organization, Location, Event, Object
-- **Typed relationships:** `(Entity:Person)-[:WORKS_AT]->(Entity:Organization)`
-- **Deduplicated:** the same entity resolves to one node
+- **What it is:** durable knowledge kept across sessions — entities, facts, preferences
+- **Like:** semantic memory, what the agent knows about the world
+- **Example:** "Apple competes with Samsung"; the user prefers concise answers
+- **Deduplicated:** the same entity resolves to one node, not five
 
 <!--
-Long-term memory is the knowledge graph the agent grows. Entities are classified
-with the POLE+O model and joined by typed relationships. It maps to what the
-literature calls semantic memory. Entity resolution keeps John Mercer one node,
-not five. This is where memory augments the model's lossy training with curated
-ground truth.
+Long-term memory is the knowledge graph the agent grows, its semantic memory:
+what it knows about the world, held across sessions. This is where memory
+augments the model's lossy training with curated ground truth.
+
+Under the hood, entities are classified with the POLE+O model (Person,
+Organization, Location, Event, Object) and joined by typed relationships such as
+(Entity:Person)-[:WORKS_AT]->(Entity:Organization). Entity resolution keeps John
+Mercer one node, not five.
 -->
 
 ---
 
 ## Reasoning Memory and Traces
 
-- **Reasoning memory:** decision traces and tool calls as first-class nodes
-- **Schema:** `(Message)-[:TRIGGERED]->(ReasoningTrace)-[:HAS_STEP]->(ReasoningStep)`
-- **Tool use:** `(ReasoningStep)-[:USED_TOOL]->(ToolCall)-[:CALL_OF]->(Tool)`
-- **Provenance:** a `ToolCall` links back with `RETRIEVED` to the entity it touched
-- **Why:** answers "why did the agent decide this?"
+- **What it is:** a record of how the agent reached an answer — its decisions and tool calls, saved as nodes
+- **Like:** procedural memory, how the agent did something
+- **Example:** which tool ran, what it retrieved, and the step it informed
+- **Auditable:** answers "why did the agent decide this?"
 
 <!--
-This is the layer the old deck was missing. Reasoning traces are not log lines,
-they are graph nodes with typed edges to the entities and messages that informed
-each decision. That is what turns an agent from a black box into an auditable
-system, the question regulators always ask.
+Reasoning memory is the agent's procedural memory: how it solved something, not
+just what it concluded. Traces are not log lines, they are graph nodes with
+typed edges to the entities and messages that informed each decision. That is
+what turns an agent from a black box into an auditable system, the question
+regulators always ask.
+
+Under the hood: (Message)-[:TRIGGERED]->(ReasoningTrace)-[:HAS_STEP]->
+(ReasoningStep), each step (ReasoningStep)-[:USED_TOOL]->(ToolCall)-[:CALL_OF]->
+(Tool), and a ToolCall links back with RETRIEVED to the entity it touched.
 -->
 
 ---

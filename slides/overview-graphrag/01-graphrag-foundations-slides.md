@@ -136,8 +136,6 @@ Graph connections turn an isolated text answer into a **contextual, grounded res
 
 ---
 
-## Two Halves of One Graph
-
 ![bg contain](two-halves-graph.svg)
 
 ---

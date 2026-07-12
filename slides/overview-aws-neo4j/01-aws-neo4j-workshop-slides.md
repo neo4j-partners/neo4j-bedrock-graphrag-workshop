@@ -72,9 +72,11 @@ The workshop builds a knowledge graph from this data, connecting companies, prod
 
 ---
 
-## Data Pipeline: AWS Lakehouse to Neo4j
-
 ![Data pipeline from AWS lakehouse to Neo4j](data-pipeline-v2.svg)
+
+<style scoped>
+section { font-size: 95%; }
+</style>
 
 This workshop's graph is **pre-loaded**. You work with it directly from Lab 1. The optional Lab 2 rebuilds it from `financial_data.json` with Amazon Titan embeddings instead of running the full lakehouse job.
 
