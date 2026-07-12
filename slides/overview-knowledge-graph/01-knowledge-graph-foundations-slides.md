@@ -171,9 +171,27 @@ Neo4j Aura is the **fully managed cloud graph database** used in this workshop:
 
 **Query**: Cypher editor with syntax highlighting and auto-completion. Used to load data and verify results.
 
-**Explore** (Neo4j Bloom): Visual graph exploration. Search for nodes, expand relationships, discover patterns on an interactive canvas.
+**Explore**: Visual, no-code graph exploration. Search for nodes, expand relationships, and discover patterns on an interactive canvas.
 
-**Dashboards**: Low-code visualization with bar charts, geographic maps, and graph visualizations for non-technical stakeholders.
+**Dashboards**: Low-code charts, geographic maps, and graph visualizations for non-technical stakeholders.
+
+**Import**: No-code CSV loader that maps files to a data model and populates the graph.
+
+**Graph Analytics**: On-demand sessions for graph algorithms (PageRank, community detection) over your data.
+
+**Data APIs**: Auto-generated GraphQL API over the graph, no server to build.
+
+---
+
+## Aura Agent and MCP
+
+Aura extends beyond querying into building GenAI applications directly on the graph:
+
+**Aura Agent**: No/low-code platform to build, test, and deploy knowledge-graph-grounded GraphRAG agents. "Create with AI" reads your graph schema and auto-drafts an agent, ready to test and deploy in minutes.
+
+**MCP for Aura**: A managed Model Context Protocol endpoint that lets AI assistants and agents query your Aura graph over a standard protocol, no custom integration code required.
+
+Together they turn the graph into a first-class backend for agentic AI, the same pattern this workshop builds by hand in the labs.
 
 ---
 
@@ -194,19 +212,16 @@ Constraints make MERGE efficient: Neo4j uses the index instead of scanning all n
 
 ---
 
-## Constraints and Indexes
+## Indexes That Power Search
 
-```cypher
-CREATE CONSTRAINT company_ticker IF NOT EXISTS
-FOR (c:Company) REQUIRE c.ticker IS UNIQUE
-```
+Beyond the uniqueness constraints used during loading, the graph carries indexes that make retrieval fast, the foundation for GraphRAG in Lab 2 and Lab 3.
 
-**Constraints** prevent duplicate nodes and enable efficient MERGE operations.
-
-**Vector indexes** store embeddings for semantic search (Lab 2 and Lab 3):
+**Vector indexes** store embeddings for semantic (meaning-based) search:
 ```cypher
 CREATE VECTOR INDEX chunkEmbeddings IF NOT EXISTS
 FOR (c:Chunk) ON (c.embedding)
 OPTIONS {indexConfig: {`vector.dimensions`: 1024,
          `vector.similarity_function`: 'cosine'}}
 ```
+
+**Fulltext indexes** support keyword search over chunk text and entity names, complementing vector search for hybrid retrieval.

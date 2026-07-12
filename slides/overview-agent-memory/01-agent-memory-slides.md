@@ -82,7 +82,7 @@ understanding of what connects to what.
 
 - **Agent memory:** durable, queryable record of what an agent knows and has done
 - **Context graph:** a knowledge graph that captures decision traces, grounded in real entities
-- **The relationship:** the context graph *is* the memory — one model spanning short-term, long-term, and reasoning
+- **The relationship:** the context graph *is* the memory: one model spanning short-term, long-term, and reasoning
 - **Composable:** store, query, and scale each layer on its own, yet keep them connected
 
 <!--
@@ -125,10 +125,10 @@ three colors.
 
 ## Short-Term Memory
 
-- **What it is:** the running conversation — the turns in the current session
+- **What it is:** the running conversation, the turns in the current session
 - **Like:** working memory, what the agent is actively holding
-- **Example:** resolves "their" back to Apple across two questions
-- **Scoped:** lives for one session, then fades — not meant to last
+- **Example:** remembers you were asking about Apple, so the next question lands
+- **Scoped:** one session only, then it fades
 
 <!--
 Short-term memory is the agent's working memory: ordered conversation turns
@@ -144,10 +144,10 @@ with a call like get_context(session_id=...).
 
 ## Long-Term Memory
 
-- **What it is:** durable knowledge kept across sessions — entities, facts, preferences
+- **What it is:** durable knowledge kept across sessions: entities, facts, preferences
 - **Like:** semantic memory, what the agent knows about the world
 - **Example:** "Apple competes with Samsung"; the user prefers concise answers
-- **Deduplicated:** the same entity resolves to one node, not five
+- **Deduplicated:** the same entity resolves to one node, not a new node each time it's mentioned
 
 <!--
 Long-term memory is the knowledge graph the agent grows, its semantic memory:
@@ -164,9 +164,9 @@ Mercer one node, not five.
 
 ## Reasoning Memory and Traces
 
-- **What it is:** a record of how the agent reached an answer — its decisions and tool calls, saved as nodes
+- **What it is:** a record of how the agent reached an answer: its decisions and tool calls, saved as nodes
 - **Like:** procedural memory, how the agent did something
-- **Example:** which tool ran, what it retrieved, and the step it informed
+- **Example:** a search tool ran, found Samsung, and that shaped the competitors answer
 - **Auditable:** answers "why did the agent decide this?"
 
 <!--
@@ -226,7 +226,7 @@ a single active reflection.
 
 | Dimension | Without memory | With memory |
 |---|---|---|
-| **Continuity** | "their" resolves to nothing | short-term recalls Apple |
+| **Continuity** | forgets you were discussing Apple | carries Apple into the next question |
 | **Knowledge** | re-derived every call | long-term accumulates facts |
 | **Accountability** | opaque black box | reasoning traces show *why* |
 
