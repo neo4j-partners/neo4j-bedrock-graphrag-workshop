@@ -45,6 +45,10 @@ Connections are **stored as first-class structures**, not computed at query time
 
 ---
 
+![bg contain](label-property-graph.svg)
+
+---
+
 ## Graph Notation
 
 Parentheses denote nodes. Brackets denote relationships:
