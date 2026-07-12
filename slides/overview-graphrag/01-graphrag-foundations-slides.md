@@ -37,10 +37,10 @@ From GenAI Limitations to Graph-Enriched Retrieval
 
 Foundation models are powerful but have critical gaps:
 
-- **Hallucination** — generate confident, incorrect answers
-- **No private data access** — trained on public data, not your SEC filings
-- **Knowledge cutoff** — training data has a fixed date
-- **No domain context** — cannot traverse your company's relationships
+- **Hallucination**: generate confident, incorrect answers
+- **No private data access**: trained on public data, not your SEC filings
+- **Knowledge cutoff**: training data has a fixed date
+- **No domain context**: cannot traverse your company's relationships
 
 These gaps matter when accuracy and grounding are non-negotiable.
 
@@ -52,7 +52,7 @@ Even with context windows growing to hundreds of thousands of tokens, more conte
 
 **Context rot**: as the volume of retrieved context grows, model accuracy on questions about that context *decreases*. The signal gets diluted by noise.
 
-The solution is not bigger context windows. It is **better retrieval** — finding precisely the right information and nothing more.
+The solution is not bigger context windows. It is **better retrieval**: finding precisely the right information and nothing more.
 
 ---
 
@@ -119,7 +119,7 @@ Vector search returns **isolated passages**:
 - No knowledge of *what entities* it mentions
 - No connection to *related information* in the corpus
 
-"Here are text chunks about cybersecurity threats" — but from which company? Affecting which products?
+"Here are text chunks about cybersecurity threats." But from which company? Affecting which products?
 
 ---
 
@@ -136,9 +136,9 @@ Graph connections turn an isolated text answer into a **contextual, grounded res
 
 ---
 
-## The Two-Layer Graph
+## Two Halves of One Graph
 
-![bg contain](two-layer-graph.png)
+![bg contain](two-halves-graph.svg)
 
 ---
 
@@ -146,10 +146,10 @@ Graph connections turn an isolated text answer into a **contextual, grounded res
 
 1. **Vector search** finds chunks whose meaning matches your question
 2. **Graph traversal** follows relationships from each matched chunk:
-   - `(Chunk)-[:FROM_DOCUMENT]->(Document)` — which filing?
-   - `(Document)<-[:FILED]-(Company)` — which company?
-   - `(Company)-[:FACES_RISK]->(RiskFactor)` — what risks?
-   - `(Product)-[:FROM_CHUNK]->(Chunk)` — what products mentioned?
+   - `(Chunk)-[:FROM_DOCUMENT]->(Document)`: which filing?
+   - `(Document)<-[:FILED]-(Company)`: which company?
+   - `(Company)-[:FACES_RISK]->(RiskFactor)`: what risks?
+   - `(Product)-[:FROM_CHUNK]->(Chunk)`: what products mentioned?
 3. **LLM** receives chunk text + structured entity context
 
 ---

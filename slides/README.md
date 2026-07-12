@@ -66,7 +66,7 @@ Knowledge graph foundations — graph databases vs relational, Cypher query lang
 GenAI limitations and the GraphRAG solution — hallucination, context rot, embeddings, vector search, RAG, and how graph context transforms retrieval quality.
 
 ### `overview-retrievers/`
-GraphRAG retriever patterns — VectorRetriever, VectorCypherRetriever, the two-layer graph, retrieval query design, and choosing the right retriever for your question type.
+GraphRAG retriever patterns — VectorRetriever, VectorCypherRetriever, the two halves of one graph, retrieval query design, and choosing the right retriever for your question type.
 
 ### `overview-agent-agentcore/`
 The GraphRAG agent and AgentCore — the ReAct pattern, the Strands Agents SDK, wrapping GraphRAG retrievers as tools, and deploying the agent to Amazon Bedrock AgentCore.

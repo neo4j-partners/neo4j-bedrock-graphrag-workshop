@@ -13,7 +13,7 @@ Deliver the why before anything technical. Attendees hear the business story, th
 * Answers become explainable and auditable, so you can trace why an answer was given, which matters critically in regulated industries like finance
 * Graph traversal surfaces the multi-hop connections vector search cannot reach, and that richer context reduces hallucination
 * What we're building today: a GraphRAG agent over real SEC 10-K data, deployed to Amazon Bedrock AgentCore
-* Neo4j + AWS Strategic Collaboration Agreement and 2026 roadmap
+* Neo4j + AWS joint partnership and 2026 roadmap
 * Live demo: the instructor runs hero questions against the finished agent, pre-deployed before the event. Example: "Which risk factors expose BlackRock's portfolio across multiple companies?"
 
 ## 2. Sign In and Set Up Aura

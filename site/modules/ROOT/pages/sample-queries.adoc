@@ -2,7 +2,7 @@
 
 Copy and paste these queries into the https://console.neo4j.io[Neo4j Aura Query interface] to explore the SEC financial knowledge graph. Queries are organized by retrieval strategy, progressing from direct graph traversals through vector and fulltext search to graph-enriched retrieval.
 
-TIP: The fulltext, vector, and graph-enriched queries require the unstructured layer (Chunk nodes, embeddings, and the `chunkEmbeddings` vector index), which is loaded in xref:lab1-instructions.adoc[Lab 1].
+TIP: The fulltext, vector, and graph-enriched queries require the unstructured half (Chunk nodes, embeddings, and the `chunkEmbeddings` vector index), which is loaded in xref:lab1-instructions.adoc[Lab 1].
 
 == Cypher Quick Reference
 
@@ -149,7 +149,7 @@ RETURN c.name, c.ticker, d.accessionNumber, d.filingType
 ORDER BY c.name
 ----
 
-NOTE: The FILED relationship bridges the structured entity layer (Company, Product, RiskFactor) to the unstructured document layer (Document, Chunk). Each Document represents a SEC 10-K filing identified by its accession number.
+NOTE: The FILED relationship bridges the structured entity half (Company, Product, RiskFactor) to the unstructured document half (Document, Chunk). Each Document represents a SEC 10-K filing identified by its accession number.
 
 === Cross-Entity Analysis
 

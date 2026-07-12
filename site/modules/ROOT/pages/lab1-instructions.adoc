@@ -1,6 +1,6 @@
 = Lab 1 Instructions: Set Up Aura and Load the Graph
 
-Follow these steps to sign up for Neo4j Aura, create your database instance, and load the complete SEC financial knowledge graph, including the structured entities and the unstructured chunk/embedding layer.
+Follow these steps to sign up for Neo4j Aura, create your database instance, and load the complete SEC financial knowledge graph, including the structured entities and the unstructured chunk/embedding half.
 
 TIP: For concepts and background, see xref:lab1.adoc[Lab 1: Neo4j Aura Setup and Exploration].
 
@@ -199,7 +199,7 @@ MERGE (c)-[:REPORTS]->(fm);
 
 === Step 4: Load Document Chunks and Embeddings
 
-So far you have loaded the **structured layer** — companies, products, risk factors, and the relationships between them. Now you add the **unstructured layer**: the SEC filing text split into chunks, each carrying a pre-computed 1024-dimensional embedding.
+So far you have loaded the **structured half** — companies, products, risk factors, and the relationships between them. Now you add the **unstructured half**: the SEC filing text split into chunks, each carrying a pre-computed 1024-dimensional embedding.
 
 This statement reads `chunks.csv`, where the embedding is stored as a semicolon-delimited list of floats, rebuilds it into a vector with `split()`/`toFloat()`, and attaches it to each Chunk node. The load is batched with `CALL { ... } IN TRANSACTIONS` because the file is large (~9 MB).
 

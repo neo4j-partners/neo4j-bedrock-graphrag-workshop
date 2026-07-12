@@ -36,9 +36,9 @@ Building the Strands GraphRAG agent and deploying it to Amazon Bedrock AgentCore
 ## Why Agents?
 
 Foundation models have gaps:
-- **No tool access** — cannot query databases or call APIs on their own
-- **No private data** — trained on public data, not your knowledge graph
-- **Static knowledge** — training data has a cutoff date
+- **No tool access**: cannot query databases or call APIs on their own
+- **No private data**: trained on public data, not your knowledge graph
+- **Static knowledge**: training data has a cutoff date
 
 **Agents** bridge these gaps by giving LLMs the ability to **reason about what to do** and **act by calling tools**. The model decides which tool to call, interprets the result, and decides what to do next.
 
@@ -61,9 +61,9 @@ The number of cycles depends on the question's complexity, not a predetermined p
 
 **User**: "What risks does NVIDIA face and which asset managers are exposed?"
 
-**Cycle 1** — Reason: need NVIDIA's risk factors → Act: query graph → Observe: Supply Chain Disruption, Cybersecurity Threats
+**Cycle 1.** Reason: need NVIDIA's risk factors → Act: query graph → Observe: Supply Chain Disruption, Cybersecurity Threats
 
-**Cycle 2** — Reason: need asset managers holding NVIDIA → Act: query graph → Observe: BlackRock, Vanguard, State Street
+**Cycle 2.** Reason: need asset managers holding NVIDIA → Act: query graph → Observe: BlackRock, Vanguard, State Street
 
 **Synthesize**: "NVIDIA faces supply chain and cybersecurity risks. BlackRock, Vanguard, and State Street hold positions, making their portfolios exposed."
 
@@ -71,23 +71,34 @@ The number of cycles depends on the question's complexity, not a predetermined p
 
 ## Strands Agents SDK
 
-AWS-native agent framework. **Model-driven**: the model decides what to do, not developer-defined control flow.
+- **AWS-native**: first-class Bedrock integration, no glue code
+- **Model-driven**: the model chooses tools and sequencing; you don't write the control flow
+- **Minimal primitives**: an `Agent`, a `BedrockModel`, and `@tool` functions
+- **Adaptive**: unlike a fixed pipeline, the agent decides how many steps a question needs
+
+The next slide wires these three primitives together.
+
+---
+
+## Building the Agent
 
 ```python
 from strands import Agent
 from strands.models import BedrockModel
-from strands.tools import tool
 
+# The model: temperature=0 for deterministic, repeatable answers
 bedrock_model = BedrockModel(
     model_id=MODEL_ID,
     region_name=REGION,
     temperature=0,
 )
 
+# The agent: system_prompt sets its role,
+# tools=[...] lists what the model is allowed to call
 agent = Agent(
     model=bedrock_model,
     system_prompt="You are a financial research assistant.",
-    tools=[graphrag_search],
+    tools=[graphrag_search],  # defined on the next slide
 )
 ```
 
@@ -95,7 +106,10 @@ agent = Agent(
 
 ## Tools with the @tool Decorator
 
-A tool is a Python function the LLM can call. Here the tool wraps a `VectorCypherRetriever` so the agent retrieves graph-enriched context:
+- **Tool**: a Python function the LLM can call
+- **Wraps a retriever**: this tool calls a `VectorCypherRetriever` for graph-enriched context
+- **Docstring**: becomes the tool description the LLM reads to decide when to call it
+- **Return value**: chunks plus connected entities the agent interprets
 
 ```python
 @tool
@@ -106,18 +120,7 @@ def graphrag_search(query: str, top_k: int = 5) -> str:
     risk factors. Graph traversal adds connected entities to
     each retrieved chunk.
     """
-    result = vector_cypher_retriever.search(query_text=query, top_k=top_k)
-    chunks = []
-    for item in result.items:
-        meta = item.metadata or {}
-        header = (f"Company: {meta.get('company')} | "
-                  f"Products: {meta.get('products', [])} | "
-                  f"Risks: {meta.get('risks', [])}")
-        chunks.append(f"{header}\n{item.content}")
-    return "\n\n".join(chunks)
 ```
-
-The docstring becomes the tool description. The LLM reads it, decides when to call the tool, and interprets the chunks plus connected entities it returns.
 
 ---
 

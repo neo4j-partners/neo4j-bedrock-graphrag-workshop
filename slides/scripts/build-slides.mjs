@@ -10,7 +10,7 @@ import {
 import { basename, join } from "node:path";
 
 // Shared image library; decks reference some assets that live here rather than
-// in the deck folder (e.g. two-layer-graph.png used by overview-graphrag).
+// in the deck folder (e.g. two-halves-graph.svg used by overview-graphrag).
 const SHARED_IMAGES_DIR = "images";
 
 const decks = [
@@ -26,7 +26,7 @@ const decks = [
     key: "aws-neo4j",
     dir: "overview-aws-neo4j",
     source: "01-aws-neo4j-workshop-slides.md",
-    title: "Workshop Architecture & Roadmap",
+    title: "Workshop Architecture and Roadmap",
     description:
       "The AWS + Neo4j architecture, the production lakehouse-to-graph pipeline, the SEC 10-K data domain, and the four-part lab roadmap.",
   },
@@ -50,15 +50,15 @@ const decks = [
     key: "retrievers",
     dir: "overview-retrievers",
     source: "01-retrievers-overview-slides.md",
-    title: "Retrievers Overview",
+    title: "GraphRAG Retriever Patterns",
     description:
-      "VectorRetriever, VectorCypherRetriever, the two-layer graph, and choosing the right retriever for a question.",
+      "VectorRetriever, VectorCypherRetriever, the two halves of one graph, and choosing the right retriever for a question.",
   },
   {
     key: "agent-agentcore",
     dir: "overview-agent-agentcore",
     source: "01-agent-agentcore-slides.md",
-    title: "GraphRAG Agent & AgentCore",
+    title: "GraphRAG Agent and AgentCore",
     description:
       "The ReAct pattern, the Strands Agents SDK, wrapping GraphRAG retrievers as tools, and deploying the agent to Amazon Bedrock AgentCore.",
   },

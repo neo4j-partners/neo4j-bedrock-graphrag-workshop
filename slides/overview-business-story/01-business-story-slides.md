@@ -111,7 +111,7 @@ The demo you are about to see is the artifact you will build.
 
 ## Neo4j + AWS Partnership
 
-- **Strategic Collaboration Agreement** focused on grounding enterprise AI agents to reduce hallucinations
+- **Joint partnership** focused on grounding enterprise AI agents to reduce hallucinations
 - **Neo4j Aura** is available on AWS Marketplace, deployable into your own account
 - Key integrations this workshop uses: Amazon Bedrock (Claude and Titan embeddings), Bedrock AgentCore, and the Neo4j MCP Server
 - A shared **2026 roadmap** continues to deepen the Bedrock and AgentCore integration

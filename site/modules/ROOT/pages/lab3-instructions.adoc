@@ -1,6 +1,6 @@
 = Lab 3 Instructions: Semantic Search and GraphRAG
 
-Follow these notebooks to build retrieval pipelines against your knowledge graph, progressing from pure vector search to graph-enriched retrieval. The unstructured layer (chunks, Titan v2 embeddings, and the `chunkEmbeddings` index) is already in place from the Lab 1 seed load, so both notebooks start directly with retrieval.
+Follow these notebooks to build retrieval pipelines against your knowledge graph, progressing from pure vector search to graph-enriched retrieval. The unstructured half (chunks, Titan v2 embeddings, and the `chunkEmbeddings` index) is already in place from the Lab 1 seed load, so both notebooks start directly with retrieval.
 
 TIP: For concepts and background, see xref:lab3.adoc[Lab 3: Semantic Search and GraphRAG].
 
@@ -13,10 +13,10 @@ IMPORTANT: Before running either notebook, make sure you have filled in `CONFIG.
 
 == Prerequisites
 
-* Completed **Lab 1**: Aura instance created and the seed load run (structured entities plus the unstructured chunk/embedding layer)
+* Completed **Lab 1**: Aura instance created and the seed load run (structured entities plus the unstructured chunk/embedding half)
 * Completed the **Part 2 environment setup**: see xref:part2-setup-instructions.adoc[Part 2 Setup Instructions]
 
-NOTE: This lab uses the same Neo4j Aura instance from Part 1. The seed load already added both the structured graph (companies, products, risk factors, asset managers) and the unstructured layer (chunks with Titan v2 embeddings and the `chunkEmbeddings` vector index). These notebooks read from that graph; they do not clear or reload data.
+NOTE: This lab uses the same Neo4j Aura instance from Part 1. The seed load already added both the structured graph (companies, products, risk factors, asset managers) and the unstructured half (chunks with Titan v2 embeddings and the `chunkEmbeddings` vector index). These notebooks read from that graph; they do not clear or reload data.
 
 === Update CONFIG.txt with Neo4j Credentials
 

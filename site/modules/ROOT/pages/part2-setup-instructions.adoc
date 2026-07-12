@@ -108,4 +108,4 @@ IMPORTANT: `MODEL_ID` and `REGION` already have working defaults, so leave them 
 
 == Next Steps
 
-Your environment is ready. Continue to xref:lab2.adoc[Lab 2: Data Pipeline (Optional)] to build the two-layer graph with the neo4j-graphrag pipeline, or go straight to xref:lab3.adoc[Lab 3: Semantic Search and GraphRAG].
+Your environment is ready. Continue to xref:lab2.adoc[Lab 2: Data Pipeline (Optional)] to build the two halves of one graph with the neo4j-graphrag pipeline, or go straight to xref:lab3.adoc[Lab 3: Semantic Search and GraphRAG].

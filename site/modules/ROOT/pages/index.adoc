@@ -45,7 +45,7 @@ The SEC financial dataset includes six entity types connected by typed relations
 
 image::financial-data-model.png[SEC 10-K Financial Data Model,800]
 
-This diagram shows the structured layer. The Lab 1 seed load also brings in the unstructured layer: Document and Chunk nodes with Titan Text Embeddings V2 embeddings that connect filing text back to these entities. xref:lab3.adoc[Lab 3] uses both layers for graph-enriched retrieval, and xref:lab2.adoc[Lab 2] shows how the pipeline builds them from scratch.
+This diagram shows the structured half. The Lab 1 seed load also brings in the unstructured half: Document and Chunk nodes with Titan Text Embeddings V2 embeddings that connect filing text back to these entities. xref:lab3.adoc[Lab 3] uses both halves for graph-enriched retrieval, and xref:lab2.adoc[Lab 2] shows how the pipeline builds them from scratch.
 
 == Workshop Architecture
 

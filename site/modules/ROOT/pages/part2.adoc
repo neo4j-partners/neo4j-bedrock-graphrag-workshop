@@ -1,10 +1,10 @@
 = Part 2: AWS ETL, Semantic Search, and GraphRAG
 
-This part is the core of the workshop. You set up the AWS environment and build retrieval that spans both the structured graph and the vector-indexed text. The unstructured layer, chunked filing text with vector embeddings, was already loaded into the knowledge graph during setup, so this part focuses on querying across both layers rather than building them.
+This part is the core of the workshop. You set up the AWS environment and build retrieval that spans both the structured graph and the vector-indexed text. The unstructured half, chunked filing text with vector embeddings, was already loaded into the knowledge graph during setup, so this part focuses on querying across both halves rather than building them.
 
 You will work in Amazon SageMaker Studio, use the neo4j-graphrag Python library for semantic search and GraphRAG retrieval, and build a Strands agent that combines vector search with graph traversal and deploys to Amazon Bedrock AgentCore.
 
-image::two-layer-graph.png[The Two-Layer Graph,800]
+image::two-halves-graph.svg[Two Halves of One Graph,800]
 
 == The neo4j-graphrag Library
 
@@ -13,6 +13,6 @@ Lab 3 uses the https://github.com/neo4j/neo4j-graphrag-python[neo4j-graphrag] Py
 == Labs
 
 * xref:part2-setup.adoc[Environment Setup: AWS and SageMaker]: sign in to AWS, enable Bedrock model access, and launch SageMaker Studio
-* xref:lab2.adoc[Lab 2: Data Pipeline (Optional)]: build the two-layer graph with the neo4j-graphrag knowledge graph construction pipeline
+* xref:lab2.adoc[Lab 2: Data Pipeline (Optional)]: build the two halves of one graph with the neo4j-graphrag knowledge graph construction pipeline
 * xref:lab3.adoc[Lab 3: Semantic Search and GraphRAG]: vector retrieval and vector-cypher retrieval over the knowledge graph with the neo4j-graphrag library
 * xref:lab4.adoc[Lab 4: Strands GraphRAG Agent and AgentCore]: build a GraphRAG agent with the Strands Agents SDK and deploy it to AgentCore

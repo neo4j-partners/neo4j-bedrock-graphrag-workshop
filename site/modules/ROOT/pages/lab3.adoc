@@ -1,6 +1,6 @@
 = Lab 3: Semantic Search and GraphRAG
 
-This lab connects directly to your knowledge graph using the neo4j-graphrag Python library and builds retrieval pipelines that progress from pure vector search to graph-enriched search. It uses the same Neo4j Aura instance from Part 1. The unstructured layer (document chunks, Titan v2 embeddings, and the `chunkEmbeddings` vector index) is already present from the Lab 1 seed load, so this lab starts directly with retrieval.
+This lab connects directly to your knowledge graph using the neo4j-graphrag Python library and builds retrieval pipelines that progress from pure vector search to graph-enriched search. It uses the same Neo4j Aura instance from Part 1. The unstructured half (document chunks, Titan v2 embeddings, and the `chunkEmbeddings` vector index) is already present from the Lab 1 seed load, so this lab starts directly with retrieval.
 
 TIP: Ready to start? Jump to the xref:lab3-instructions.adoc[Lab 3 Instructions] for step-by-step notebook walkthroughs.
 
@@ -10,13 +10,13 @@ TIP: Ready to start? Jump to the xref:lab3-instructions.adoc[Lab 3 Instructions]
 * **Graph-enriched search**: after finding matching passages, follow graph relationships to pull in companies, products, and risk factors using `VectorCypherRetriever`
 * **GraphRAG pipeline**: combine a retriever with an LLM to answer natural-language questions grounded in your data
 
-== The Two-Layer Graph
+== Two Halves of One Graph
 
-The graph you explored in Part 1 (companies, products, risk factors, asset managers) is the **structured layer**. The Lab 1 seed load also added the **unstructured layer**: Document and Chunk nodes with embeddings, linked by `FROM_DOCUMENT` and `NEXT_CHUNK` relationships. Cross-links (`FROM_CHUNK`) connect entities like Products and RiskFactors to the Chunks that mention them.
+The graph you explored in Part 1 (companies, products, risk factors, asset managers) is the **structured half**. The Lab 1 seed load also added the **unstructured half**: Document and Chunk nodes with embeddings, linked by `FROM_DOCUMENT` and `NEXT_CHUNK` relationships. Cross-links (`FROM_CHUNK`) connect entities like Products and RiskFactors to the Chunks that mention them.
 
-The `FILED` relationship bridges the two layers: `(Company)-[:FILED]->(Document)`. When graph-enriched search traverses from a chunk to its source document to the company that filed it, it crosses from unstructured text into the structured entities you already know. That traversal chain, `(Chunk)-[:FROM_DOCUMENT]->(Document)<-[:FILED]-(Company)`, is what makes GraphRAG possible.
+The `FILED` relationship bridges the two halves: `(Company)-[:FILED]->(Document)`. When graph-enriched search traverses from a chunk to its source document to the company that filed it, it crosses from unstructured text into the structured entities you already know. That traversal chain, `(Chunk)-[:FROM_DOCUMENT]->(Document)<-[:FILED]-(Company)`, is what makes GraphRAG possible.
 
-image::two-layer-graph.png[The Two-Layer Graph,800]
+image::two-halves-graph.svg[Two Halves of One Graph,800]
 
 == The neo4j-graphrag Library
 
@@ -94,7 +94,7 @@ In xref:lab6.adoc[Lab 6], you will do each of these steps yourself through MCP: 
 
 In these notebooks the developer hardcodes which retriever to use. xref:lab4.adoc[Lab 4] shifts that decision to the model by wrapping the `VectorCypherRetriever` as a Strands `@tool` function and giving it to an agent that reasons about the question and calls the tool on its own. That agent is what powers the workshop's opening hero-question demo.
 
-The progression clarifies the role each layer plays:
+The progression clarifies the role each half plays:
 
 [cols="1,2,2"]
 |===

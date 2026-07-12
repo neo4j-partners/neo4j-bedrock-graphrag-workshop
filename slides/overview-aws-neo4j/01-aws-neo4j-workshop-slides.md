@@ -27,7 +27,7 @@ ol > li {
 }
 </style>
 
-# GraphRAG with Neo4j & AWS
+# Workshop Architecture and Roadmap
 
 Building Knowledge Graph-Powered AI Agents
 
@@ -179,6 +179,6 @@ Each step gives the agent more autonomy. The trade-off: more flexibility means l
 
 - **AWS account** with Bedrock access (provided for instructor-led workshops)
 - **Neo4j Aura** account (free tier or provided OneBlink SSO)
-- **No local setup required** — all work happens in SageMaker Studio notebooks
+- **No local setup required**: all work happens in SageMaker Studio notebooks
 
 Let's get started with Lab 0.

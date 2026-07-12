@@ -59,7 +59,7 @@ The Neo4j MCP Server exposes two tools (read-only mode):
 
 | Tool | Description |
 |------|-------------|
-| **`get_neo4j_schema`** | Reads the graph schema via APOC — node labels, relationship types, properties. Token-efficient format for LLM consumption. |
+| **`get_neo4j_schema`** | Reads the graph schema via APOC: node labels, relationship types, properties. Token-efficient format for LLM consumption. |
 | **`read_neo4j_cypher`** | Executes a read-only Cypher query. Runs `EXPLAIN` first to verify no write operations (CREATE, MERGE, DELETE, SET). |
 
 The agent discovers these tools automatically through the MCP protocol.
@@ -108,9 +108,9 @@ The agent **selects** which template to execute. The queries are expert-reviewed
 
 The agent writes its own Cypher from scratch after schema discovery:
 
-1. **Retrieve the schema** — call `get_neo4j_schema` to learn labels, types, properties
-2. **Write a Cypher query** — based on the actual schema, not assumptions
-3. **Execute the query** — call `read_neo4j_cypher` with the generated Cypher
+1. **Retrieve the schema**: call `get_neo4j_schema` to learn labels, types, properties
+2. **Write a Cypher query**: based on the actual schema, not assumptions
+3. **Execute the query**: call `read_neo4j_cypher` with the generated Cypher
 
 The agent can answer **any question the schema supports**, but query quality depends on LLM reasoning.
 
@@ -118,7 +118,7 @@ The agent can answer **any question the schema supports**, but query quality dep
 
 ## Schema-First Approach
 
-**Without schema**: LLM guesses `MATCH (c:Corp)-[:HAS_PRODUCT]->(p)` — label `Corp` does not exist, `HAS_PRODUCT` is not a relationship type. Query returns zero results silently.
+**Without schema**: LLM guesses `MATCH (c:Corp)-[:HAS_PRODUCT]->(p)`. Label `Corp` does not exist, `HAS_PRODUCT` is not a relationship type. Query returns zero results silently.
 
 **With schema**: Agent sees actual labels (`Company`, `Product`) and types (`OFFERS`, `FACES_RISK`). Generated Cypher uses the correct vocabulary.
 

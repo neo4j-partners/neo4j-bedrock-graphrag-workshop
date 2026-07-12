@@ -37,7 +37,7 @@ Larger chunks give the LLM more context during retrieval, which helps when the a
 
 == From Documents to Knowledge Graph
 
-The pipeline builds both the structured and unstructured layers of the knowledge graph, then connects them:
+The pipeline builds both the structured and unstructured halfs of the knowledge graph, then connects them:
 
 1. **Load filing text as Document and Chunk nodes.** The filing becomes a Document node. The filing text is split into chunks, each stored as a Chunk node linked to its source via `FROM_DOCUMENT` and to adjacent chunks via `NEXT_CHUNK`.
 2. **Create structured entities.** Company and Product nodes are created from the structured data in the filing, linked by `OFFERS` and `FILED`. Each Product is cross-linked to the chunks that mention it via `FROM_CHUNK`.
@@ -50,14 +50,14 @@ The workshop's knowledge graph uses pre-built structured entities from JSON data
 
 In a full production pipeline, an LLM reads each chunk and extracts entities mentioned in the text: company names, product references, risk factors. Entity resolution then deduplicates these, merging "NVIDIA Corporation," "Nvidia," and "NVDA" into a single Company node. Cross-linking connects extracted entities to existing graph structure, so a risk factor mentioned in filing text links directly to the RiskFactor node that other companies also reference.
 
-The workshop sidesteps extraction because the SEC dataset already provides clean structured data. The conceptual model is the same: chunks connect to entities, entities connect to each other, and retrieval traverses both layers. Whether entities arrive via JSON loading or LLM extraction, the graph structure and retrieval patterns are identical.
+The workshop sidesteps extraction because the SEC dataset already provides clean structured data. The conceptual model is the same: chunks connect to entities, entities connect to each other, and retrieval traverses both halves. Whether entities arrive via JSON loading or LLM extraction, the graph structure and retrieval patterns are identical.
 ====
 
 == The Pipeline
 
 A single notebook walks the full arc: chunk the filing text, embed it, build the graph, and create the vector index that makes it searchable.
 
-The notebook splits SEC filing text into `DemoChunk` nodes linked by `FROM_DOCUMENT` and `NEXT_CHUNK`, creates the structured layer (`DemoCompany`, `DemoProduct`, `DemoDocument`) with the `OFFERS`, `FILED`, and `FROM_CHUNK` cross-links, generates a vector embedding on every chunk, and creates the `demoChunkEmbeddings` vector index. It then runs a semantic search to confirm the pipeline works and deletes the sandbox. Lab 3 builds vector and graph-enriched retrieval on the full workshop graph.
+The notebook splits SEC filing text into `DemoChunk` nodes linked by `FROM_DOCUMENT` and `NEXT_CHUNK`, creates the structured half (`DemoCompany`, `DemoProduct`, `DemoDocument`) with the `OFFERS`, `FILED`, and `FROM_CHUNK` cross-links, generates a vector embedding on every chunk, and creates the `demoChunkEmbeddings` vector index. It then runs a semantic search to confirm the pipeline works and deletes the sandbox. Lab 3 builds vector and graph-enriched retrieval on the full workshop graph.
 
 == Lab 1 Seed Load vs Lab 2 Pipeline
 

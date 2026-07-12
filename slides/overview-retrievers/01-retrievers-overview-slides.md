@@ -27,7 +27,7 @@ ol > li {
 }
 </style>
 
-# The neo4j-graphrag Library
+# GraphRAG Retriever Patterns
 
 From Vector Search to Graph-Enriched Retrieval
 
@@ -104,7 +104,7 @@ The retriever's job is finding the right context. The LLM's job is generating a 
 - "Tell me about cybersecurity threats"
 - Conceptual, exploratory questions
 
-**Limitation:** Returns text chunks only — no entity relationships.
+**Limitation:** Returns text chunks only. No entity relationships.
 
 ---
 
@@ -120,7 +120,7 @@ The retriever's job is finding the right context. The LLM's job is generating a 
 - "What risks do tech companies face?"
 - Questions needing both content and relationships
 
-**Key insight:** The chunk is the anchor — graph traversal enriches what vector search finds.
+**Key insight:** The chunk is the anchor. Graph traversal enriches what vector search finds.
 
 ---
 
@@ -253,7 +253,7 @@ The chunk load and embeddings come from the Lab 1 seed load (or the optional Lab
 - **Retrievers** search and return relevant information from your knowledge graph
 - **VectorRetriever**: semantic similarity search across chunks
 - **VectorCypherRetriever**: semantic search + graph traversal for entity context
-- **Each excels at different question types** — choosing the right one matters
-- **The chunk is the anchor** — graph traversal enriches what vector search finds
+- **Each excels at different question types**: choosing the right one matters
+- **The chunk is the anchor**: graph traversal enriches what vector search finds
 
 **Next:** Lab 6 adds MCP, Cypher Templates, and Text2Cypher for full agent autonomy.

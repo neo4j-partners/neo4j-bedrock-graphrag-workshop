@@ -52,7 +52,7 @@ The outline's highest-priority gap. Leads with the why before any architecture. 
 4. **Context graphs and decision governance.** Neo4j captures agent decision traces as nodes and relationships, giving audit trails and explainability for regulated industries.
 5. **The proof: hero questions.** "Which risk factors expose BlackRock's portfolio across multiple companies?" and "What risks does NVIDIA face, and which asset managers are exposed?"
 6. **What we are building today.** A GraphRAG agent over real SEC 10-K data, deployed to Amazon Bedrock AgentCore, extended with neo4j-agent-memory and the Neo4j MCP Server.
-7. **Neo4j + AWS partnership.** Strategic Collaboration Agreement focused on reducing hallucinations, Aura on AWS Marketplace, key integrations, and the 2026 roadmap.
+7. **Neo4j + AWS partnership.** Joint partnership focused on reducing hallucinations, Aura on AWS Marketplace, key integrations, and the 2026 roadmap.
 8. **Opening demo (instructor).** A holder slide plus speaker notes for running the hero questions live against the pre-deployed Lab 4 agent, showing tool calls and an optional vector-only vs GraphRAG comparison.
 
 ### A2. `overview-aws-neo4j` (reframe as workshop roadmap)
@@ -204,7 +204,7 @@ Old `agents-mcp` key / `overview-agents-mcp` dir retired.
 ### Quality review (post-implementation)
 - **Cross-deck lab numbering:** swept all 8 decks; fully consistent with the target mapping, no stale patterns (`Labs 3-5`, `Bonus`, `agents-mcp`, `no-code`, `four notebooks`) remain.
 - **agent-memory deck:** verified API and schema against the real Lab 5 notebooks (`get_context`, `short_term.add_message`, `search_entities/facts`, `adopt_existing_graph`, `HAS_MESSAGE`, `github.com/neo4j-labs/agent-memory`). Accurate.
-- **FIXED — business-story partnership slide:** the three specific "2026 roadmap" bullets (AgentCore Memory connector, Bedrock Knowledge Bases GraphRAG backend, Marketplace Quick Launch) were agent-invented; not in `course-outline.md` (which only says "Strategic Collaboration Agreement and 2026 roadmap"). Replaced with sourced/generic framing plus an instructor speaker-note placeholder to insert the real, publicly announced roadmap.
+- **FIXED — business-story partnership slide:** the three specific "2026 roadmap" bullets (AgentCore Memory connector, Bedrock Knowledge Bases GraphRAG backend, Marketplace Quick Launch) were agent-invented; not in `course-outline.md` (which only says "joint partnership and 2026 roadmap"). Replaced with sourced/generic framing plus an instructor speaker-note placeholder to insert the real, publicly announced roadmap.
 - **FIXED — agent-agentcore "Why a Specialized Graph Agent":** relocated slide described "inspect schema, write Cypher, execute it" (that is the Lab 6 Text2Cypher agent). Reworded to graph retrieval, matching the Lab 4 retriever-based agent.
 - Rebuilt after fixes: clean, 8 cards.
 

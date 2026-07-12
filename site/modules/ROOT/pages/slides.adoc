@@ -16,7 +16,7 @@ The decks are published as a standalone slide gallery. Open any deck below, or b
 
 | https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/slides/aws-neo4j/[Workshop Architecture and Roadmap]
 | The AWS and Neo4j architecture, the production lakehouse-to-graph pipeline, the SEC 10-K financial data domain, and the four-part lab roadmap.
-| xref:index.adoc[Overview], xref:part1.adoc[Part 1]
+| xref:index.adoc[Overview], xref:part1.adoc[Part 1], xref:lab2.adoc[Lab 2]
 
 | https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/slides/knowledge-graph/[Knowledge Graph Foundations]
 | Graph databases versus relational, the Cypher query language, the SEC financial knowledge graph schema, Neo4j Aura, and visual exploration tools.
@@ -24,10 +24,10 @@ The decks are published as a standalone slide gallery. Open any deck below, or b
 
 | https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/slides/graphrag/[GraphRAG Foundations]
 | GenAI limitations and the GraphRAG solution: hallucination, context rot, embeddings, vector search, RAG, and how graph context transforms retrieval quality.
-| xref:lab3.adoc[Lab 3]
+| xref:lab2.adoc[Lab 2], xref:lab3.adoc[Lab 3]
 
 | https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/slides/retrievers/[GraphRAG Retriever Patterns]
-| VectorRetriever, VectorCypherRetriever, the two-layer graph, retrieval query design, and choosing the right retriever for your question type.
+| VectorRetriever, VectorCypherRetriever, the two halves of one graph, retrieval query design, and choosing the right retriever for your question type.
 | xref:lab3.adoc[Lab 3]
 
 | https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/slides/agent-agentcore/[GraphRAG Agent and AgentCore]

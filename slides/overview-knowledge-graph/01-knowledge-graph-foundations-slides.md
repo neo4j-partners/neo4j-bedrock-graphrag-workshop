@@ -165,17 +165,17 @@ Neo4j Aura is the **fully managed cloud graph database** used in this workshop:
 
 ## Aura Developer Tools
 
-**Query** — Cypher editor with syntax highlighting and auto-completion. Used to load data and verify results.
+**Query**: Cypher editor with syntax highlighting and auto-completion. Used to load data and verify results.
 
-**Explore** (Neo4j Bloom) — Visual graph exploration. Search for nodes, expand relationships, discover patterns on an interactive canvas.
+**Explore** (Neo4j Bloom): Visual graph exploration. Search for nodes, expand relationships, discover patterns on an interactive canvas.
 
-**Dashboards** — Low-code visualization: bar charts, geographic maps, and graph visualizations for non-technical stakeholders.
+**Dashboards**: Low-code visualization with bar charts, geographic maps, and graph visualizations for non-technical stakeholders.
 
 ---
 
 ## Data Loading Pattern
 
-The Lab 1 seed load is a provided import of the **complete graph**: structured entities, text chunks, embeddings, and the vector index. The MERGE pattern below shows how the **structured entity layer** is built with Cypher:
+The Lab 1 seed load is a provided import of the **complete graph**: structured entities, text chunks, embeddings, and the vector index. The MERGE pattern below shows how the **structured entity half** is built with Cypher:
 
 1. **Create constraints** for uniqueness (Company by ticker, Product by name)
 2. **MERGE nodes**: create if not exists, match if it does

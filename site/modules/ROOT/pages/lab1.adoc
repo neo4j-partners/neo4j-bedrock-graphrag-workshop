@@ -1,6 +1,6 @@
 = Lab 1: Neo4j Aura Setup and Exploration
 
-Lab 1 is where you set up your graph and get to know the data. You sign up for a Neo4j Aura free trial, load the complete SEC 10-K financial knowledge graph, and explore it with Cypher and Neo4j Explore. The seed load is complete: it provides both the structured graph and the unstructured document layer with embeddings, so every later lab works without running the optional data pipeline. Understanding what the graph contains and how its two layers connect is the foundation for the GraphRAG labs: Lab 3 builds semantic search and GraphRAG retrieval over it, Lab 4 wraps that in a Strands agent, and Lab 6 connects a Neo4j MCP agent.
+Lab 1 is where you set up your graph and get to know the data. You sign up for a Neo4j Aura free trial, load the complete SEC 10-K financial knowledge graph, and explore it with Cypher and Neo4j Explore. The seed load is complete: it provides both the structured graph and the unstructured document half with embeddings, so every later lab works without running the optional data pipeline. Understanding what the graph contains and how its two halves connect is the foundation for the GraphRAG labs: Lab 3 builds semantic search and GraphRAG retrieval over it, Lab 4 wraps that in a Strands agent, and Lab 6 connects a Neo4j MCP agent.
 
 TIP: Ready to start? Jump to xref:lab1-instructions.adoc[Lab 1 Instructions: Set Up Aura and Load the Graph] to create your Aura instance and load the graph, then xref:lab1-explore.adoc[Explore with Neo4j] for the Neo4j Explore walkthrough, and see xref:sample-queries.adoc[Sample Cypher Queries] for queries to run.
 
@@ -11,7 +11,7 @@ TIP: Ready to start? Jump to xref:lab1-instructions.adoc[Lab 1 Instructions: Set
 * **Graph databases**: store data as nodes and relationships, where connections are explicit and traversable rather than hidden in foreign keys and joins
 * **Cypher**: Neo4j's pattern-matching query language, where queries read like the graph patterns they match
 * **The SEC 10-K dataset**: companies, products, risk factors, asset managers, documents, and financial metrics drawn from public 10-K filings
-* **Two layers**: a structured entity graph plus an unstructured document layer of chunks and embeddings, joined by the FILED relationship
+* **Two halves**: a structured entity graph plus an unstructured document half of chunks and embeddings, joined by the FILED relationship
 * **Aura developer tools**: Query (Cypher editor), Explore (visual graph canvas), and Dashboards (low-code visualization)
 
 == Neo4j Aura
@@ -124,21 +124,21 @@ COMPETES_WITH and PARTNERS_WITH are separate relationship types rather than a ge
 
 == What the Seed Load Provides
 
-Running Lab 1 loads a complete graph in two layers.
+Running Lab 1 loads a complete graph in two halves.
 
 **The structured graph** holds the entity types above, connected by typed relationships: a Company OFFERS products, FACES_RISK on risk factors, COMPETES_WITH and PARTNERS_WITH other companies, and REPORTS financial metrics, while an AssetManager OWNS companies and a Company FILED documents.
 
-**The unstructured layer** connects those entities to the text of the filings. Each Document links to Chunk nodes that hold passages of filing text, and each Chunk carries an embedding vector. The seed load populates these embeddings using Amazon Titan Text Embeddings V2 (`amazon.titan-embed-text-v2:0`), which produces 1024-dimension vectors, and it creates the `chunkEmbeddings` vector index over `Chunk.embedding` so semantic search works immediately.
+**The unstructured half** connects those entities to the text of the filings. Each Document links to Chunk nodes that hold passages of filing text, and each Chunk carries an embedding vector. The seed load populates these embeddings using Amazon Titan Text Embeddings V2 (`amazon.titan-embed-text-v2:0`), which produces 1024-dimension vectors, and it creates the `chunkEmbeddings` vector index over `Chunk.embedding` so semantic search works immediately.
 
-IMPORTANT: After Lab 1, the graph is complete. Both layers are in place, so Labs 3 through 6 run without you having to run the optional data pipeline in Lab 2. Lab 2 is available if you want to see how the unstructured layer is built, but it is not required.
+IMPORTANT: After Lab 1, the graph is complete. Both halves are in place, so Labs 3 through 6 run without you having to run the optional data pipeline in Lab 2. Lab 2 is available if you want to see how the unstructured half is built, but it is not required.
 
-== The Two-Layer Graph
+== Two Halves of One Graph
 
-The graph has two layers, joined by the FILED relationship.
+The graph has two halves, joined by the FILED relationship.
 
-**The structured layer** holds the entity types above: Company, Product, RiskFactor, AssetManager, Document, and FinancialMetric, connected by typed relationships.
+**The structured half** holds the entity types above: Company, Product, RiskFactor, AssetManager, Document, and FinancialMetric, connected by typed relationships.
 
-**The unstructured layer** connects those entities to the text of the filings. A Company node links to its filed Documents via FILED. Each Document links to its Chunks via FROM_DOCUMENT, and adjacent Chunks link to each other via NEXT_CHUNK to preserve reading order. Each Chunk carries an embedding vector, and the `chunkEmbeddings` vector index (1024 dimensions, from Amazon Titan Text Embeddings V2) supports semantic search over the chunk text. These embeddings were loaded in Lab 1.
+**The unstructured half** connects those entities to the text of the filings. A Company node links to its filed Documents via FILED. Each Document links to its Chunks via FROM_DOCUMENT, and adjacent Chunks link to each other via NEXT_CHUNK to preserve reading order. Each Chunk carries an embedding vector, and the `chunkEmbeddings` vector index (1024 dimensions, from Amazon Titan Text Embeddings V2) supports semantic search over the chunk text. These embeddings were loaded in Lab 1.
 
 This structure supports GraphRAG retrieval: vector search finds relevant Chunks, then graph traversal follows FROM_DOCUMENT to the Document and FILED back to the Company, pulling in structured entity context alongside the matched text. Lab 3 and Lab 4 build on exactly this pattern.
 
