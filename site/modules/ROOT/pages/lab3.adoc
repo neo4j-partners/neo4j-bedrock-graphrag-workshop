@@ -57,7 +57,7 @@ When you ask "What cybersecurity risks does Apple face?", vector search finds th
 
 This lab covers the retrieval side: vector search and graph-enriched retrieval. The chunking and embedding were pre-computed and loaded by the Lab 1 seed load. xref:lab2.adoc[Lab 2] covers building that data pipeline from scratch.
 
-image::graph-enriched-retrieval.png[SEC 10-K GraphRAG Retrieval Flow,800]
+image::graph-enriched-retrieval.svg[SEC 10-K GraphRAG Retrieval Flow,800]
 
 == Retrieval Strategies
 

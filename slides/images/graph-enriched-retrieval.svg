@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1480" font-family="'Comic Sans MS','Segoe Print','Bradley Hand',cursive">
+  <defs>
+    <marker id="ge-dark" markerWidth="11" markerHeight="11" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#343a40"/></marker>
+    <marker id="ge-teal" markerWidth="11" markerHeight="11" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#0c8599"/></marker>
+    <marker id="ge-purple" markerWidth="11" markerHeight="11" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9c36b5"/></marker>
+  </defs>
+
+  <rect x="0" y="0" width="1500" height="1480" fill="#ffffff"/>
+
+  <text x="750" y="64" text-anchor="middle" font-size="42" fill="#222">SEC 10-K GraphRAG Retrieval Flow</text>
+  <text x="370" y="150" text-anchor="middle" font-size="24" fill="#adb5bd">Retrieval Pipeline</text>
+  <text x="1105" y="150" text-anchor="middle" font-size="24" fill="#adb5bd">Neo4j Knowledge Graph</text>
+
+  <!-- ===== left column flow arrows ===== -->
+  <line x1="370" y1="295" x2="370" y2="356" stroke="#343a40" stroke-width="3" marker-end="url(#ge-dark)"/>
+  <line x1="370" y1="455" x2="370" y2="516" stroke="#343a40" stroke-width="3" marker-end="url(#ge-dark)"/>
+  <line x1="370" y1="635" x2="370" y2="696" stroke="#343a40" stroke-width="3" marker-end="url(#ge-dark)"/>
+  <line x1="370" y1="795" x2="370" y2="856" stroke="#343a40" stroke-width="3" marker-end="url(#ge-dark)"/>
+
+  <!-- ===== right column flow arrows ===== -->
+  <line x1="1105" y1="360" x2="1105" y2="416" stroke="#343a40" stroke-width="3" marker-end="url(#ge-dark)"/>
+  <line x1="1105" y1="520" x2="1105" y2="576" stroke="#343a40" stroke-width="3" marker-end="url(#ge-dark)"/>
+  <line x1="1105" y1="720" x2="1105" y2="776" stroke="#343a40" stroke-width="3" marker-end="url(#ge-dark)"/>
+  <line x1="1105" y1="890" x2="1105" y2="946" stroke="#343a40" stroke-width="3" marker-end="url(#ge-dark)"/>
+
+  <!-- ===== cross links ===== -->
+  <!-- Vector/Hybrid Search -> Chunk nodes -->
+  <line x1="650" y1="405" x2="798" y2="300" stroke="#0c8599" stroke-width="3" marker-end="url(#ge-teal)"/>
+  <!-- Graph Traversal -> Company -->
+  <line x1="650" y1="575" x2="798" y2="650" stroke="#9c36b5" stroke-width="3" stroke-dasharray="11 7" marker-end="url(#ge-purple)"/>
+
+  <!-- ===== left column boxes ===== -->
+  <rect x="90" y="200" width="560" height="95" rx="18" fill="#dbe4ff" stroke="#1971c2" stroke-width="2.5"/>
+  <text x="370" y="256" text-anchor="middle" font-size="28" fill="#1971c2">User Question</text>
+
+  <rect x="90" y="360" width="560" height="95" rx="18" fill="#c5f6fa" stroke="#1098ad" stroke-width="2.5"/>
+  <text x="370" y="416" text-anchor="middle" font-size="28" fill="#0c8599">Vector / Hybrid Search</text>
+
+  <rect x="90" y="520" width="560" height="115" rx="18" fill="#f3e8fd" stroke="#9c36b5" stroke-width="2.5"/>
+  <text x="370" y="568" text-anchor="middle" font-size="27" fill="#9c36b5">Graph Traversal</text>
+  <text x="370" y="602" text-anchor="middle" font-size="23" fill="#9c36b5">(VectorCypherRetriever)</text>
+
+  <rect x="90" y="700" width="560" height="95" rx="18" fill="#d3f9d8" stroke="#2f9e44" stroke-width="2.5"/>
+  <text x="370" y="756" text-anchor="middle" font-size="28" fill="#2f9e44">Graph-Enriched Context</text>
+
+  <rect x="90" y="860" width="560" height="95" rx="18" fill="#d3f9d8" stroke="#2f9e44" stroke-width="2.5"/>
+  <text x="370" y="916" text-anchor="middle" font-size="28" fill="#2f9e44">GraphRAG Answer</text>
+
+  <!-- ===== right column boxes ===== -->
+  <rect x="800" y="200" width="610" height="160" rx="18" fill="#ffe8cc" stroke="#e8590c" stroke-width="2.5"/>
+  <text x="1105" y="256" text-anchor="middle" font-size="27" fill="#e8590c">(:Chunk) Nodes</text>
+  <text x="1105" y="292" text-anchor="middle" font-size="24" fill="#e8590c">Vector + Fulltext Indexed</text>
+  <text x="1105" y="326" text-anchor="middle" font-size="24" fill="#e8590c">NEXT_CHUNK chain</text>
+
+  <rect x="800" y="420" width="610" height="100" rx="18" fill="#c5f6fa" stroke="#1098ad" stroke-width="2.5"/>
+  <text x="1105" y="462" text-anchor="middle" font-size="27" fill="#0c8599">(:Document)</text>
+  <text x="1105" y="496" text-anchor="middle" font-size="24" fill="#0c8599">FROM_DOCUMENT</text>
+
+  <rect x="800" y="580" width="610" height="140" rx="18" fill="#f3e8fd" stroke="#9c36b5" stroke-width="2.5"/>
+  <text x="1105" y="628" text-anchor="middle" font-size="27" fill="#9c36b5">(:Company)</text>
+  <text x="1105" y="662" text-anchor="middle" font-size="24" fill="#9c36b5">FILED / COMPETES_WITH /</text>
+  <text x="1105" y="694" text-anchor="middle" font-size="24" fill="#9c36b5">PARTNERS_WITH</text>
+
+  <rect x="800" y="780" width="610" height="110" rx="18" fill="#ffdeeb" stroke="#e64980" stroke-width="2.5"/>
+  <text x="1105" y="826" text-anchor="middle" font-size="27" fill="#c2255c">(:Product) (:RiskFactor)</text>
+  <text x="1105" y="860" text-anchor="middle" font-size="24" fill="#c2255c">OFFERS / FACES_RISK</text>
+
+  <rect x="800" y="950" width="610" height="110" rx="18" fill="#fff3bf" stroke="#f08c00" stroke-width="2.5"/>
+  <text x="1105" y="996" text-anchor="middle" font-size="27" fill="#e67700">(:AssetManager)</text>
+  <text x="1105" y="1030" text-anchor="middle" font-size="24" fill="#e67700">OWNS {shares}</text>
+
+  <!-- ===== framework footer ===== -->
+  <rect x="60" y="1360" width="1380" height="72" rx="16" fill="#ffec99" stroke="#f08c00" stroke-width="2.5"/>
+  <text x="750" y="1404" text-anchor="middle" font-size="23" fill="#8a5a00">neo4j-graphrag  |  VectorRetriever  |  VectorCypherRetriever  |  HybridRetriever  |  Bedrock Titan Embeddings</text>
+</svg>

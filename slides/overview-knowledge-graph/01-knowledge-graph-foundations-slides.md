@@ -119,7 +119,7 @@ Four core entity types from SEC 10-K filings:
 
 ---
 
-![bg contain](financial-data-model.png)
+![bg contain](financial-data-model.svg)
 
 ---
 

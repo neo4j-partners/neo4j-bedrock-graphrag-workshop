@@ -59,7 +59,7 @@ Together: AWS aggregates and governs enterprise data in the lakehouse and provid
 
 ---
 
-![bg contain](workshop-architecture.png)
+![bg contain](workshop-architecture.svg)
 
 ---
 
@@ -102,7 +102,7 @@ Four entity types connected by typed relationships that reflect real-world struc
 
 ---
 
-![bg contain](financial-data-model.png)
+![bg contain](financial-data-model.svg)
 
 ---
 
@@ -174,7 +174,7 @@ Each step gives the agent more autonomy. The trade-off: more flexibility means l
 |---|-----|-------|
 | **Provides** | Models, compute, hosting, lakehouse + data pipelines | Graph storage, vector index, query engine |
 | **Answers** | "Generate a response", "Deploy this agent", "How much?" and "How often?" | "How is this connected?" and "What is semantically similar?" |
-| **AI capability** | Bedrock (Claude, Titan), AgentCore, Athena / Amazon Q (natural language SQL) | Vector indexes, GraphRAG, MCP Server |
+| **AI capability** | Bedrock (Claude, Titan), AgentCore, Athena / Amazon Quick (natural language SQL) | Vector indexes, GraphRAG, MCP Server |
 | **Strength** | Scale, managed services, security, governance + data pipelines | Relationships, traversal, pattern matching |
 
 ---

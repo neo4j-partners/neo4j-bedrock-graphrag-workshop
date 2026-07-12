@@ -19,7 +19,7 @@ These steps must be completed by the workshop admin before participants begin.
 ### 1. Enable Bedrock Model Access
 
 In the AWS Console, navigate to **Amazon Bedrock > Model access** and enable:
-- `us.anthropic.claude-sonnet-4-5-20250929-v1:0` (or your preferred Claude model)
+- `us.anthropic.claude-sonnet-4-6` (or your preferred Claude model)
 - `amazon.titan-embed-text-v2:0`
 
 This is a manual console step and cannot be scripted.

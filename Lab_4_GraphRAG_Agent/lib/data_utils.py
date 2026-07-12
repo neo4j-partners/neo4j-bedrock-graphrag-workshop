@@ -59,7 +59,7 @@ class BedrockConfig(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="", extra="ignore")
 
     model_id: str = Field(
-        default="us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        default="us.anthropic.claude-sonnet-4-6",
         validation_alias="MODEL_ID"
     )
     region: str = Field(default="us-east-1", validation_alias="REGION")

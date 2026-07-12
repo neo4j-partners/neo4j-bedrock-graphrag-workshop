@@ -59,7 +59,7 @@ The outline's highest-priority gap. Leads with the why before any architecture. 
 
 With the business story moved to its own deck, this deck becomes the architecture and roadmap deck. Required changes:
 
-- **Keep the AWS-lakehouse pipeline narrative as the production pattern.** The "Data Pipeline: AWS Lakehouse to Neo4j" slide, the Glue/EMR/Spark Connector/Iceberg/medallion content in "Why Neo4j + AWS", and `workshop-architecture.png` stay. Frame this explicitly as how data reaches the graph in production. Add a line noting that the workshop's hands-on version is the optional Lab 2, which rebuilds from `financial_data.json` with Titan embeddings rather than running the full lakehouse job.
+- **Keep the AWS-lakehouse pipeline narrative as the production pattern.** The "Data Pipeline: AWS Lakehouse to Neo4j" slide, the Glue/EMR/Spark Connector/Iceberg/medallion content in "Why Neo4j + AWS", and `workshop-architecture.svg` stay. Frame this explicitly as how data reaches the graph in production. Add a line noting that the workshop's hands-on version is the optional Lab 2, which rebuilds from `financial_data.json` with Titan embeddings rather than running the full lakehouse job.
 - **Fix the roadmap slide.** "Part 2: Labs 3-5" and "Part 3: Bonus Lab 6" are wrong. Use the four-part structure: Part 1 (Labs 0-1), Part 2 (Labs 2-4), Part 3 (Lab 5), Part 4 (Lab 6), plus the appendix.
 - **Fix the "Lab Progression" table.** Currently Lab 0 = AWS sign-in, 1 = Aura, 3 = Strands, 4 = retrievers, 5 = MCP, 6 = pipeline. Renumber to the target table above.
 - **Fix "From Code-First to Full Autonomy"** and "What Each Platform Brings" lab references to the new numbering.
@@ -103,7 +103,7 @@ The deck currently mixes the toy-agent intro, the GraphRAG agent, AgentCore, and
 
 **New deck 2: `overview-mcp` (Lab 6).** The MCP production pattern:
 
-- MCP architecture, Neo4j MCP Server tools, and the `lab6-mcp-agent-architecture.png` diagram, kept from the current deck.
+- MCP architecture, Neo4j MCP Server tools, and the `lab6-mcp-agent-architecture.svg` diagram, kept from the current deck.
 - **Cypher Templates** and **Text2Cypher** slides, renumbered from "Lab 5" to Lab 6, including the notebook progression.
 - **Add an MCP-as-production-pattern slide**: framework-agnostic, one server for any framework, available on AWS Marketplace, matching the Part 4 slides in the outline.
 - Fix the closing summary "knowledge graph from Labs 1-4" to the new numbering.

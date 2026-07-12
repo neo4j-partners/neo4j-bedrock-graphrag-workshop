@@ -71,7 +71,7 @@ All credentials are stored in `CONFIG.txt` at the project root (gitignored). The
 NEO4J_URI=neo4j+s://xxx.databases.neo4j.io
 NEO4J_USERNAME=neo4j
 NEO4J_PASSWORD=your_password_here
-MODEL_ID=us.anthropic.claude-sonnet-4-5-20250929-v1:0
+MODEL_ID=us.anthropic.claude-sonnet-4-6
 REGION=us-east-1
 ```
 

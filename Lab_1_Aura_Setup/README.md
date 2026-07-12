@@ -16,7 +16,7 @@ Follow the [Neo4j Aura Free Signup](Aura_Free_Trial.md) guide to create your fre
 
 ## Part 2: Load the Knowledge Graph
 
-![SEC 10-K Financial Data Model](images/financial-data-model.png)
+![SEC 10-K Financial Data Model](images/financial-data-model.svg)
 
 After your Aura instance is running, open **Query** from the left sidebar in the [Aura Console](https://console.neo4j.io) and run the following Cypher statements in order.
 

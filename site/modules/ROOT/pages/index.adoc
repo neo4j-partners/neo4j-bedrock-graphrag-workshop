@@ -43,7 +43,7 @@ The workshop uses data from SEC 10-K filings loaded into the Neo4j knowledge gra
 
 The SEC financial dataset includes six entity types connected by typed relationships:
 
-image::financial-data-model.png[SEC 10-K Financial Data Model,800]
+image::financial-data-model.svg[SEC 10-K Financial Data Model,800]
 
 This diagram shows the structured half. The Lab 1 seed load also brings in the unstructured half: Document and Chunk nodes with Titan Text Embeddings V2 embeddings that connect filing text back to these entities. xref:lab3.adoc[Lab 3] uses both halves for graph-enriched retrieval, and xref:lab2.adoc[Lab 2] shows how the pipeline builds them from scratch.
 
@@ -51,7 +51,7 @@ This diagram shows the structured half. The Lab 1 seed load also brings in the u
 
 These four steps produce the architecture below. Amazon Bedrock AgentCore is the agentic platform at the center: it hosts the Strands agents that reason over questions and the runtime that manages deployment and scaling. Bedrock provides the foundation models for reasoning and embedding. Neo4j Aura provides the knowledge graph that agents retrieve from. SageMaker Studio is the development environment where you build and test before deploying to AgentCore.
 
-image::workshop-architecture.png[Workshop Architecture,800]
+image::workshop-architecture.svg[Workshop Architecture,800]
 
 == Labs
 

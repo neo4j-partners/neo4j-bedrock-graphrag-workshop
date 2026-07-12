@@ -163,6 +163,10 @@ Each session runs in an **isolated microVM** with dedicated CPU, memory, and fil
 
 ---
 
+![bg contain](agentcore-deployment.svg)
+
+---
+
 ## The AgentCore Handler Contract
 
 Deployment wraps the same agent code in two AgentCore primitives:

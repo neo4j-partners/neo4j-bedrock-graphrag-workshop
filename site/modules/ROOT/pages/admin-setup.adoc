@@ -13,7 +13,7 @@ These steps must be completed by the workshop admin before participants begin. T
 
 In the AWS Console, navigate to **Amazon Bedrock > Model access** and enable:
 
-* `us.anthropic.claude-sonnet-4-5-20250929-v1:0` (or your preferred Claude model)
+* `us.anthropic.claude-sonnet-4-6` (or your preferred Claude model)
 * `amazon.titan-embed-text-v2:0`
 
 This is a manual console step. Titan Text Embeddings V2 is usually approved instantly; Claude may take a few minutes. Participants also verify model access in xref:part2-setup-instructions.adoc[the Part 2 environment setup], but enabling it in advance avoids delays.
@@ -59,7 +59,7 @@ Verify the following fields in `CONFIG.txt` before distributing to participants.
 
 [source]
 ----
-MODEL_ID=us.anthropic.claude-sonnet-4-5-20250929-v1:0
+MODEL_ID=us.anthropic.claude-sonnet-4-6
 REGION=us-east-1
 ----
 

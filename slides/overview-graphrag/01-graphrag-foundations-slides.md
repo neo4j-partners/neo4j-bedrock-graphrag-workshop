@@ -154,7 +154,7 @@ Graph connections turn an isolated text answer into a **contextual, grounded res
 
 ---
 
-![bg contain](graph-enriched-retrieval.png)
+![bg contain](graph-enriched-retrieval.svg)
 
 ---
 

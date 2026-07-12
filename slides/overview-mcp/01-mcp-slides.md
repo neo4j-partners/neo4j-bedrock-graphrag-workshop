@@ -49,7 +49,7 @@ Any MCP-compatible agent connects to any MCP-compatible server.
 
 ---
 
-![bg contain](lab6-mcp-agent-architecture.png)
+![bg contain](lab6-mcp-agent-architecture.svg)
 
 ---
 

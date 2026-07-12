@@ -14,70 +14,70 @@
   <text x="800" y="64" text-anchor="middle" font-size="44" fill="#222">Lab 4: Deploy to AgentCore Runtime</text>
 
   <!-- ===================== SageMaker Studio boundary ===================== -->
-  <rect x="40" y="120" width="430" height="330" rx="18" fill="none" stroke="#4a90e2" stroke-width="2.5" stroke-dasharray="10 6"/>
+  <rect x="40" y="120" width="420" height="340" rx="18" fill="none" stroke="#4a90e2" stroke-width="2.5" stroke-dasharray="10 6"/>
   <text x="58" y="152" font-size="20" fill="#2f6fd0">Amazon SageMaker Studio</text>
 
   <!-- Notebook / code box -->
-  <rect x="65" y="190" width="380" height="150" rx="16" fill="#dbe4ff" stroke="#1971c2" stroke-width="3"/>
-  <text x="255" y="238" text-anchor="middle" font-size="21" fill="#333">02_deploy_to_agentcore.ipynb</text>
-  <text x="255" y="272" text-anchor="middle" font-size="17" fill="#333">bedrock-agentcore-starter-toolkit</text>
-  <text x="255" y="302" text-anchor="middle" font-size="16" fill="#333">agentcore deploy (direct_code_deploy)</text>
+  <rect x="55" y="200" width="350" height="150" rx="16" fill="#dbe4ff" stroke="#1971c2" stroke-width="3"/>
+  <text x="230" y="248" text-anchor="middle" font-size="21" fill="#333">02_deploy_to_agentcore.ipynb</text>
+  <text x="230" y="282" text-anchor="middle" font-size="17" fill="#333">bedrock-agentcore-starter-toolkit</text>
+  <text x="230" y="312" text-anchor="middle" font-size="16" fill="#333">agentcore deploy (direct_code_deploy)</text>
 
   <!-- note under notebook -->
-  <text x="66" y="372" font-size="16" fill="#868e96">bundles agentcore_deploy/:</text>
-  <text x="66" y="395" font-size="16" fill="#868e96">agent.py, graphrag_agent.py,</text>
-  <text x="66" y="418" font-size="16" fill="#868e96">pyproject.toml</text>
+  <text x="56" y="372" font-size="16" fill="#868e96">bundles agentcore_deploy/:</text>
+  <text x="56" y="395" font-size="16" fill="#868e96">agent.py, graphrag_agent.py,</text>
+  <text x="56" y="418" font-size="16" fill="#868e96">pyproject.toml</text>
 
   <!-- ===================== AWS Cloud boundary ===================== -->
-  <rect x="500" y="120" width="1060" height="480" rx="18" fill="none" stroke="#ff9900" stroke-width="2.5" stroke-dasharray="10 6"/>
+  <rect x="500" y="120" width="1060" height="490" rx="18" fill="none" stroke="#ff9900" stroke-width="2.5" stroke-dasharray="10 6"/>
   <text x="520" y="152" font-size="20" fill="#ff9900">AWS Cloud (us-east-1)</text>
 
   <!-- ===================== deploy-step arrows (orange) ===================== -->
   <!-- 1. notebook -> S3 -->
-  <line x1="447" y1="252" x2="531" y2="250" stroke="#e8820c" stroke-width="3" marker-end="url(#ah-orange)"/>
-  <text x="489" y="235" text-anchor="middle" font-size="16" fill="#e8820c">1. zip + upload code</text>
+  <line x1="407" y1="262" x2="556" y2="256" stroke="#e8820c" stroke-width="3" marker-end="url(#ah-orange)"/>
+  <text x="480" y="178" text-anchor="middle" font-size="16" fill="#e8820c">1. zip + upload code</text>
   <!-- 2. S3 -> Runtime -->
-  <line x1="767" y1="252" x2="866" y2="270" stroke="#e8820c" stroke-width="3" marker-end="url(#ah-orange)"/>
-  <text x="817" y="232" text-anchor="middle" font-size="16" fill="#e8820c">2. provision runtime</text>
+  <line x1="762" y1="255" x2="876" y2="250" stroke="#e8820c" stroke-width="3" marker-end="url(#ah-orange)"/>
+  <text x="815" y="178" text-anchor="middle" font-size="16" fill="#e8820c">2. provision runtime</text>
 
   <!-- ===================== gray arrows ===================== -->
   <!-- Runtime -> Bedrock -->
-  <line x1="1232" y1="258" x2="1326" y2="262" stroke="#555" stroke-width="2.5" marker-end="url(#ah-gray)"/>
-  <text x="1280" y="242" text-anchor="middle" font-size="16" fill="#555">model + embed calls</text>
+  <line x1="1232" y1="256" x2="1326" y2="260" stroke="#555" stroke-width="2.5" marker-end="url(#ah-gray)"/>
+  <text x="1280" y="178" text-anchor="middle" font-size="16" fill="#555">model + embed calls</text>
   <!-- Runtime -> Neo4j Aura (exits AWS services boundary) -->
-  <line x1="1180" y1="455" x2="1385" y2="682" stroke="#555" stroke-width="2.5" marker-end="url(#ah-gray)"/>
-  <text x="1335" y="560" text-anchor="middle" font-size="18" fill="#555">Cypher + vector</text>
+  <line x1="1185" y1="470" x2="1385" y2="678" stroke="#555" stroke-width="2.5" marker-end="url(#ah-gray)"/>
+  <text x="1330" y="560" text-anchor="middle" font-size="18" fill="#555">Cypher + vector</text>
   <!-- client -> Runtime -->
-  <line x1="458" y1="700" x2="892" y2="458" stroke="#555" stroke-width="2.5" marker-end="url(#ah-gray)"/>
-  <text x="675" y="560" text-anchor="middle" font-size="17" fill="#555">3. invoke over REST</text>
-  <text x="675" y="582" text-anchor="middle" font-size="17" fill="#555">(agentRuntimeArn, prompt)</text>
+  <line x1="462" y1="700" x2="878" y2="466" stroke="#555" stroke-width="2.5" marker-end="url(#ah-gray)"/>
+  <text x="640" y="512" text-anchor="middle" font-size="17" fill="#555">3. invoke over REST</text>
+  <text x="640" y="534" text-anchor="middle" font-size="17" fill="#555">(agentRuntimeArn, prompt)</text>
 
   <!-- ===================== nodes ===================== -->
   <!-- Amazon S3 -->
-  <rect x="535" y="205" width="230" height="95" rx="16" fill="#d3f9d8" stroke="#2f9e44" stroke-width="3"/>
-  <text x="650" y="245" text-anchor="middle" font-size="22" fill="#333">Amazon S3</text>
-  <text x="650" y="278" text-anchor="middle" font-size="18" fill="#333">code bundle (.zip)</text>
+  <rect x="560" y="210" width="200" height="95" rx="16" fill="#d3f9d8" stroke="#2f9e44" stroke-width="3"/>
+  <text x="660" y="250" text-anchor="middle" font-size="22" fill="#333">Amazon S3</text>
+  <text x="660" y="282" text-anchor="middle" font-size="18" fill="#333">code bundle (.zip)</text>
 
   <!-- Amazon Bedrock AgentCore Runtime -->
-  <rect x="870" y="175" width="360" height="280" rx="16" fill="#ffe8cc" stroke="#e8820c" stroke-width="3"/>
-  <text x="1050" y="212" text-anchor="middle" font-size="21" fill="#333">Amazon Bedrock</text>
-  <text x="1050" y="240" text-anchor="middle" font-size="21" fill="#333">AgentCore Runtime</text>
-  <line x1="900" y1="258" x2="1200" y2="258" stroke="#e8820c" stroke-width="1.5" stroke-dasharray="6 5"/>
-  <text x="1050" y="294" text-anchor="middle" font-size="18" fill="#333">isolated microVM per session</text>
-  <text x="1050" y="326" text-anchor="middle" font-size="18" fill="#333">Python 3.13 / arm64</text>
-  <text x="1050" y="358" text-anchor="middle" font-size="18" fill="#333">retrievers built once (warm)</text>
-  <text x="1050" y="390" text-anchor="middle" font-size="18" fill="#333">fresh Agent per request</text>
+  <rect x="880" y="200" width="350" height="270" rx="16" fill="#ffe8cc" stroke="#e8820c" stroke-width="3"/>
+  <text x="1055" y="238" text-anchor="middle" font-size="21" fill="#333">Amazon Bedrock</text>
+  <text x="1055" y="266" text-anchor="middle" font-size="21" fill="#333">AgentCore Runtime</text>
+  <line x1="910" y1="284" x2="1200" y2="284" stroke="#e8820c" stroke-width="1.5" stroke-dasharray="6 5"/>
+  <text x="1055" y="318" text-anchor="middle" font-size="18" fill="#333">isolated microVM per session</text>
+  <text x="1055" y="350" text-anchor="middle" font-size="18" fill="#333">Python 3.13 / arm64</text>
+  <text x="1055" y="382" text-anchor="middle" font-size="18" fill="#333">retrievers built once (warm)</text>
+  <text x="1055" y="414" text-anchor="middle" font-size="18" fill="#333">fresh Agent per request</text>
 
   <!-- Amazon Bedrock (models) -->
-  <rect x="1326" y="205" width="212" height="120" rx="16" fill="#f4e2fb" stroke="#9b30c9" stroke-width="3"/>
-  <text x="1432" y="246" text-anchor="middle" font-size="21" fill="#333">Amazon Bedrock</text>
-  <text x="1432" y="278" text-anchor="middle" font-size="17" fill="#333">Claude Sonnet 4.5 +</text>
-  <text x="1432" y="302" text-anchor="middle" font-size="17" fill="#333">Titan Embeddings V2</text>
+  <rect x="1330" y="210" width="210" height="120" rx="16" fill="#f4e2fb" stroke="#9b30c9" stroke-width="3"/>
+  <text x="1435" y="250" text-anchor="middle" font-size="21" fill="#333">Amazon Bedrock</text>
+  <text x="1435" y="282" text-anchor="middle" font-size="17" fill="#333">Claude Sonnet 4.5 +</text>
+  <text x="1435" y="306" text-anchor="middle" font-size="17" fill="#333">Titan Embeddings V2</text>
 
   <!-- IAM note -->
-  <rect x="815" y="478" width="415" height="86" rx="14" fill="#f1f3f5" stroke="#868e96" stroke-width="2.5"/>
-  <text x="1022" y="514" text-anchor="middle" font-size="17" fill="#495057">IAM: BedrockAgentCoreLabDeployPolicy</text>
-  <text x="1022" y="540" text-anchor="middle" font-size="16" fill="#868e96">execution role auto-created</text>
+  <rect x="820" y="500" width="380" height="85" rx="14" fill="#f1f3f5" stroke="#868e96" stroke-width="2.5"/>
+  <text x="1010" y="536" text-anchor="middle" font-size="17" fill="#495057">IAM: BedrockAgentCoreLabDeployPolicy</text>
+  <text x="1010" y="562" text-anchor="middle" font-size="16" fill="#868e96">execution role auto-created</text>
 
   <!-- Neo4j Aura (outside AWS services boundary) -->
   <rect x="1320" y="682" width="220" height="115" rx="16" fill="#e8fbf8" stroke="#2bb3a3" stroke-width="3"/>
@@ -85,8 +85,8 @@
   <text x="1430" y="762" text-anchor="middle" font-size="18" fill="#333">vector + graph</text>
 
   <!-- Client invocation box -->
-  <rect x="40" y="682" width="430" height="120" rx="16" fill="#dbe4ff" stroke="#1971c2" stroke-width="3"/>
-  <text x="255" y="722" text-anchor="middle" font-size="20" fill="#333">client</text>
-  <text x="255" y="754" text-anchor="middle" font-size="18" fill="#333">agentcore invoke</text>
-  <text x="255" y="784" text-anchor="middle" font-size="18" fill="#333">boto3 invoke_agent_runtime</text>
+  <rect x="40" y="680" width="420" height="120" rx="16" fill="#dbe4ff" stroke="#1971c2" stroke-width="3"/>
+  <text x="250" y="720" text-anchor="middle" font-size="20" fill="#333">client</text>
+  <text x="250" y="752" text-anchor="middle" font-size="18" fill="#333">agentcore invoke</text>
+  <text x="250" y="782" text-anchor="middle" font-size="18" fill="#333">boto3 invoke_agent_runtime</text>
 </svg>
