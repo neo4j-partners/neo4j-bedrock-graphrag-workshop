@@ -89,7 +89,7 @@ def get_llm() -> BedrockLLM:
     config = BedrockConfig()
 
     return BedrockLLM(
-        model_id=config.model_id,
+        model_name=config.model_id,
         region_name=config.region,
     )
 

@@ -68,7 +68,7 @@ const decks = [
     source: "01-agent-memory-slides.md",
     title: "Agent Memory with Neo4j",
     description:
-      "Why stateless agents fail across turns, neo4j-agent-memory for short and long-term memory, and one Neo4j instance as both knowledge graph and memory store.",
+      "Why stateless agents fail across turns, the three-part memory model of short-term, long-term, and reasoning traces forming a context graph, and one Neo4j instance as both knowledge graph and memory store.",
   },
   {
     key: "mcp",

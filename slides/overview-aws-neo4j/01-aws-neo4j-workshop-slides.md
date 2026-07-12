@@ -65,13 +65,13 @@ Together: AWS aggregates and governs enterprise data in the lakehouse and provid
 
 ## Data Pipeline: AWS Lakehouse to Neo4j
 
-This is the **production pattern** for how data reaches the graph. The SEC 10-K data flows from the **AWS lakehouse** to **Neo4j** through AWS Glue (Spark) and the Neo4j Spark Connector:
+The **production pattern** for how SEC 10-K data reaches the graph, via AWS Glue (Spark) and the Neo4j Spark Connector:
 
-- Governed Apache Iceberg tables on Amazon S3, refined through the **medallion pattern** (bronze, silver, gold), cataloged in the Glue Data Catalog and secured with Lake Formation
-- An AWS Glue (or Amazon EMR) Spark job runs the Neo4j Spark Connector, reading from the silver/gold tables and writing nodes and relationships into the knowledge graph
-- Table rows become nodes, foreign keys become relationships, shared attributes become shared nodes
+- Governed Apache Iceberg tables on Amazon S3, refined through the **medallion pattern** (bronze/silver/gold), cataloged in Glue and secured with Lake Formation
+- A Glue (or EMR) Spark job reads the silver/gold tables and writes nodes and relationships via the Neo4j Spark Connector
+- Rows become nodes, foreign keys become relationships, shared attributes become shared nodes
 
-This workshop's knowledge graph is **pre-loaded**. You work directly with the populated graph from Lab 1 onward. The workshop's hands-on version is the optional Lab 2, which rebuilds from `financial_data.json` with Amazon Titan embeddings rather than running the full lakehouse job.
+This workshop's graph is **pre-loaded** — you work with it directly from Lab 1. The optional Lab 2 rebuilds it from `financial_data.json` with Amazon Titan embeddings instead of running the full lakehouse job.
 
 ---
 
@@ -108,6 +108,10 @@ Four entity types connected by typed relationships that reflect real-world struc
 
 ## Workshop Architecture
 
+<style scoped>
+section { font-size: 95%; }
+</style>
+
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
 | **Data Pipeline** | AWS Glue / EMR + S3 Iceberg lakehouse (Lake Formation) + Neo4j Spark Connector | Govern, refine, and load enterprise data into the graph |
@@ -134,9 +138,6 @@ Add short and long-term memory to the agent with Neo4j
 **Part 4: Neo4j MCP Server** (Lab 6, optional)
 Schema-first Text2Cypher agent over the Model Context Protocol
 
-**Appendix: What Is an Agent?**
-Strands intro with toy tools
-
 ---
 
 ## Lab Progression
@@ -150,21 +151,6 @@ Strands intro with toy tools
 | **4** | GraphRAG agent + AgentCore | ReAct pattern, tool use, deployment |
 | **5** | Agent memory (optional) | Short and long-term memory |
 | **6** | Neo4j MCP agent (optional) | Schema-first Text2Cypher over MCP |
-
----
-
-## From Code-First to Full Autonomy
-
-The labs progress along a **control spectrum**:
-
-```
-Appendix: Strands SDK      → Code-first agents, @tool decorator
-Lab 3: neo4j-graphrag      → Pre-built retriever classes
-Lab 6: Cypher Templates    → Pre-written queries, MCP transport
-Lab 6: Text2Cypher         → Agent writes its own Cypher
-```
-
-Each step gives the agent more autonomy. The trade-off: more flexibility means less predictability.
 
 ---
 

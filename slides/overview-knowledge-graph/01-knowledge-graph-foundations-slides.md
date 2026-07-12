@@ -206,14 +206,3 @@ FOR (c:Chunk) ON (c.embedding)
 OPTIONS {indexConfig: {`vector.dimensions`: 1024,
          `vector.similarity_function`: 'cosine'}}
 ```
-
----
-
-## What Comes Next
-
-- **Lab 1**: Provision Aura, load the seed graph, explore visually
-- **Lab 2**: Build the data pipeline from scratch (optional)
-- **Lab 3**: Run GraphRAG retrievers over chunks and embeddings
-- **Lab 6**: Connect agents to the graph via MCP
-
-The knowledge graph is the foundation for everything that follows.

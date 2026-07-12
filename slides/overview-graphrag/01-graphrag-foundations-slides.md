@@ -212,13 +212,3 @@ The full production pipeline is the AWS lakehouse pattern shown in the workshop 
 ---
 
 ![bg contain](data-pipeline-v2.svg)
-
----
-
-## What Comes Next
-
-- **Lab 3**: Load chunks and embeddings, run VectorRetriever and VectorCypherRetriever
-- **Lab 6**: Connect agents to Neo4j via MCP, Cypher Templates and Text2Cypher
-- **Lab 2**: Build the chunking, embedding, and indexing pipeline (optional)
-
-The graph provides the knowledge. Retrieval strategies determine how agents access it.

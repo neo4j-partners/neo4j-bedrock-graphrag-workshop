@@ -35,7 +35,7 @@ The decks are published as a standalone slide gallery. Open any deck below, or b
 | xref:lab4.adoc[Lab 4]
 
 | https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/slides/agent-memory/[Agent Memory with Neo4j]
-| Why stateless agents fail across turns, neo4j-agent-memory for short and long-term memory, the memory graph schema, and one Neo4j instance serving as both knowledge graph and memory store.
+| Why stateless agents fail across turns, the three-part memory model of short-term, long-term, and reasoning traces, the memory graph schema and how it forms a context graph, and one Neo4j instance serving as both knowledge graph and memory store.
 | xref:lab5.adoc[Lab 5]
 
 | https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/slides/mcp/[Neo4j MCP Agent]

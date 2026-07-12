@@ -22,8 +22,8 @@ All credentials are stored in `CONFIG.txt` at the project root (gitignored). The
 ### Lab 2 - GraphRAG Data Pipeline (Optional)
 Location: `Lab_2_Data_Pipeline/`
 
-Two notebooks covering data loading and embedding generation. Wipes the graph and rebuilds from `financial_data.json` (isolated sandbox). Uses neo4j-graphrag with Bedrock support (`neo4j-graphrag[bedrock]>=1.18.0` from PyPI). Retrieval is deferred to Lab 3.
-- `01_data_loading.ipynb`, `02_embeddings.ipynb`
+One notebook covering data loading and embedding generation together. Wipes the graph and rebuilds from `financial_data.json` (isolated sandbox). Uses neo4j-graphrag with Bedrock support (`neo4j-graphrag[bedrock]>=1.18.0` from PyPI). Retrieval is deferred to Lab 3.
+- `01_chunking_and_embeddings.ipynb`
 
 ### Lab 3 - Semantic Search and GraphRAG (neo4j-graphrag Library)
 Location: `Lab_3_GraphRAG_Search/`
@@ -37,15 +37,18 @@ Uses `lib/data_utils.py` for embedder/LLM helpers. All Neo4j access is via `neo4
 ### Lab 4 - Strands GraphRAG Agent
 Location: `Lab_4_GraphRAG_Agent/`
 
-One notebook:
-- `01_strands_graphrag_agent.ipynb`: Wraps both retrievers from Lab 3 as Strands `@tool` functions and builds an agent with `strands.models.BedrockModel` that chooses the retrieval strategy per question.
+Two notebooks:
+- `01_strands_graphrag_agent.ipynb`: Wraps both retrievers from Lab 3 as Strands `@tool` functions (`semantic_search` over the VectorRetriever and `graph_enriched_search` over the VectorCypherRetriever) and builds an agent with `strands.models.BedrockModel` that chooses the retrieval strategy per question.
+- `02_deploy_to_agentcore.ipynb`: Deploys the agent to Amazon Bedrock AgentCore. The deployment package lives in `agentcore_deploy/` (`agent.py` with the `BedrockAgentCoreApp` + `@app.entrypoint` handler and warm-microVM init, plus `.bedrock_agentcore.yaml`).
 
 Uses `lib/data_utils.py` for embedder/LLM helpers.
 
 ### Lab 5 - Agent Memory with Neo4j
 Location: `Lab_5_Agent_Memory/`
 
-Net-new lab (in development) that adds `neo4j-agent-memory` on top of the Lab 4 Strands agent so it remembers across conversation turns. Uses the same Aura instance and Bedrock Titan embeddings.
+Adds `neo4j-agent-memory` on top of the Lab 4 Strands agent so it remembers across conversation turns. Uses the same Aura instance and Bedrock Titan embeddings.
+- `01_short_term_memory.ipynb`: short-term, within-conversation memory.
+- `02_long_term_memory.ipynb`: long-term memory. Extraction is OFF (`ExtractionConfig(extractor_type=ExtractorType.NONE)`, no extractor LLM); knowledge is written explicitly via `add_entity`/`add_fact`/`add_preference` and recalled via `search_entities`/`search_facts`/`search_preferences`.
 
 ### Lab 6 - Neo4j MCP Server
 Location: `Lab_6_MCP_Server/`
@@ -57,13 +60,15 @@ All MCP access via Strands `MCPClient` with `streamablehttp_client` transport. T
 
 ## Shared Utilities
 
-`lib/data_utils.py`: `Neo4jConfig`, `BedrockConfig` (pydantic-settings), `Neo4jConnection`, `DataLoader`, `get_embedder()`, `get_llm()`, `get_embedding()`, `get_schema()`, `split_text()`. Loads config from project-root `CONFIG.txt`.
+There is no root `lib/` package. Each lab and the loader ships its own local `lib/` so notebooks can import helpers directly.
 
-`lib/mcp_utils.py`: `MCPConnection` — wraps raw MCP `ClientSession` over Streamable HTTP for persistent connections and `execute_query(cypher)`. Loads config from `CONFIG.txt` by default.
+`data_utils.py` provides `Neo4jConfig`, `BedrockConfig` (pydantic-settings), `Neo4jConnection`, `DataLoader`, `get_embedder()`, `get_llm()`, `get_embedding()`, `get_schema()`, `split_text()`. It exists as five copies:
+- `Lab_2_Data_Pipeline/lib/`, `Lab_3_GraphRAG_Search/lib/`, `Lab_4_GraphRAG_Agent/lib/`, `Lab_5_Agent_Memory/lib/`: load config from the project-root `CONFIG.txt`. These four are identical except for a one-line provenance comment.
+- `financial_data_load/lib/`: loads from `financial_data_load/.env` instead of `CONFIG.txt` (so the destructive load/rebuild harness never touches the workshop instance); otherwise the same helpers.
 
-`Lab_3_GraphRAG_Search/lib/data_utils.py` and `Lab_4_GraphRAG_Agent/lib/data_utils.py`: Copies of root `lib/data_utils.py` used by the Lab 3 and Lab 4 notebooks for `get_embedder()` and `get_llm()`.
+Any change to shared logic (for example the `MODEL_ID` default) must be applied to all five copies to keep them in sync.
 
-`financial_data_load/lib/`: Local copies of `data_utils.py` and `mcp_utils.py` that load from `financial_data_load/.env` instead of the project-root `CONFIG.txt`. These are copied from the root `lib/` to simplify env loading for the test harness. If either copy is changed, the other must be updated to match.
+`mcp_utils.py` (`MCPConnection`, which wraps a raw MCP `ClientSession` over Streamable HTTP for persistent connections and `execute_query(cypher)`) exists only in `financial_data_load/lib/`, loading config from `financial_data_load/.env`.
 
 ## Knowledge Graph Schema
 

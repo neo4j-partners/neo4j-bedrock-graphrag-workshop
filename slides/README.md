@@ -72,7 +72,7 @@ GraphRAG retriever patterns — VectorRetriever, VectorCypherRetriever, the two 
 The GraphRAG agent and AgentCore — the ReAct pattern, the Strands Agents SDK, wrapping GraphRAG retrievers as tools, and deploying the agent to Amazon Bedrock AgentCore.
 
 ### `overview-agent-memory/`
-Agent memory with Neo4j — why stateless agents fail across turns, neo4j-agent-memory for short and long-term memory, the memory graph schema, and one Neo4j instance serving as both knowledge graph and memory store.
+Agent memory with Neo4j — why stateless agents fail across turns, the three-part memory model of short-term, long-term, and reasoning traces, the memory graph schema and how it forms a context graph, and one Neo4j instance serving as both knowledge graph and memory store.
 
 ### `overview-mcp/`
 The Neo4j MCP agent — Model Context Protocol architecture, the Neo4j MCP Server tools, Cypher Templates vs Text2Cypher, the schema-first approach, and MCP as a framework-agnostic production pattern.
