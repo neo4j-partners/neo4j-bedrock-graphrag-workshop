@@ -126,17 +126,24 @@ section { font-size: 95%; }
 
 ## Workshop Roadmap
 
+<style scoped>
+section { font-size: 95%; }
+</style>
+
 **Part 1: Setup & Exploration** (Labs 0-1)
-Sign in to AWS and enable Bedrock access, provision Neo4j Aura, load the seed graph, and explore it with Cypher
+- Lab 0: Sign in to AWS and enable Bedrock access
+- Lab 1: Provision Neo4j Aura, load the seed graph, explore it with Cypher
 
 **Part 2: GraphRAG Pipelines & Agents** (Labs 2-4)
-Optional Lab 2 data pipeline, Lab 3 semantic search and GraphRAG (neo4j-graphrag), Lab 4 GraphRAG agent with AgentCore
+- Lab 2: Data pipeline — chunking, embeddings, indexing (optional)
+- Lab 3: Semantic search and GraphRAG with neo4j-graphrag
+- Lab 4: GraphRAG agent and deployment to AgentCore
 
-**Part 3: Agent Memory** (Lab 5, optional)
-Add short and long-term memory to the agent with Neo4j
+**Part 3: Agent Memory** (Lab 5)
+- Lab 5: Add short and long-term memory to the agent with Neo4j
 
 **Part 4: Neo4j MCP Server** (Lab 6, optional)
-Schema-first Text2Cypher agent over the Model Context Protocol
+- Lab 6: Schema-first Text2Cypher agent over the Model Context Protocol
 
 ---
 
@@ -149,7 +156,7 @@ Schema-first Text2Cypher agent over the Model Context Protocol
 | **2** | Data pipeline (optional) | Chunking, embeddings, indexing |
 | **3** | Semantic search + GraphRAG (neo4j-graphrag) | Vector + graph-enriched retrieval |
 | **4** | GraphRAG agent + AgentCore | ReAct pattern, tool use, deployment |
-| **5** | Agent memory (optional) | Short and long-term memory |
+| **5** | Agent memory | Short and long-term memory |
 | **6** | Neo4j MCP agent (optional) | Schema-first Text2Cypher over MCP |
 
 ---

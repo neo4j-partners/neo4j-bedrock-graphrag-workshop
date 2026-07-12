@@ -16,8 +16,10 @@ knowledge graph.
    preferences with `add_entity` / `add_fact` / `add_preference`, then recalls them from a fresh session.
    An optional cell adopts the existing SEC 10-K `Company` nodes as long-term entities.
 
-A third memory pillar, reasoning traces, is covered as an optional "Going Further" callout on the
-workshop site page rather than as a notebook.
+These two notebooks cover the first two layers of a three-part memory model, short-term and
+long-term, which together form a **context graph**. The third layer, reasoning traces (decision
+traces and tool calls captured as first-class nodes), is covered as an optional "Going Further"
+callout on the workshop site page rather than as a notebook.
 
 ## Key facts
 

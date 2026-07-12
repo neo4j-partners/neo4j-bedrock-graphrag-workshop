@@ -21,7 +21,7 @@ A hands-on workshop teaching Graph Retrieval-Augmented Generation (GraphRAG) pat
 | [Lab 3](Lab_3_GraphRAG_Search/README.md) | Semantic Search and GraphRAG | Vector retrieval and vector-cypher retrieval over the knowledge graph with the neo4j-graphrag library |
 | [Lab 4](Lab_4_GraphRAG_Agent/) | Strands GraphRAG Agent | Wrap the retrievers as Strands tools and let the agent choose the retrieval strategy per question |
 
-### Part 3: Agent Memory (Optional / Advanced)
+### Part 3: Agent Memory
 
 | Lab | Title | Description |
 |-----|-------|-------------|
