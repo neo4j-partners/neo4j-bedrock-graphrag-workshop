@@ -81,11 +81,11 @@ image::lab1-configure-instance.png[Configure Instance]
 
 === Save Your Credentials
 
-IMPORTANT: After clicking Create, a credentials dialog appears with your Connection URI, Username, and Password. **Save this information immediately.** The password will not be shown again.
+IMPORTANT: After clicking Create, a credentials dialog appears with your Connection URI, Username, and Password. **Save this information immediately.** The password will not be shown again. You will paste these three values into the `CONFIG.txt` file during the Part 2 setup, and every coding lab reads them from there.
 
 image::lab1-save-credentials.png[Save Credentials]
 
-Click **Download and continue** to save the credentials file. You will need these in Labs 3 through 6 for the `CONFIG.txt` notebook configuration.
+Click **Download and continue** to save the credentials file. You will need these in Labs 3 through 6 for the `CONFIG.txt` notebook configuration, which you fill in after cloning the repository in xref:part2-setup-instructions.adoc[Part 2 Setup].
 
 == Part 3: Load the Knowledge Graph
 

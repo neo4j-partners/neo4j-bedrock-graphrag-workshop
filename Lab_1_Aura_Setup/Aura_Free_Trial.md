@@ -16,6 +16,8 @@ Follow these steps to create a free Neo4j Aura account and database instance:
 
    ![Creating your instance screen showing credentials with download option](images/FREE_02_Create_Instances.png)
 
+   > **⚠️ Keep these credentials.** You will paste the Connection URI, Username, and Password into the `CONFIG.txt` file at the repository root during the Part 2 setup. Every coding lab reads them from there.
+
 6. Once your instance is running, you will see it in the Instances list with a "RUNNING" status.
 
    ![Instances page showing the running free trial instance](images/FREE_03%20_Navigate_Instance.png)

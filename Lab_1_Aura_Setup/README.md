@@ -1,6 +1,8 @@
 # Lab 1: Neo4j Aura Setup and Exploration
 
-In this lab, you will set up your Neo4j Aura database, load a complete financial knowledge graph — structured entities, relationships, and document chunks with vector embeddings — using Cypher, and explore your graph visually. After this lab the graph is ready for every downstream lab; no further data loading is required.
+In this lab, you will set up your Neo4j Aura database, load a complete financial knowledge graph (structured entities, relationships, and document chunks with vector embeddings) using Cypher, and explore your graph visually. After this lab the graph is ready for every downstream lab; no further data loading is required.
+
+> **⚠️ Important: Save your Aura credentials.** When you create your Aura instance, the Connection URI, Username, and Password are shown only once. **Download and keep them.** Every coding lab (Labs 3 through 6) reads these values from the `CONFIG.txt` file at the repository root, which you fill in after cloning the repo in the Part 2 setup. Losing the password means recreating the instance.
 
 ## Prerequisites
 

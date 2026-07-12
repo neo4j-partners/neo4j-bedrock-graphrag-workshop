@@ -4,6 +4,8 @@ Follow these notebooks to build retrieval pipelines against your knowledge graph
 
 TIP: For concepts and background, see xref:lab3.adoc[Lab 3: Semantic Search and GraphRAG].
 
+IMPORTANT: Before running either notebook, make sure you have filled in `CONFIG.txt` at the repository root with your Neo4j credentials from Lab 1. See <<Update CONFIG.txt with Neo4j Credentials>> below. The notebooks fail to connect if this file still contains placeholder values.
+
 == What You'll Learn
 
 * **Vector Search**: Use `VectorRetriever` to find semantically similar chunks and generate answers with the `GraphRAG` pipeline

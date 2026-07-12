@@ -4,6 +4,8 @@ Follow these steps to set up Amazon SageMaker Studio for the Part 2 coding labs.
 
 TIP: For concepts and background, see xref:part2-setup.adoc[Environment Setup: AWS and SageMaker].
 
+IMPORTANT: Every coding lab reads your Neo4j credentials from the `CONFIG.txt` file at the repository root. After you clone the repository (Step 7), you must fill in `CONFIG.txt` with the credentials you saved in Lab 1 (see <<Step 8: Configure CONFIG.txt with Your Neo4j Credentials>>). The notebooks will fail to connect until this is done.
+
 == Prerequisites
 
 * Completed xref:lab0.adoc[Lab 0]: signed in to AWS with Amazon Bedrock model access enabled
@@ -85,6 +87,24 @@ git clone https://github.com/neo4j-partners/neo4j-bedrock-graphrag-workshop.git
 ----
 +
 3. Once the clone completes, click the **file browser icon** (folder icon) in the left sidebar to navigate into the `neo4j-bedrock-graphrag-workshop` directory
+
+=== Step 8: Configure CONFIG.txt with Your Neo4j Credentials
+
+The repository includes a `CONFIG.txt` file at its root with placeholder values. The notebooks read your Neo4j connection details from this file, so you must fill it in before running any lab.
+
+1. In the JupyterLab file browser, open `CONFIG.txt` in the `neo4j-bedrock-graphrag-workshop` directory
+2. Replace the placeholder values with the Neo4j credentials you saved in Lab 1:
++
+[source,text]
+----
+NEO4J_URI=neo4j+s://xxxxxxxx.databases.neo4j.io
+NEO4J_USERNAME=neo4j
+NEO4J_PASSWORD=your-password-from-lab-1
+----
++
+3. Save the file (Cmd/Ctrl+S)
+
+IMPORTANT: `MODEL_ID` and `REGION` already have working defaults, so leave them unchanged. Only the three Neo4j values are required to run Labs 3 and 4.
 
 == Next Steps
 
