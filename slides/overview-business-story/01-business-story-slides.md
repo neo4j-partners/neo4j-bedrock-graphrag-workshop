@@ -92,7 +92,7 @@ Questions no vector store can answer alone:
 - "Which risk factors expose **BlackRock's portfolio** across multiple companies?"
 - "What risks does **NVIDIA** face, and which **asset managers** are exposed?"
 
-Both require following relationships across companies, portfolios, and risk factors. That is graph traversal, not text similarity.
+Both require finding the relevant text **and** following relationships across companies, portfolios, and risk factors. It is the combination of vector similarity and graph traversal, not either one alone.
 
 ---
 

@@ -75,7 +75,7 @@ Any change to shared logic (for example the `MODEL_ID` default) must be applied 
 - **Nodes**: Company, Product, RiskFactor, AssetManager, Document, Chunk
 - **Relationships**: OFFERS, FACES_RISK, COMPETES_WITH, PARTNERS_WITH, OWNS, FILED, FROM_DOCUMENT, NEXT_CHUNK, FROM_CHUNK
 - **Vector Index**: `chunkEmbeddings` on Chunk.embedding (1024 dims for Titan Text Embeddings V2)
-- **Fulltext Indexes**: `search_chunks` (on Chunk.text), `search_entities` (on Company/Product/RiskFactor names)
+- **Fulltext Indexes**: `search_entities` (on Company/Product/RiskFactor names) is created by the Lab 1 seed load; `search_chunks` (on Chunk.text) is not in the base graph and is created by an explicit `CREATE FULLTEXT INDEX` step in the Lab 3 sample queries (`lab3-sample-queries.adoc`)
 
 ## Financial Data
 

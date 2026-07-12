@@ -24,6 +24,8 @@ Before starting this lab, make sure you have:
 | [01_vector_retriever.ipynb](01_vector_retriever.ipynb) | Vector Retriever | Semantic search with `VectorRetriever` and end-to-end question answering with `GraphRAG` |
 | [02_vector_cypher_retriever.ipynb](02_vector_cypher_retriever.ipynb) | VectorCypher Retriever | Graph-enriched retrieval that adds companies, products, and risk factors to vector search results |
 
+> **Beyond these two retrievers:** neo4j-graphrag also offers hybrid retrievers (`HybridRetriever` and `HybridCypherRetriever`) that fuse vector search with fulltext (keyword) search to boost recall on exact names and tickers, plus Text2Cypher for fact and aggregation questions (covered in Lab 6). This lab focuses on the two vector-based strategies; the others build on the same patterns.
+
 ## Next Steps
 
 After completing this lab, continue to [Lab 4 - Strands GraphRAG Agent](../Lab_4_GraphRAG_Agent) to wrap these retrievers as agent tools, or to [Lab 6 - Neo4j MCP Server](../Lab_6_MCP_Server) to connect agents to Neo4j via MCP.

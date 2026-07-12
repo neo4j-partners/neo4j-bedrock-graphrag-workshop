@@ -37,7 +37,7 @@ From Vector Search to Graph-Enriched Retrieval
 
 The **neo4j-graphrag** Python package provides the building blocks for GraphRAG applications on Neo4j:
 
-- **Retrievers**: `VectorRetriever`, `VectorCypherRetriever`, and others for hybrid search strategies
+- **Retrievers**: `VectorRetriever` and `VectorCypherRetriever`, plus `HybridRetriever` and `HybridCypherRetriever` that fuse vector and fulltext search
 - **GraphRAG pipeline**: combines a retriever with an LLM to go from question to grounded answer
 - **Knowledge Graph Construction**: `SimpleKGPipeline` for building graphs from text and PDFs
 - **LLM and Embedder abstractions**: pluggable providers including Bedrock, OpenAI, Anthropic, Cohere, and Vertex AI
@@ -188,6 +188,19 @@ If vector search does not surface relevant chunks, no amount of graph traversal 
 
 ---
 
+## Strengthening the Anchor: Hybrid Search
+
+If the chunk is the anchor, **hybrid search** makes that anchor more reliable. It fuses two signals over the same chunks:
+
+- **Vector search**: semantic similarity, catches meaning and paraphrase
+- **Fulltext search**: keyword match on a `search_chunks` fulltext index (created by an explicit `CREATE FULLTEXT INDEX` step in the Lab 3 sample queries), catches exact names, tickers, and acronyms that embeddings can blur
+
+Hybrid is not a separate branch in the decision tree. It is a **recall booster** that sits underneath either strategy: `HybridRetriever` enhances `VectorRetriever`, and `HybridCypherRetriever` enhances `VectorCypherRetriever`.
+
+Use it when questions hinge on precise terms (a specific product name or ticker) that pure semantic search might miss.
+
+---
+
 ## When Vector Search Is Not Enough
 
 **"How many products does NVIDIA offer?"**
@@ -253,6 +266,7 @@ The chunk load and embeddings come from the Lab 1 seed load (or the optional Lab
 - **Retrievers** search and return relevant information from your knowledge graph
 - **VectorRetriever**: semantic similarity search across chunks
 - **VectorCypherRetriever**: semantic search + graph traversal for entity context
+- **Hybrid search**: fuses vector and fulltext to boost recall on exact terms, enhancing either retriever
 - **Each excels at different question types**: choosing the right one matters
 - **The chunk is the anchor**: graph traversal enriches what vector search finds
 

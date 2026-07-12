@@ -224,4 +224,4 @@ OPTIONS {indexConfig: {`vector.dimensions`: 1024,
          `vector.similarity_function`: 'cosine'}}
 ```
 
-**Fulltext indexes** support keyword search over chunk text and entity names, complementing vector search for hybrid retrieval.
+**Fulltext indexes** support keyword search over entity names (`search_entities`), complementing vector search. A chunk-text index can be added for hybrid retrieval.
