@@ -262,6 +262,53 @@ RETURN c.name AS company,
 
 NOTE: Combines fulltext keyword search with the same graph traversal pattern used in vector-based GraphRAG. The difference is the starting point: fulltext search matches by keywords while vector search matches by semantic meaning. Both traverse the same graph structure to enrich results.
 
+== Hybrid Search
+
+Hybrid search fuses the two previous strategies over the same chunks: vector similarity catches meaning and paraphrase, while fulltext keyword search catches exact names, tickers, and acronyms that embeddings can blur. The catch is that the two signals use different score scales (cosine similarity is roughly 0 to 1; Lucene relevance is unbounded), so the results have to be re-ranked onto a common scale before they can be merged.
+
+IMPORTANT: Requires both the `chunkEmbeddings` vector index (Lab 1 seed load) and the `search_chunks` fulltext index (created above).
+
+=== Merge and Re-rank Two Signals
+
+Run both searches, normalize each score to 0 to 1, then combine with a weighted sum:
+
+[source,cypher]
+----
+// Gather candidates from both signals. The vector arm reuses a random chunk's
+// stored embedding so no embedding API call is needed; the fulltext arm matches
+// a keyword. Each arm returns the same three columns so the UNION lines up.
+CALL () {
+    MATCH (seed:Chunk) WHERE seed.embedding IS NOT NULL
+    WITH seed, rand() AS r ORDER BY r LIMIT 1
+    CALL db.index.vector.queryNodes('chunkEmbeddings', 10, seed.embedding)
+    YIELD node, score
+    RETURN node, score AS vScore, 0.0 AS tScore
+  UNION
+    CALL db.index.fulltext.queryNodes('search_chunks', 'cybersecurity risk')
+    YIELD node, score
+    RETURN node, 0.0 AS vScore, score AS tScore
+}
+// Collapse duplicates: a chunk found by both arms keeps its best score from each.
+WITH node, max(vScore) AS vScore, max(tScore) AS tScore
+WITH collect({node: node, vScore: vScore, tScore: tScore}) AS rows
+// Find the top score in each signal so we can normalize onto a shared 0 to 1 scale.
+WITH rows,
+     reduce(mx = 0.0, x IN rows | CASE WHEN x.vScore > mx THEN x.vScore ELSE mx END) AS vMax,
+     reduce(mx = 0.0, x IN rows | CASE WHEN x.tScore > mx THEN x.tScore ELSE mx END) AS tMax
+UNWIND rows AS x
+WITH x.node AS node,
+     CASE WHEN vMax > 0 THEN x.vScore / vMax ELSE 0.0 END AS vNorm,
+     CASE WHEN tMax > 0 THEN x.tScore / tMax ELSE 0.0 END AS tNorm
+RETURN substring(node.text, 0, 120) AS content,
+       round(vNorm, 3) AS semanticScore,
+       round(tNorm, 3) AS keywordScore,
+       round(0.5 * vNorm + 0.5 * tNorm, 3) AS hybridScore
+ORDER BY hybridScore DESC
+LIMIT 5
+----
+
+NOTE: This is the re-ranking that `HybridRetriever` in neo4j-graphrag does for you. Each signal is normalized independently, then merged with a weight (here `0.5 / 0.5`, an even split known as *alpha*). Raise the vector weight to favor meaning, raise the keyword weight to favor exact terms. In the library both arms run against the same user question (embedded for the vector arm, passed as keywords to the fulltext arm); this example reuses a stored embedding for the vector arm so it runs without an API key, so read it as a demonstration of the fusion mechanics rather than a single coherent question.
+
 == Verify Indexes
 
 Confirm which indexes exist in the database:

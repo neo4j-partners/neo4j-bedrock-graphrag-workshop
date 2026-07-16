@@ -7,6 +7,8 @@ TIP: Ready to start? Jump to the xref:lab3-instructions.adoc[Lab 3 Instructions]
 .**At a Glance**
 
 * **Vector search**: find text passages whose meaning is closest to your question using `VectorRetriever`
+* **Full-text search**: match exact keywords, names, and tickers with a `search_chunks` fulltext index (see the xref:lab3-sample-queries.adoc[sample queries])
+* **Hybrid search**: fuse vector and full-text signals and re-rank the merged results (see the xref:lab3-sample-queries.adoc[sample queries])
 * **Graph-enriched search**: after finding matching passages, follow graph relationships to pull in companies, products, and risk factors using `VectorCypherRetriever`
 * **GraphRAG pipeline**: combine a retriever with an LLM to answer natural-language questions grounded in your data
 
@@ -22,7 +24,7 @@ image::two-halves-graph.svg[Two Halves of One Graph,800]
 
 This lab uses the https://github.com/neo4j/neo4j-graphrag-python[neo4j-graphrag] Python library, which provides the building blocks for GraphRAG applications on Neo4j:
 
-* **Retrievers**: `VectorRetriever` and `VectorCypherRetriever` handle embedding the query, running the vector search, and (for Cypher retrievers) traversing the graph to enrich results with structured context
+* **Retrievers**: `VectorRetriever` and `VectorCypherRetriever` handle embedding the query, running the vector search, and (for Cypher retrievers) traversing the graph to enrich results with structured context. `HybridRetriever` and `HybridCypherRetriever` add fulltext keyword search and re-rank the fused results
 * **GraphRAG pipeline**: combines a retriever with an LLM to go from a natural-language question to a grounded answer in a single call
 * **LLM and Embedder abstractions**: pluggable providers including Bedrock, OpenAI, Anthropic, Cohere, and Vertex AI
 * **Knowledge Graph Construction**: `SimpleKGPipeline` for building graphs from text and PDFs (used in xref:lab2.adoc[Lab 2])
@@ -55,15 +57,52 @@ This lab applies the pattern above to SEC 10-K filings, the annual financial rep
 
 When you ask "What cybersecurity risks does Apple face?", vector search finds the most relevant passages. Graph-enriched search then follows relationships from those passages to return Apple as the filer, the specific products mentioned, and the risk factor classifications, all in a single retrieval step.
 
-This lab covers the retrieval side: vector search and graph-enriched retrieval. The chunking and embedding were pre-computed and loaded by the Lab 1 seed load. xref:lab2.adoc[Lab 2] covers building that data pipeline from scratch.
+This lab covers the retrieval side: vector search and graph-enriched retrieval in the notebooks, plus full-text and hybrid search in the sample queries. The chunking and embedding were pre-computed and loaded by the Lab 1 seed load. xref:lab2.adoc[Lab 2] covers building that data pipeline from scratch.
 
 image::graph-enriched-retrieval.svg[SEC 10-K GraphRAG Retrieval Flow,800]
 
 == Retrieval Strategies
 
+GraphRAG is not a single retrieval method. It is a set of strategies you choose between based on the question. The first three find the right text; the last two bring in graph structure.
+
+[cols="1,2,2"]
+|===
+| Strategy | How It Works | Best For
+
+| **Vector Search**
+| Embed the question, find similar chunks
+| Conceptual, meaning-based questions
+
+| **Full-text Search**
+| Keyword match, ranked by Lucene/BM25
+| Exact terms, names, acronyms
+
+| **Hybrid Search**
+| Run both, merge and re-rank results
+| Meaning and exact keywords together
+
+| **Graph-Enriched Search**
+| Vector search plus graph traversal
+| Questions needing entity context
+
+| **Text2Cypher**
+| LLM writes Cypher from the schema
+| Counts, lists, specific lookups
+|===
+
+The two notebooks in this lab implement **Vector Search** (`VectorRetriever`) and **Graph-Enriched Search** (`VectorCypherRetriever`). **Full-text** and **Hybrid** search are demonstrated as Cypher in the xref:lab3-sample-queries.adoc[Lab 3 sample queries], and **Text2Cypher** is covered in xref:lab6.adoc[Lab 6].
+
 === VectorRetriever
 
 Notebook 01 introduces the `VectorRetriever` from the neo4j-graphrag library. It wraps the vector index and handles embedding the query, running the similarity search, and formatting the results. Connected to an LLM via `GraphRAG`, it builds a complete question-answering pipeline. The results are chunk text ranked by cosine similarity: isolated passages with no graph context.
+
+=== Full-text Search
+
+Vector search matches meaning, but it can blur exact terms. "NVDA", a product codename, or a specific acronym may not sit close to your question in embedding space even when the chunk is an exact match. Full-text search covers that gap: a `search_chunks` fulltext index (Apache Lucene under the hood) matches keywords directly and ranks results by Lucene relevance (BM25-style) score. It also supports fuzzy matching for typos and boolean operators. The xref:lab3-sample-queries.adoc[sample queries] create the index and run keyword, fuzzy, and boolean searches.
+
+=== Hybrid Search
+
+Hybrid search runs vector and full-text search together and fuses the results, so you get semantic recall and exact-term precision at once. Because cosine similarity and Lucene relevance use different scales, the two result sets are normalized to a common range and then merged with a weight (*alpha*): re-ranking the combined list so the best matches from either signal rise to the top. The neo4j-graphrag library packages this as `HybridRetriever` and `HybridCypherRetriever`; the xref:lab3-sample-queries.adoc[sample queries] show the same normalize-and-merge re-ranking as plain Cypher.
 
 === VectorCypherRetriever
 

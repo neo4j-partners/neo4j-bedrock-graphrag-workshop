@@ -121,3 +121,15 @@ section { font-size: 95%; }
 **Part 4: Neo4j MCP Server** (Lab 6, optional)
 - Lab 6: Schema-first Text2Cypher agent over the Model Context Protocol
 
+---
+
+## Agent Architecture
+
+![Strands GraphRAG agent architecture](strands-agent-architecture.png)
+
+---
+
+## Deployment Architecture
+
+![Workshop deployment architecture](workshop-architecture.png)
+

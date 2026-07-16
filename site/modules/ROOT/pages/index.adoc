@@ -47,7 +47,15 @@ image::two-halves-graph.svg[Two Halves of One Graph,800]
 
 This diagram shows both halves of the graph: the structured entities on the left and the unstructured document and chunk half on the right, joined by the FILED relationship. The Lab 1 seed load brings in both halves, and the Chunk nodes carry Titan Text Embeddings V2 embeddings that connect filing text back to these entities. xref:lab3.adoc[Lab 3] uses both halves for graph-enriched retrieval, and xref:lab2.adoc[Lab 2] shows how the pipeline builds them from scratch.
 
-== Workshop Architecture
+== Architecture
+
+=== Strands Agent Architecture
+
+At request time, a user query flows into a Strands agent backed by Claude. The agent selects a retrieval tool for the question: Vector Search over Nova embeddings for semantic matching, Text2Cypher where Claude writes the query, or a Cypher template for direct lookups. Each tool runs against Neo4j Aura, which holds the SEC 10-K knowledge graph of companies, products, risk factors, and ownership.
+
+image::strands-agent-architecture.svg[Strands Agent Architecture,800]
+
+=== Workshop Architecture
 
 These four steps produce the architecture below. Amazon Bedrock AgentCore is the agentic platform at the center: it hosts the Strands agents that reason over questions and the runtime that manages deployment and scaling. Bedrock provides the foundation models for reasoning and embedding. Neo4j Aura provides the knowledge graph that agents retrieve from. SageMaker Studio is the development environment where you build and test before deploying to AgentCore.
 
