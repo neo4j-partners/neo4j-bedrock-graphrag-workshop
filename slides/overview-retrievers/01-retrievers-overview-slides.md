@@ -35,15 +35,13 @@ From Vector Search to Graph-Enriched Retrieval
 
 ## The neo4j-graphrag Library
 
-The **neo4j-graphrag** Python package provides the building blocks for GraphRAG applications on Neo4j:
-
-- **Retrievers**: `VectorRetriever` and `VectorCypherRetriever`, plus `HybridRetriever` and `HybridCypherRetriever` that fuse vector and full-text search
-- **GraphRAG pipeline**: combines a retriever with an LLM to go from question to grounded answer
+- **Retrievers**: `VectorRetriever`, `VectorCypherRetriever`, `HybridRetriever`, `HybridCypherRetriever`
+- **GraphRAG pipeline**: retriever + LLM, question to grounded answer
 - **Knowledge Graph Construction**: `SimpleKGPipeline` for building graphs from text and PDFs
-- **LLM and Embedder abstractions**: pluggable providers including Bedrock, OpenAI, Anthropic, Cohere, and Vertex AI
-- **Vector index utilities**: `create_vector_index` and `upsert_vectors` for managing Neo4j vector indexes
+- **LLM & Embedder abstractions**: pluggable providers (Bedrock, OpenAI, Anthropic, Cohere, Vertex AI)
+- **Vector index utilities**: `create_vector_index`, `upsert_vectors`
 
-Lab 3 uses the retriever and pipeline components. The optional Lab 2 uses the construction components.
+Lab 3 uses the retrievers and pipeline; the optional Lab 2 uses the construction components.
 
 ---
 
