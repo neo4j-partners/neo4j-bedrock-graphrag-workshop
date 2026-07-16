@@ -42,3 +42,51 @@ callout on the workshop site page rather than as a notebook.
 Shared setup lives in `lib/memory_utils.py` (`build_memory_client`) and `lib/data_utils.py`. Both notebooks
 open with a dependency install cell (`neo4j-agent-memory[bedrock]==0.5.0`) and read `CONFIG.txt` for the
 Neo4j and AWS credentials.
+
+## Clearing the memory
+
+The memory layer writes into the **same** Aura database as the SEC 10-K graph, so clear it deliberately.
+Run the Cypher below against the database the notebooks use (`NEO4J_DATABASE` in `CONFIG.txt`, which is not
+always `neo4j`); in Neo4j Browser switch to it first with `:use <database>`.
+
+### Clear one conversation (short-term)
+
+To reset a single session so you can re-run `01_short_term_memory.ipynb`, delete its `Conversation` and
+`Message` nodes:
+
+```cypher
+MATCH (c:Conversation {session_id: "<your-session-id>"})-[:HAS_MESSAGE]->(m:Message)
+DETACH DELETE c, m
+```
+
+Or from Python, without Cypher: `await memory.short_term.clear_session(SESSION)`.
+
+### Clear all memory
+
+This removes everything the memory layer created (short-term, long-term, and the optional reasoning-trace
+nodes) while leaving the SEC 10-K graph intact:
+
+```cypher
+// Nodes the library owns outright
+MATCH (n)
+WHERE n:Conversation OR n:Message OR n:Fact OR n:Preference
+   OR n:ReasoningTrace OR n:ReasoningStep OR n:ToolCall OR n:Tool
+   OR n:ConsolidationRun OR n:MemoryReadAudit OR n:User
+DETACH DELETE n;
+
+// Entities the library created, skipping SEC nodes adopted via adopt_existing_graph
+MATCH (n:Entity)
+WHERE NOT (n:Company OR n:Product OR n:RiskFactor OR n:AssetManager OR n:Document OR n:Chunk)
+DETACH DELETE n;
+```
+
+> **Careful with `adopt_existing_graph`.** The optional cell in `02_long_term_memory.ipynb` adds the
+> `:Entity` label to your existing `Company` nodes rather than creating new ones, so a plain
+> `MATCH (n:Entity) DETACH DELETE n` would delete real SEC companies. The `WHERE NOT (...)` filter above
+> protects them. If you ran that cell and want to fully undo it, strip the memory label instead of deleting
+> the node:
+>
+> ```cypher
+> MATCH (n:Company:Entity)
+> REMOVE n:Entity, n.type, n.canonical_name, n.embedding
+> ```
