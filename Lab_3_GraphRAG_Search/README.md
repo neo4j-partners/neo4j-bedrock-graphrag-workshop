@@ -1,6 +1,6 @@
 # Lab 3 - Semantic Search and GraphRAG
 
-Run two notebooks that build GraphRAG retrieval over the SEC 10-K knowledge graph using the neo4j-graphrag Python library. You progress from pure vector search to graph-enriched retrieval, seeing why traversing relationships returns richer context than vector similarity alone.
+Run three notebooks that build GraphRAG retrieval over the SEC 10-K knowledge graph using the neo4j-graphrag Python library. You progress from pure vector search to graph-enriched retrieval to hybrid search, seeing why traversing relationships returns richer context than vector similarity alone and how fusing keyword and semantic signals catches what either misses.
 
 > **Run this in Amazon SageMaker AI.** These notebooks are designed to run in Amazon SageMaker AI Studio. Running them locally (e.g. VS Code) or elsewhere is not supported and will fail. Follow the [Environment Setup guide](https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/workshop/neo4j-bedrock-graphrag-workshop/1.0/part2-setup-instructions.html) to launch SageMaker AI Studio first.
 
@@ -8,6 +8,7 @@ Run two notebooks that build GraphRAG retrieval over the SEC 10-K knowledge grap
 
 - **Vector Search**: Use `VectorRetriever` to find semantically similar chunks and generate answers with `GraphRAG`
 - **Graph-Enriched Search**: Use `VectorCypherRetriever` to combine vector search with Cypher graph traversal for richer, connected context
+- **Hybrid Search**: Use `HybridRetriever` and `HybridCypherRetriever` to fuse vector and full-text keyword search, and re-rank the merged results with the `NAIVE` and `LINEAR` rankers
 
 ## Prerequisites
 
@@ -25,8 +26,9 @@ Before starting this lab, make sure you have:
 |----------|-------|----------------|
 | [01_vector_retriever.ipynb](01_vector_retriever.ipynb) | Vector Retriever | Semantic search with `VectorRetriever` and end-to-end question answering with `GraphRAG` |
 | [02_vector_cypher_retriever.ipynb](02_vector_cypher_retriever.ipynb) | VectorCypher Retriever | Graph-enriched retrieval that adds companies, products, and risk factors to vector search results |
+| [03_hybrid_retriever.ipynb](03_hybrid_retriever.ipynb) | Hybrid Retriever | Full-text keyword search plus `HybridRetriever` / `HybridCypherRetriever`, fusing vector and keyword signals with the `NAIVE` and `LINEAR` re-rankers |
 
-> **Beyond these two retrievers:** neo4j-graphrag also offers hybrid retrievers (`HybridRetriever` and `HybridCypherRetriever`) that fuse vector search with fulltext (keyword) search to boost recall on exact names and tickers, plus Text2Cypher for fact and aggregation questions (covered in Lab 6). This lab focuses on the two vector-based strategies; the others build on the same patterns.
+> **The other strategies:** these notebooks build **Vector Search**, **Graph-Enriched Search**, **Full-text Search**, and **Hybrid Search**. The same patterns are also shown as raw Cypher in the [Lab 3 sample queries](https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/workshop/neo4j-bedrock-graphrag-workshop/1.0/lab3-sample-queries.html). GraphRAG also uses **Text2Cypher** for counts and lookups (covered in Lab 6). All build on the same patterns.
 
 ## Next Steps
 

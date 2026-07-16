@@ -78,7 +78,7 @@ The workshop builds a knowledge graph from this data, connecting companies, prod
 section { font-size: 95%; }
 </style>
 
-This workshop's graph is **pre-loaded**. You work with it directly from Lab 1. The optional Lab 2 rebuilds it from `financial_data.json` with Amazon Titan embeddings instead of running the full lakehouse job.
+This workshop's graph is **pre-loaded**. You work with it directly from Lab 1. The optional Lab 2 rebuilds it from `financial_data.json` with Amazon Titan Text Embeddings V2 instead of running the full lakehouse job.
 
 ---
 

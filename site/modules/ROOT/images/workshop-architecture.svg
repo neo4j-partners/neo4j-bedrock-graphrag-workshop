@@ -1,105 +1,108 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" font-family="'Comic Sans MS','Segoe Print','Bradley Hand',cursive">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" font-family="'Inter','Segoe UI','Helvetica Neue',Arial,sans-serif">
   <defs>
     <marker id="ah-gray" markerWidth="12" markerHeight="12" refX="8.5" refY="5" orient="auto">
-      <path d="M0,0 L10,5 L0,10 z" fill="#555"/>
+      <path d="M0,0 L10,5 L0,10 z" fill="#64748b"/>
     </marker>
     <marker id="ah-orange" markerWidth="12" markerHeight="12" refX="8.5" refY="5" orient="auto">
-      <path d="M0,0 L10,5 L0,10 z" fill="#e8820c"/>
+      <path d="M0,0 L10,5 L0,10 z" fill="#f59e0b"/>
     </marker>
     <marker id="ah-indigo" markerWidth="12" markerHeight="12" refX="8.5" refY="5" orient="auto">
-      <path d="M0,0 L10,5 L0,10 z" fill="#7048e8"/>
+      <path d="M0,0 L10,5 L0,10 z" fill="#6366f1"/>
     </marker>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="2.5" stdDeviation="3.5" flood-color="#101828" flood-opacity="0.13"/>
+    </filter>
   </defs>
 
   <rect x="0" y="0" width="1600" height="900" fill="#ffffff"/>
 
   <!-- Title -->
-  <text x="800" y="46" text-anchor="middle" font-size="40" fill="#222">Workshop Architecture</text>
+  <text x="800" y="46" text-anchor="middle" font-size="40" font-weight="600" letter-spacing="0.3" fill="#1e293b">Workshop Architecture</text>
 
   <!-- ===================== boundaries (drawn first) ===================== -->
   <!-- AWS Cloud boundary -->
-  <rect x="52" y="126" width="1496" height="544" rx="20" fill="none" stroke="#ff9900" stroke-width="2.5" stroke-dasharray="10 6"/>
-  <text x="74" y="152" font-size="20" fill="#ff9900">AWS Cloud (us-east-1)</text>
+  <rect x="52" y="126" width="1496" height="544" rx="20" fill="none" stroke="#fbbf24" stroke-width="2" stroke-dasharray="10 6"/>
+  <text x="74" y="152" font-size="20" font-weight="600" fill="#b45309">AWS Cloud (us-east-1)</text>
 
   <!-- AgentCore Runtime boundary (where the deployed agent RUNS) -->
-  <rect x="100" y="262" width="1400" height="248" rx="18" fill="none" stroke="#7048e8" stroke-width="2.5" stroke-dasharray="10 6"/>
-  <text x="120" y="288" font-size="20" fill="#7048e8">Amazon Bedrock AgentCore Runtime &#8212; isolated microVM</text>
+  <rect x="100" y="262" width="1400" height="248" rx="18" fill="none" stroke="#a5b4fc" stroke-width="2" stroke-dasharray="10 6"/>
+  <text x="120" y="288" font-size="20" font-weight="600" fill="#4338ca">Amazon Bedrock AgentCore Runtime &#8212; isolated microVM</text>
 
   <!-- ===================== edges (drawn before nodes) ===================== -->
   <!-- User Question -> Strands Agent -->
-  <line x1="800" y1="110" x2="800" y2="298" stroke="#555" stroke-width="2.5" marker-end="url(#ah-gray)"/>
+  <line x1="800" y1="110" x2="800" y2="298" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah-gray)"/>
 
   <!-- SageMaker Studio -> AgentCore Runtime (deploy) -->
-  <line x1="280" y1="220" x2="280" y2="260" stroke="#7048e8" stroke-width="2.5" stroke-dasharray="7 5" marker-end="url(#ah-indigo)"/>
-  <text x="300" y="246" font-size="18" fill="#7048e8">agentcore deploy &#8594; S3 bundle (no Docker)</text>
+  <line x1="280" y1="220" x2="280" y2="260" stroke="#6366f1" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#ah-indigo)"/>
+  <text x="300" y="246" font-size="18" fill="#4338ca">agentcore deploy &#8594; S3 bundle (no Docker)</text>
 
   <!-- Agent -> three tools -->
-  <line x1="650" y1="374" x2="382" y2="404" stroke="#555" stroke-width="2.5" marker-end="url(#ah-gray)"/>
-  <line x1="800" y1="374" x2="800" y2="404" stroke="#555" stroke-width="2.5" marker-end="url(#ah-gray)"/>
-  <line x1="950" y1="374" x2="1218" y2="404" stroke="#555" stroke-width="2.5" marker-end="url(#ah-gray)"/>
-  <text x="620" y="396" text-anchor="middle" font-size="18" fill="#555">agent picks one tool</text>
+  <line x1="650" y1="374" x2="382" y2="404" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah-gray)"/>
+  <line x1="800" y1="374" x2="800" y2="404" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah-gray)"/>
+  <line x1="950" y1="374" x2="1218" y2="404" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah-gray)"/>
+  <text x="620" y="396" text-anchor="middle" font-size="18" fill="#64748b">agent picks one tool</text>
 
   <!-- Vector Search -> Bedrock (embed query) -->
-  <line x1="360" y1="496" x2="460" y2="538" stroke="#555" stroke-width="2.5" marker-end="url(#ah-gray)"/>
-  <text x="356" y="524" text-anchor="middle" font-size="18" fill="#555">embed query</text>
+  <line x1="360" y1="496" x2="460" y2="538" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah-gray)"/>
+  <text x="356" y="524" text-anchor="middle" font-size="18" fill="#64748b">embed query</text>
 
   <!-- Graph-Enriched -> Bedrock (embed query) -->
-  <line x1="800" y1="496" x2="700" y2="538" stroke="#555" stroke-width="2.5" marker-end="url(#ah-gray)"/>
-  <text x="808" y="524" text-anchor="middle" font-size="18" fill="#555">embed query</text>
+  <line x1="800" y1="496" x2="700" y2="538" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah-gray)"/>
+  <text x="808" y="524" text-anchor="middle" font-size="18" fill="#64748b">embed query</text>
 
   <!-- Text2Cypher -> Neo4j directly (raw Cypher, no embedding) -->
-  <line x1="1240" y1="496" x2="1240" y2="690" stroke="#555" stroke-width="2.5" marker-end="url(#ah-gray)"/>
-  <text x="1240" y="596" text-anchor="middle" font-size="18" fill="#555">raw Cypher (no embedding)</text>
+  <line x1="1240" y1="496" x2="1240" y2="690" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah-gray)"/>
+  <text x="1240" y="596" text-anchor="middle" font-size="18" fill="#64748b">raw Cypher (no embedding)</text>
 
   <!-- Bedrock -> Neo4j (query vector) -->
-  <line x1="600" y1="628" x2="600" y2="690" stroke="#555" stroke-width="2.5" marker-end="url(#ah-gray)"/>
-  <text x="600" y="668" text-anchor="middle" font-size="18" fill="#555">query vector</text>
+  <line x1="600" y1="628" x2="600" y2="690" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah-gray)"/>
+  <text x="600" y="668" text-anchor="middle" font-size="18" fill="#64748b">query vector</text>
 
   <!-- Neo4j -> Grounded answer -->
-  <line x1="800" y1="812" x2="800" y2="832" stroke="#555" stroke-width="2.5" marker-end="url(#ah-gray)"/>
+  <line x1="800" y1="812" x2="800" y2="832" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah-gray)"/>
 
   <!-- ===================== nodes ===================== -->
   <!-- User Question (blue) -->
-  <rect x="640" y="64" width="320" height="46" rx="16" fill="#dbe4ff" stroke="#1971c2" stroke-width="2.5"/>
-  <text x="800" y="95" text-anchor="middle" font-size="26" fill="#333">User Question</text>
+  <rect x="640" y="64" width="320" height="46" rx="12" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.75" filter="url(#shadow)"/>
+  <text x="800" y="95" text-anchor="middle" font-size="26" font-weight="600" fill="#1d4ed8">User Question</text>
 
   <!-- SageMaker Studio build box (blue-gray) -->
-  <rect x="100" y="158" width="380" height="62" rx="16" fill="#e7f0fb" stroke="#2f6fd0" stroke-width="2.5"/>
-  <text x="290" y="185" text-anchor="middle" font-size="22" fill="#333">Amazon SageMaker Studio</text>
-  <text x="290" y="209" text-anchor="middle" font-size="17" fill="#333">build &amp; test the agent (Lab 4 nb 01)</text>
+  <rect x="100" y="158" width="380" height="62" rx="12" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.75" filter="url(#shadow)"/>
+  <text x="290" y="185" text-anchor="middle" font-size="22" font-weight="600" fill="#1d4ed8">Amazon SageMaker Studio</text>
+  <text x="290" y="209" text-anchor="middle" font-size="17" fill="#3b82f6">build &amp; test the agent (Lab 4 nb 01)</text>
 
   <!-- Strands Agent (purple) -->
-  <rect x="570" y="300" width="460" height="74" rx="16" fill="#f4e2fb" stroke="#9b30c9" stroke-width="3"/>
-  <text x="800" y="332" text-anchor="middle" font-size="26" fill="#333">Strands Agent</text>
-  <text x="800" y="360" text-anchor="middle" font-size="20" fill="#333">Claude Sonnet 4.5 (BedrockModel)</text>
+  <rect x="570" y="300" width="460" height="74" rx="12" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="2" filter="url(#shadow)"/>
+  <text x="800" y="332" text-anchor="middle" font-size="26" font-weight="600" fill="#6d28d9">Strands Agent</text>
+  <text x="800" y="360" text-anchor="middle" font-size="20" fill="#7c3aed">Claude Sonnet 4.6 (BedrockModel)</text>
 
   <!-- Tool 1: Vector Search (teal) -->
-  <rect x="170" y="406" width="380" height="90" rx="16" fill="#e8fbf8" stroke="#2bb3a3" stroke-width="2.5"/>
-  <text x="360" y="443" text-anchor="middle" font-size="24" fill="#333">Vector Search</text>
-  <text x="360" y="473" text-anchor="middle" font-size="18" fill="#333">VectorRetriever (Lab 3/4)</text>
+  <rect x="170" y="406" width="380" height="90" rx="12" fill="#ecfeff" stroke="#06b6d4" stroke-width="1.75" filter="url(#shadow)"/>
+  <text x="360" y="443" text-anchor="middle" font-size="24" font-weight="600" fill="#0e7490">Vector Search</text>
+  <text x="360" y="473" text-anchor="middle" font-size="18" fill="#0891b2">VectorRetriever (Lab 3/4)</text>
 
   <!-- Tool 2: Graph-Enriched (teal) -->
-  <rect x="610" y="406" width="380" height="90" rx="16" fill="#e8fbf8" stroke="#2bb3a3" stroke-width="2.5"/>
-  <text x="800" y="443" text-anchor="middle" font-size="24" fill="#333">Graph-Enriched</text>
-  <text x="800" y="473" text-anchor="middle" font-size="18" fill="#333">VectorCypherRetriever (Lab 3/4)</text>
+  <rect x="610" y="406" width="380" height="90" rx="12" fill="#ecfeff" stroke="#06b6d4" stroke-width="1.75" filter="url(#shadow)"/>
+  <text x="800" y="443" text-anchor="middle" font-size="24" font-weight="600" fill="#0e7490">Graph-Enriched</text>
+  <text x="800" y="473" text-anchor="middle" font-size="18" fill="#0891b2">VectorCypherRetriever (Lab 3/4)</text>
 
   <!-- Tool 3: Text2Cypher (teal) -->
-  <rect x="1050" y="406" width="380" height="90" rx="16" fill="#e8fbf8" stroke="#2bb3a3" stroke-width="2.5"/>
-  <text x="1240" y="443" text-anchor="middle" font-size="24" fill="#333">Text2Cypher</text>
-  <text x="1240" y="473" text-anchor="middle" font-size="18" fill="#333">LLM writes Cypher (Lab 6, MCP)</text>
+  <rect x="1050" y="406" width="380" height="90" rx="12" fill="#ecfeff" stroke="#06b6d4" stroke-width="1.75" filter="url(#shadow)"/>
+  <text x="1240" y="443" text-anchor="middle" font-size="24" font-weight="600" fill="#0e7490">Text2Cypher</text>
+  <text x="1240" y="473" text-anchor="middle" font-size="18" fill="#0891b2">LLM writes Cypher (Lab 6, MCP)</text>
 
   <!-- Amazon Bedrock (amber) -->
-  <rect x="380" y="538" width="440" height="90" rx="16" fill="#ffe8cc" stroke="#e8820c" stroke-width="3"/>
-  <text x="600" y="575" text-anchor="middle" font-size="26" fill="#333">Amazon Bedrock</text>
-  <text x="600" y="605" text-anchor="middle" font-size="18" fill="#333">Titan Text Embeddings V2 (1024-dim)</text>
+  <rect x="380" y="538" width="440" height="90" rx="12" fill="#fffbeb" stroke="#f59e0b" stroke-width="2" filter="url(#shadow)"/>
+  <text x="600" y="575" text-anchor="middle" font-size="26" font-weight="600" fill="#b45309">Amazon Bedrock</text>
+  <text x="600" y="605" text-anchor="middle" font-size="18" fill="#d97706">Titan Text Embeddings V2 (1024-dim)</text>
 
   <!-- Neo4j Aura (green) -->
-  <rect x="300" y="696" width="1000" height="116" rx="16" fill="#d3f9d8" stroke="#2f9e44" stroke-width="3"/>
-  <text x="800" y="732" text-anchor="middle" font-size="28" fill="#333">Neo4j Aura</text>
-  <text x="800" y="765" text-anchor="middle" font-size="20" fill="#333">chunkEmbeddings vector index + graph</text>
-  <text x="800" y="795" text-anchor="middle" font-size="18" fill="#333">Company / Product / RiskFactor / AssetManager (SEC 10-K)</text>
+  <rect x="300" y="696" width="1000" height="116" rx="12" fill="#f0fdf4" stroke="#22c55e" stroke-width="2" filter="url(#shadow)"/>
+  <text x="800" y="732" text-anchor="middle" font-size="28" font-weight="600" fill="#15803d">Neo4j Aura</text>
+  <text x="800" y="765" text-anchor="middle" font-size="20" fill="#16a34a">chunkEmbeddings vector index + graph</text>
+  <text x="800" y="795" text-anchor="middle" font-size="18" fill="#16a34a">Company / Product / RiskFactor / AssetManager (SEC 10-K)</text>
 
   <!-- Grounded answer (blue) -->
-  <rect x="650" y="832" width="300" height="46" rx="16" fill="#dbe4ff" stroke="#1971c2" stroke-width="2.5"/>
-  <text x="800" y="863" text-anchor="middle" font-size="26" fill="#333">Grounded answer</text>
+  <rect x="650" y="832" width="300" height="46" rx="12" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.75" filter="url(#shadow)"/>
+  <text x="800" y="863" text-anchor="middle" font-size="26" font-weight="600" fill="#1d4ed8">Grounded answer</text>
 </svg>

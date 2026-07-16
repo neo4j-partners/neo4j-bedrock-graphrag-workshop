@@ -59,18 +59,19 @@ You have a knowledge graph with:
 
 ---
 
-## What Is a Retriever?
+## The Retrieval Strategies
 
 A **retriever** searches your knowledge graph and returns relevant information.
 
-**Two retrieval patterns in Lab 3:**
+| Strategy | What It Does |
+|----------|--------------|
+| **Vector Search** | Semantic similarity across chunks |
+| **Full-text Search** | Keyword match, ranked by Lucene/BM25 |
+| **Hybrid Search** | Fuse vector + full-text, re-rank |
+| **Graph-Enriched Search** | Vector search + graph traversal |
+| **Text2Cypher** | LLM writes Cypher from schema |
 
-| Retriever | What It Does |
-|-----------|--------------|
-| **VectorRetriever** | Semantic similarity search across text chunks |
-| **VectorCypherRetriever** | Semantic search + graph traversal for entity context |
-
-Each pattern excels at different question types.
+Top three find the right **text**; bottom two bring in **graph** structure.
 
 ---
 
@@ -105,6 +106,22 @@ The retriever's job is finding the right context. The LLM's job is generating a 
 - Conceptual, exploratory questions
 
 **Limitation:** Returns text chunks only. No entity relationships.
+
+---
+
+## Full-text Search
+
+**How it works:**
+- Keyword match on a `search_chunks` fulltext index (Apache Lucene)
+- Ranks by Lucene relevance (BM25-style) score
+- Supports fuzzy matching and boolean operators
+
+**Best for:**
+- Exact names, tickers, acronyms ("NVDA", "10-K")
+- Terms that embeddings blur together
+- Precise lookups over specific wording
+
+**Limitation:** Matches words, not meaning. Misses paraphrase.
 
 ---
 
@@ -188,16 +205,18 @@ If vector search does not surface relevant chunks, no amount of graph traversal 
 
 ---
 
-## Strengthening the Anchor: Hybrid Search
+## Hybrid Search
 
-If the chunk is the anchor, **hybrid search** makes that anchor more reliable. It fuses two signals over the same chunks:
+**How it works:**
+- Runs vector and full-text search over the same chunks
+- Normalizes the two score scales, merges into one list
+- Re-ranks by a weighted blend (*alpha*) of both signals
 
-- **Vector search**: semantic similarity, catches meaning and paraphrase
-- **Fulltext search**: keyword match on a `search_chunks` fulltext index (created by an explicit `CREATE FULLTEXT INDEX` step in the Lab 3 sample queries), catches exact names, tickers, and acronyms that embeddings can blur
+**Best for:**
+- Questions mixing concepts with exact terms
+- Precise names or tickers pure vector search misses
 
-Hybrid is not a separate branch in the decision tree. It is a **recall booster** that sits underneath either strategy: `HybridRetriever` enhances `VectorRetriever`, and `HybridCypherRetriever` enhances `VectorCypherRetriever`.
-
-Use it when questions hinge on precise terms (a specific product name or ticker) that pure semantic search might miss.
+**Re-ranking:** the two score scales differ; Hybrid normalizes each, then blends. `HybridRetriever` / `HybridCypherRetriever` add this to the vector and graph-enriched strategies.
 
 ---
 
@@ -216,34 +235,27 @@ For counts, lists, and specific lookups, **Text2Cypher** (Lab 6) writes the quer
 
 ---
 
-## Choosing the Right Retriever
+## Choosing the Right Strategy
 
-| Question Pattern | Best Retriever |
+| Question Pattern | Best Strategy |
 |-----------------|----------------|
-| "What is...", "Tell me about..." | VectorRetriever |
-| "Which [entities] are affected by..." | VectorCypherRetriever |
+| "What is...", "Tell me about..." | Vector Search |
+| Exact names, tickers, acronyms | Full-text Search |
+| Meaning **and** exact terms together | Hybrid Search |
+| "Which [entities] are affected by..." | Graph-Enriched Search |
 | "How many...", "List all..." | Text2Cypher (Lab 6) |
-| Content about topics | VectorRetriever |
-| Content + relationships | VectorCypherRetriever |
-| Facts, counts, aggregations | Text2Cypher (Lab 6) |
 
 ---
 
 ## The Decision Framework
 
-**Ask yourself:**
+**Match the question to a strategy:**
 
-1. **Am I looking for content or facts?**
-   - Content → VectorRetriever or VectorCypherRetriever
-   - Facts → Text2Cypher
-
-2. **Do I need related entities?**
-   - No → VectorRetriever
-   - Yes → VectorCypherRetriever
-
-3. **Is this about relationships?**
-   - Traversals → VectorCypherRetriever or Text2Cypher
-   - Semantic → VectorRetriever
+- Counts, lists, specific facts → **Text2Cypher**
+- Related entities and context → **Graph-Enriched Search**
+- Meaning → **Vector Search**
+- Exact terms, names, tickers → **Full-text Search**
+- Meaning *and* exact terms → **Hybrid Search**
 
 ---
 
@@ -263,11 +275,11 @@ The chunk load and embeddings come from the Lab 1 seed load (or the optional Lab
 
 ## Summary
 
-- **Retrievers** search and return relevant information from your knowledge graph
-- **VectorRetriever**: semantic similarity search across chunks
-- **VectorCypherRetriever**: semantic search + graph traversal for entity context
-- **Hybrid search**: fuses vector and fulltext to boost recall on exact terms, enhancing either retriever
-- **Each excels at different question types**: choosing the right one matters
-- **The chunk is the anchor**: graph traversal enriches what vector search finds
+- **Vector Search**: semantic similarity across chunks
+- **Full-text Search**: keyword match, ranked by Lucene/BM25
+- **Hybrid Search**: fuse vector + full-text, re-rank the merged results
+- **Graph-Enriched Search**: semantic search + graph traversal for entity context
+- **Text2Cypher**: LLM writes Cypher for counts, lists, and lookups (Lab 6)
+- **The chunk is the anchor**: graph traversal enriches what search finds
 
 **Next:** Lab 6 adds MCP, Cypher Templates, and Text2Cypher for full agent autonomy.

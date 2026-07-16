@@ -74,5 +74,5 @@
 
   <!-- ===== framework footer ===== -->
   <rect x="60" y="1360" width="1380" height="72" rx="12" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.75" filter="url(#shadow)"/>
-  <text x="750" y="1404" text-anchor="middle" font-size="23" font-weight="500" fill="#92400e">neo4j-graphrag  |  VectorRetriever  |  VectorCypherRetriever  |  HybridRetriever  |  Bedrock Titan Embeddings</text>
+  <text x="750" y="1404" text-anchor="middle" font-size="23" font-weight="500" fill="#92400e">neo4j-graphrag  |  VectorRetriever  |  VectorCypherRetriever  |  HybridRetriever  |  Bedrock Titan Text Embeddings V2</text>
 </svg>

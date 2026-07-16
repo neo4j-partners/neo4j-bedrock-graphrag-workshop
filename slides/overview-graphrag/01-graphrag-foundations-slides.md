@@ -189,7 +189,7 @@ With graph context, these are **verified facts** from the knowledge graph, not L
 | **Full-text Search** | Keyword match, ranked by Lucene/BM25 | Exact terms, names, acronyms |
 | **Hybrid Search** | Run both, merge and re-rank results | Meaning *and* exact keywords |
 
-*Re-ranking*: vector similarity and keyword scores use different scales. Hybrid normalizes both, then merges them into a single ranked list. Available via neo4j-graphrag's `HybridRetriever`, beyond this lab's scope.
+*Re-ranking*: the two score scales differ, so Hybrid normalizes each, then merges into one ranked list. Shown as Cypher in the Lab 3 sample queries, and as neo4j-graphrag's `HybridRetriever`.
 
 ---
 
@@ -200,7 +200,7 @@ With graph context, these are **verified facts** from the knowledge graph, not L
 | **Graph-Enriched Search** | Vector search + graph traversal | Questions needing entity context |
 | **Text2Cypher** | LLM writes Cypher from schema | Counts, lists, specific lookups |
 
-Vector, full-text, and graph-enriched search run in **Lab 3**; Text2Cypher runs in **Lab 6**.
+Vector, full-text, hybrid, and graph-enriched search run in **Lab 3**; Text2Cypher runs in **Lab 6**.
 
 ---
 

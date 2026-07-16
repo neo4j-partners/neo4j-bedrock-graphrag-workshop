@@ -67,16 +67,16 @@ During development, notebooks call Bedrock directly and iterate on the agent loo
 | SageMaker Studio (environment setup), Bedrock (model access verification)
 
 | xref:lab2.adoc[Lab 2]
-| Bedrock (Titan embeddings, Claude reasoning)
+| Bedrock (Titan Text Embeddings V2, Claude reasoning)
 
 | xref:lab3.adoc[Lab 3]
-| Bedrock (Titan embeddings, Claude reasoning)
+| Bedrock (Titan Text Embeddings V2, Claude reasoning)
 
 | xref:lab4.adoc[Lab 4]
 | Bedrock (Converse API, tool use, Claude reasoning), AgentCore (agent deployment)
 
 | xref:lab5.adoc[Lab 5]
-| Bedrock (Titan embeddings, Claude reasoning)
+| Bedrock (Titan Text Embeddings V2, Claude reasoning)
 
 | xref:lab6.adoc[Lab 6]
 | Bedrock (Claude reasoning), AgentCore (MCP Gateway, MCP Server hosting)

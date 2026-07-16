@@ -3,7 +3,7 @@
 Loads everything the workshop needs into a Neo4j instance and keeps it:
 the structured layer (companies, products, risk factors, asset managers,
 documents, financial metrics and their relationships) plus the unstructured
-layer (document chunks with Titan embeddings, the vector index, and the
+layer (document chunks with Titan Text Embeddings V2, the vector index, and the
 chunk-to-graph links).
 
 Mirrors the Cypher in Lab_1_Aura_Setup/README.md, but reads the local CSV /
@@ -232,7 +232,7 @@ def load_relationships(driver: Driver, data: dict) -> None:
 
 
 def load_chunks(driver: Driver, data: dict) -> None:
-    """Step 4: chunk nodes with pre-computed Titan embeddings."""
+    """Step 4: chunk nodes with pre-computed Titan Text Embeddings V2."""
     driver.execute_query(
         """UNWIND $chunks AS chunk
            MERGE (c:Chunk {chunkId: chunk.chunkId})

@@ -90,7 +90,7 @@ RETURN substring(seed.text, 0, 80) AS seedText,
 
 NOTE: Enriches vector results by traversing FROM_DOCUMENT to include the source filing. This is the same pattern used by the `VectorCypherRetriever` in Lab 3 Notebook 02: vector search finds the chunk, then graph traversal gathers context.
 
-== Graph-Enriched Retrieval
+== Graph-Enriched Search
 
 These queries combine vector search with graph traversal, demonstrating the GraphRAG patterns covered in Lab 3.
 
@@ -172,7 +172,7 @@ RETURN substring(node.text, 0, 80) AS matchText,
 
 NOTE: NEXT_CHUNK relationships form a linked list that preserves the original reading order. Retrieving the previous and next chunks alongside the vector match gives the agent a wider context window. `COALESCE` handles the first and last chunks in a chain, which have no predecessor or successor.
 
-== Fulltext Keyword Search
+== Full-text Keyword Search
 
 Fulltext indexes enable keyword-based search alongside vector similarity. The `search_entities` index was already created by the xref:lab1.adoc[Lab 1 seed load]. The queries below also require a `search_chunks` index on Chunk text, which is not created until you run the setup query below.
 
@@ -277,7 +277,7 @@ Run both searches, normalize each score to 0 to 1, then combine with a weighted 
 // Gather candidates from both signals. The vector arm reuses a random chunk's
 // stored embedding so no embedding API call is needed; the fulltext arm matches
 // a keyword. Each arm returns the same three columns so the UNION lines up.
-CALL () {
+CALL {
     MATCH (seed:Chunk) WHERE seed.embedding IS NOT NULL
     WITH seed, rand() AS r ORDER BY r LIMIT 1
     CALL db.index.vector.queryNodes('chunkEmbeddings', 10, seed.embedding)
@@ -307,7 +307,7 @@ ORDER BY hybridScore DESC
 LIMIT 5
 ----
 
-NOTE: This is the re-ranking that `HybridRetriever` in neo4j-graphrag does for you. Each signal is normalized independently, then merged with a weight (here `0.5 / 0.5`, an even split known as *alpha*). Raise the vector weight to favor meaning, raise the keyword weight to favor exact terms. In the library both arms run against the same user question (embedded for the vector arm, passed as keywords to the fulltext arm); this example reuses a stored embedding for the vector arm so it runs without an API key, so read it as a demonstration of the fusion mechanics rather than a single coherent question.
+NOTE: This is the re-ranking that `HybridRetriever`'s `linear` ranker (`ranker="linear"`) in neo4j-graphrag does for you; its default `naive` ranker skips normalization and just takes the max score per node. The `linear` ranker normalizes each signal independently, then merges them with a weight `alpha` (the vector weight, with `1 - alpha` on keywords; here an even split at `alpha = 0.5`). Raise `alpha` to favor meaning, lower it to favor exact terms. In the library both arms run against the same user question (embedded for the vector arm, passed as keywords to the fulltext arm); this example reuses a stored embedding for the vector arm so it runs without an API key, so read it as a demonstration of the fusion mechanics rather than a single coherent question.
 
 == Verify Indexes
 

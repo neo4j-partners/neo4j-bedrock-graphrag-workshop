@@ -13,6 +13,8 @@ IMPORTANT: Before running either notebook, make sure you have filled in `CONFIG.
 * **Vector Search**: Use `VectorRetriever` to find semantically similar chunks and generate answers with the `GraphRAG` pipeline
 * **Graph-Enriched Search**: Use `VectorCypherRetriever` to combine vector search with Cypher graph traversal for richer context
 
+TIP: The notebooks cover vector and graph-enriched search. For **full-text (keyword)** and **hybrid** search, including how hybrid re-ranks the fused results, work through the xref:lab3-sample-queries.adoc[Lab 3 Sample Queries].
+
 == Prerequisites
 
 * Completed **Lab 1**: Aura instance created and the seed load run (structured entities plus the unstructured chunk/embedding half)

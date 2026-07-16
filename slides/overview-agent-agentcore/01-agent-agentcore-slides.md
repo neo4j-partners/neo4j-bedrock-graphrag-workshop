@@ -71,12 +71,45 @@ The number of cycles depends on the question's complexity, not a predetermined p
 
 ## Strands Agents SDK
 
-- **AWS-native**: first-class Bedrock integration, no glue code
-- **Model-driven**: the model chooses tools and sequencing; you don't write the control flow
-- **Minimal primitives**: an `Agent`, a `BedrockModel`, and `@tool` functions
-- **Adaptive**: unlike a fixed pipeline, the agent decides how many steps a question needs
+- **Open-source SDK from AWS** (Apache 2.0), Python and TypeScript
+- **Model-driven**: the model plans and calls tools; you write no control flow
+- **Model-agnostic**: Bedrock (default), Anthropic, OpenAI, Google, Ollama
+- **Few primitives**: an `Agent`, a model provider, and `@tool` functions
+- **Production-tested** inside Amazon: Q Developer, AWS Glue
 
-The next slide wires these three primitives together.
+<!--
+Strands is AWS's open-source agent framework, licensed Apache 2.0 and
+available in Python and TypeScript. Model-driven means the model does the
+planning: it reads the tool docstrings, decides what to call, and sequences
+the steps. You don't write routing logic. It's model-agnostic, so Bedrock is
+the default but you can swap in Anthropic, OpenAI, Google, or Ollama without
+touching your tools. And it isn't a toy: Amazon runs it in Q Developer and
+AWS Glue. For this workshop we use it with Bedrock and just three primitives.
+-->
+
+---
+
+## What's New in Strands 1.0
+
+- **Multi-agent primitives**: Swarm, Graph, Workflow, Agents-as-Tools
+- **A2A protocol**: agents interoperate across platforms and vendors
+- **Durable sessions**: persist conversation state to file or Amazon S3
+- **Native MCP client**: connect to MCP tool servers directly
+- **Async streaming + lifecycle hooks**: stream events, intercept each step
+- **OpenTelemetry tracing**: observability built in, no extra wiring
+
+<!--
+Strands hit 1.0 in mid-2025 and added the pieces you need past a single agent.
+Four multi-agent patterns: a Swarm is a flat peer team that hands off control;
+a Graph is a deterministic node-and-edge workflow you define; Workflow
+orchestrates dependent tasks; Agents-as-Tools wraps a specialist agent as a
+tool an orchestrator calls. A2A lets Strands agents talk to agents on other
+platforms over an open protocol. Durable sessions persist conversation state
+to file or S3, so a warm agent survives restarts. MCP is a first-class client,
+which is exactly what Lab 6 uses. Async streaming, lifecycle hooks, and
+OpenTelemetry tracing round out the production story. We use the single-agent
+core here, but the same SDK scales to all of this.
+-->
 
 ---
 

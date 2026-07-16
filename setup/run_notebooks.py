@@ -87,6 +87,7 @@ NOTEBOOKS: list[Notebook] = [
     Notebook("2", REPO_ROOT / "Lab_2_Data_Pipeline" / "01_chunking_and_embeddings.ipynb"),
     Notebook("3", REPO_ROOT / "Lab_3_GraphRAG_Search" / "01_vector_retriever.ipynb"),
     Notebook("3", REPO_ROOT / "Lab_3_GraphRAG_Search" / "02_vector_cypher_retriever.ipynb"),
+    Notebook("3", REPO_ROOT / "Lab_3_GraphRAG_Search" / "03_hybrid_retriever.ipynb"),
     Notebook("4", REPO_ROOT / "Lab_4_GraphRAG_Agent" / "01_strands_graphrag_agent.ipynb"),
     Notebook(
         "4",

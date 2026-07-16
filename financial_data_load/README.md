@@ -324,14 +324,14 @@ A **uniqueness constraint** (`CREATE CONSTRAINT ... REQUIRE n.prop IS UNIQUE`) a
 
 The pipeline above builds a live graph from the raw PDFs in `financial-data/`. The distributable **seed data** that participants load in Lab 1 lives in `seed-data/` — the filtered, exported snapshot of that graph. Regenerating it is an admin-only workflow; participants never run it, they only load the CloudFront-hosted copies. Uploading the seed data to S3/CloudFront is handled by `setup/setup_s3_seed_data.sh` (see [`../setup/README.md`](../setup/README.md)).
 
-The `seed-data/` files are the source of truth for the SEC 10-K knowledge graph — both the structured CSVs and `chunks.csv`/`chunks.jsonl` (chunks with Titan embeddings).
+The `seed-data/` files are the source of truth for the SEC 10-K knowledge graph — both the structured CSVs and `chunks.csv`/`chunks.jsonl` (chunks with Titan Text Embeddings V2).
 
 ### `export_seed_data/export.py` — Export the graph to `seed-data/`
 
 Exports the full knowledge graph from a live Neo4j instance to `../seed-data/`:
 
 - **Structured layer**: companies, products, risk factors, financial metrics, asset managers, and documents, plus their relationship and junction tables (OFFERS, FACES_RISK, REPORTS, OWNS, COMPETES_WITH, PARTNERS_WITH, FILED).
-- **Unstructured layer**: chunks with Titan embeddings (`chunks.jsonl`) and their FROM_DOCUMENT, NEXT_CHUNK, and FROM_CHUNK relationships.
+- **Unstructured layer**: chunks with Titan Text Embeddings V2 (`chunks.jsonl`) and their FROM_DOCUMENT, NEXT_CHUNK, and FROM_CHUNK relationships.
 
 The export filters to filing companies, those with a `FILED` relationship to a `Document` node, and their directly connected entities. Stable string IDs are assigned per node (`C001`, `P001`, `CH001`, etc.) so the CSVs are portable across databases.
 
@@ -366,7 +366,7 @@ uv run financial_data_load/regenerate_titan_embeddings.py [--region us-east-1]
 Standalone loader that builds the complete knowledge graph from the local `seed-data/` files and keeps it. It mirrors the Cypher in Lab 1's README (constraints, nodes, relationships, chunks, vector index, chunk links, fulltext index), reading local CSV / JSONL via `UNWIND` instead of `LOAD CSV` from CloudFront:
 
 - **Structured layer**: companies, products, risk factors, asset managers, documents, financial metrics, and their relationships (OFFERS, FACES_RISK, OWNS, COMPETES_WITH, PARTNERS_WITH, FILED, REPORTS).
-- **Unstructured layer**: all chunks with Titan embeddings (`chunks.jsonl`), the `chunkEmbeddings` vector index, and the FROM_DOCUMENT, NEXT_CHUNK, and FROM_CHUNK links.
+- **Unstructured layer**: all chunks with Titan Text Embeddings V2 (`chunks.jsonl`), the `chunkEmbeddings` vector index, and the FROM_DOCUMENT, NEXT_CHUNK, and FROM_CHUNK links.
 
 After loading it prints node/relationship counts and index states for verification.
 

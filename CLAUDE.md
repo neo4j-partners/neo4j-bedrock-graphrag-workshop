@@ -28,11 +28,12 @@ One notebook covering data loading and embedding generation together. Wipes the 
 ### Lab 3 - Semantic Search and GraphRAG (neo4j-graphrag Library)
 Location: `Lab_3_GraphRAG_Search/`
 
-Two notebooks using the neo4j-graphrag Python library with direct Python driver connections:
+Three notebooks using the neo4j-graphrag Python library with direct Python driver connections:
 - `01_vector_retriever.ipynb`: `VectorRetriever` + `GraphRAG` pipeline for semantic question answering
 - `02_vector_cypher_retriever.ipynb`: `VectorCypherRetriever` with custom Cypher retrieval query traversing companies, products, risk factors
+- `03_hybrid_retriever.ipynb`: full-text keyword search plus `HybridRetriever`/`HybridCypherRetriever`, fusing vector and full-text signals and re-ranking with the `NAIVE` and `LINEAR` (alpha-weighted) rankers. Creates the `search_chunks` full-text index itself (`CREATE FULLTEXT INDEX ... IF NOT EXISTS`), since it is not in the base graph.
 
-Uses `lib/data_utils.py` for embedder/LLM helpers. All Neo4j access is via `neo4j.GraphDatabase.driver()` (no MCP). Both notebooks assume the seed load (Lab 1) already populated the graph with chunks, embeddings, and the vector index.
+Uses `lib/data_utils.py` for embedder/LLM helpers. All Neo4j access is via `neo4j.GraphDatabase.driver()` (no MCP). All three notebooks assume the seed load (Lab 1) already populated the graph with chunks, embeddings, and the vector index.
 
 ### Lab 4 - Strands GraphRAG Agent
 Location: `Lab_4_GraphRAG_Agent/`
@@ -46,7 +47,7 @@ Uses `lib/data_utils.py` for embedder/LLM helpers.
 ### Lab 5 - Agent Memory with Neo4j
 Location: `Lab_5_Agent_Memory/`
 
-Adds `neo4j-agent-memory` on top of the Lab 4 Strands agent so it remembers across conversation turns. Uses the same Aura instance and Bedrock Titan embeddings.
+Adds `neo4j-agent-memory` on top of the Lab 4 Strands agent so it remembers across conversation turns. Uses the same Aura instance and Bedrock Titan Text Embeddings V2.
 - `01_short_term_memory.ipynb`: short-term, within-conversation memory.
 - `02_long_term_memory.ipynb`: long-term memory. Extraction is OFF (`ExtractionConfig(extractor_type=ExtractorType.NONE)`, no extractor LLM); knowledge is written explicitly via `add_entity`/`add_fact`/`add_preference` and recalled via `search_entities`/`search_facts`/`search_preferences`.
 

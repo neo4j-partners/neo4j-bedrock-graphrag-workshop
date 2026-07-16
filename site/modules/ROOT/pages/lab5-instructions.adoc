@@ -44,7 +44,7 @@ The embedding model is Amazon Titan Text Embeddings V2 (`amazon.titan-embed-text
 
 === 1. Build and Connect the MemoryClient
 
-`neo4j-agent-memory` is asynchronous, so every memory call is awaited. The Lab 5 helper reads `CONFIG.txt` and wires a client over the existing Aura instance with Titan embeddings. Open it, then connect.
+`neo4j-agent-memory` is asynchronous, so every memory call is awaited. The Lab 5 helper reads `CONFIG.txt` and wires a client over the existing Aura instance with Titan Text Embeddings V2. Open it, then connect.
 
 [source,python]
 ----

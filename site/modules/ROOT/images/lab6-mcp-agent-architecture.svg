@@ -1,94 +1,97 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" font-family="'Comic Sans MS','Segoe Print','Bradley Hand',cursive">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" font-family="'Inter','Segoe UI','Helvetica Neue',Arial,sans-serif">
   <defs>
     <marker id="ah-gray" markerWidth="12" markerHeight="12" refX="8.5" refY="5" orient="auto">
-      <path d="M0,0 L10,5 L0,10 z" fill="#555"/>
+      <path d="M0,0 L10,5 L0,10 z" fill="#64748b"/>
     </marker>
     <marker id="ah-orange" markerWidth="12" markerHeight="12" refX="8.5" refY="5" orient="auto">
-      <path d="M0,0 L10,5 L0,10 z" fill="#e8820c"/>
+      <path d="M0,0 L10,5 L0,10 z" fill="#f59e0b"/>
     </marker>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="2.5" stdDeviation="3.5" flood-color="#101828" flood-opacity="0.13"/>
+    </filter>
   </defs>
 
   <rect x="0" y="0" width="1600" height="900" fill="#ffffff"/>
 
   <!-- Title -->
-  <text x="800" y="64" text-anchor="middle" font-size="44" fill="#222">Lab 6: MCP Text2Cypher Agent</text>
+  <text x="800" y="64" text-anchor="middle" font-size="44" font-weight="600" letter-spacing="0.3" fill="#1e293b">Lab 6: MCP Text2Cypher Agent</text>
 
   <!-- ===================== LEFT: SageMaker Studio boundary ===================== -->
-  <rect x="50" y="130" width="700" height="660" rx="24" fill="none" stroke="#4a90e2" stroke-width="2.5" stroke-dasharray="10 6"/>
-  <text x="70" y="162" font-size="20" fill="#2f6fd0">Amazon SageMaker Studio</text>
+  <rect x="50" y="130" width="700" height="660" rx="20" fill="none" stroke="#93c5fd" stroke-width="2" stroke-dasharray="10 6"/>
+  <text x="70" y="162" font-size="20" font-weight="600" fill="#1d4ed8">Amazon SageMaker Studio</text>
 
   <!-- ReAct loop boundary -->
-  <rect x="195" y="300" width="375" height="425" rx="20" fill="none" stroke="#9b30c9" stroke-width="2" stroke-dasharray="8 6"/>
-  <text x="382" y="328" text-anchor="middle" font-size="20" fill="#9b30c9">ReAct Loop</text>
+  <rect x="195" y="300" width="375" height="425" rx="18" fill="none" stroke="#c4b5fd" stroke-width="2" stroke-dasharray="8 6"/>
+  <text x="382" y="328" text-anchor="middle" font-size="20" font-weight="600" fill="#6d28d9">ReAct Loop</text>
 
   <!-- ===== left edges (drawn before nodes) ===== -->
   <!-- User Question -> LLM Reasoning -->
-  <line x1="225" y1="274" x2="300" y2="343" stroke="#555" stroke-width="2.5" marker-end="url(#ah-gray)"/>
+  <line x1="225" y1="274" x2="300" y2="343" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah-gray)"/>
   <!-- LLM Reasoning -> Response (finish path) -->
-  <line x1="470" y1="345" x2="520" y2="276" stroke="#555" stroke-width="2.5" marker-end="url(#ah-gray)"/>
-  <text x="512" y="322" text-anchor="middle" font-size="18" fill="#555">final answer</text>
+  <line x1="470" y1="345" x2="520" y2="276" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah-gray)"/>
+  <text x="512" y="322" text-anchor="middle" font-size="18" fill="#64748b">final answer</text>
   <!-- LLM Reasoning -> Tool Selection -->
-  <line x1="375" y1="455" x2="375" y2="508" stroke="#555" stroke-width="2.5" marker-end="url(#ah-gray)"/>
+  <line x1="375" y1="455" x2="375" y2="508" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah-gray)"/>
   <!-- Tool Selection -> MCP Tool Call -->
-  <line x1="375" y1="584" x2="375" y2="633" stroke="#555" stroke-width="2.5" marker-end="url(#ah-gray)"/>
+  <line x1="375" y1="584" x2="375" y2="633" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah-gray)"/>
 
   <!-- ===== left nodes ===== -->
   <!-- User Question -->
-  <rect x="100" y="200" width="250" height="74" rx="16" fill="#dbe4ff" stroke="#1971c2" stroke-width="2.5"/>
-  <text x="225" y="245" text-anchor="middle" font-size="24" fill="#333">User Question</text>
+  <rect x="100" y="200" width="250" height="74" rx="12" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.75" filter="url(#shadow)"/>
+  <text x="225" y="245" text-anchor="middle" font-size="24" font-weight="600" fill="#1d4ed8">User Question</text>
   <!-- Response -->
-  <rect x="400" y="200" width="250" height="74" rx="16" fill="#dbe4ff" stroke="#1971c2" stroke-width="2.5"/>
-  <text x="525" y="245" text-anchor="middle" font-size="24" fill="#333">Response</text>
+  <rect x="400" y="200" width="250" height="74" rx="12" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.75" filter="url(#shadow)"/>
+  <text x="525" y="245" text-anchor="middle" font-size="24" font-weight="600" fill="#1d4ed8">Response</text>
   <!-- LLM Reasoning -->
-  <rect x="230" y="345" width="290" height="110" rx="16" fill="#f4e2fb" stroke="#9b30c9" stroke-width="3"/>
-  <text x="375" y="382" text-anchor="middle" font-size="23" fill="#333">LLM Reasoning</text>
-  <text x="375" y="412" text-anchor="middle" font-size="20" fill="#444">Claude Sonnet 4.5</text>
-  <text x="375" y="438" text-anchor="middle" font-size="18" fill="#666">via Amazon Bedrock</text>
+  <rect x="230" y="345" width="290" height="110" rx="12" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="2" filter="url(#shadow)"/>
+  <text x="375" y="382" text-anchor="middle" font-size="23" font-weight="600" fill="#6d28d9">LLM Reasoning</text>
+  <text x="375" y="412" text-anchor="middle" font-size="20" fill="#7c3aed">Claude Sonnet 4.6</text>
+  <text x="375" y="438" text-anchor="middle" font-size="18" fill="#8b5cf6">via Amazon Bedrock</text>
   <!-- Tool Selection -->
-  <rect x="245" y="510" width="260" height="74" rx="16" fill="#ffe8cc" stroke="#e8820c" stroke-width="2.5"/>
-  <text x="375" y="555" text-anchor="middle" font-size="24" fill="#333">Tool Selection</text>
+  <rect x="245" y="510" width="260" height="74" rx="12" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.75" filter="url(#shadow)"/>
+  <text x="375" y="555" text-anchor="middle" font-size="24" font-weight="600" fill="#b45309">Tool Selection</text>
   <!-- MCP Tool Call -->
-  <rect x="245" y="635" width="260" height="74" rx="16" fill="#ffe8cc" stroke="#e8820c" stroke-width="2.5"/>
-  <text x="375" y="680" text-anchor="middle" font-size="24" fill="#333">MCP Tool Call</text>
+  <rect x="245" y="635" width="260" height="74" rx="12" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.75" filter="url(#shadow)"/>
+  <text x="375" y="680" text-anchor="middle" font-size="24" font-weight="600" fill="#b45309">MCP Tool Call</text>
 
   <!-- ===== cross-boundary edges ===== -->
   <!-- Forward: MCP Tool Call -> AgentCore Gateway (orange) -->
-  <line x1="505" y1="668" x2="998" y2="268" stroke="#e8820c" stroke-width="3" marker-end="url(#ah-orange)"/>
-  <text x="770" y="490" text-anchor="middle" font-size="19" fill="#e8820c">MCP over HTTPS</text>
-  <text x="770" y="514" text-anchor="middle" font-size="19" fill="#e8820c">(bearer token)</text>
+  <line x1="505" y1="668" x2="998" y2="268" stroke="#f59e0b" stroke-width="2.25" marker-end="url(#ah-orange)"/>
+  <text x="770" y="490" text-anchor="middle" font-size="19" fill="#b45309">MCP over HTTPS</text>
+  <text x="770" y="514" text-anchor="middle" font-size="19" fill="#b45309">(bearer token)</text>
   <!-- Return: dashed Results back to LLM Reasoning -->
-  <line x1="998" y1="238" x2="522" y2="400" stroke="#555" stroke-width="2.5" stroke-dasharray="10 7" marker-end="url(#ah-gray)"/>
-  <text x="760" y="292" text-anchor="middle" font-size="20" fill="#555">Results</text>
+  <line x1="998" y1="238" x2="522" y2="400" stroke="#94a3b8" stroke-width="2" stroke-dasharray="10 7" marker-end="url(#ah-gray)"/>
+  <text x="760" y="292" text-anchor="middle" font-size="20" fill="#64748b">Results</text>
 
   <!-- ===================== RIGHT: remote server chain ===================== -->
   <!-- Gateway -> MCP Server -->
-  <line x1="1190" y1="305" x2="1190" y2="383" stroke="#555" stroke-width="2.5" marker-end="url(#ah-gray)"/>
+  <line x1="1190" y1="305" x2="1190" y2="383" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah-gray)"/>
   <!-- MCP Server -> tool boxes -->
-  <line x1="1090" y1="463" x2="990" y2="556" stroke="#555" stroke-width="2.5" marker-end="url(#ah-gray)"/>
-  <line x1="1290" y1="463" x2="1375" y2="556" stroke="#555" stroke-width="2.5" marker-end="url(#ah-gray)"/>
+  <line x1="1090" y1="463" x2="990" y2="556" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah-gray)"/>
+  <line x1="1290" y1="463" x2="1375" y2="556" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah-gray)"/>
   <!-- MCP Server -> Neo4j Aura -->
-  <line x1="1190" y1="505" x2="1190" y2="703" stroke="#555" stroke-width="2.5" marker-end="url(#ah-gray)"/>
-  <text x="1205" y="600" font-size="19" fill="#555">Cypher over Bolt</text>
+  <line x1="1190" y1="505" x2="1190" y2="703" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah-gray)"/>
+  <text x="1205" y="600" font-size="19" fill="#64748b">Cypher over Bolt</text>
 
   <!-- Amazon Bedrock AgentCore Gateway -->
-  <rect x="1000" y="200" width="380" height="105" rx="16" fill="#ffe8cc" stroke="#e8820c" stroke-width="3"/>
-  <text x="1190" y="238" text-anchor="middle" font-size="22" fill="#333">Amazon Bedrock AgentCore Gateway</text>
-  <text x="1190" y="266" text-anchor="middle" font-size="18" fill="#666">managed HTTPS MCP endpoint</text>
-  <text x="1190" y="290" text-anchor="middle" font-size="18" fill="#666">bearer-token gated</text>
+  <rect x="1000" y="200" width="380" height="105" rx="12" fill="#fffbeb" stroke="#f59e0b" stroke-width="2" filter="url(#shadow)"/>
+  <text x="1190" y="238" text-anchor="middle" font-size="22" font-weight="600" fill="#b45309">Amazon Bedrock AgentCore Gateway</text>
+  <text x="1190" y="266" text-anchor="middle" font-size="18" fill="#d97706">managed HTTPS MCP endpoint</text>
+  <text x="1190" y="290" text-anchor="middle" font-size="18" fill="#d97706">bearer-token gated</text>
 
   <!-- Neo4j MCP Server -->
-  <rect x="1030" y="385" width="320" height="78" rx="16" fill="#d3f9d8" stroke="#2f9e44" stroke-width="3"/>
-  <text x="1190" y="432" text-anchor="middle" font-size="24" fill="#333">Neo4j MCP Server</text>
-  <text x="1190" y="486" text-anchor="middle" font-size="16" fill="#868e96">pre-deployed from neo4j-partners/aws-starter</text>
+  <rect x="1030" y="385" width="320" height="78" rx="12" fill="#f0fdf4" stroke="#22c55e" stroke-width="2" filter="url(#shadow)"/>
+  <text x="1190" y="432" text-anchor="middle" font-size="24" font-weight="600" fill="#15803d">Neo4j MCP Server</text>
+  <text x="1190" y="486" text-anchor="middle" font-size="16" fill="#94a3b8">pre-deployed from neo4j-partners/aws-starter</text>
 
   <!-- Tool boxes -->
-  <rect x="810" y="560" width="290" height="66" rx="16" fill="#d3f9d8" stroke="#2f9e44" stroke-width="2.5"/>
-  <text x="955" y="600" text-anchor="middle" font-size="22" fill="#333">get_neo4j_schema</text>
-  <rect x="1265" y="560" width="290" height="66" rx="16" fill="#d3f9d8" stroke="#2f9e44" stroke-width="2.5"/>
-  <text x="1410" y="600" text-anchor="middle" font-size="22" fill="#333">read_neo4j_cypher</text>
+  <rect x="810" y="560" width="290" height="66" rx="12" fill="#f0fdf4" stroke="#22c55e" stroke-width="1.75" filter="url(#shadow)"/>
+  <text x="955" y="600" text-anchor="middle" font-size="22" font-weight="600" fill="#15803d">get_neo4j_schema</text>
+  <rect x="1265" y="560" width="290" height="66" rx="12" fill="#f0fdf4" stroke="#22c55e" stroke-width="1.75" filter="url(#shadow)"/>
+  <text x="1410" y="600" text-anchor="middle" font-size="22" font-weight="600" fill="#15803d">read_neo4j_cypher</text>
 
   <!-- Neo4j Aura -->
-  <rect x="1060" y="705" width="260" height="90" rx="16" fill="#e8fbf8" stroke="#2bb3a3" stroke-width="3"/>
-  <text x="1190" y="745" text-anchor="middle" font-size="24" fill="#333">Neo4j Aura</text>
-  <text x="1190" y="774" text-anchor="middle" font-size="18" fill="#1a9e8f">Knowledge Graph</text>
+  <rect x="1060" y="705" width="260" height="90" rx="12" fill="#ecfeff" stroke="#06b6d4" stroke-width="2" filter="url(#shadow)"/>
+  <text x="1190" y="745" text-anchor="middle" font-size="24" font-weight="600" fill="#0e7490">Neo4j Aura</text>
+  <text x="1190" y="774" text-anchor="middle" font-size="18" fill="#0891b2">Knowledge Graph</text>
 </svg>

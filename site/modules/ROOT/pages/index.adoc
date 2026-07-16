@@ -51,7 +51,7 @@ This diagram shows both halves of the graph: the structured entities on the left
 
 === Strands Agent Architecture
 
-At request time, a user query flows into a Strands agent backed by Claude. The agent selects a retrieval tool for the question: Vector Search over Nova embeddings for semantic matching, Text2Cypher where Claude writes the query, or a Cypher template for direct lookups. Each tool runs against Neo4j Aura, which holds the SEC 10-K knowledge graph of companies, products, risk factors, and ownership.
+At request time, a user query flows into a Strands agent backed by Claude. The agent selects a retrieval tool for the question: Vector Search over Titan Text Embeddings V2 for semantic matching, Text2Cypher where Claude writes the query, or a Cypher template for direct lookups. Each tool runs against Neo4j Aura, which holds the SEC 10-K knowledge graph of companies, products, risk factors, and ownership.
 
 image::strands-agent-architecture.svg[Strands Agent Architecture,800]
 
