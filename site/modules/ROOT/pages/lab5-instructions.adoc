@@ -9,6 +9,8 @@ The lab is two notebooks in `Lab_5_Agent_Memory/`:
 
 TIP: For concepts and background, see xref:lab5.adoc[Lab 5: Agent Memory with Neo4j].
 
+IMPORTANT: These notebooks are designed to run in *Amazon SageMaker AI* Studio. Running them locally (for example in VS Code) or in another environment is not supported and will fail. Complete xref:part2-setup-instructions.adoc[Environment Setup: Amazon SageMaker AI] first to launch SageMaker AI Studio, then open the notebooks there.
+
 == What You'll Learn
 
 * **Configure memory**: build a `MemoryClient` against the existing Aura instance using Titan Text Embeddings V2

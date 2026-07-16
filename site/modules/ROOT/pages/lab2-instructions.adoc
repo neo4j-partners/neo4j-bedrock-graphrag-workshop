@@ -2,6 +2,8 @@
 
 TIP: For concepts and background, see xref:lab2.adoc[Lab 2: Data Pipeline].
 
+IMPORTANT: These notebooks are designed to run in *Amazon SageMaker AI* Studio. Running them locally (for example in VS Code) or in another environment is not supported and will fail. Complete xref:part2-setup-instructions.adoc[Environment Setup: Amazon SageMaker AI] first to launch SageMaker AI Studio, then open the notebooks there.
+
 == What You'll Learn
 
 * **Chunking**: Split SEC 10-K filing text into overlapping passages sized for embedding
@@ -13,7 +15,7 @@ TIP: For concepts and background, see xref:lab2.adoc[Lab 2: Data Pipeline].
 
 * Completed **Lab 1** (Neo4j Aura instance created and running with the seed data load)
 * Completed the Part 2 environment setup (xref:part2-setup-instructions.adoc[Part 2 Setup Instructions])
-* A running environment (SageMaker Studio or GitHub Codespace)
+* A running Amazon SageMaker AI Studio environment (see xref:part2-setup-instructions.adoc[Part 2 Setup Instructions])
 
 NOTE: This lab is optional and non-destructive. It builds everything in an isolated sandbox using `:Demo` node labels and a `demoChunkEmbeddings` index, then tears the sandbox down at the end. The graph Lab 1 loaded is never touched, so the notebook is safe to run as many times as you like.
 

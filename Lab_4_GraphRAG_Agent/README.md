@@ -2,6 +2,8 @@
 
 Wrap the retrievers you built in Lab 3 as agent tools and let a Strands agent decide which retrieval strategy to use for each question. Instead of the developer hardcoding vector search or graph-enriched search, the model reads each tool's description and picks the right one.
 
+> **Run this in Amazon SageMaker AI.** These notebooks are designed to run in Amazon SageMaker AI Studio. Running them locally (e.g. VS Code) or elsewhere is not supported and will fail. Follow the [Environment Setup guide](https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/workshop/neo4j-bedrock-graphrag-workshop/1.0/part2-setup-instructions.html) to launch SageMaker AI Studio first.
+
 ## What You'll Learn
 
 - **Retrievers as Tools**: Wrap `VectorRetriever` and `VectorCypherRetriever` as Strands `@tool` functions
@@ -15,7 +17,7 @@ Before starting this lab, make sure you have:
 
 - Completed **Lab 3** (Semantic Search and GraphRAG), so you understand both retrievers
 - `CONFIG.txt` at the project root filled in with `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD`, `MODEL_ID`, and `REGION`
-- A running environment (SageMaker Studio or GitHub Codespace)
+- A running Amazon SageMaker AI Studio environment (see [Part 2 Setup Instructions](https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/workshop/neo4j-bedrock-graphrag-workshop/1.0/part2-setup-instructions.html))
 
 > **Note:** This lab uses the same Neo4j Aura instance from the earlier labs. The knowledge graph — including document chunks, chunk embeddings, and the `chunkEmbeddings` vector index — must already be loaded.
 

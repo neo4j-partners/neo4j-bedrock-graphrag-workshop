@@ -95,6 +95,11 @@ NOTEBOOKS: list[Notebook] = [
     ),
     Notebook("5", REPO_ROOT / "Lab_5_Agent_Memory" / "01_short_term_memory.ipynb"),
     Notebook("5", REPO_ROOT / "Lab_5_Agent_Memory" / "02_long_term_memory.ipynb"),
+    Notebook(
+        "5",
+        REPO_ROOT / "Lab_5_Agent_Memory" / "03_deploy_to_agentcore.ipynb",
+        is_deploy=True,
+    ),
     Notebook("6", REPO_ROOT / "Lab_6_MCP_Server" / "01_mcp_text2cypher_agent.ipynb", requires_mcp=True),
 ]
 

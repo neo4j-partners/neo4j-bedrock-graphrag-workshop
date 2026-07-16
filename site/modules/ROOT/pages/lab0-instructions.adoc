@@ -18,7 +18,7 @@ There are two sign-in paths depending on your situation:
 
 If you are attending an instructor-led workshop:
 
-1. Visit https://events.oneblink.ai[events.oneblink.ai]
+1. Visit https://neo4jsandbox.oneblink.ai/gate[neo4jsandbox.oneblink.ai/gate]
 2. Enter the email you used to register along with the 7-digit event code
 3. Check the box to agree to the Terms and Conditions, then click **Register**
 

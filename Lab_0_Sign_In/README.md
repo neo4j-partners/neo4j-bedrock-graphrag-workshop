@@ -9,7 +9,7 @@ In this lab, you will sign in to your AWS account and verify access to Amazon Be
 If you are attending an instructor-led workshop, you will receive credentials through OneBlink:
 
 1. At the end of the first presentation, you will receive an event code
-2. Visit [https://events.oneblink.ai](https://events.oneblink.ai)
+2. Visit [https://neo4jsandbox.oneblink.ai/gate](https://neo4jsandbox.oneblink.ai/gate)
 3. Enter the email you used to register along with the 7-digit event code
 4. Check the box to agree to the Terms and Conditions, then click **Register**
 

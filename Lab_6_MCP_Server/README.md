@@ -2,6 +2,8 @@
 
 Connect a Strands Agent to a Neo4j knowledge graph through the **Model Context Protocol (MCP)**. This lab introduces MCP tool discovery, then builds an autonomous **Text2Cypher** agent that discovers the graph schema and writes its own Cypher from scratch.
 
+> **Run this in Amazon SageMaker AI.** This notebook is designed to run in Amazon SageMaker AI Studio. Running it locally (e.g. VS Code) or elsewhere is not supported and will fail. Follow the [Environment Setup guide](https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/workshop/neo4j-bedrock-graphrag-workshop/1.0/part2-setup-instructions.html) to launch SageMaker AI Studio first.
+
 ## What You'll Learn
 
 - **MCP fundamentals**: Agent → MCP Server → Data Source architecture, tool discovery, Streamable HTTP transport

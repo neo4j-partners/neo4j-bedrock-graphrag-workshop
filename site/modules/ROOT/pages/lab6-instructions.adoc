@@ -2,6 +2,8 @@
 
 TIP: For concepts and background, see xref:lab6.adoc[Lab 6: Neo4j MCP Agent].
 
+IMPORTANT: This notebook is designed to run in *Amazon SageMaker AI* Studio. Running it locally (for example in VS Code) or in another environment is not supported and will fail. Complete xref:part2-setup-instructions.adoc[Environment Setup: Amazon SageMaker AI] first to launch SageMaker AI Studio, then open the notebook there.
+
 == What You'll Learn
 
 * **MCP Fundamentals**: Connect a Strands Agent to a Neo4j MCP Server, discover tools, inspect the graph schema

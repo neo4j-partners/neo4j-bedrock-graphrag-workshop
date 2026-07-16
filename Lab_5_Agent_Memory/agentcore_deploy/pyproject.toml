@@ -1,0 +1,14 @@
+[project]
+name = "graphrag-memory-agent"
+version = "0.1.0"
+description = "Strands GraphRAG agent with short-term memory for AgentCore Runtime"
+requires-python = ">=3.10"
+dependencies = [
+    "strands-agents>=0.1.0",
+    "strands-agents-tools>=0.1.0",
+    "boto3>=1.42.0",
+    "bedrock-agentcore>=1.4.7",
+    "neo4j>=5.0.0",
+    "neo4j-graphrag[bedrock]>=1.18.0",
+    "neo4j-agent-memory[bedrock]==0.5.0",
+]

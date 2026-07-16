@@ -4,6 +4,8 @@ Follow these notebooks to build retrieval pipelines against your knowledge graph
 
 TIP: For concepts and background, see xref:lab3.adoc[Lab 3: Semantic Search and GraphRAG].
 
+IMPORTANT: These notebooks are designed to run in *Amazon SageMaker AI* Studio. Running them locally (for example in VS Code) or in another environment is not supported and will fail. Complete xref:part2-setup-instructions.adoc[Environment Setup: Amazon SageMaker AI] first to launch SageMaker AI Studio, then open the notebooks there.
+
 IMPORTANT: Before running either notebook, make sure you have filled in `CONFIG.txt` at the repository root with your Neo4j credentials from Lab 1. See <<Update CONFIG.txt with Neo4j Credentials>> below. The notebooks fail to connect if this file still contains placeholder values.
 
 == What You'll Learn

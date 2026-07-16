@@ -6,6 +6,8 @@ Neo4j Aura instance and Amazon Titan Text Embeddings V2 (`amazon.titan-embed-tex
 labs, storing `Conversation`, `Message`, `Entity`, `Fact`, and `Preference` nodes alongside the SEC 10-K
 knowledge graph.
 
+> **Run this in Amazon SageMaker AI.** These notebooks are designed to run in Amazon SageMaker AI Studio. Running them locally (e.g. VS Code) or elsewhere is not supported and will fail. Follow the [Environment Setup guide](https://neo4j-partners.github.io/neo4j-bedrock-graphrag-workshop/workshop/neo4j-bedrock-graphrag-workshop/1.0/part2-setup-instructions.html) to launch SageMaker AI Studio first.
+
 ## Notebooks
 
 1. **`01_short_term_memory.ipynb`**, the conversational recall layer. Wraps the imported Lab 4 agent so
@@ -15,6 +17,10 @@ knowledge graph.
 2. **`02_long_term_memory.ipynb`**, the durable knowledge layer. Persists entities, facts, and
    preferences with `add_entity` / `add_fact` / `add_preference`, then recalls them from a fresh session.
    An optional cell adopts the existing SEC 10-K `Company` nodes as long-term entities.
+3. **`03_deploy_to_agentcore.ipynb`** (optional), deploys the short-term-memory agent to Amazon Bedrock
+   AgentCore Runtime, mirroring Lab 4's deployment. The handler wraps the GraphRAG tools with the memory
+   layer, keyed on the AgentCore session, and the notebook drives a four-turn demo (and console-playground
+   prompts) showing memory carry context across separate invocations.
 
 These two notebooks cover the first two layers of a three-part memory model, short-term and
 long-term, which together form a **context graph**. The third layer, reasoning traces (decision

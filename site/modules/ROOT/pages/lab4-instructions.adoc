@@ -4,6 +4,8 @@ Follow these notebooks to build a Strands agent that wraps *both* Lab 3 retrieve
 
 TIP: For concepts and background, see xref:lab4.adoc[Lab 4: Strands GraphRAG Agent and AgentCore].
 
+IMPORTANT: These notebooks are designed to run in *Amazon SageMaker AI* Studio. Running them locally (for example in VS Code) or in another environment is not supported and will fail. Complete xref:part2-setup-instructions.adoc[Environment Setup: Amazon SageMaker AI] first to launch SageMaker AI Studio, then open the notebooks there.
+
 == What You'll Learn
 
 * **Wrap retrieval as tools**: expose both Lab 3 retrievers as Strands `@tool` functions, `semantic_search` and `graph_enriched_search`
