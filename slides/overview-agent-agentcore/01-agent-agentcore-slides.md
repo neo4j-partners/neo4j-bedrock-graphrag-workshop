@@ -92,6 +92,7 @@ AWS Glue. For this workshop we use it with Bedrock and just three primitives.
 ## What's New in Strands 1.0
 
 - **Multi-agent primitives**: Swarm, Graph, Workflow, Agents-as-Tools
+- **Model-driven or deterministic**: a single agent lets the model plan; Graph and Workflow let you define control flow when you want it
 - **A2A protocol**: agents interoperate across platforms and vendors
 - **Durable sessions**: persist conversation state to file or Amazon S3
 - **Native MCP client**: connect to MCP tool servers directly
@@ -100,15 +101,29 @@ AWS Glue. For this workshop we use it with Bedrock and just three primitives.
 
 <!--
 Strands hit 1.0 in mid-2025 and added the pieces you need past a single agent.
-Four multi-agent patterns: a Swarm is a flat peer team that hands off control;
-a Graph is a deterministic node-and-edge workflow you define; Workflow
-orchestrates dependent tasks; Agents-as-Tools wraps a specialist agent as a
-tool an orchestrator calls. A2A lets Strands agents talk to agents on other
-platforms over an open protocol. Durable sessions persist conversation state
-to file or S3, so a warm agent survives restarts. MCP is a first-class client,
-which is exactly what Lab 6 uses. Async streaming, lifecycle hooks, and
-OpenTelemetry tracing round out the production story. We use the single-agent
-core here, but the same SDK scales to all of this.
+
+The four multi-agent primitives are different ways to coordinate more than one
+agent:
+- Swarm: a flat team of peer agents sharing context. Any agent can hand off
+  control to another via a built-in handoff tool, and the order is emergent,
+  not pre-planned. Good when you don't know the path up front.
+- Graph: a deterministic workflow you define as nodes and directed edges, with
+  optional conditions on each edge. Execution order is fixed and auditable.
+  Good when you want a repeatable, testable flow.
+- Workflow: orchestrates a set of tasks with dependencies. It resolves the
+  order, runs independent tasks in parallel, and persists progress by id.
+  Good for pipelines of dependent steps.
+- Agents-as-Tools: the pattern we lean on here. Wrap a specialist agent inside
+  the @tool decorator so an orchestrator agent calls it like any other tool.
+  Control returns to the orchestrator after each delegation. This is how a
+  supervisor routes to the graph agent versus a SQL agent.
+
+A2A lets Strands agents talk to agents on other platforms over an open
+protocol. Durable sessions persist conversation state to file or S3, so a warm
+agent survives restarts. MCP is a first-class client, which is exactly what
+Lab 6 uses. Async streaming, lifecycle hooks, and OpenTelemetry tracing round
+out the production story. We use the single-agent core here, but the same SDK
+scales to all of this.
 -->
 
 ---

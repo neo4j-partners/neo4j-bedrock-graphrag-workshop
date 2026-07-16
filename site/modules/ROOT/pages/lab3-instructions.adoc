@@ -1,19 +1,20 @@
 = Lab 3 Instructions: Semantic Search and GraphRAG
 
-Follow these notebooks to build retrieval pipelines against your knowledge graph, progressing from pure vector search to graph-enriched retrieval. The unstructured half (chunks, Titan v2 embeddings, and the `chunkEmbeddings` index) is already in place from the Lab 1 seed load, so both notebooks start directly with retrieval.
+Follow these notebooks to build retrieval pipelines against your knowledge graph, progressing from pure vector search to graph-enriched retrieval to hybrid search. The unstructured half (chunks, Titan v2 embeddings, and the `chunkEmbeddings` index) is already in place from the Lab 1 seed load, so the notebooks start directly with retrieval.
 
 TIP: For concepts and background, see xref:lab3.adoc[Lab 3: Semantic Search and GraphRAG].
 
 IMPORTANT: These notebooks are designed to run in *Amazon SageMaker AI* Studio. Running them locally (for example in VS Code) or in another environment is not supported and will fail. Complete xref:part2-setup-instructions.adoc[Environment Setup: Amazon SageMaker AI] first to launch SageMaker AI Studio, then open the notebooks there.
 
-IMPORTANT: Before running either notebook, make sure you have filled in `CONFIG.txt` at the repository root with your Neo4j credentials from Lab 1. See <<Update CONFIG.txt with Neo4j Credentials>> below. The notebooks fail to connect if this file still contains placeholder values.
+IMPORTANT: Before running any notebook, make sure you have filled in `CONFIG.txt` at the repository root with your Neo4j credentials from Lab 1. See <<Update CONFIG.txt with Neo4j Credentials>> below. The notebooks fail to connect if this file still contains placeholder values.
 
 == What You'll Learn
 
 * **Vector Search**: Use `VectorRetriever` to find semantically similar chunks and generate answers with the `GraphRAG` pipeline
 * **Graph-Enriched Search**: Use `VectorCypherRetriever` to combine vector search with Cypher graph traversal for richer context
+* **Full-text and Hybrid Search**: Create a `search_chunks` fulltext index, then use `HybridRetriever` and `HybridCypherRetriever` to fuse vector and keyword search and re-rank the merged results with the `naive` and `linear` (alpha-weighted) rankers
 
-TIP: The notebooks cover vector and graph-enriched search. For **full-text (keyword)** and **hybrid** search, including how hybrid re-ranks the fused results, work through the xref:lab3-sample-queries.adoc[Lab 3 Sample Queries].
+TIP: The notebooks now cover full-text and hybrid search directly. For the same patterns expressed as raw Cypher, including fuzzy and boolean keyword variants, work through the xref:lab3-sample-queries.adoc[Lab 3 Sample Queries].
 
 == Prerequisites
 
@@ -37,7 +38,7 @@ NEO4J_PASSWORD=your-password-from-lab-0
 
 == Notebooks
 
-Both notebooks live in `Lab_3_GraphRAG_Search/`.
+The three notebooks live in `Lab_3_GraphRAG_Search/`.
 
 [cols="1,2,3"]
 |===
@@ -50,6 +51,10 @@ Both notebooks live in `Lab_3_GraphRAG_Search/`.
 | `02_vector_cypher_retriever.ipynb`
 | VectorCypher Retriever
 | Graph-enriched retrieval using `VectorCypherRetriever`, adding filing metadata, companies, products, and risk factors to vector search results
+
+| `03_hybrid_retriever.ipynb`
+| Hybrid Retriever
+| Full-text keyword search plus `HybridRetriever` and `HybridCypherRetriever`, fusing vector and keyword signals and re-ranking with the `naive` and `linear` rankers
 |===
 
 == Walkthrough
@@ -113,6 +118,35 @@ vector_cypher_retriever = VectorCypherRetriever(
 ----
 +
 . **Search and inspect the enriched metadata.** Each `item.metadata` now carries `company`, `products`, `risks`, and `score` alongside the chunk text in `item.content`. As in Notebook 01, building a `GraphRAG` pipeline and calling `search(query, retriever_config={'top_k': 5}, return_context=True)` exposes the enriched matches through `response.retriever_result.items`.
+
+=== Notebook 03: Hybrid Retriever
+
+. **Create the full-text index.** The Lab 1 seed load built the `chunkEmbeddings` vector index and a `search_entities` index on entity names, but not a full-text index over chunk text. Create `search_chunks` before searching, and wait for it to come online so the queries below do not race the build:
++
+[source,python]
+----
+driver.execute_query(
+    "CREATE FULLTEXT INDEX search_chunks IF NOT EXISTS FOR (c:Chunk) ON EACH [c.text]"
+)
+driver.execute_query("CALL db.awaitIndexes(300)")
+----
++
+. **Run keyword search.** Query the index directly with `db.index.fulltext.queryNodes('search_chunks', ...)` to see chunks ranked by Lucene relevance. Unlike vector search, this matches terms literally, which is strong on exact names, tickers, and acronyms.
+. **Fuse the two signals with `HybridRetriever`.** Pass both index names and the embedder. On `search`, the retriever embeds the query for the vector arm, passes the same text as keywords to the full-text arm, and merges the two result sets:
++
+[source,python]
+----
+hybrid_retriever = HybridRetriever(
+    driver=driver,
+    vector_index_name='chunkEmbeddings',
+    fulltext_index_name='search_chunks',
+    embedder=embedder,
+    return_properties=['text'],
+)
+----
++
+. **Compare the re-rankers.** Run the same query with `ranker=HybridSearchRanker.NAIVE` (default; max normalized score per chunk) and with `ranker=HybridSearchRanker.LINEAR` at `alpha=0.9` versus `alpha=0.1`. The `linear` ranker blends the arms as `alpha * vector + (1 - alpha) * fulltext`; a high `alpha` favors meaning, a low `alpha` favors exact keywords, and the ranking visibly shifts between them.
+. **Add graph traversal with `HybridCypherRetriever`.** It takes the same two indexes plus the `retrieval_query` and `result_formatter` from Notebook 02, so hybrid search finds the chunks and the Cypher traversal enriches each match with its filing, company, products, and risk factors. Ranker options pass through `retriever_config` when wrapped in a `GraphRAG` pipeline.
 
 === Reference: How the Vector Index Was Built
 

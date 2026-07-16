@@ -1,8 +1,8 @@
 = Sample Cypher Queries
 
-Copy and paste these queries into the https://console.neo4j.io[Neo4j Aura Query interface] to explore the SEC financial knowledge graph. Queries are organized by retrieval strategy, progressing from direct graph traversals through vector, fulltext, and hybrid search to graph-enriched retrieval.
+Copy and paste these queries into the https://console.neo4j.io[Neo4j Aura Query interface] to explore the SEC financial knowledge graph. Queries are organized by retrieval strategy, progressing from direct graph traversals through vector, full-text, and hybrid search to graph-enriched retrieval.
 
-TIP: The fulltext, vector, hybrid, and graph-enriched queries require the unstructured half (Chunk nodes, embeddings, and the `chunkEmbeddings` vector index), which is loaded in xref:lab1-instructions.adoc[Lab 1].
+TIP: The full-text, vector, hybrid, and graph-enriched queries require the unstructured half (Chunk nodes, embeddings, and the `chunkEmbeddings` vector index), which is loaded in xref:lab1-instructions.adoc[Lab 1].
 
 == Cypher Quick Reference
 
@@ -38,7 +38,7 @@ TIP: The fulltext, vector, hybrid, and graph-enriched queries require the unstru
 | Tests whether a graph pattern exists in the database
 
 | `db.index.fulltext.queryNodes()`
-| Run a keyword search against a named fulltext index
+| Run a keyword search against a named full-text index
 
 | `db.index.vector.queryNodes()`
 | Run a vector similarity search against a named vector index
@@ -170,4 +170,4 @@ NOTE: Pattern matching with directed relationships following the schema: Company
 
 == Full-text, Vector, Hybrid, and Graph-Enriched Queries
 
-The fulltext, vector, hybrid, and graph-enriched retrieval queries require the Document/Chunk nodes and embeddings loaded in Lab 1. See the xref:lab3-sample-queries.adoc[Lab 3: Sample Queries] page for those queries.
+The full-text, vector, hybrid, and graph-enriched retrieval queries require the Document/Chunk nodes and embeddings loaded in Lab 1. See the xref:lab3-sample-queries.adoc[Lab 3: Sample Queries] page for those queries.

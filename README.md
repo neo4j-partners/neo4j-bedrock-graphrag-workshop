@@ -18,7 +18,7 @@ A hands-on workshop teaching Graph Retrieval-Augmented Generation (GraphRAG) pat
 | Lab | Title | Description |
 |-----|-------|-------------|
 | [Lab 2](Lab_2_Data_Pipeline/README.md) | Data Pipeline (Optional) | Load chunks, generate Titan Text Embeddings V2, create a vector index, and link chunks to graph entities |
-| [Lab 3](Lab_3_GraphRAG_Search/README.md) | Semantic Search and GraphRAG | Vector retrieval and vector-cypher retrieval over the knowledge graph with the neo4j-graphrag library |
+| [Lab 3](Lab_3_GraphRAG_Search/README.md) | Semantic Search and GraphRAG | Vector, graph-enriched, full-text, and hybrid retrieval over the knowledge graph with the neo4j-graphrag library |
 | [Lab 4](Lab_4_GraphRAG_Agent/) | Strands GraphRAG Agent | Wrap the retrievers as Strands tools and let the agent choose the retrieval strategy per question |
 
 ### Part 3: Agent Memory

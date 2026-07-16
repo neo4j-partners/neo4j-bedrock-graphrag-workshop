@@ -174,9 +174,11 @@ NOTE: NEXT_CHUNK relationships form a linked list that preserves the original re
 
 == Full-text Keyword Search
 
-Fulltext indexes enable keyword-based search alongside vector similarity. The `search_entities` index was already created by the xref:lab1.adoc[Lab 1 seed load]. The queries below also require a `search_chunks` index on Chunk text, which is not created until you run the setup query below.
+Full-text indexes enable keyword-based search alongside vector similarity. The `search_entities` index was already created by the xref:lab1.adoc[Lab 1 seed load]. The queries below also require a `search_chunks` index on Chunk text, which is not created until you run the setup query below.
 
-=== Setup: Create Fulltext Index on Chunks
+TIP: Notebook 03 (`03_hybrid_retriever.ipynb`) creates the same `search_chunks` index and runs keyword search through the neo4j-graphrag library. The queries here show the raw Cypher underneath, plus fuzzy and boolean variants.
+
+=== Setup: Create Full-text Index on Chunks
 
 [source,cypher]
 ----
@@ -200,7 +202,7 @@ ORDER BY score DESC
 LIMIT 5
 ----
 
-NOTE: Fulltext search returns chunks ranked by Lucene relevance score. Terms are matched as keywords, not by semantic meaning.
+NOTE: Full-text search returns chunks ranked by Lucene relevance score. Terms are matched as keywords, not by semantic meaning.
 
 Fuzzy search (catches misspellings):
 
@@ -243,7 +245,7 @@ LIMIT 10
 
 NOTE: The `search_entities` index covers Company, Product, and RiskFactor names. This finds entities by name rather than searching filing text.
 
-=== Fulltext Search with Entity Enrichment
+=== Full-text Search with Entity Enrichment
 
 Find chunks by keyword, then traverse to the company and its products:
 
@@ -260,13 +262,15 @@ RETURN c.name AS company,
        substring(node.text, 0, 120) AS excerpt
 ----
 
-NOTE: Combines fulltext keyword search with the same graph traversal pattern used in vector-based GraphRAG. The difference is the starting point: fulltext search matches by keywords while vector search matches by semantic meaning. Both traverse the same graph structure to enrich results.
+NOTE: Combines full-text keyword search with the same graph traversal pattern used in vector-based GraphRAG. The difference is the starting point: full-text search matches by keywords while vector search matches by semantic meaning. Both traverse the same graph structure to enrich results.
 
 == Hybrid Search
 
-Hybrid search fuses the two previous strategies over the same chunks: vector similarity catches meaning and paraphrase, while fulltext keyword search catches exact names, tickers, and acronyms that embeddings can blur. The catch is that the two signals use different score scales (cosine similarity is roughly 0 to 1; Lucene relevance is unbounded), so the results have to be re-ranked onto a common scale before they can be merged.
+Hybrid search fuses the two previous strategies over the same chunks: vector similarity catches meaning and paraphrase, while full-text keyword search catches exact names, tickers, and acronyms that embeddings can blur. The catch is that the two signals use different score scales (cosine similarity is roughly 0 to 1; Lucene relevance is unbounded), so the results have to be re-ranked onto a common scale before they can be merged.
 
-IMPORTANT: Requires both the `chunkEmbeddings` vector index (Lab 1 seed load) and the `search_chunks` fulltext index (created above).
+IMPORTANT: Requires both the `chunkEmbeddings` vector index (Lab 1 seed load) and the `search_chunks` full-text index (created above).
+
+TIP: Notebook 03 (`03_hybrid_retriever.ipynb`) does this fusion for you with `HybridRetriever` and `HybridCypherRetriever`, exposing the same choice of ranker (`naive` versus `linear` with an `alpha` weight). The query below shows the normalize-and-merge mechanics as raw Cypher.
 
 === Merge and Re-rank Two Signals
 
@@ -275,7 +279,7 @@ Run both searches, normalize each score to 0 to 1, then combine with a weighted 
 [source,cypher]
 ----
 // Gather candidates from both signals. The vector arm reuses a random chunk's
-// stored embedding so no embedding API call is needed; the fulltext arm matches
+// stored embedding so no embedding API call is needed; the full-text arm matches
 // a keyword. Each arm returns the same three columns so the UNION lines up.
 CALL {
     MATCH (seed:Chunk) WHERE seed.embedding IS NOT NULL
@@ -307,7 +311,7 @@ ORDER BY hybridScore DESC
 LIMIT 5
 ----
 
-NOTE: This is the re-ranking that `HybridRetriever`'s `linear` ranker (`ranker="linear"`) in neo4j-graphrag does for you; its default `naive` ranker skips normalization and just takes the max score per node. The `linear` ranker normalizes each signal independently, then merges them with a weight `alpha` (the vector weight, with `1 - alpha` on keywords; here an even split at `alpha = 0.5`). Raise `alpha` to favor meaning, lower it to favor exact terms. In the library both arms run against the same user question (embedded for the vector arm, passed as keywords to the fulltext arm); this example reuses a stored embedding for the vector arm so it runs without an API key, so read it as a demonstration of the fusion mechanics rather than a single coherent question.
+NOTE: This is the re-ranking that `HybridRetriever`'s `linear` ranker (`ranker="linear"`) in neo4j-graphrag does for you; its default `naive` ranker skips normalization and just takes the max score per node. The `linear` ranker normalizes each signal independently, then merges them with a weight `alpha` (the vector weight, with `1 - alpha` on keywords; here an even split at `alpha = 0.5`). Raise `alpha` to favor meaning, lower it to favor exact terms. In the library both arms run against the same user question (embedded for the vector arm, passed as keywords to the full-text arm); this example reuses a stored embedding for the vector arm so it runs without an API key, so read it as a demonstration of the fusion mechanics rather than a single coherent question.
 
 == Verify Indexes
 
