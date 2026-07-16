@@ -134,14 +134,20 @@ The retriever's job is finding the right context. The LLM's job is generating a 
 - Questions mixing concepts with exact terms
 - Precise names or tickers pure vector search misses
 
-**Re-ranking:** the two score scales differ, so Hybrid normalizes each first. Both rankers normalize the same way; they differ only in how they combine:
+`HybridRetriever` combines the two text strategies; `HybridCypherRetriever` adds the same fusion on top of graph-enriched search (covered next).
+
+---
+
+## Hybrid Search: Re-ranking
+
+The two score scales differ, so Hybrid normalizes each first. Both rankers normalize the same way; they differ only in how they combine:
 
 | Ranker | What it does | Tunable? |
 |--------|--------------|----------|
 | **NAIVE** | takes the **max** of the two normalized scores | no knob |
 | **LINEAR** | takes a **weighted blend** (*alpha*) of them | yes, via *alpha* |
 
-`HybridRetriever` combines the two text strategies; `HybridCypherRetriever` adds the same fusion on top of graph-enriched search (covered next).
+**NAIVE** is a solid default. Reach for **LINEAR** when you want to tune how much weight vector similarity gets versus keyword match via *alpha*.
 
 ---
 
