@@ -37,7 +37,7 @@ From Vector Search to Graph-Enriched Retrieval
 
 The **neo4j-graphrag** Python package provides the building blocks for GraphRAG applications on Neo4j:
 
-- **Retrievers**: `VectorRetriever` and `VectorCypherRetriever`, plus `HybridRetriever` and `HybridCypherRetriever` that fuse vector and fulltext search
+- **Retrievers**: `VectorRetriever` and `VectorCypherRetriever`, plus `HybridRetriever` and `HybridCypherRetriever` that fuse vector and full-text search
 - **GraphRAG pipeline**: combines a retriever with an LLM to go from question to grounded answer
 - **Knowledge Graph Construction**: `SimpleKGPipeline` for building graphs from text and PDFs
 - **LLM and Embedder abstractions**: pluggable providers including Bedrock, OpenAI, Anthropic, Cohere, and Vertex AI
@@ -262,14 +262,17 @@ For counts, lists, and specific lookups, **Text2Cypher** (Lab 6) writes the quer
 ## Lab 3 Notebook Progression
 
 **Notebook 01: VectorRetriever**
-Semantic question answering with `01_vector_retriever.ipynb`: VectorRetriever + GraphRAG pipeline
+Semantic search plus the `GraphRAG` pipeline
 
 **Notebook 02: VectorCypherRetriever**
-Graph-enriched retrieval with `02_vector_cypher_retriever.ipynb`: VectorCypherRetriever + custom Cypher traversal across companies, products, and risk factors
+Graph-enriched traversal across companies, products, risk factors
 
-The chunk load and embeddings come from the Lab 1 seed load (or the optional Lab 2 pipeline), so Lab 3 starts from a populated graph.
+**Notebook 03: HybridRetriever**
+Full-text search fused with vector, re-ranked (NAIVE / LINEAR)
 
-**Next:** Lab 4 wraps both retrievers as `@tool` functions to build the GraphRAG agent.
+Chunks and embeddings come from the Lab 1 seed load, so Lab 3 starts from a populated graph.
+
+**Next:** Lab 4 wraps the vector and graph-enriched retrievers as `@tool` functions to build the GraphRAG agent.
 
 ---
 

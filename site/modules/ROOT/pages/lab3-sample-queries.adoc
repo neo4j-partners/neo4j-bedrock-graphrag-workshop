@@ -270,7 +270,7 @@ Hybrid search fuses the two previous strategies over the same chunks: vector sim
 
 IMPORTANT: Requires both the `chunkEmbeddings` vector index (Lab 1 seed load) and the `search_chunks` full-text index (created above).
 
-TIP: Notebook 03 (`03_hybrid_retriever.ipynb`) does this fusion for you with `HybridRetriever` and `HybridCypherRetriever`, exposing the same choice of ranker (`naive` versus `linear` with an `alpha` weight). The query below shows the normalize-and-merge mechanics as raw Cypher.
+TIP: Notebook 03 (`03_hybrid_retriever.ipynb`) does this fusion for you with `HybridRetriever` and `HybridCypherRetriever`, exposing the same choice of ranker (`NAIVE` versus `LINEAR` with an `alpha` weight). The query below shows the normalize-and-merge mechanics as raw Cypher.
 
 === Merge and Re-rank Two Signals
 
@@ -311,7 +311,7 @@ ORDER BY hybridScore DESC
 LIMIT 5
 ----
 
-NOTE: This is the re-ranking that `HybridRetriever`'s `linear` ranker (`ranker="linear"`) in neo4j-graphrag does for you; its default `naive` ranker skips normalization and just takes the max score per node. The `linear` ranker normalizes each signal independently, then merges them with a weight `alpha` (the vector weight, with `1 - alpha` on keywords; here an even split at `alpha = 0.5`). Raise `alpha` to favor meaning, lower it to favor exact terms. In the library both arms run against the same user question (embedded for the vector arm, passed as keywords to the full-text arm); this example reuses a stored embedding for the vector arm so it runs without an API key, so read it as a demonstration of the fusion mechanics rather than a single coherent question.
+NOTE: This is the re-ranking that `HybridRetriever`'s `LINEAR` ranker in neo4j-graphrag does for you; its default `NAIVE` ranker normalizes each signal the same way, then simply takes the higher of the two normalized scores per node instead of the weighted blend. The `LINEAR` ranker normalizes each signal independently, then merges them with a weight `alpha` (the vector weight, with `1 - alpha` on keywords; here an even split at `alpha = 0.5`). Raise `alpha` to favor meaning, lower it to favor exact terms. In the library both arms run against the same user question (embedded for the vector arm, passed as keywords to the full-text arm); this example reuses a stored embedding for the vector arm so it runs without an API key, so read it as a demonstration of the fusion mechanics rather than a single coherent question.
 
 == Verify Indexes
 

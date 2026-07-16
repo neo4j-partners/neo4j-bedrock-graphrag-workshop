@@ -181,26 +181,17 @@ With graph context, these are **verified facts** from the knowledge graph, not L
 
 ---
 
-## Retrieval Strategies, Part 1: Finding the Right Text
+## Retrieval Strategies (Preview)
 
-| Strategy | How It Works | Best For |
-|----------|-------------|----------|
-| **Vector Search** | Embed question, find similar chunks | Conceptual, meaning-based questions |
-| **Full-text Search** | Keyword match, ranked by Lucene/BM25 | Exact terms, names, acronyms |
-| **Hybrid Search** | Run both, merge and re-rank results | Meaning *and* exact keywords |
+GraphRAG isn't one technique — it's a family of retrieval strategies:
 
-*Re-ranking*: the two score scales differ, so Hybrid normalizes each, then merges into one ranked list. Shown as Cypher in the Lab 3 sample queries, and as neo4j-graphrag's `HybridRetriever`.
+- **Vector Search**
+- **Full-text Search**
+- **Hybrid Search**
+- **Graph-Enriched Search**
+- **Text2Cypher**
 
----
-
-## Retrieval Strategies, Part 2: Using the Graph
-
-| Strategy | How It Works | Best For |
-|----------|-------------|----------|
-| **Graph-Enriched Search** | Vector search + graph traversal | Questions needing entity context |
-| **Text2Cypher** | LLM writes Cypher from schema | Counts, lists, specific lookups |
-
-Vector, full-text, hybrid, and graph-enriched search run in **Lab 3**; Text2Cypher runs in **Lab 6**.
+We'll cover how each works — and when to use it — in the Retrievers section (Lab 3), with Text2Cypher in Lab 6.
 
 ---
 

@@ -69,6 +69,31 @@ The number of cycles depends on the question's complexity, not a predetermined p
 
 ---
 
+## Strands: Model-Driven, Not Workflow-Driven
+
+- **The bet**: modern models can plan and self-correct, so let them drive the loop
+- **Older frameworks**: you hand-author the graph, the state, and every branch
+- **Strands**: give the model a prompt and tools, and it decides the steps
+- **Payoff**: less orchestration code, fewer places for your logic to drift from the model
+- **Still your call**: reach for Graph or Workflow when a step must be fixed
+
+<!--
+Here's the origin story. Early agent frameworks were built when models
+couldn't reliably plan, so the framework made you encode the plan: a graph of
+nodes, explicit state, hand-written branches. That orchestration code is
+where bugs live, and it goes stale every time the model gets better. Strands
+starts from a different bet: today's models are good enough to run their own
+reason-act-observe loop, so the framework should get out of the way. You hand
+the model a system prompt and a set of tools, and it decides what to call and
+in what order. Compared to a LangGraph-style framework, there's far less code
+between you and the model, and less that can drift out of sync as models
+improve. That's not dogma though: when a step genuinely has to be
+deterministic, you drop down to Graph or Workflow and pin it. The default is
+trust the model, the escape hatch is control it.
+-->
+
+---
+
 ## Strands Agents SDK
 
 - **Open-source SDK from AWS** (Apache 2.0), Python and TypeScript

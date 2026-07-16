@@ -102,7 +102,7 @@ Vector search matches meaning, but it can blur exact terms. "NVDA", a product co
 
 === Hybrid Search
 
-Hybrid search runs vector and full-text search together and fuses the results, so you get semantic recall and exact-term precision at once. Because cosine similarity and Lucene relevance use different scales, the two result sets are normalized to a common range and then merged: re-ranking the combined list so the best matches from either signal rise to the top. Notebook 03 builds both `HybridRetriever` and `HybridCypherRetriever` and compares the library's two re-rankers: the default `naive` ranker (max normalized score per chunk) and the `linear` ranker, which blends the two arms with a weight (*alpha*) you can tune toward meaning or exact terms. The xref:lab3-sample-queries.adoc[sample queries] show the same normalize-and-merge re-ranking as plain Cypher.
+Hybrid search runs vector and full-text search together and fuses the results, so you get semantic recall and exact-term precision at once. Because cosine similarity and Lucene relevance use different scales, the two result sets are normalized to a common range and then merged: re-ranking the combined list so the best matches from either signal rise to the top. Notebook 03 builds both `HybridRetriever` and `HybridCypherRetriever` and compares the library's two re-rankers: the default `NAIVE` ranker (max normalized score per chunk) and the `LINEAR` ranker, which blends the two arms with a weight (*alpha*) you can tune toward meaning or exact terms. The xref:lab3-sample-queries.adoc[sample queries] show the same normalize-and-merge re-ranking as plain Cypher.
 
 === VectorCypherRetriever
 

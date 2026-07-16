@@ -12,7 +12,7 @@ IMPORTANT: Before running any notebook, make sure you have filled in `CONFIG.txt
 
 * **Vector Search**: Use `VectorRetriever` to find semantically similar chunks and generate answers with the `GraphRAG` pipeline
 * **Graph-Enriched Search**: Use `VectorCypherRetriever` to combine vector search with Cypher graph traversal for richer context
-* **Full-text and Hybrid Search**: Create a `search_chunks` fulltext index, then use `HybridRetriever` and `HybridCypherRetriever` to fuse vector and keyword search and re-rank the merged results with the `naive` and `linear` (alpha-weighted) rankers
+* **Full-text and Hybrid Search**: Create a `search_chunks` fulltext index, then use `HybridRetriever` and `HybridCypherRetriever` to fuse vector and keyword search and re-rank the merged results with the `NAIVE` and `LINEAR` (alpha-weighted) rankers
 
 TIP: The notebooks now cover full-text and hybrid search directly. For the same patterns expressed as raw Cypher, including fuzzy and boolean keyword variants, work through the xref:lab3-sample-queries.adoc[Lab 3 Sample Queries].
 
@@ -54,7 +54,7 @@ The three notebooks live in `Lab_3_GraphRAG_Search/`.
 
 | `03_hybrid_retriever.ipynb`
 | Hybrid Retriever
-| Full-text keyword search plus `HybridRetriever` and `HybridCypherRetriever`, fusing vector and keyword signals and re-ranking with the `naive` and `linear` rankers
+| Full-text keyword search plus `HybridRetriever` and `HybridCypherRetriever`, fusing vector and keyword signals and re-ranking with the `NAIVE` and `LINEAR` rankers
 |===
 
 == Walkthrough
@@ -145,7 +145,7 @@ hybrid_retriever = HybridRetriever(
 )
 ----
 +
-. **Compare the re-rankers.** Run the same query with `ranker=HybridSearchRanker.NAIVE` (default; max normalized score per chunk) and with `ranker=HybridSearchRanker.LINEAR` at `alpha=0.9` versus `alpha=0.1`. The `linear` ranker blends the arms as `alpha * vector + (1 - alpha) * fulltext`; a high `alpha` favors meaning, a low `alpha` favors exact keywords, and the ranking visibly shifts between them.
+. **Compare the re-rankers.** Run the same query with `ranker=HybridSearchRanker.NAIVE` (default; max normalized score per chunk) and with `ranker=HybridSearchRanker.LINEAR` at `alpha=0.9` versus `alpha=0.1`. The `LINEAR` ranker blends the arms as `alpha * vector + (1 - alpha) * fulltext`; a high `alpha` favors meaning, a low `alpha` favors exact keywords, and the ranking visibly shifts between them.
 . **Add graph traversal with `HybridCypherRetriever`.** It takes the same two indexes plus the `retrieval_query` and `result_formatter` from Notebook 02, so hybrid search finds the chunks and the Cypher traversal enriches each match with its filing, company, products, and risk factors. Ranker options pass through `retriever_config` when wrapped in a `GraphRAG` pipeline.
 
 === Reference: How the Vector Index Was Built
