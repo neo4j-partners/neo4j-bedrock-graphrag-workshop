@@ -59,6 +59,10 @@ Together: AWS aggregates and governs the data and provides the reasoning and gen
 
 ---
 
+![bg contain](two-halves-graph.svg)
+
+---
+
 ## The SEC Financial Data Domain
 
 Public companies file **10-K annual reports** with the Securities and Exchange Commission. These filings contain:
@@ -79,6 +83,14 @@ section { font-size: 95%; }
 </style>
 
 This workshop's graph is **pre-loaded**. You work with it directly from Lab 1. The optional Lab 2 rebuilds it from `financial_data.json` with Amazon Titan Text Embeddings V2 instead of running the full lakehouse job.
+
+---
+
+![Strands GraphRAG agent architecture](strands-agent-architecture.png)
+
+---
+
+![Workshop deployment architecture](workshop-architecture.png)
 
 ---
 
@@ -120,16 +132,4 @@ section { font-size: 95%; }
 
 **Part 4: Neo4j MCP Server** (Lab 6, optional)
 - Lab 6: Schema-first Text2Cypher agent over the Model Context Protocol
-
----
-
-## Agent Architecture
-
-![Strands GraphRAG agent architecture](strands-agent-architecture.png)
-
----
-
-## Deployment Architecture
-
-![Workshop deployment architecture](workshop-architecture.png)
 
