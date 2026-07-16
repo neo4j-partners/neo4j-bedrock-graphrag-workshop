@@ -123,7 +123,7 @@ section { font-size: 95%; }
 - Lab 1: Provision Neo4j Aura, load the seed graph, explore it with Cypher
 
 **Part 2: GraphRAG Pipelines & Agents** (Labs 2-4)
-- Lab 2: Data pipeline — chunking, embeddings, indexing (optional)
+- Lab 2: Data pipeline: chunking, embeddings, indexing (optional)
 - Lab 3: Semantic search and GraphRAG with neo4j-graphrag
 - Lab 4: GraphRAG agent and deployment to AgentCore
 

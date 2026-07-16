@@ -183,7 +183,7 @@ With graph context, these are **verified facts** from the knowledge graph, not L
 
 ## Retrieval Strategies (Preview)
 
-GraphRAG isn't one technique — it's a family of retrieval strategies:
+GraphRAG isn't one technique. It's a family of retrieval strategies:
 
 - **Vector Search**
 - **Full-text Search**
@@ -191,7 +191,7 @@ GraphRAG isn't one technique — it's a family of retrieval strategies:
 - **Graph-Enriched Search**
 - **Text2Cypher**
 
-We'll cover how each works — and when to use it — in the Retrievers section (Lab 3), with Text2Cypher in Lab 6.
+We'll cover how each works, and when to use it, in the Retrievers section (Lab 3), with Text2Cypher in Lab 6.
 
 ---
 

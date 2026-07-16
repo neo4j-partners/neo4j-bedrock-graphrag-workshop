@@ -112,7 +112,7 @@ The retriever's job is finding the right context. The LLM's job is generating a 
 ## Full-text Search
 
 **How it works:**
-- Keyword match on a `search_chunks` fulltext index (Apache Lucene)
+- Keyword match on a `search_chunks` full-text index (Apache Lucene)
 - Ranks by Lucene relevance (BM25-style) score
 - Supports fuzzy matching and boolean operators
 
@@ -122,6 +122,28 @@ The retriever's job is finding the right context. The LLM's job is generating a 
 - Precise lookups over specific wording
 
 **Limitation:** Matches words, not meaning. Misses paraphrase.
+
+---
+
+## Hybrid Search
+
+**How it works:**
+- Runs vector and full-text search over the same chunks
+- Normalizes the two score scales, merges into one list
+- Re-ranks by a weighted blend (*alpha*) of both signals
+
+**Best for:**
+- Questions mixing concepts with exact terms
+- Precise names or tickers pure vector search misses
+
+**Re-ranking:** the two score scales differ, so Hybrid normalizes each first. Both rankers normalize the same way; they differ only in how they combine:
+
+| Ranker | What it does | Tunable? |
+|--------|--------------|----------|
+| **NAIVE** | takes the **max** of the two normalized scores | no knob |
+| **LINEAR** | takes a **weighted blend** (*alpha*) of them | yes, via *alpha* |
+
+`HybridRetriever` combines the two text strategies; `HybridCypherRetriever` adds the same fusion on top of graph-enriched search (covered next).
 
 ---
 
@@ -173,7 +195,7 @@ When you call a retriever, it:
 3. **Traverses the graph** (Cypher retrievers only): executes the `retrieval_query`
 4. **Formats results for the LLM**: packages text and metadata into prompt-ready format
 
-In Lab 6, you do each of these steps yourself through MCP.
+In Lab 6, the agent writes its own Cypher and runs it over MCP.
 
 ---
 
@@ -205,21 +227,6 @@ If vector search does not surface relevant chunks, no amount of graph traversal 
 
 ---
 
-## Hybrid Search
-
-**How it works:**
-- Runs vector and full-text search over the same chunks
-- Normalizes the two score scales, merges into one list
-- Re-ranks by a weighted blend (*alpha*) of both signals
-
-**Best for:**
-- Questions mixing concepts with exact terms
-- Precise names or tickers pure vector search misses
-
-**Re-ranking:** the two score scales differ; Hybrid normalizes each, then blends. `HybridRetriever` / `HybridCypherRetriever` add this to the vector and graph-enriched strategies.
-
----
-
 ## When Vector Search Is Not Enough
 
 **"How many products does NVIDIA offer?"**
@@ -237,7 +244,7 @@ For counts, lists, and specific lookups, **Text2Cypher** (Lab 6) writes the quer
 
 ## Matching Strategy to Need
 
-Retrieval strategies aren't either/or — they layer to cover what a question needs:
+Retrieval strategies aren't either/or. They layer to cover what a question needs:
 
 | The question needs… | Add this capability |
 |---------------------|---------------------|
@@ -269,11 +276,11 @@ Chunks and embeddings come from the Lab 1 seed load, so Lab 3 starts from a popu
 
 ## Summary
 
-- **Vector Search**: semantic similarity across chunks
-- **Full-text Search**: keyword match, ranked by Lucene/BM25
-- **Hybrid Search**: fuse vector + full-text, re-rank the merged results
-- **Graph-Enriched Search**: semantic search + graph traversal for entity context
-- **Text2Cypher**: LLM writes Cypher for counts, lists, and lookups (Lab 6)
+- **Vector Search** is the foundation: semantic similarity across chunks
+- **+ Full-text** → **Hybrid**: adds keyword precision (Lucene/BM25), re-ranked
+- **+ Graph traversal** → **Graph-Enriched**: adds entity context around each chunk
+- **Text2Cypher**: a distinct mode for structured, exact counts, lists, and lookups (Lab 6)
+- **The strategies layer**: most real questions need more than one
 - **The chunk is the anchor**: graph traversal enriches what search finds
 
 **Next:** Lab 6 adds MCP, Cypher Templates, and Text2Cypher for full agent autonomy.

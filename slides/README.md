@@ -13,7 +13,7 @@ npm run serve   # build, then serve the gallery at http://localhost:8080/
 ```
 
 `npm run build` renders each deck to `build/<deck>/index.html`, copies its images
-alongside, and generates `build/index.html` — a gallery linking to every deck.
+alongside, and generates `build/index.html`, a gallery linking to every deck.
 
 When published, the slides live at `/slides/`, the workshop site at `/workshop/`,
 and the landing page (in `../landing/index.html`) at the site root `/`. The
@@ -54,28 +54,28 @@ done
 The eight decks below follow the workshop run of show: the business-story opening, the architecture and roadmap, graph and GraphRAG foundations, retrievers, the GraphRAG agent with AgentCore, agent memory, and the Neo4j MCP agent.
 
 ### `overview-business-story/`
-The business case for GraphRAG (opening) — the stakes, why vector search alone falls short, the shift to GraphRAG, decision governance, the hero questions, what the workshop builds, and the Neo4j + AWS partnership.
+The business case for GraphRAG (opening): the stakes, why vector search alone falls short, the shift to GraphRAG, decision governance, the hero questions, what the workshop builds, and the Neo4j + AWS partnership.
 
 ### `overview-aws-neo4j/`
-Workshop architecture and roadmap — the AWS + Neo4j architecture, the production lakehouse-to-graph pipeline, the SEC 10-K financial data domain, and the four-part lab roadmap.
+Workshop architecture and roadmap: the AWS + Neo4j architecture, the production lakehouse-to-graph pipeline, the SEC 10-K financial data domain, and the four-part lab roadmap.
 
 ### `overview-knowledge-graph/`
-Knowledge graph foundations — graph databases vs relational, Cypher query language, the SEC financial knowledge graph schema, Neo4j Aura, and visual exploration tools.
+Knowledge graph foundations: graph databases vs relational, Cypher query language, the SEC financial knowledge graph schema, Neo4j Aura, and visual exploration tools.
 
 ### `overview-graphrag/`
-GenAI limitations and the GraphRAG solution — hallucination, context rot, embeddings, vector search, RAG, and how graph context transforms retrieval quality.
+GenAI limitations and the GraphRAG solution: hallucination, context rot, embeddings, vector search, RAG, and how graph context transforms retrieval quality.
 
 ### `overview-retrievers/`
-GraphRAG retriever patterns — VectorRetriever, VectorCypherRetriever, the two halves of one graph, retrieval query design, and choosing the right retriever for your question type.
+GraphRAG retriever patterns: VectorRetriever, VectorCypherRetriever, the two halves of one graph, retrieval query design, and choosing the right retriever for your question type.
 
 ### `overview-agent-agentcore/`
-The GraphRAG agent and AgentCore — the ReAct pattern, the Strands Agents SDK, wrapping GraphRAG retrievers as tools, and deploying the agent to Amazon Bedrock AgentCore.
+The GraphRAG agent and AgentCore: the ReAct pattern, the Strands Agents SDK, wrapping GraphRAG retrievers as tools, and deploying the agent to Amazon Bedrock AgentCore.
 
 ### `overview-agent-memory/`
-Agent memory with Neo4j — why stateless agents fail across turns, the three-part memory model of short-term, long-term, and reasoning traces, the memory graph schema and how it forms a context graph, and one Neo4j instance serving as both knowledge graph and memory store.
+Agent memory with Neo4j: why stateless agents fail across turns, the three-part memory model of short-term, long-term, and reasoning traces, the memory graph schema and how it forms a context graph, and one Neo4j instance serving as both knowledge graph and memory store.
 
 ### `overview-mcp/`
-The Neo4j MCP agent — Model Context Protocol architecture, the Neo4j MCP Server tools, Cypher Templates vs Text2Cypher, the schema-first approach, and MCP as a framework-agnostic production pattern.
+The Neo4j MCP agent: Model Context Protocol architecture, the Neo4j MCP Server tools, Cypher Templates vs Text2Cypher, the schema-first approach, and MCP as a framework-agnostic production pattern.
 
 ---
 

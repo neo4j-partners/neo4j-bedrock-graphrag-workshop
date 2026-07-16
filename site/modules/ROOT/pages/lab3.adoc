@@ -24,7 +24,7 @@ image::two-halves-graph.svg[Two Halves of One Graph,800]
 
 This lab uses the https://github.com/neo4j/neo4j-graphrag-python[neo4j-graphrag] Python library, which provides the building blocks for GraphRAG applications on Neo4j:
 
-* **Retrievers**: `VectorRetriever` and `VectorCypherRetriever` handle embedding the query, running the vector search, and (for Cypher retrievers) traversing the graph to enrich results with structured context. `HybridRetriever` and `HybridCypherRetriever` add fulltext keyword search and re-rank the fused results
+* **Retrievers**: `VectorRetriever` and `VectorCypherRetriever` handle embedding the query, running the vector search, and (for Cypher retrievers) traversing the graph to enrich results with structured context. `HybridRetriever` and `HybridCypherRetriever` add full-text keyword search and re-rank the fused results
 * **GraphRAG pipeline**: combines a retriever with an LLM to go from a natural-language question to a grounded answer in a single call
 * **LLM and Embedder abstractions**: pluggable providers including Bedrock, OpenAI, Anthropic, Cohere, and Vertex AI
 * **Knowledge Graph Construction**: `SimpleKGPipeline` for building graphs from text and PDFs (used in xref:lab2.adoc[Lab 2])
