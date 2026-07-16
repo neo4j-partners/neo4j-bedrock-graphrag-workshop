@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import logging
+import os
 
 from neo4j_agent_memory import EmbeddingConfig, EmbeddingProvider, MemoryClient, MemorySettings
 from neo4j_agent_memory import Neo4jConfig as MemoryNeo4jConfig
@@ -67,11 +68,18 @@ def build_memory_settings() -> MemorySettings:
         aws_region=bedrock_cfg.region,
     )
 
+    # neo4j-agent-memory's Neo4jConfig defaults the target database to "neo4j"
+    # and passes it explicitly on every session, which overrides home-database
+    # routing. The earlier labs never name a database, so they resolve to the
+    # connection's home db; the memory SDK does not. Read NEO4J_DATABASE (falling
+    # back to "neo4j" for standard Aura instances) so instances whose single
+    # database is not named "neo4j" still work.
     return MemorySettings(
         neo4j=MemoryNeo4jConfig(
             uri=neo4j_cfg.uri,
             username=neo4j_cfg.username,
             password=SecretStr(neo4j_cfg.password),
+            database=os.environ.get("NEO4J_DATABASE", "neo4j"),
         ),
         embedding=embedding,
         extraction=ExtractionConfig(extractor_type=ExtractorType.NONE),

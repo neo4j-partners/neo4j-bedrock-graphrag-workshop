@@ -67,9 +67,9 @@ The visualization shows which filing companies compete with which other companie
 
 
 
-## Step 6: Apply Degree Centrality
+## Step 6: Apply Degree Centrality — Not supported in Aura Free
 
-> **Note:** This requires Graph Analytics to be enabled on your Aura instance. In the Aura Console, go to your instance settings and under **Graph Analytics**, select **Plugin**. If it's not enabled, you'll see a 403 error when applying an algorithm.
+> **Note:** Steps 6 and 7 require the Graph Analytics (GDS) plugin, which is **not available on AuraDB Free** — it needs AuraDB Professional or the serverless Aura Graph Analytics environment. On a Professional instance, go to your instance settings in the Aura Console and under **Graph Analytics**, select **Plugin** (if it's not enabled, you'll see a 403 error when applying an algorithm). **If you're on the Free tier, you can skip Steps 6 and 7 and continue to the coding labs (Lab 3).**
 
 With the competitive landscape still on the canvas, open the **Graph Data Science** panel by clicking the connected-nodes icon on the left toolbar.
 

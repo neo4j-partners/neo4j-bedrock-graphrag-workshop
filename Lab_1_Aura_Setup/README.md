@@ -16,7 +16,7 @@ Follow the [Neo4j Aura Free Signup](Aura_Free_Trial.md) guide to create your fre
 
 ## Part 2: Load the Knowledge Graph
 
-![SEC 10-K Financial Data Model](images/financial-data-model.svg)
+![Two Halves of One Graph](images/two-halves-graph.svg)
 
 After your Aura instance is running, open **Query** from the left sidebar in the [Aura Console](https://console.neo4j.io) and run the following Cypher statements in order.
 
@@ -132,6 +132,7 @@ This statement reads `chunks.csv`, where the embedding is stored as a semicolon-
 > **Run this statement on its own.** `CALL (row) { ... } IN TRANSACTIONS` must execute as a single auto-committing query, so paste and run only this block (not alongside other statements). It may take a few seconds to complete.
 
 ```cypher
+CYPHER 25
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/chunks.csv' AS row
 CALL (row) {
     MERGE (c:Chunk {chunkId: row.chunkId})
@@ -171,24 +172,28 @@ MATCH (curr:Chunk {chunkId: row.chunkId})
 MATCH (next:Chunk {chunkId: row.nextChunkId})
 MERGE (curr)-[:NEXT_CHUNK]->(next);
 
+CYPHER 25
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/entity_chunks.csv' AS row
 FILTER row.entityType = 'Product'
 MATCH (e:Product {productId: row.entityId})
 MATCH (c:Chunk {chunkId: row.chunkId})
 MERGE (e)-[:FROM_CHUNK]->(c);
 
+CYPHER 25
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/entity_chunks.csv' AS row
 FILTER row.entityType = 'RiskFactor'
 MATCH (e:RiskFactor {riskId: row.entityId})
 MATCH (c:Chunk {chunkId: row.chunkId})
 MERGE (e)-[:FROM_CHUNK]->(c);
 
+CYPHER 25
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/entity_chunks.csv' AS row
 FILTER row.entityType = 'FinancialMetric'
 MATCH (e:FinancialMetric {metricId: row.entityId})
 MATCH (c:Chunk {chunkId: row.chunkId})
 MERGE (e)-[:FROM_CHUNK]->(c);
 
+CYPHER 25
 LOAD CSV WITH HEADERS FROM 'https://dhoj7jltw73ew.cloudfront.net/sec-filings/entity_chunks.csv' AS row
 FILTER row.entityType = 'Company'
 MATCH (e:Company {companyId: row.entityId})
@@ -244,16 +249,6 @@ SHOW VECTOR INDEXES;
 
 The `chunkEmbeddings` index should be listed with a `state` of `ONLINE`.
 
-> **Note:** The Company count is higher than 6 because `company_competitors.csv` and
-> `company_partners.csv` contain competitor and partner names (e.g., Google, Samsung, OpenAI)
-> that aren't in `companies.csv`. The relationship loads use
-> `MERGE (b:Company {name: row.targetCompanyName})`, which creates new Company nodes for
-> these names. The resulting nodes have only a `name` property — no `companyId`, `ticker`,
-> or other identifiers. The 6 filing companies can be found with:
-> ```cypher
-> MATCH (c:Company) WHERE c.companyId IS NOT NULL RETURN c.name, c.ticker ORDER BY c.name;
-> ```
-
 ### Step 9: Try Some Queries
 
 Now that the graph is loaded, try these queries to explore the data.
@@ -303,10 +298,10 @@ RETURN am.name, r.name, exposed
 ORDER BY exposed DESC, am.name LIMIT 5;
 ```
 
-**Who are NVIDIA's supply chain partners?**
+**Who are Amazon's supply chain partners?**
 
 ```cypher
-MATCH (c:Company {ticker: 'NVDA'})-[:PARTNERS_WITH]->(p:Company)
+MATCH (c:Company {ticker: 'AMZN'})-[:PARTNERS_WITH]->(p:Company)
 WHERE p.name IS NOT NULL
 RETURN p.name ORDER BY p.name;
 ```

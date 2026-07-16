@@ -43,9 +43,9 @@ The workshop uses data from SEC 10-K filings loaded into the Neo4j knowledge gra
 
 The SEC financial dataset includes six entity types connected by typed relationships:
 
-image::financial-data-model.svg[SEC 10-K Financial Data Model,800]
+image::two-halves-graph.svg[Two Halves of One Graph,800]
 
-This diagram shows the structured half. The Lab 1 seed load also brings in the unstructured half: Document and Chunk nodes with Titan Text Embeddings V2 embeddings that connect filing text back to these entities. xref:lab3.adoc[Lab 3] uses both halves for graph-enriched retrieval, and xref:lab2.adoc[Lab 2] shows how the pipeline builds them from scratch.
+This diagram shows both halves of the graph: the structured entities on the left and the unstructured document and chunk half on the right, joined by the FILED relationship. The Lab 1 seed load brings in both halves, and the Chunk nodes carry Titan Text Embeddings V2 embeddings that connect filing text back to these entities. xref:lab3.adoc[Lab 3] uses both halves for graph-enriched retrieval, and xref:lab2.adoc[Lab 2] shows how the pipeline builds them from scratch.
 
 == Workshop Architecture
 

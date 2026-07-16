@@ -17,21 +17,25 @@
   <rect x="55" y="150" width="720" height="690" rx="28" fill="#eef4ff" stroke="#4a90e2" stroke-width="3"/>
   <rect x="855" y="150" width="690" height="690" rx="28" fill="#e8fbf8" stroke="#2bb3a3" stroke-width="3"/>
   <text x="415" y="205" text-anchor="middle" font-size="30" fill="#2f6fd0">Structured Half &#183; Lab 1</text>
-  <text x="1200" y="205" text-anchor="middle" font-size="30" fill="#1a9e8f">Unstructured Half &#183; Lab 4</text>
+  <text x="1200" y="205" text-anchor="middle" font-size="30" fill="#1a9e8f">Unstructured Half &#183; Lab 3</text>
 
   <!-- ===== structured edges (gray) ===== -->
   <!-- OWNS -->
   <line x1="315" y1="315" x2="440" y2="315" stroke="#555" stroke-width="2.5" marker-end="url(#ah-gray)"/>
   <text x="378" y="303" text-anchor="middle" font-size="20" fill="#555">OWNS</text>
   <!-- OFFERS -->
-  <line x1="515" y1="351" x2="372" y2="550" stroke="#555" stroke-width="2.5" marker-end="url(#ah-gray)"/>
-  <text x="398" y="470" text-anchor="middle" font-size="20" fill="#555">OFFERS</text>
+  <line x1="500" y1="351" x2="275" y2="552" stroke="#555" stroke-width="2.5" marker-end="url(#ah-gray)"/>
+  <text x="340" y="450" text-anchor="middle" font-size="20" fill="#555">OFFERS</text>
   <!-- FACES_RISK -->
-  <line x1="572" y1="351" x2="552" y2="730" stroke="#555" stroke-width="2.5" marker-end="url(#ah-gray)"/>
-  <text x="640" y="545" text-anchor="middle" font-size="20" fill="#555">FACES_RISK</text>
-  <!-- COMPETES_WITH self-reference -->
+  <line x1="480" y1="351" x2="250" y2="731" stroke="#555" stroke-width="2.5" marker-end="url(#ah-gray)"/>
+  <text x="432" y="548" text-anchor="middle" font-size="20" fill="#555">FACES_RISK</text>
+  <!-- REPORTS -->
+  <line x1="560" y1="351" x2="556" y2="642" stroke="#555" stroke-width="2.5" marker-end="url(#ah-gray)"/>
+  <text x="602" y="500" text-anchor="middle" font-size="20" fill="#555">REPORTS</text>
+  <!-- COMPETES_WITH / PARTNERS_WITH self-reference -->
   <path d="M600,340 C660,360 660,300 612,300" fill="none" stroke="#999" stroke-width="2" marker-end="url(#ah-gray)"/>
-  <text x="690" y="380" text-anchor="middle" font-size="19" fill="#999">COMPETES_WITH</text>
+  <text x="650" y="398" text-anchor="middle" font-size="18" fill="#999">COMPETES_WITH /</text>
+  <text x="650" y="418" text-anchor="middle" font-size="18" fill="#999">PARTNERS_WITH</text>
 
   <!-- ===== unstructured edges (gray) ===== -->
   <!-- FROM_DOCUMENT (up) -->
@@ -46,12 +50,12 @@
   <line x1="675" y1="315" x2="1118" y2="315" stroke="#e8820c" stroke-width="4" marker-end="url(#ah-orange)"/>
   <text x="898" y="298" text-anchor="middle" font-size="24" fill="#e8820c">FILED</text>
   <text x="898" y="336" text-anchor="middle" font-size="18" fill="#a06010">bridges the two halves</text>
-  <!-- FROM_CHUNK -> Product -->
-  <line x1="1185" y1="590" x2="452" y2="590" stroke="#e8820c" stroke-width="3" stroke-dasharray="12 8" marker-end="url(#ah-orange)"/>
-  <text x="815" y="575" text-anchor="middle" font-size="22" fill="#e8820c">FROM_CHUNK</text>
-  <!-- FROM_CHUNK -> RiskFactor -->
-  <line x1="1185" y1="770" x2="667" y2="770" stroke="#e8820c" stroke-width="3" stroke-dasharray="12 8" marker-end="url(#ah-orange)"/>
-  <text x="925" y="755" text-anchor="middle" font-size="22" fill="#e8820c">FROM_CHUNK</text>
+  <!-- FROM_CHUNK: (Product)-[:FROM_CHUNK]->(Chunk) -->
+  <line x1="306" y1="590" x2="1179" y2="590" stroke="#e8820c" stroke-width="3" stroke-dasharray="12 8" marker-end="url(#ah-orange)"/>
+  <text x="720" y="575" text-anchor="middle" font-size="22" fill="#e8820c">FROM_CHUNK</text>
+  <!-- FROM_CHUNK: (RiskFactor)-[:FROM_CHUNK]->(Chunk) -->
+  <line x1="306" y1="770" x2="1179" y2="770" stroke="#e8820c" stroke-width="3" stroke-dasharray="12 8" marker-end="url(#ah-orange)"/>
+  <text x="850" y="755" text-anchor="middle" font-size="22" fill="#e8820c">FROM_CHUNK</text>
 
   <!-- ===== nodes ===== -->
   <!-- AssetManager -->
@@ -63,13 +67,17 @@
   <path d="M479,304 L490,315 L479,326 L468,315 Z" fill="#2b6fe0" stroke="#1b4fa0" stroke-width="1.5"/>
   <text x="510" y="324" font-size="26" fill="#333">Company</text>
   <!-- Product -->
-  <rect x="215" y="554" width="230" height="72" rx="14" fill="#f4e2fb" stroke="#9b30c9" stroke-width="2.5"/>
-  <path d="M249,579 L260,590 L249,601 L238,590 Z" fill="#2b6fe0" stroke="#1b4fa0" stroke-width="1.5"/>
-  <text x="280" y="599" font-size="26" fill="#333">Product</text>
+  <rect x="90" y="554" width="210" height="72" rx="14" fill="#f4e2fb" stroke="#9b30c9" stroke-width="2.5"/>
+  <path d="M124,579 L135,590 L124,601 L113,590 Z" fill="#2b6fe0" stroke="#1b4fa0" stroke-width="1.5"/>
+  <text x="155" y="599" font-size="26" fill="#333">Product</text>
+  <!-- FinancialMetric -->
+  <rect x="430" y="644" width="250" height="72" rx="14" fill="#f4e2fb" stroke="#9b30c9" stroke-width="2.5"/>
+  <path d="M464,669 L475,680 L464,691 L453,680 Z" fill="#2b6fe0" stroke="#1b4fa0" stroke-width="1.5"/>
+  <text x="495" y="689" font-size="24" fill="#333">FinancialMetric</text>
   <!-- RiskFactor -->
-  <rect x="430" y="734" width="230" height="72" rx="14" fill="#f4e2fb" stroke="#9b30c9" stroke-width="2.5"/>
-  <path d="M464,759 L475,770 L464,781 L453,770 Z" fill="#2b6fe0" stroke="#1b4fa0" stroke-width="1.5"/>
-  <text x="495" y="779" font-size="26" fill="#333">RiskFactor</text>
+  <rect x="90" y="734" width="210" height="72" rx="14" fill="#f4e2fb" stroke="#9b30c9" stroke-width="2.5"/>
+  <path d="M124,759 L135,770 L124,781 L113,770 Z" fill="#2b6fe0" stroke="#1b4fa0" stroke-width="1.5"/>
+  <text x="155" y="779" font-size="26" fill="#333">RiskFactor</text>
 
   <!-- Document -->
   <rect x="1125" y="279" width="230" height="72" rx="14" fill="#f4e2fb" stroke="#9b30c9" stroke-width="2.5"/>
