@@ -235,27 +235,18 @@ For counts, lists, and specific lookups, **Text2Cypher** (Lab 6) writes the quer
 
 ---
 
-## Choosing the Right Strategy
+## Matching Strategy to Need
 
-| Question Pattern | Best Strategy |
-|-----------------|----------------|
-| "What is...", "Tell me about..." | Vector Search |
-| Exact names, tickers, acronyms | Full-text Search |
-| Meaning **and** exact terms together | Hybrid Search |
-| "Which [entities] are affected by..." | Graph-Enriched Search |
-| "How many...", "List all..." | Text2Cypher (Lab 6) |
+Retrieval strategies aren't either/or — they layer to cover what a question needs:
 
----
+| The question needs… | Add this capability |
+|---------------------|---------------------|
+| Meaning / concepts | **Vector Search** (the foundation) |
+| Exact terms, names, tickers | **+ Full-text** → Hybrid |
+| Surrounding entity context | **+ Graph traversal** → Graph-Enriched |
+| Precise counts, lists, facts | **Text2Cypher** (structured, exact) |
 
-## The Decision Framework
-
-**Match the question to a strategy:**
-
-- Counts, lists, specific facts → **Text2Cypher**
-- Related entities and context → **Graph-Enriched Search**
-- Meaning → **Vector Search**
-- Exact terms, names, tickers → **Full-text Search**
-- Meaning *and* exact terms → **Hybrid Search**
+Most real questions need more than one. Vector search is the base; full-text, graph traversal, and Text2Cypher add precision, context, and structure on top.
 
 ---
 
