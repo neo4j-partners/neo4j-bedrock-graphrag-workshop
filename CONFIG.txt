@@ -11,13 +11,12 @@
 NEO4J_URI=neo4j+s://xxxxxxxx.databases.neo4j.io
 NEO4J_USERNAME=neo4j
 NEO4J_PASSWORD=your_password_here
-
-# Target database name. Standard Aura instances use "neo4j"; some workshop
-# instances name their single database after the instance id, so set it explicitly.
+# Target database name. Standard Aura instances use "neo4j"; this instance's
+# single database is named after the instance id, so set it explicitly.
 NEO4J_DATABASE=neo4j
 
 # -----------------------------------------------------------------------------
-# MCP Gateway (Advanced - Labs 4 and 7 MCP server connection)
+# MCP Gateway (Advanced - Lab 6 MCP server connection)
 # -----------------------------------------------------------------------------
 MCP_GATEWAY_URL=your-gateway-url-here
 MCP_ACCESS_TOKEN=your-access-token-here
@@ -30,7 +29,7 @@ MCP_ACCESS_TOKEN=your-access-token-here
 # -----------------------------------------------------------------------------
 # AWS Bedrock Settings (Pre-configured - no changes needed)
 # -----------------------------------------------------------------------------
-MODEL_ID=us.anthropic.claude-sonnet-4-5-20250929-v1:0
+MODEL_ID=us.anthropic.claude-sonnet-4-6
 REGION=us-east-1
 
 # Alternative Models (uncomment to use a different model - not tested!!!)
