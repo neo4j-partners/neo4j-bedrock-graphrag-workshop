@@ -63,12 +63,12 @@ TITAN_EMBEDDING_MODEL = "amazon.titan-embed-text-v2:0"
 TITAN_EMBEDDING_DIMENSIONS = 1024
 
 # --- Filled in from CONFIG.txt by 03_deploy_to_agentcore.ipynb ---
-NEO4J_URI = 'neo4j+s://1a2c98cc-staging.databases.neo4j.io'
-NEO4J_USERNAME = 'neo4j'
-NEO4J_PASSWORD = 'uezRxMa0PW2wPPzWwgaNLCr5j8u3yLqFU53PoTnUyEY'
-NEO4J_DATABASE = 'neo4j'
-MODEL_ID = 'us.anthropic.claude-sonnet-4-5-20250929-v1:0'
-REGION = 'us-east-1'
+NEO4J_URI = "<NEO4J_URI>"
+NEO4J_USERNAME = "<NEO4J_USERNAME>"
+NEO4J_PASSWORD = "<NEO4J_PASSWORD>"
+NEO4J_DATABASE = "<NEO4J_DATABASE>"
+MODEL_ID = "<MODEL_ID>"
+REGION = "<REGION>"
 
 # Session id used when neither the AgentCore request context nor the payload
 # supplies one, so memory still has a stable key to write and read against.

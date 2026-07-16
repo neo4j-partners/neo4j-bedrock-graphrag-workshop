@@ -24,9 +24,9 @@ In the AWS Console, navigate to **Amazon Bedrock > Model access** and enable:
 
 This is a manual console step and cannot be scripted.
 
-### 2. Set Up AgentCore IAM & Resources (Lab 4 Deployment)
+### 2. Set Up AgentCore IAM & Resources (Lab 4 and Lab 5 Deployment)
 
-Lab 4's AgentCore deployment requires IAM roles, an S3 bucket, and a deployment policy. This is a **two-step process** because SageMaker execution roles are auto-created when participants set up their domains (Quick Setup), so the admin cannot attach policies to roles that don't exist yet.
+The AgentCore deploy notebooks, Lab 4 `02` (`graphrag_strands_agent`) and Lab 5 `03` (`graphrag_memory_agent`), require IAM roles, an S3 bucket, and a deployment policy. This is a **two-step process** because SageMaker execution roles are auto-created when participants set up their domains (Quick Setup), so the admin cannot attach policies to roles that don't exist yet.
 
 **Step 2a — Run before the workshop:**
 
@@ -54,6 +54,13 @@ To specify a different region:
 This finds all `AmazonSageMaker-ExecutionRole-*` roles in the account and attaches the managed policy created in Step 2a. The script is idempotent — re-run it whenever new participants join. If a participant hits a permissions error in Lab 4, this is the fix.
 
 See [sagemaker-roles.md](sagemaker-roles.md) for a detailed explanation of the timing issue.
+
+**Deploying / validating the deploy notebooks from your own account**
+
+When you run a deploy notebook outside a hosted SageMaker domain, either locally or via `run_notebooks.py --include-deploy`, watch for these two things:
+
+- **The `role-check` cell gates on policy attachment, not on permissions.** It passes only when `BedrockAgentCoreLabDeployPolicy` is attached to your *caller* role. `setup_agentcore.sh` creates that policy and `grant_sagemaker_access.sh` attaches it to `AmazonSageMaker-ExecutionRole*` roles only, never to an SSO role. So the common default profile here is an admin SSO role, `AWSReservedSSO_AdministratorAccess_…`, which the gate rejects even though admin can deploy fine. To get past it, run under an identity that has the policy attached, or temporarily bypass that one cell. Admin already has the permissions the deploy needs. Set `AWS_PROFILE` to pick the identity. With none set, boto3 uses the `[default]` profile.
+- **The Neo4j Aura instance must be running, not paused.** The deployed runtime calls `driver.verify_connectivity()` during initialization, which must finish inside AgentCore's 30s cold-start window. If Aura is paused, the host stops resolving with `NXDOMAIN`, that call hangs, and the deploy fails to invoke with `Runtime initialization time exceeded`. Resume the instance first.
 
 ### 3. Update CONFIG.txt
 
@@ -133,7 +140,7 @@ The script is a `uv run` PEP 723 script: `uv` builds and caches its dependency e
 |------|---------|---------|
 | `--labs` | all in-scope | Labs to run: `4`, `3,4,6`, or `4-6`. |
 | `--env` | root `.env`, else `CONFIG.txt` | Env file whose keys are injected into the environment before the kernel launches. Injected values take precedence over the notebooks' own `load_dotenv`, so no config file is rewritten. |
-| `--include-deploy` | off | Also run the deploy notebook (Lab 4 `02`), which has AWS side effects. Off by default. |
+| `--include-deploy` | off | Also run the deploy notebooks (Lab 4 `02` and Lab 5 `03`), which have AWS side effects. Off by default. |
 | `--timeout` | 600 | Per-cell execution timeout in seconds. |
 | `--keep-temp` | off | Keep the prepared and executed temp notebooks for inspection. |
 
