@@ -46,7 +46,7 @@ from workshop_lab.roles import AGENTCORE_PRINCIPAL, ROLE_SPECS, Roles, RoleSpec
 from workshop_lab.runtime import AgentRuntime
 from workshop_lab.teardown import Teardown
 
-__version__ = "0.8.0"
+__version__ = "0.9.0"
 
 __all__ = [
     "AGENTCORE_PRINCIPAL",

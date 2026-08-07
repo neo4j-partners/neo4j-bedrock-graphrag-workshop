@@ -76,7 +76,16 @@ class Memory:
         return self.lab.client("bedrock-agentcore-control")
 
     def create(self) -> dict[str, Any] | None:
-        """Create the Memory with both strategies and register its delete."""
+        """Create the Memory with both strategies, tagged, and register its delete.
+
+        The tag goes on in the create request as well as through `tag` below, and
+        the pair is not redundant. `tag` is what measures
+        `bedrock-agentcore:TagResource` for the tracker, and it runs after the
+        Memory is `ACTIVE`, which is a minute or more later. A create that tags
+        nothing leaves the Memory unrecognisable to a tag sweep for the whole of
+        that window, and unrecognisable for good if the notebook is interrupted
+        inside it. So it is tagged at birth and the measurement still happens.
+        """
         memory = self.lab.check(
             CREATE_CHECK,
             lambda: self.control.create_memory(
@@ -84,6 +93,7 @@ class Memory:
                 description="Vocareum environment verification.",
                 eventExpiryDuration=EVENT_EXPIRY_DAYS,
                 memoryStrategies=STRATEGIES,
+                tags=self.lab.names.tags_map,
             ),
             "two long-term strategies, the pair the workshop configures",
         )

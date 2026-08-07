@@ -278,6 +278,7 @@ class GatewayBoundary:
                     protocolType="MCP",
                     authorizerType="AWS_IAM",
                     description="Vocareum environment verification.",
+                    tags=self.lab.names.tags_map,
                 ),
                 codes={"ValidationException"},
                 label="create_gateway",

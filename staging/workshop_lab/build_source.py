@@ -143,27 +143,49 @@ class BuildSource:
         return self.repository_created
 
     def ensure_bucket(self) -> None:
-        """Reuse the toolkit's shared source bucket, or create it once.
+        """Reuse the toolkit's shared source bucket, or create it once, and tag it.
 
         Recorded as PASS when it already exists. The measurement this step owes
         the tracker is whether the account can hold build source at all, and a
         bucket that is already there answers that.
+
+        The tag is a second call because CreateBucket is the one create in this
+        notebook that takes no tags at all. It runs on the reuse path too: a
+        bucket this run depends on carries the workshop tag whether or not this
+        run is the one that made it, and PutBucketTagging replaces the whole tag
+        set rather than failing on a bucket that already has one.
         """
         bucket = self.lab.names.source_bucket
         try:
             self.s3.head_bucket(Bucket=bucket, ExpectedBucketOwner=self.lab.account_id)
         except ClientError:
-            self.lab.check(
+            created = self.lab.check(
                 "s3:CreateBucket source bucket",
                 lambda: self.s3.create_bucket(Bucket=bucket),
             )
+            if created is None:
+                return
         else:
             self.lab.record(
                 "s3:CreateBucket source bucket", PASS, "already exists, reused"
             )
+        self.lab.check(
+            "s3:PutBucketTagging source bucket",
+            lambda: self.s3.put_bucket_tagging(
+                Bucket=bucket,
+                Tagging={"TagSet": self.lab.names.tags_list},
+                ExpectedBucketOwner=self.lab.account_id,
+            ),
+        )
 
     def upload(self) -> bool:
-        """Put the zip at the key CodeBuild will be pointed at."""
+        """Put the zip at the key CodeBuild will be pointed at, tagged.
+
+        `Tagging` on PutObject authorizes against `s3:PutObjectTagging` as well
+        as `s3:PutObject`. Without the second grant this call is refused outright
+        rather than storing the object untagged, so `lab.template` grants both
+        and this check failing on `AccessDenied` means the template is behind.
+        """
         bucket, key = self.lab.names.source_bucket, self.lab.names.source_key
         put = self.lab.check(
             "s3:PutObject build source",
@@ -171,6 +193,7 @@ class BuildSource:
                 Bucket=bucket,
                 Key=key,
                 Body=self.zip_bytes,
+                Tagging=self.lab.names.tags_query,
                 ExpectedBucketOwner=self.lab.account_id,
             ),
             f"{len(self.zip_bytes)} bytes to s3://{bucket}/{key}",

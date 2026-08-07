@@ -4,7 +4,14 @@
 # Regenerate: ./scripts/sync_workshop_lab.py
 #
 # tests/test_workshop_lab_drift.py fails when the copies disagree.
-"""Step 14. Empty the account, and prove it rather than assume it.
+"""Empty the account, and prove it rather than assume it.
+
+**This runs twice, and only the second run records anything.**
+`Teardown.sweep_before_start` is step 4, ahead of the first create, and clears
+what a session that never reached step 14 left behind. `Teardown(lab).run()` is
+step 14 itself. Same enumeration and same deletes both times; the difference is
+that the pre-flight files no rows, because deleting an earlier run's litter
+answers no question `docs/permissions.md` asks.
 
 **This enumerates the account. It does not replay the deletes the run registered.**
 `Harness.cleanups` only ever holds what this kernel created itself, and that lost
@@ -21,12 +28,15 @@ stands on steps 0, 2 and 4 alone: if the kernel restarted, run those three and
 then this one.
 
 **Two ways to recognise a resource, unioned, because each has a hole the other
-covers.** The tag is applied at create time, but `agentcore:TagResource` is
-itself a measured permission in step 10, so a refused tag leaves a live resource
-untagged and a tag-only sweep walks past it. The names are the templates steps 6
-to 12 build out of the prefix. A bare prefix is not enough on its own: the ECR
-repository, the CodeBuild project and the Lambda all carry it in the middle of a
-longer fixed name.
+covers.** Every create this notebook makes now passes the workshop tag in its own
+request, so the tag half is the one that survives a rename. It cannot be the only
+half. Three things here carry no tag and cannot be made to: a gateway target,
+which `CreateGatewayTarget` has no `tags` member for at all; the per-endpoint
+CloudWatch log groups, which AgentCore creates rather than this notebook; and any
+resource whose create was interrupted between the call and the tag landing. The
+names are the templates steps 6 to 12 build out of the prefix, and a bare prefix
+is not enough on its own: the ECR repository, the CodeBuild project and the
+Lambda all carry it in the middle of a longer fixed name.
 
 **Anything CloudFormation owns is left alone.** Vocareum deletes the lab stack
 itself at session end. Deleting one of its resources by hand first leaves the
@@ -53,15 +63,19 @@ from typing import TYPE_CHECKING, Any
 from botocore.exceptions import BotoCoreError, ClientError
 
 from workshop_lab.harness import FAIL, GONE_CODES, PASS
-from workshop_lab.naming import WORKSHOP_TAG_KEY, WORKSHOP_TAG_VALUE
+from workshop_lab.selection import (
+    AGENTCORE_RUNTIME_LOG_PREFIX,
+    BUCKET_GONE_CODES,
+    IMPLICIT_ENDPOINT,
+    log_group_tail,
+    matches_prefix,
+    name_prefixes,
+    stack_owned_keys,
+)
+from workshop_lab.selection import carries_workshop_tag as tag_present
 
 if TYPE_CHECKING:
     from workshop_lab.harness import Harness
-
-# AgentCore Runtime creates one CloudWatch log group per runtime endpoint under
-# this fixed path, and DeleteAgentRuntime does not take it with it. The path is
-# documented under bedrock-agentcore/latest/devguide/observability-configure.html.
-AGENTCORE_LOG_PREFIX = "/aws/bedrock-agentcore/runtimes/"
 
 EMPTY_CHECK = "account is empty after teardown"
 
@@ -93,7 +107,12 @@ def items_of(response: dict) -> list[dict]:
 
 
 def carries_workshop_tag(read_tags: Callable[[], Any]) -> bool:
-    """True when a resource carries the workshop tag.
+    """True when a resource carries the workshop tag, without the read raising.
+
+    Everything about which shapes count is `selection.carries_workshop_tag`, so
+    this side and `vocareum_tools.sweep` cannot disagree about whether a
+    CodeBuild project spelling its tags `key`/`value` is tagged. What is left
+    here is the call, and the two failures a call can have.
 
     A refused ListTags is not an answer, and it is not fatal either, because the
     name prefixes already recognise everything this notebook creates. So it is
@@ -102,16 +121,9 @@ def carries_workshop_tag(read_tags: Callable[[], Any]) -> bool:
     operations for AgentCore at all.
     """
     try:
-        raw = read_tags()
+        return tag_present(read_tags())
     except (AttributeError, ClientError, BotoCoreError):
         return False
-    if isinstance(raw, dict):
-        return raw.get(WORKSHOP_TAG_KEY) == WORKSHOP_TAG_VALUE
-    return any(
-        (entry.get("Key") or entry.get("key")) == WORKSHOP_TAG_KEY
-        and (entry.get("Value") or entry.get("value")) == WORKSHOP_TAG_VALUE
-        for entry in raw or []
-    )
 
 
 def gone(operation: str, message: str) -> ClientError:
@@ -140,16 +152,19 @@ class Target:
 class Teardown:
     """Enumerates the account, deletes what this notebook owns, confirms it went."""
 
-    def __init__(self, lab: Harness) -> None:
+    def __init__(self, lab: Harness, recording: bool = True) -> None:
         self.lab = lab
+        # False for the pre-flight sweep in step 4. Same enumeration, same
+        # deletes, no rows: clearing out what an earlier session left behind
+        # answers no question `docs/permissions.md` asks, and a FAIL filed
+        # against a leftover this run did not create would be read as this run
+        # having been refused something.
+        self.recording = recording
         # A bare prefix does not match every name: the ECR repository, the
-        # CodeBuild project and the Lambda carry it in the middle.
-        self.name_prefixes = (
-            lab.prefix,
-            f"workshop-{lab.prefix}",
-            f"bedrock-agentcore-{lab.prefix}",
-            f"hotel-booking-{lab.prefix}",
-        )
+        # CodeBuild project and the Lambda carry it in the middle. The shapes are
+        # in `selection` because `vocareum_tools.sweep` has to recognise the same
+        # names from outside the notebook.
+        self.name_prefixes = name_prefixes(lab.prefix)
         self.stack_owned: set[str] = set()
         self.enumerated: list[str] = []
         self.enumeration_failures: list[str] = []
@@ -214,7 +229,10 @@ class Teardown:
         except (ClientError, BotoCoreError) as error:
             code = error_code(error)
             self.enumeration_failures.append(f"{label}: {code}")
-            self.lab.record(enumerated_check(label), FAIL, code)
+            if self.recording:
+                self.lab.record(enumerated_check(label), FAIL, code)
+            else:
+                self.lab.echo(f"      could not list {label}: {code}")
             return []
 
     def pages(self, service: Any, operation: str, key: str, **kwargs: Any) -> list[Any]:
@@ -268,10 +286,7 @@ class Teardown:
                     "StackResourceSummaries",
                     StackName=summary["StackName"],
                 ):
-                    physical = resource.get("PhysicalResourceId") or ""
-                    if physical:
-                        owned.add(physical)
-                        owned.add(physical.rsplit("/", 1)[-1])
+                    owned |= stack_owned_keys(resource.get("PhysicalResourceId") or "")
             self.stack_owned = owned
             self.lab.echo(
                 f"CloudFormation owns {len(owned)} names. Those are left alone."
@@ -287,10 +302,17 @@ class Teardown:
     def ours(
         self, name: str, arn: str = "", read_tags: Callable[[], Any] | None = None
     ) -> bool:
-        """True when this notebook created the resource, by name or by tag."""
+        """True when this notebook created the resource, by name or by tag.
+
+        The lazy form of `selection.selected_by`, sharing its two halves rather
+        than its signature. The tag read is a call per resource against a service
+        that may refuse it, so it is not made at all once the name has already
+        decided. That costs the "tag+prefix" reason `vocareum_tools.sweep`
+        reports, which the notebook has nowhere to print anyway.
+        """
         if name in self.stack_owned or (arn and arn in self.stack_owned):
             return False
-        if any(name.startswith(one) for one in self.name_prefixes):
+        if matches_prefix(name, self.name_prefixes):
             return True
         return read_tags is not None and carries_workshop_tag(read_tags)
 
@@ -437,16 +459,26 @@ class Teardown:
 
     # --- probes that rename absence -------------------------------------------
     def codebuild_probe(self, name: str) -> Any:
-        """Describe a CodeBuild project, reporting absence the way the others do.
+        """Confirm a CodeBuild project by listing, not by BatchGetProjects.
 
-        BatchGetProjects answers a missing project with an empty list and a
-        `projectsNotFound` entry rather than an error, so `wait_until_gone` would
-        wait out its whole timeout and then call a deleted project present.
+        Two reasons, and either alone is enough. ListProjects has no per-project
+        describe behind it, and BatchGetProjects answers a missing project with
+        an empty list and a `projectsNotFound` entry rather than an error, so
+        `wait_until_gone` would wait out its whole timeout and then call a
+        deleted project present.
+
+        And `codebuild:BatchGetProjects` is not one of the five CodeBuild actions
+        `lab.template` grants. Under the student session role the batch call
+        answers `AccessDenied`, which `wait_until_gone` reads as "cannot tell"
+        and reports as a survivor, so every project this step deleted would be
+        reported as still present. This used to call it, which is what
+        `vocareum_tools.sweep` had already worked out and written down.
+        `codebuild:ListProjects` is granted, it is the call the collection above
+        already makes, and the absence of a name from it is unambiguous.
         """
-        found = self.codebuild.batch_get_projects(names=[name])
-        if not found.get("projects"):
-            raise gone("BatchGetProjects", name)
-        return found["projects"][0]
+        if name in self.pages(self.codebuild, "list_projects", "projects"):
+            return {"name": name}
+        raise gone("ListProjects", name)
 
     def log_group_tags(self, name: str) -> Callable[[], Any]:
         """Return a reader for one log group's tags.
@@ -476,7 +508,10 @@ class Teardown:
         """Head the build-source bucket, renaming absence to a code probes accept.
 
         HeadBucket answers a missing bucket with a bare 404 and no body, so boto3
-        reports the code as "404", which is not in `GONE_CODES`.
+        reports the code as "404", which is not in `GONE_CODES`. Which of the
+        three codes in `BUCKET_GONE_CODES` arrives depends on the operation and
+        the botocore version, which is why the set is shared rather than spelled
+        out at each of the three call sites here.
         """
         try:
             return self.s3.head_bucket(
@@ -484,7 +519,7 @@ class Teardown:
                 ExpectedBucketOwner=self.lab.account_id,
             )
         except ClientError as error:
-            if error.response["Error"]["Code"] in {"404", "NoSuchBucket"}:
+            if error.response["Error"]["Code"] in BUCKET_GONE_CODES:
                 raise gone("HeadBucket", self.source_bucket_name) from error
             raise
 
@@ -502,7 +537,7 @@ class Teardown:
                 ExpectedBucketOwner=self.lab.account_id,
             )
         except ClientError as error:
-            if error.response["Error"]["Code"] in {"NoSuchBucket", "404"}:
+            if error.response["Error"]["Code"] in BUCKET_GONE_CODES:
                 raise gone("ListObjectsV2", "no objects left") from error
             raise
         if not listed.get("Contents"):
@@ -531,7 +566,7 @@ class Teardown:
                 ExpectedBucketOwner=self.lab.account_id,
             )
         except ClientError as error:
-            if error.response["Error"]["Code"] in {"NoSuchBucket", "404"}:
+            if error.response["Error"]["Code"] in BUCKET_GONE_CODES:
                 return []
             raise
 
@@ -567,7 +602,7 @@ class Teardown:
             ),
         ):
             name = endpoint.get("name") or ""
-            if not name or name == "DEFAULT":
+            if not name or name == IMPLICIT_ENDPOINT:
                 continue
             targets.append(self._endpoint_target(runtime, name))
         return targets
@@ -610,7 +645,7 @@ class Teardown:
                 self.logs,
                 "describe_log_groups",
                 "logGroups",
-                logGroupNamePrefix=AGENTCORE_LOG_PREFIX,
+                logGroupNamePrefix=AGENTCORE_RUNTIME_LOG_PREFIX,
             ),
         ):
             name = item.get("logGroupName") or ""
@@ -620,7 +655,7 @@ class Teardown:
             # name is what the stack-owned half of ours() needs. The tail goes in
             # the first slot for the prefix match, which the fixed /aws/... path
             # would otherwise never satisfy.
-            tail = name.removeprefix(AGENTCORE_LOG_PREFIX)
+            tail = log_group_tail(name)
             if not self.ours(tail, name, self.log_group_tags(name)):
                 continue
             targets.append(self._log_group_target(name))
@@ -970,6 +1005,8 @@ class Teardown:
                     )
 
     def report_plan(self, targets: list[Target]) -> None:
+        if not targets and not self.recording:
+            return
         if targets:
             self.lab.echo(
                 f"      {len(targets)} resources to delete, in dependency order:"
@@ -1004,9 +1041,11 @@ class Teardown:
         claimed a clean account five separate times while resources were still
         in it.
         """
-        self.lab.echo(
-            "\nConfirming each resource is gone rather than assuming the delete took:"
-        )
+        if targets or self.recording:
+            self.lab.echo(
+                "\nConfirming each resource is gone rather than assuming the delete"
+                " took:"
+            )
         still_present: list[str] = []
         for target in targets:
             if self.lab.wait_until_gone(target.probe, target.label):
@@ -1022,6 +1061,8 @@ class Teardown:
         self, targets: list[Target], failed: list[str], still_present: list[str]
     ) -> bool:
         """Record the one verdict this step exists to produce."""
+        if not self.recording:
+            return self.report_quietly(targets, failed, still_present)
         if self.enumeration_failures or still_present:
             self.lab.record(
                 EMPTY_CHECK,
@@ -1049,12 +1090,58 @@ class Teardown:
         )
         return True
 
+    def report_quietly(
+        self, targets: list[Target], failed: list[str], still_present: list[str]
+    ) -> bool:
+        """Say what the pre-flight sweep did, and file nothing.
+
+        A leftover it could not shift is worth saying out loud rather than
+        swallowing: the step that goes on to create that same name is the one
+        that will fail, and it will fail with a conflict that reads like a
+        permission problem.
+        """
+        if not targets:
+            self.lab.echo("      nothing left over. Starting from an empty account.")
+            return not self.enumeration_failures
+        if still_present or failed:
+            self.lab.echo(
+                f"      {len(still_present)} of {len(targets)} leftovers would not go."
+            )
+            self.lab.echo(
+                "      A step below that creates one of these names will fail on a"
+            )
+            self.lab.echo("      conflict. Delete them in the AWS console.")
+            return False
+        self.lab.echo(f"      cleared {len(targets)} leftovers from an earlier run.")
+        return not self.enumeration_failures
+
     def run(self) -> bool:
         """Do the whole step. True when the account is measured empty."""
         self.read_stack_owned()
-        self.run_hints()
+        if self.recording:
+            self.run_hints()
         targets = self.collect()
         self.report_plan(targets)
         failed = self.delete_all(targets)
         still_present = self.confirm(targets)
         return self.report(targets, failed, still_present)
+
+    @classmethod
+    def sweep_before_start(cls, lab: Harness) -> bool:
+        """Step 4. Clear out an earlier run's resources before this one creates any.
+
+        Step 14 already deletes everything, so this only matters when step 14 did
+        not run: a closed tab, a restarted kernel, a session that ended on a
+        failed cell. What it prevents is the failure mode that produced this
+        method. A re-run creates nothing the second time, and the notebook then
+        measures a resource it did not make and never registers a delete for it:
+        `CreateGateway verify-gateway` succeeded at 11:48:29Z and the re-run
+        failed `ConflictException` at 11:48:51Z, which recorded FAIL on a create
+        this account plainly allows and skipped the three checks downstream of it.
+
+        This is the earliest point it can run. It needs `lab.names`, which needs
+        the account id, which step 2 is what establishes. Sweeping before that
+        would delete from whichever account ambient credentials happened to name.
+        """
+        lab.echo("Clearing anything an earlier run left behind:")
+        return cls(lab, recording=False).run()

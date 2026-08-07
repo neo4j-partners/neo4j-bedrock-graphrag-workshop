@@ -93,6 +93,7 @@ class AgentRuntime:
                     roleArn=self.runtime_role,
                     networkConfiguration={"networkMode": "PUBLIC"},
                     description="Vocareum environment verification.",
+                    tags=self.lab.names.tags_map,
                 ),
                 codes={"ValidationException"},
                 label="create_agent_runtime",
@@ -137,7 +138,7 @@ class AgentRuntime:
         endpoint = self.lab.check(
             ENDPOINT_CHECK,
             lambda: self.control.create_agent_runtime_endpoint(
-                agentRuntimeId=runtime_id, name=name
+                agentRuntimeId=runtime_id, name=name, tags=self.lab.names.tags_map
             ),
         )
         if endpoint is None:

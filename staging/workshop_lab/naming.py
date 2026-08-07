@@ -26,9 +26,13 @@ granted prefix, and every role is then denied its policy.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from urllib.parse import urlencode
 
-WORKSHOP_TAG_KEY = "WorkshopResource"
-WORKSHOP_TAG_VALUE = "stop-ai-agent-hallucinations"
+from workshop_lab.selection import (
+    WORKSHOP_TAG_KEY,
+    WORKSHOP_TAG_VALUE,
+    source_bucket_name,
+)
 
 # The image the workshop publishes, already built for linux/arm64. Step 8 copies
 # it into `image_uri` when CodeBuild produces nothing, which in a Vocareum
@@ -70,6 +74,17 @@ class Names:
         """Tag form for services that take a list of Key/Value pairs (ECR, DynamoDB)."""
         return [{"Key": WORKSHOP_TAG_KEY, "Value": WORKSHOP_TAG_VALUE}]
 
+    @property
+    def tags_query(self) -> str:
+        """Tag form for S3 PutObject, which takes a URL-encoded query string.
+
+        S3 is the only service here that does not take a structure. `Tagging` on
+        PutObject is the literal `key=value&key=value` form, and it is quoted
+        because a value containing `&` or `=` would otherwise be read as another
+        pair. The current value needs no quoting; a future one might.
+        """
+        return urlencode({WORKSHOP_TAG_KEY: WORKSHOP_TAG_VALUE})
+
     # --- IAM --------------------------------------------------------------
     def role(self, suffix: str) -> str:
         """Role name under the `workshop-` prefix `lab.template` grants against."""
@@ -90,7 +105,14 @@ class Names:
 
     @property
     def source_bucket(self) -> str:
-        return f"bedrock-agentcore-codebuild-sources-{self.account_id}-{self.region}"
+        """The AgentCore toolkit's own bucket name, not one this workshop chose.
+
+        Built by `selection.source_bucket_name` rather than spelled out here,
+        because `vocareum_tools.sweep` has to name the same bucket from outside
+        the notebook and two spellings of one name is one sweeper walking past
+        it.
+        """
+        return source_bucket_name(self.account_id, self.region)
 
     @property
     def source_key(self) -> str:
