@@ -36,6 +36,7 @@ deletes with the permissions and the reporting shape it has.
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
+from dataclasses import dataclass, field
 from typing import Any
 
 # The tag every step applies to what it creates, and the tag half of the rule
@@ -146,6 +147,59 @@ def carries_workshop_tag(
 ) -> bool:
     """True when a tag read, in whatever shape it arrived, carries the workshop tag."""
     return tag_map(raw).get(tag_key) == tag_value
+
+
+# How many refused resources a count names before it stops listing them. Enough
+# to tell one refused service from a whole account of them, short enough that a
+# blind sweep does not bury its own plan under the evidence.
+DENIAL_SAMPLE = 3
+
+
+@dataclass
+class TagReads:
+    """A running count of tag reads that answered against tag reads that did not.
+
+    Selection cannot tell those apart and should not: a refusal and an untagged
+    resource both mean "no workshop tag", and both are meant to, because the
+    name half already recognises everything either sweeper created. They are not
+    the same fact about the account. `logs:ListTagsForResource` was granted on
+    2026-08-07 and `docs/permissions.md` still carries it Untested, so a run
+    where every tag read was refused reads exactly like a run where nothing was
+    tagged, and both read like a clean account.
+
+    This counts the difference so it can be printed. It changes no verdict on
+    either side. Escalating a refusal into a failure would fail the notebook's
+    empty check on every student run in an account that refuses the read, which
+    is the ordinary case rather than the anomaly, so what is bought here is a
+    report that says the tag half was blind for N resources instead of quietly
+    answering "untagged" N times.
+    """
+
+    reads: int = 0
+    denials: int = 0
+    labels: list[str] = field(default_factory=list)
+
+    def answered(self) -> None:
+        """Record a tag read that returned, whether or not it carried tags."""
+        self.reads += 1
+
+    def refused(self, label: str) -> None:
+        """Record a tag read that failed, keeping the first few names."""
+        self.reads += 1
+        self.denials += 1
+        if len(self.labels) < DENIAL_SAMPLE:
+            self.labels.append(label)
+
+    def note(self) -> str:
+        """One line naming the blindness, or an empty string when there is none."""
+        if not self.denials:
+            return ""
+        named = ", ".join(self.labels)
+        more = "" if self.denials <= len(self.labels) else ", and more"
+        return (
+            f"tag reads refused for {self.denials} of {self.reads} resources "
+            f"({named}{more}); each was read as untagged and the name half decided"
+        )
 
 
 def matches_prefix(name: str, prefixes: Iterable[str]) -> bool:

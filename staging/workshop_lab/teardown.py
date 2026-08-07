@@ -67,6 +67,7 @@ from workshop_lab.selection import (
     AGENTCORE_RUNTIME_LOG_PREFIX,
     BUCKET_GONE_CODES,
     IMPLICIT_ENDPOINT,
+    TagReads,
     log_group_tail,
     matches_prefix,
     name_prefixes,
@@ -92,7 +93,11 @@ def error_code(error: Exception) -> str:
     return str(error)[:120]
 
 
-def carries_workshop_tag(read_tags: Callable[[], Any]) -> bool:
+def carries_workshop_tag(
+    read_tags: Callable[[], Any],
+    record: TagReads | None = None,
+    label: str = "",
+) -> bool:
     """True when a resource carries the workshop tag, without the read raising.
 
     Everything about which shapes count is `selection.carries_workshop_tag`, so
@@ -105,11 +110,20 @@ def carries_workshop_tag(read_tags: Callable[[], Any]) -> bool:
     swallowed and read as "not tagged". AttributeError is in there for the same
     reason step 10 tests `hasattr` before tagging: an older boto3 has no tagging
     operations for AgentCore at all.
+
+    `record` is what keeps "refused" and "untagged" distinguishable afterwards,
+    since the return value cannot be. Both still answer False here; only the
+    count separates them, and only the report reads the count.
     """
     try:
-        return tag_present(read_tags())
+        tags = read_tags()
     except (AttributeError, ClientError, BotoCoreError):
+        if record is not None:
+            record.refused(label)
         return False
+    if record is not None:
+        record.answered()
+    return tag_present(tags)
 
 
 def gone(operation: str, message: str) -> ClientError:
@@ -154,6 +168,11 @@ class Teardown:
         self.stack_owned: set[str] = set()
         self.enumerated: list[str] = []
         self.enumeration_failures: list[str] = []
+        # Refused tag reads, counted rather than escalated. A denial is the
+        # ordinary state of this account rather than a fault, so it must not
+        # move the verdict; a run that was blind for every resource still says
+        # so out loud. `selection.TagReads` carries the reasoning.
+        self.tag_reads = TagReads()
         # Every runtime id this run decided to delete. The log group sweep waits
         # on these rather than on a clock.
         self.runtime_ids: list[str] = []
@@ -285,7 +304,9 @@ class Teardown:
             return False
         if matches_prefix(name, self.name_prefixes):
             return True
-        return read_tags is not None and carries_workshop_tag(read_tags)
+        return read_tags is not None and carries_workshop_tag(
+            read_tags, self.tag_reads, name
+        )
 
     # --- deletes that need more than one call ---------------------------------
     def delete_gateway_when_drained(self, gateway: str) -> None:
@@ -1039,10 +1060,25 @@ class Teardown:
             self.lab.echo("      nothing to confirm")
         return still_present
 
+    def tag_suffix(self) -> str:
+        """The refused-tag-read count, for a verdict detail, or nothing.
+
+        Appended rather than folded into the verdict on purpose. The tag half is
+        a second opinion and the name half decided every selection this run made,
+        so a blind tag read is worth saying and is not worth failing on. See
+        `selection.TagReads`.
+        """
+        if not self.tag_reads.denials:
+            return ""
+        return f", {self.tag_reads.denials} tag reads refused"
+
     def report(
         self, targets: list[Target], failed: list[str], still_present: list[str]
     ) -> bool:
         """Record the one verdict this step exists to produce."""
+        note = self.tag_reads.note()
+        if note:
+            self.lab.echo(f"      {note}")
         if not self.recording:
             return self.report_quietly(targets, failed, still_present)
         if self.enumeration_failures or still_present:
@@ -1051,7 +1087,7 @@ class Teardown:
                 FAIL,
                 f"{len(self.enumeration_failures)} listings refused,"
                 f" {len(still_present)} still present,"
-                f" {len(failed)} delete errors",
+                f" {len(failed)} delete errors" + self.tag_suffix(),
             )
             self.lab.echo(
                 "\nRe-run this cell. Anything still present after that has to be"
@@ -1068,7 +1104,7 @@ class Teardown:
             EMPTY_CHECK,
             PASS,
             f"{len(self.enumerated)} listings read,"
-            f" {len(targets)} resources confirmed gone",
+            f" {len(targets)} resources confirmed gone" + self.tag_suffix(),
         )
         return True
 

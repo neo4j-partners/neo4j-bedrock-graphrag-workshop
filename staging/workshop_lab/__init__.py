@@ -42,7 +42,7 @@ from workshop_lab.runtime import AgentRuntime
 from workshop_lab.selection import WORKSHOP_TAG_KEY, WORKSHOP_TAG_VALUE
 from workshop_lab.teardown import Teardown
 
-__version__ = "0.11.0"
+__version__ = "0.11.2"
 
 __all__ = [
     "AGENTCORE_PRINCIPAL",

@@ -185,6 +185,11 @@ class BuildSource:
         as `s3:PutObject`. Without the second grant this call is refused outright
         rather than storing the object untagged, so `lab.template` grants both
         and this check failing on `AccessDenied` means the template is behind.
+
+        The deferred delete carries `ExpectedBucketOwner` for the same reason the
+        put does. This bucket's name is derived from the account id, Vocareum
+        rotates the account pool, and a delete is the one call here where landing
+        in the wrong account destroys something rather than just reading it.
         """
         bucket, key = self.lab.names.source_bucket, self.lab.names.source_key
         put = self.lab.check(
@@ -201,7 +206,9 @@ class BuildSource:
         if put is not None:
             self.lab.defer(
                 f"s3 object {key}",
-                lambda: self.s3.delete_object(Bucket=bucket, Key=key),
+                lambda: self.s3.delete_object(
+                    Bucket=bucket, Key=key, ExpectedBucketOwner=self.lab.account_id
+                ),
             )
         self.uploaded = put is not None
         return self.uploaded
