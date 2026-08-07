@@ -64,6 +64,44 @@ PASS = "PASS"
 FAIL = "FAIL"
 SKIP = "SKIP"
 
+# Not a verdict. The tally `summary` prints names PASS, FAIL and SKIP; INFO is a
+# line a student needs in the transcript that answers no permission question, so
+# it stays out of that tally and out of the readiness gate.
+INFO = "INFO"
+
+
+def items_of(response: dict) -> list[dict]:
+    """Return whichever list key an AgentCore List call answered with.
+
+    The control plane is not consistent about the name: gateways arrive under
+    "items", runtimes and memories under keys of their own. Taking the first list
+    of objects in the response survives that, and survives a boto3 upgrade
+    renaming it, which three hard-coded guesses would not.
+    """
+    for value in response.values():
+        if isinstance(value, list) and all(isinstance(one, dict) for one in value):
+            return value
+    return []
+
+
+def agentcore_all(call: Callable[..., dict], **kwargs: Any) -> list[dict]:
+    """Collect every page of an AgentCore List call.
+
+    These operations have no boto3 paginator, and a leftover from an earlier
+    session is exactly the thing that would be sitting on page two. Module-level
+    rather than a `Teardown` method because step 11 sweeps its own gateway name
+    before it creates, and a one-page read there walks past the leftover that
+    made the sweep necessary.
+    """
+    collected: list[dict] = []
+    token = None
+    while True:
+        page = call(**kwargs, nextToken=token) if token else call(**kwargs)
+        collected.extend(items_of(page))
+        token = page.get("nextToken")
+        if not token:
+            return collected
+
 
 class Harness:
     """Session, clients, results, and cleanups for one run of the lab notebook."""
@@ -75,7 +113,11 @@ class Harness:
         echo: Callable[[str], None] = print,
     ) -> None:
         self.session = session if session is not None else boto3.session.Session()
-        self.region = self.session.region_name or guards.REQUIRED_REGION
+        # The session's own answer, never a default. A session that names no
+        # region has to reach `verify_region` as the empty string: defaulting it
+        # here made the guard compare us-east-1 against us-east-1 and pass, and
+        # step 2 printed a region the session had never said it was in.
+        self.region = self.session.region_name or ""
         self.prefix = prefix
         self.echo = echo
         self.account_id: str = ""
@@ -99,9 +141,17 @@ class Harness:
         return self._names
 
     def client(self, name: str) -> Any:
-        """Return one cached client per service."""
+        """Return one cached client per service.
+
+        Falls back to the required region only so a client can be constructed at
+        all when the session named none. Nothing is measured through such a
+        client: `verify_identity` builds the sts one, and `verify_region` raises
+        inside it before the first call goes out.
+        """
         if name not in self._clients:
-            self._clients[name] = self.session.client(name, region_name=self.region)
+            self._clients[name] = self.session.client(
+                name, region_name=self.region or guards.REQUIRED_REGION
+            )
         return self._clients[name]
 
     def verify_credentials(self) -> None:

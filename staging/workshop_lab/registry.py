@@ -52,6 +52,8 @@ from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from typing import Any
 
+from workshop_lab.harness import INFO, PASS
+
 MANIFEST_TYPES = ",".join(
     [
         "application/vnd.docker.distribution.manifest.v2+json",
@@ -325,7 +327,7 @@ def copy_blob_with_retry(
                 raise
             record(
                 f"registry: blob {digest[7:19]}",
-                "INFO",
+                INFO,
                 f"{error}, retrying ({attempt}/{attempts - 1})",
             )
             sleep(3 * attempt)
@@ -342,7 +344,9 @@ def copy_image(
 
     `record` takes a check name, a verdict, and a detail, which is the shape of
     the notebook's own reporting function. It defaults to a no-op so a caller
-    that reports differently is not forced to supply one.
+    that reports differently is not forced to supply one. The verdicts are the
+    harness's own constants rather than literals spelled here, because a row
+    this module files lands in the same summary every step files into.
     """
     source_host, source_repo, source_tag = parse_reference(source_ref)
     dest_host, dest_repo, dest_tag = parse_reference(dest_ref)
@@ -373,7 +377,7 @@ def copy_image(
     )
     record(
         "registry: copied pre-built image to ECR",
-        "PASS",
+        PASS,
         f"{dest_ref}, {len(manifest['layers'])} layers",
     )
     return dest_ref

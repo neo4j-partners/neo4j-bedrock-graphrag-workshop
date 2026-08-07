@@ -54,7 +54,7 @@ from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
 from botocore.exceptions import BotoCoreError, ClientError
 
-from workshop_lab.harness import FAIL, PASS, SKIP
+from workshop_lab.harness import FAIL, PASS, SKIP, agentcore_all
 from workshop_lab.runtime import READY_STATES
 
 if TYPE_CHECKING:
@@ -214,7 +214,7 @@ class GatewayBoundary:
         try:
             stale = [
                 item
-                for item in self.control.list_gateways().get("items", [])
+                for item in agentcore_all(self.control.list_gateways)
                 if item.get("name") == name
             ]
             for item in stale:

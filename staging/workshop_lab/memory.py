@@ -31,7 +31,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from workshop_lab.harness import FAIL, PASS
-from workshop_lab.naming import WORKSHOP_TAG_KEY, WORKSHOP_TAG_VALUE
+from workshop_lab.selection import WORKSHOP_TAG_KEY, WORKSHOP_TAG_VALUE
 
 if TYPE_CHECKING:
     from workshop_lab.harness import Harness

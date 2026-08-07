@@ -87,7 +87,21 @@ def verify_credentials(session: Any, echo: Any = print) -> None:
 
 
 def verify_region(region: str, required: str = REQUIRED_REGION) -> None:
-    """Stop the notebook unless the session is in the region the workshop needs."""
+    """Stop the notebook unless the session is in the region the workshop needs.
+
+    An absent region is its own failure and not a silent `us-east-1`. A session
+    that names no region has to arrive here as the empty string, because a
+    caller that defaulted it first would have this function compare the required
+    region against itself and pass, and step 2 would then print a region nobody
+    measured.
+    """
+    if not region:
+        raise RuntimeError(
+            f"This session names no region and this workshop needs {required}. "
+            "Your lab session has probably not fully started. Close this tab, "
+            "start the lab again, and reopen the notebook. Nothing below this "
+            "cell is meaningful until the session says which region it is in."
+        )
     if region != required:
         raise RuntimeError(
             f"This workshop needs {required} and this session is in {region}. "

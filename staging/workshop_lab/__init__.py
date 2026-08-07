@@ -35,18 +35,14 @@ from workshop_lab.gateway import GatewayBoundary
 from workshop_lab.harness import FAIL, GONE_CODES, PASS, SKIP, Harness
 from workshop_lab.lambda_package import LambdaPackage
 from workshop_lab.memory import Memory
-from workshop_lab.naming import (
-    PREBUILT_IMAGE,
-    WORKSHOP_TAG_KEY,
-    WORKSHOP_TAG_VALUE,
-    Names,
-)
+from workshop_lab.naming import PREBUILT_IMAGE, Names
 from workshop_lab.neo4j_probe import Neo4jProbe
 from workshop_lab.roles import AGENTCORE_PRINCIPAL, ROLE_SPECS, Roles, RoleSpec
 from workshop_lab.runtime import AgentRuntime
+from workshop_lab.selection import WORKSHOP_TAG_KEY, WORKSHOP_TAG_VALUE
 from workshop_lab.teardown import Teardown
 
-__version__ = "0.9.0"
+__version__ = "0.11.0"
 
 __all__ = [
     "AGENTCORE_PRINCIPAL",

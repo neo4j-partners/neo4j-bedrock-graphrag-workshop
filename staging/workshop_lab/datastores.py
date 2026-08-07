@@ -22,10 +22,7 @@ table is idle by the time teardown reaches it.
 from __future__ import annotations
 
 import json
-import time
 from typing import TYPE_CHECKING, Any
-
-from botocore.exceptions import ClientError
 
 from workshop_lab.harness import FAIL, PASS, SKIP
 
@@ -115,18 +112,17 @@ class DataStores:
 
         Registered as the teardown delete rather than a bare `delete_table`,
         because tagging leaves a table `ResourceInUseException` for longer than
-        the rest of this step takes.
+        the rest of this step takes. The waiting is `Harness.retry_while`, which
+        is where step 14 already does this same delete: two hand-rolled retry
+        loops around one call is how the two ended up with different timeouts.
         """
-        deadline = time.monotonic() + DELETE_TABLE_TIMEOUT
-        while True:
-            try:
-                self.dynamodb.delete_table(TableName=name)
-                return
-            except ClientError as error:
-                code = error.response["Error"]["Code"]
-                if code != "ResourceInUseException" or time.monotonic() >= deadline:
-                    raise
-                time.sleep(DELETE_TABLE_INTERVAL)
+        self.lab.retry_while(
+            lambda: self.dynamodb.delete_table(TableName=name),
+            codes={"ResourceInUseException"},
+            label=f"delete table {name}",
+            timeout=DELETE_TABLE_TIMEOUT,
+            interval=DELETE_TABLE_INTERVAL,
+        )
 
     def create_table(self) -> bool:
         """Create the table and wait for `ACTIVE`, which is when it takes items."""

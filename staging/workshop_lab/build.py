@@ -33,7 +33,7 @@ from typing import TYPE_CHECKING, Any
 
 from botocore.exceptions import BotoCoreError, ClientError
 
-from workshop_lab.harness import FAIL, PASS, SKIP
+from workshop_lab.harness import FAIL, INFO, PASS, SKIP
 from workshop_lab.naming import PREBUILT_IMAGE
 from workshop_lab.registry import copy_image
 
@@ -318,7 +318,7 @@ class ContainerBuild:
     def copy_prebuilt(self) -> bool:
         """Copy the published image into this account's ECR."""
         image_uri = self.lab.names.image_uri
-        self.lab.record("falling back to the pre-built image", "INFO", PREBUILT_IMAGE)
+        self.lab.record("falling back to the pre-built image", INFO, PREBUILT_IMAGE)
         self.lab.echo(f"      copying {PREBUILT_IMAGE}")
         self.lab.echo(f"           to {image_uri}")
         self.lab.echo("      this moves about 1.3 GB and takes a few minutes")

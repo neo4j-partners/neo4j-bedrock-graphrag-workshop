@@ -62,7 +62,7 @@ from typing import TYPE_CHECKING, Any
 
 from botocore.exceptions import BotoCoreError, ClientError
 
-from workshop_lab.harness import FAIL, GONE_CODES, PASS
+from workshop_lab.harness import FAIL, GONE_CODES, PASS, agentcore_all
 from workshop_lab.selection import (
     AGENTCORE_RUNTIME_LOG_PREFIX,
     BUCKET_GONE_CODES,
@@ -90,20 +90,6 @@ def error_code(error: Exception) -> str:
     if isinstance(error, ClientError):
         return error.response["Error"]["Code"]
     return str(error)[:120]
-
-
-def items_of(response: dict) -> list[dict]:
-    """Return whichever list key an AgentCore List call answered with.
-
-    The control plane is not consistent about the name: gateways arrive under
-    "items", runtimes and memories under keys of their own. Taking the first list
-    of objects in the response survives that, and survives a boto3 upgrade
-    renaming it, which three hard-coded guesses would not.
-    """
-    for value in response.values():
-        if isinstance(value, list) and all(isinstance(one, dict) for one in value):
-            return value
-    return []
 
 
 def carries_workshop_tag(read_tags: Callable[[], Any]) -> bool:
@@ -242,21 +228,6 @@ class Teardown:
             collected.extend(page.get(key, []))
         return collected
 
-    def agentcore_all(self, call: Callable[..., dict], **kwargs: Any) -> list[dict]:
-        """Collect every page of an AgentCore List call.
-
-        These operations have no boto3 paginator, and a leftover from an earlier
-        session is exactly the thing that would be sitting on page two.
-        """
-        collected: list[dict] = []
-        token = None
-        while True:
-            page = call(**kwargs, nextToken=token) if token else call(**kwargs)
-            collected.extend(items_of(page))
-            token = page.get("nextToken")
-            if not token:
-                return collected
-
     def agentcore_tags(self, arn: str) -> Callable[[], Any]:
         """Return a reader for one AgentCore resource's tags."""
         return lambda: self.control.list_tags_for_resource(resourceArn=arn).get(
@@ -331,7 +302,7 @@ class Teardown:
         self.lab.wait_until(
             lambda: (
                 "empty"
-                if not self.agentcore_all(
+                if not agentcore_all(
                     self.control.list_gateway_targets, gatewayIdentifier=gateway
                 )
                 else "holding targets"
@@ -579,7 +550,7 @@ class Teardown:
         targets: list[Target] = []
         for item in self.enumerate_all(
             "agent runtimes",
-            lambda: self.agentcore_all(self.control.list_agent_runtimes),
+            lambda: agentcore_all(self.control.list_agent_runtimes),
         ):
             runtime = item.get("agentRuntimeId") or ""
             name = item.get("agentRuntimeName") or ""
@@ -597,7 +568,7 @@ class Teardown:
         targets: list[Target] = []
         for endpoint in self.enumerate_all(
             f"endpoints of runtime {runtime}",
-            lambda: self.agentcore_all(
+            lambda: agentcore_all(
                 self.control.list_agent_runtime_endpoints, agentRuntimeId=runtime
             ),
         ):
@@ -672,7 +643,7 @@ class Teardown:
         """Gateway targets first, then the gateway, which waits itself out."""
         targets: list[Target] = []
         for item in self.enumerate_all(
-            "gateways", lambda: self.agentcore_all(self.control.list_gateways)
+            "gateways", lambda: agentcore_all(self.control.list_gateways)
         ):
             gateway = item.get("gatewayId") or ""
             name = item.get("name") or ""
@@ -689,7 +660,7 @@ class Teardown:
         targets: list[Target] = []
         for entry in self.enumerate_all(
             f"targets of gateway {gateway}",
-            lambda: self.agentcore_all(
+            lambda: agentcore_all(
                 self.control.list_gateway_targets, gatewayIdentifier=gateway
             ),
         ):
@@ -722,7 +693,7 @@ class Teardown:
         the name appears in a List response."""
         targets: list[Target] = []
         for item in self.enumerate_all(
-            "memories", lambda: self.agentcore_all(self.control.list_memories)
+            "memories", lambda: agentcore_all(self.control.list_memories)
         ):
             memory = item.get("id") or item.get("memoryId") or ""
             arn = item.get("arn") or ""

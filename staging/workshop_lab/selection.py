@@ -40,8 +40,9 @@ from typing import Any
 
 # The tag every step applies to what it creates, and the tag half of the rule
 # below. It is here rather than in `naming` because `naming` builds names and
-# this module is the vocabulary both sweepers share; `naming` imports it back
-# for its own `tags_map` / `tags_list` / `tags_query` forms.
+# this module is the vocabulary both sweepers share. Every reader imports it
+# from here directly; `naming` imports it for its own `tags_map` / `tags_list` /
+# `tags_query` forms and re-exports nothing, so there is one hop and not three.
 WORKSHOP_TAG_KEY = "WorkshopResource"
 WORKSHOP_TAG_VALUE = "stop-ai-agent-hallucinations"
 
