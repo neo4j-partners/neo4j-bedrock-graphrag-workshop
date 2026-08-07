@@ -735,8 +735,10 @@ class Teardown:
 
     def collect_codebuild_projects(self) -> list[Target]:
         """Name only: step 8 passes the tags in the CreateProject request itself,
-        so a project that exists untagged is not a case that can arise, and
-        reading tags would mean one BatchGetProjects per project in the account.
+        so a project that exists untagged is not a case that can arise, and the
+        only call that would read them back is `BatchGetProjects`, which
+        `lab.template` does not grant to a student session. The same fact shapes
+        `codebuild_probe` above.
         """
         targets: list[Target] = []
         for name in self.enumerate_all(
@@ -905,11 +907,20 @@ class Teardown:
         """IAM last. Every role here is passed to something above, and IAM will
         not delete a role a live service is still using.
 
-        Name only, on purpose. ListRoles returns no tags, so a tag union would
-        cost one ListRoleTags per role in the account, Vocareum's own included.
-        Step 6 cannot name these roles anything else either: `lab.template`
-        scopes `iam:PutRolePolicy` to `role/workshop-*`, so an untagged role
-        still matches.
+        Name only, on purpose, and passing no `read_tags` is what makes it so.
+        ListRoles returns no tags, so a tag union would cost one ListRoleTags
+        per role in the account, Vocareum's own included. Step 6 cannot name
+        these roles anything else either: `lab.template` scopes
+        `iam:PutRolePolicy` to `role/workshop-*`, so an untagged role still
+        matches.
+
+        **The cost argument is not the only one, and the other is why this must
+        not be "improved" into a tag read.** It lands on the same rule
+        `vocareum_tools.sweep` reaches through `selected_by(...,
+        require_prefix=True)`: this account also holds Vocareum's own voclabs
+        and vocareum roles and whatever service-linked roles AWS put there, and
+        a role selectable by tag alone becomes deletable the moment anything
+        tags one.
         """
         targets: list[Target] = []
         for item in self.enumerate_all(
