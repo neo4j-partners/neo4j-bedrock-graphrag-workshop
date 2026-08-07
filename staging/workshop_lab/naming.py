@@ -35,9 +35,10 @@ from workshop_lab.selection import (
 )
 
 # The image the workshop publishes, already built for linux/arm64. Step 8 copies
-# it into `image_uri` when CodeBuild produces nothing, which in a Vocareum
-# account is every time. It is a public source and a private destination:
-# AgentCore Runtime pulls only from an ECR repository in the same account.
+# it into `image_uri` when CodeBuild produces nothing, which was every time in a
+# Vocareum account until 2026-08-07 and is now the exception rather than the
+# rule. It is a public source and a private destination: AgentCore Runtime pulls
+# only from an ECR repository in the same account.
 PREBUILT_IMAGE = "public.ecr.aws/h6l4p0n8/agentcore-verify:verify"
 
 

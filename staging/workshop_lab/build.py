@@ -6,23 +6,29 @@
 # tests/test_workshop_lab_drift.py fails when the copies disagree.
 """Build the container in CodeBuild, and get an image into ECR either way.
 
-Two things happen here and only one of them usually works.
+Two things happen here and either one is enough.
 
 **The build.** AgentCore Runtime accepts ARM64 images only and this environment
 has no Docker daemon, so the build runs in CodeBuild on an ARM container with
-`privilegedMode` on, which is the single setting the whole step depends on.
+`privilegedMode` on, which is the single setting the whole step depends on. As of
+2026-08-07 this works: a build reached `SUCCEEDED` in two pooled accounts, pushed
+a real image, and `uname -m` printed `aarch64`.
 
-**The fallback.** Vocareum runs an EventBridge rule in every student account
-that calls `StopBuild` about five seconds into every build. The build dies in
-PROVISIONING, no buildspec command runs, and the log stream stays empty. That is
-a restriction on the environment, not a fault in the build definition, and the
-report has to say which one it is: a bare FAIL sends people to debug a Dockerfile
-that never executed. So the workshop publishes the image it would have built, and
+**The fallback.** It did not work before that, for a reason outside the account.
+Vocareum ran an EventBridge rule, `voc-codebuild-cw-rule`, that called
+`StopBuild` about five seconds into every build. The build died in PROVISIONING,
+no buildspec command ran, and the log stream stayed empty. That is a restriction
+on the environment, not a fault in the build definition, and the report has to
+say which one it is: a bare FAIL sends people to debug a Dockerfile that never
+executed. So the workshop publishes the image it would have built, and
 `workshop_lab.registry` copies it into the student's own ECR.
 
 **The fallback is chosen by asking ECR, not by reading the build status.** That
-is what makes it self-healing. If Vocareum ever stops killing builds, the image
-is already there, the copy does not run, and nothing here needs reverting.
+is what made it self-healing, and the reversal above is the proof: the build now
+pushes, the image is already in ECR, `copy_prebuilt` is never called, and not one
+line here had to change. If the rule returns, the fallback resumes on its own.
+Keep both paths and keep the choice on ECR. `docs/permissions.md`, "CodeBuild
+builds are no longer stopped", records both directions.
 """
 
 from __future__ import annotations
@@ -52,10 +58,14 @@ BUILD_FAILED_STATES = frozenset({"FAILED", "FAULT", "STOPPED", "TIMED_OUT"})
 ARCHITECTURES = frozenset({"aarch64", "arm64", "x86_64"})
 
 STOPPED_EXPLANATION = """
-      Every CodeBuild build in this account is stopped a few seconds after it
-      starts, while it is still provisioning. No buildspec command ran, so the
+      Something in this account stopped the build a few seconds after it
+      started, while it was still provisioning. No buildspec command ran, so the
       Dockerfile, the ARM64 environment, and the IAM role are all untested and
-      none of them is the cause. Confirm it for yourself:
+      none of them is the cause.
+
+      This used to happen to every build in every student account, and stopped
+      happening on 2026-08-07. Seeing it again means the EventBridge rule that
+      caused it is back. Confirm it for yourself:
 
         aws events list-rules --name-prefix voc-codebuild
         aws cloudtrail lookup-events \\
