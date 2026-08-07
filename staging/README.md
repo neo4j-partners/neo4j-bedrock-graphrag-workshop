@@ -52,7 +52,7 @@ repeat.
 | `workshop_lab/__init__.py` | The public surface: `Harness`, `Names`, `Neo4jProbe`, the `PASS`/`FAIL`/`SKIP` verdicts, and `__version__` |
 | `workshop_lab/guards.py` | The three checks that stop the notebook rather than warn it: credentials present, account expected, region `us-east-1` |
 | `workshop_lab/harness.py` | One object owning the boto3 session, the cached clients, the result list, the deferred deletes, and the waiters |
-| `workshop_lab/naming.py` | Every resource name and tag the notebook uses, derived from one prefix |
+| `workshop_lab/naming.py` | Resource names and tags derived from one prefix, and the two rules a prefix has to satisfy. It rejects a prefix starting with `ws`, which routes AgentCore Runtime invocations into the WebSocket handler |
 | `workshop_lab/neo4j_probe.py` | The Aura round trip, which is the one check that talks to something other than AWS |
 | `pyproject.toml` | Enough packaging for pip to build the directory. Generated, including the version |
 
