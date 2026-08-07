@@ -342,9 +342,9 @@ class Harness:
             f"\n{counts[PASS]} passed, {counts[FAIL]} failed, {counts[SKIP]} skipped"
         )
         self.echo(
-            "\nNot checked here: Bedrock foundation model access. No cell above "
-            "calls a\nmodel. Model access is granted separately and the workshop's "
-            "Claude and\nNova calls need it, but nothing in this notebook does."
+            "\nNot checked here: the Amazon Nova embedding model the retrieval labs "
+            "read.\nStep 13b calls Claude, which is the model access the agent labs "
+            "need, and\nnothing above asks Nova for an embedding."
         )
         prerequisites_met = all(verdict == PASS for _, verdict, _ in extra)
         if counts[FAIL] == 0 and prerequisites_met:
