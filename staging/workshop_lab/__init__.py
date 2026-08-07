@@ -28,8 +28,13 @@ published copy changes, so a student's output names the code they actually ran
 rather than the code that was current when the notebook was written.
 """
 
+from workshop_lab.build import ContainerBuild
 from workshop_lab.build_source import BuildSource
+from workshop_lab.datastores import DataStores
+from workshop_lab.gateway import GatewayBoundary
 from workshop_lab.harness import FAIL, GONE_CODES, PASS, SKIP, Harness
+from workshop_lab.lambda_package import LambdaPackage
+from workshop_lab.memory import Memory
 from workshop_lab.naming import (
     PREBUILT_IMAGE,
     WORKSHOP_TAG_KEY,
@@ -38,8 +43,10 @@ from workshop_lab.naming import (
 )
 from workshop_lab.neo4j_probe import Neo4jProbe
 from workshop_lab.roles import AGENTCORE_PRINCIPAL, ROLE_SPECS, Roles, RoleSpec
+from workshop_lab.runtime import AgentRuntime
+from workshop_lab.teardown import Teardown
 
-__version__ = "0.3.0"
+__version__ = "0.8.0"
 
 __all__ = [
     "AGENTCORE_PRINCIPAL",
@@ -51,11 +58,18 @@ __all__ = [
     "SKIP",
     "WORKSHOP_TAG_KEY",
     "WORKSHOP_TAG_VALUE",
+    "AgentRuntime",
     "BuildSource",
+    "ContainerBuild",
+    "DataStores",
+    "GatewayBoundary",
     "Harness",
+    "LambdaPackage",
+    "Memory",
     "Names",
     "Neo4jProbe",
     "RoleSpec",
     "Roles",
+    "Teardown",
     "__version__",
 ]
