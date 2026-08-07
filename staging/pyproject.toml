@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "workshop-lab"
-version = "0.11.2"
+version = "0.11.3"
 description = "Utility classes for the Neo4j AWS workshop lab notebooks"
 requires-python = ">=3.10"
 dependencies = [
