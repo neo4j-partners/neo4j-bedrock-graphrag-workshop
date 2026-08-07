@@ -105,25 +105,37 @@ UNKNOWN_MODEL_MARKERS = (
 # file and not in the account.
 PROFILE_MARKERS = ("inference profile", "on-demand throughput isn't supported")
 
+# Both of the above are `ValidationException` shapes, and both are matched only
+# under that code. An IAM refusal names the profile it refused, so its message
+# carries the model id and can carry the word profile too; read loosely, that
+# would answer a real permission gap with "fix the id in workshop_lab.models"
+# and send nobody to the policy that actually refused the call.
+BAD_ID_CODE = "ValidationException"
+
 NO_TEXT_DETAIL = "the call returned no text, so the model did not answer"
 
 
 def verdict_for(code: str, message: str) -> tuple[str, str]:
     """Turn one Bedrock error into a verdict and a line naming who owns it.
 
-    Message first, code second. Bedrock reports the account-entitlement gate as
-    `AccessDeniedException` with an entitlement message, which is the same code
-    an ordinary IAM shortfall produces, and the two go to different people.
+    Message first, code second, for the two shapes that share a code. Bedrock
+    reports the account-entitlement gate as `AccessDeniedException` with an
+    entitlement message, which is the same code an ordinary IAM shortfall
+    produces, and the two go to different people. The rest are matched under the
+    code AWS actually returns them with, so a message that merely mentions a
+    model id cannot be mistaken for one that names a bad model id. Anything
+    unmatched keeps its code and its message rather than being guessed at.
     """
     body = message.lower()
     if any(marker in body for marker in ENTITLEMENT_MARKERS):
         return FAIL, f"this account is not entitled to the model: {message[:160]}"
     if MARKETPLACE_MARKER in body:
         return FAIL, f"the model has no Marketplace subscription: {message[:160]}"
-    if any(marker in body for marker in UNKNOWN_MODEL_MARKERS):
-        return FAIL, f"Bedrock does not know this model id: {message[:160]}"
-    if any(marker in body for marker in PROFILE_MARKERS):
-        return FAIL, f"call it by its us. inference-profile id: {message[:160]}"
+    if code == BAD_ID_CODE:
+        if any(marker in body for marker in UNKNOWN_MODEL_MARKERS):
+            return FAIL, f"Bedrock does not know this model id: {message[:160]}"
+        if any(marker in body for marker in PROFILE_MARKERS):
+            return FAIL, f"call it by its us. inference-profile id: {message[:160]}"
     if code == "AccessDeniedException":
         return FAIL, f"IAM or an SCP refused the call: {message[:160]}"
     if code == "ThrottlingException":
@@ -225,8 +237,9 @@ class ModelAccess:
                 "\nBedrock throttled this. Wait a minute and re-run the cell."
             )
             return False
-        self.lab.echo("\nThe agent labs cannot run without these models. Report it,")
-        self.lab.echo("and quote the line above: an entitlement message is an account")
-        self.lab.echo("setting, and a refusal is the lab's policy. They are fixed by")
-        self.lab.echo("different people.")
+        self.lab.echo(
+            "\nThe agent labs cannot run without these models. Report it and quote"
+            "\nthe failing line: an entitlement message is an account subscription,"
+            "\na refusal is the lab's own policy, and different people fix them."
+        )
         return False
