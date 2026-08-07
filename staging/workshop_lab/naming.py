@@ -30,6 +30,12 @@ from dataclasses import dataclass
 WORKSHOP_TAG_KEY = "WorkshopResource"
 WORKSHOP_TAG_VALUE = "stop-ai-agent-hallucinations"
 
+# The image the workshop publishes, already built for linux/arm64. Step 8 copies
+# it into `image_uri` when CodeBuild produces nothing, which in a Vocareum
+# account is every time. It is a public source and a private destination:
+# AgentCore Runtime pulls only from an ECR repository in the same account.
+PREBUILT_IMAGE = "public.ecr.aws/h6l4p0n8/agentcore-verify:verify"
+
 
 @dataclass(frozen=True)
 class Names:

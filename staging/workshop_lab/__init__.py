@@ -28,21 +28,34 @@ published copy changes, so a student's output names the code they actually ran
 rather than the code that was current when the notebook was written.
 """
 
+from workshop_lab.build_source import BuildSource
 from workshop_lab.harness import FAIL, GONE_CODES, PASS, SKIP, Harness
-from workshop_lab.naming import WORKSHOP_TAG_KEY, WORKSHOP_TAG_VALUE, Names
+from workshop_lab.naming import (
+    PREBUILT_IMAGE,
+    WORKSHOP_TAG_KEY,
+    WORKSHOP_TAG_VALUE,
+    Names,
+)
 from workshop_lab.neo4j_probe import Neo4jProbe
+from workshop_lab.roles import AGENTCORE_PRINCIPAL, ROLE_SPECS, Roles, RoleSpec
 
-__version__ = "0.1.0"
+__version__ = "0.3.0"
 
 __all__ = [
+    "AGENTCORE_PRINCIPAL",
     "FAIL",
     "GONE_CODES",
     "PASS",
+    "PREBUILT_IMAGE",
+    "ROLE_SPECS",
     "SKIP",
     "WORKSHOP_TAG_KEY",
     "WORKSHOP_TAG_VALUE",
+    "BuildSource",
     "Harness",
     "Names",
     "Neo4jProbe",
+    "RoleSpec",
+    "Roles",
     "__version__",
 ]

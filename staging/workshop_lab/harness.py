@@ -150,6 +150,22 @@ class Harness:
         """Record a check that could not run, so the summary counts it as skipped."""
         self.record(name, SKIP, reason)
 
+    def all_passed(self, name_prefix: str) -> bool:
+        """Did every check whose name starts with `name_prefix` pass?
+
+        Steps gate on a group of earlier checks rather than on one, and the
+        group is identified by the IAM action prefix the checks are named for:
+        `agentcore:` is every AgentCore call, whichever service client made it.
+
+        **No matching check is False, not True.** A step that never ran leaves
+        no rows, and an empty `all()` would report its prerequisite satisfied
+        and send the next step at an account nothing has been measured on.
+        """
+        matching = [
+            verdict for name, verdict, _ in self.results if name.startswith(name_prefix)
+        ]
+        return bool(matching) and all(verdict == PASS for verdict in matching)
+
     # --- setup that is not a measurement --------------------------------------
     def sweep(self, label: str, delete: Callable[[], Any]) -> None:
         """Delete a leftover carrying a name this notebook is about to create.
