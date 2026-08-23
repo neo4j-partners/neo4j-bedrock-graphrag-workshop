@@ -58,15 +58,22 @@ if TYPE_CHECKING:
 # about access. Vocareum said the same thing independently in 2026-08-03
 # correspondence: invoke through the `us.` or `global.` id.
 SONNET_MODEL_ID = "us.anthropic.claude-sonnet-4-6"
-OPUS_MODEL_ID = "us.anthropic.claude-opus-4-8"
+OPUS_MODEL_ID = "us.anthropic.claude-opus-4-6-v1"
 
-# The newest 4-series model of each family Vocareum named, and the Sonnet is the
-# id the workshop's own labs already carry in MODEL_ID. Pinned rather than picked
-# from the live catalog on purpose: a check that chooses its own model reports a
-# different model per session, and two sessions then cannot be compared.
+# Both pins are measured working rather than chosen for being newest, which is
+# what moved the Opus one on 2026-08-13. It was `us.anthropic.claude-opus-4-8`,
+# and 4.8 is refused by the account-entitlement gate in every lab account
+# measured: `is not available for this account`, routing to AWS Sales. Vocareum
+# subscribed Sonnet 4.5, Sonnet 4.6, Opus 4.5, Opus 4.6, and Haiku 4.5 and did
+# not subscribe 4.8, so pinning the newest Opus pins one the workshop cannot
+# call. 4.6 is the newest Opus that answers. `docs/permissions.md` has the run.
+#
+# Pinned rather than picked from the live catalog on purpose: a check that
+# chooses its own model reports a different model per session, and two sessions
+# then cannot be compared.
 MODELS = (
     (SONNET_MODEL_ID, "every agent lab in the workshop calls this one"),
-    (OPUS_MODEL_ID, "the newest 4-series Opus"),
+    (OPUS_MODEL_ID, "the newest Opus this account is subscribed to"),
 )
 
 INVOKE_ACTION = "bedrock:InvokeModel"
