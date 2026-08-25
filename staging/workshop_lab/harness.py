@@ -342,9 +342,8 @@ class Harness:
             f"\n{counts[PASS]} passed, {counts[FAIL]} failed, {counts[SKIP]} skipped"
         )
         self.echo(
-            "\nNot checked here: the Amazon Nova embedding model the retrieval labs "
-            "read.\nStep 13b calls Claude, which is the model access the agent labs "
-            "need, and\nnothing above asks Nova for an embedding."
+            "\nStep 13b checks the Claude models the agent labs call and requests "
+            "Nova and Titan embeddings\nfor the retrieval labs."
         )
         prerequisites_met = all(verdict == PASS for _, verdict, _ in extra)
         if counts[FAIL] == 0 and prerequisites_met:

@@ -13,7 +13,7 @@ module should import. Measured 2026-08-06 in a live session: it does not. What
 does work, measured the same day, is fetching Python over HTTPS from a public
 GitHub repository, so this package is installed rather than shipped:
 
-    %pip install "https://github.com/neo4j-partners/neo4j-bedrock-graphrag-workshop/archive/refs/tags/v0.13.2.zip#subdirectory=staging"
+    %pip install "https://github.com/neo4j-partners/neo4j-bedrock-graphrag-workshop/archive/refs/tags/v0.13.3.zip#subdirectory=staging"
 
 **This directory is the source of truth, and it is not the copy the notebook
 installs.** `aws-vocareum` is private, and a private repository answers
@@ -43,7 +43,7 @@ from workshop_lab.runtime import AgentRuntime
 from workshop_lab.selection import WORKSHOP_TAG_KEY, WORKSHOP_TAG_VALUE
 from workshop_lab.teardown import Teardown
 
-__version__ = "0.13.2"
+__version__ = "0.13.3"
 
 __all__ = [
     "AGENTCORE_PRINCIPAL",

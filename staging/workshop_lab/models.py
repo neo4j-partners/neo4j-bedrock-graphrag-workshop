@@ -4,14 +4,12 @@
 # Regenerate: ./scripts/sync_workshop_lab.py
 #
 # tests/test_workshop_lab_drift.py fails when the copies disagree.
-"""Step 13b. Call the Claude models the workshop's agents run on.
+"""Step 13b. Call the Bedrock models the workshop's agents and retrieval use.
 
 Every agent in the workshop is a Strands agent, and a Strands agent reaches
-Bedrock through `Converse` and `ConverseStream`. Nothing else in this notebook
-calls a foundation model at all, so an account can pass every other check here
-and still stop lab 4 at its first agent call. That was the state of this notebook
-until Vocareum confirmed the Claude 4 series is subscribed for the student
-accounts, which made the question worth asking from inside a session.
+Bedrock through `Converse` and `ConverseStream`. The retrieval labs also need a
+Nova embedding. This step exercises both paths, so a session cannot pass the
+environment check and then stop at its first model request.
 
 Two answers arrive as the same failure and belong to different people:
 
@@ -42,6 +40,7 @@ own after step 2.
 
 from __future__ import annotations
 
+import json
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
@@ -59,6 +58,8 @@ if TYPE_CHECKING:
 # correspondence: invoke through the `us.` or `global.` id.
 SONNET_MODEL_ID = "us.anthropic.claude-sonnet-4-6"
 OPUS_MODEL_ID = "us.anthropic.claude-opus-4-6-v1"
+NOVA_EMBEDDING_MODEL_ID = "amazon.nova-2-multimodal-embeddings-v1:0"
+TITAN_EMBEDDING_MODEL_ID = "amazon.titan-embed-text-v2:0"
 
 # Both pins are measured working rather than chosen for being newest, which is
 # what moved the Opus one on 2026-08-13. It was `us.anthropic.claude-opus-4-8`,
@@ -85,6 +86,20 @@ STREAM_ACTION = "bedrock:InvokeModelWithResponseStream"
 PROMPT = "Reply with one word: ready"
 MESSAGES = [{"role": "user", "content": [{"text": PROMPT}]}]
 INFERENCE_CONFIG = {"maxTokens": 32}
+EMBEDDING_DIMENSION = 1024
+EMBEDDING_REQUEST = {
+    "taskType": "SINGLE_EMBEDDING",
+    "singleEmbeddingParams": {
+        "embeddingPurpose": "GENERIC_INDEX",
+        "embeddingDimension": EMBEDDING_DIMENSION,
+        "text": {"truncationMode": "END", "value": "permission test"},
+    },
+}
+TITAN_EMBEDDING_REQUEST = {
+    "inputText": "permission test",
+    "dimensions": EMBEDDING_DIMENSION,
+    "normalize": True,
+}
 
 # Anthropic entitlement, in every wording Bedrock has been seen to use for it.
 # Tested before the error code, because the third of these arrives as
@@ -172,8 +187,64 @@ def text_of_stream(response: dict) -> str:
     return "".join(parts).strip()
 
 
+def nova_embeddings_of(response: dict) -> list[list[Any]]:
+    """Read Nova embeddings from an InvokeModel response, or return none.
+
+    A 200 response is not proof of usable retrieval access. The model must
+    return one actual vector, and `run` checks its documented dimension below.
+    """
+    body = response.get("body")
+    if body is None:
+        return []
+    try:
+        payload = json.load(body)
+    except (AttributeError, TypeError, ValueError):
+        return []
+    if not isinstance(payload, dict):
+        return []
+    embeddings = payload.get("embeddings", [])
+    if not isinstance(embeddings, list):
+        return []
+
+    result: list[list[Any]] = []
+    for item in embeddings:
+        if isinstance(item, dict) and isinstance(item.get("embedding"), list):
+            result.append(item["embedding"])
+    return result
+
+
+def titan_embeddings_of(response: dict) -> list[list[Any]]:
+    """Read the single top-level Titan V2 embedding, or return none."""
+    body = response.get("body")
+    if body is None:
+        return []
+    try:
+        payload = json.load(body)
+    except (AttributeError, TypeError, ValueError):
+        return []
+    if not isinstance(payload, dict) or not isinstance(payload.get("embedding"), list):
+        return []
+    return [payload["embedding"]]
+
+
+EMBEDDING_MODELS = (
+    (
+        NOVA_EMBEDDING_MODEL_ID,
+        "Nova retrieval embeddings",
+        EMBEDDING_REQUEST,
+        nova_embeddings_of,
+    ),
+    (
+        TITAN_EMBEDDING_MODEL_ID,
+        "Titan Text Embeddings V2",
+        TITAN_EMBEDDING_REQUEST,
+        titan_embeddings_of,
+    ),
+)
+
+
 class ModelAccess:
-    """Calls each pinned Claude model on both invoke actions and reports."""
+    """Calls each pinned Claude model and the required embedding models."""
 
     def __init__(self, lab: Harness) -> None:
         self.lab = lab
@@ -201,6 +272,20 @@ class ModelAccess:
             )
         )
 
+    def embed(
+        self,
+        model_id: str,
+        request: dict[str, Any],
+        read_embeddings: Callable[[dict], list[list[Any]]],
+    ) -> list[list[Any]]:
+        response = self.runtime.invoke_model(
+            modelId=model_id,
+            body=json.dumps(request),
+            contentType="application/json",
+            accept="application/json",
+        )
+        return read_embeddings(response)
+
     # --- measuring -----------------------------------------------------------
     def measure(self, action: str, model_id: str, call: Callable[[str], str]) -> str:
         """Run one call and record one row. Returns the verdict.
@@ -227,17 +312,67 @@ class ModelAccess:
         self.lab.record(name, PASS, f"the model answered {answer[:40]!r}")
         return PASS
 
+    def measure_embedding(
+        self,
+        model_id: str,
+        request: dict[str, Any],
+        read_embeddings: Callable[[dict], list[list[Any]]],
+    ) -> str:
+        """Request and validate one 1,024-dimension embedding."""
+        name = f"{INVOKE_ACTION} {model_id}"
+        try:
+            embeddings = self.embed(model_id, request, read_embeddings)
+        except ClientError as error:
+            code = error.response["Error"]["Code"]
+            message = error.response["Error"].get("Message", "")
+            verdict, detail = verdict_for(code, message)
+            self.lab.record(name, verdict, detail)
+            return verdict
+        except BotoCoreError as error:
+            self.lab.record(name, FAIL, str(error)[:160])
+            return FAIL
+
+        if len(embeddings) != 1:
+            self.lab.record(
+                name,
+                FAIL,
+                f"expected one embedding, but the response carried {len(embeddings)}",
+            )
+            return FAIL
+        if len(embeddings[0]) != EMBEDDING_DIMENSION:
+            self.lab.record(
+                name,
+                FAIL,
+                "expected a "
+                f"{EMBEDDING_DIMENSION}-dimension embedding, but received "
+                f"{len(embeddings[0])}",
+            )
+            return FAIL
+
+        self.lab.record(
+            name,
+            PASS,
+            f"the model returned one {EMBEDDING_DIMENSION}-dimension embedding",
+        )
+        return PASS
+
     # --- the step ------------------------------------------------------------
     def run(self) -> bool:
-        """Call both models both ways. True only when all four calls answered."""
+        """Call both chat models both ways and request each required embedding."""
         verdicts: list[str] = []
         for model_id, why in MODELS:
             self.lab.echo(f"\n{model_id}: {why}")
             verdicts.append(self.measure(INVOKE_ACTION, model_id, self.converse))
             verdicts.append(self.measure(STREAM_ACTION, model_id, self.converse_stream))
+        for model_id, why, request, read_embeddings in EMBEDDING_MODELS:
+            self.lab.echo(f"\n{model_id}: {why}")
+            verdicts.append(self.measure_embedding(model_id, request, read_embeddings))
 
         if all(verdict == PASS for verdict in verdicts):
-            self.lab.echo("\nOK. Both Claude 4 models answer, streaming and not.")
+            self.lab.echo(
+                "\nOK. Both Claude 4 models answer, streaming and not, and Nova "
+                "and Titan return embeddings."
+            )
             return True
         if FAIL not in verdicts:
             self.lab.echo(
