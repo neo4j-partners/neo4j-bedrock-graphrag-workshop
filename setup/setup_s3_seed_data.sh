@@ -7,6 +7,7 @@
 #   ./setup_s3_seed_data.sh                    # defaults to us-east-1
 #   ./setup_s3_seed_data.sh --region us-west-2
 #   ./setup_s3_seed_data.sh --refresh          # re-upload CSVs and invalidate CloudFront cache
+#   ./setup_s3_seed_data.sh --verify-live      # compare what CloudFront is serving against local seed-data
 #   ./setup_s3_seed_data.sh --cleanup          # delete CloudFront, OAC, bucket
 
 set -euo pipefail
@@ -16,6 +17,7 @@ S3_PREFIX="sec-filings"
 REGION="us-east-1"
 CLEANUP=false
 REFRESH=false
+VERIFY_LIVE=false
 OAC_NAME="neo4j-workshop-oac"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SEED_DATA_DIR="${SCRIPT_DIR}/../financial_data_load/seed-data"
@@ -35,15 +37,42 @@ while [[ $# -gt 0 ]]; do
             REFRESH=true
             shift
             ;;
+        --verify-live)
+            VERIFY_LIVE=true
+            shift
+            ;;
         *)
             echo "Unknown option: $1"
-            echo "Usage: $0 [--region REGION] [--refresh] [--cleanup]"
+            echo "Usage: $0 [--region REGION] [--refresh] [--verify-live] [--cleanup]"
             exit 1
             ;;
     esac
 done
 
-ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+# ── Helper: local referential integrity check on seed-data/ ──────────────────
+# Verifies every chunkId referenced by chunk_documents.csv, chunk_sequence.csv,
+# and entity_chunks.csv actually exists in chunks.csv. Catches a truncated or
+# partially-regenerated chunks.csv before it ever gets uploaded.
+
+check_seed_data_integrity() {
+    echo "Checking seed data referential integrity ..."
+    python3 "${SCRIPT_DIR}/check_seed_data_integrity.py" "${SEED_DATA_DIR}"
+}
+
+# ── Helper: compare what CloudFront is actually serving against local files ──
+
+verify_live() {
+    DIST_ID=$(find_distribution_id)
+    if [ "$DIST_ID" = "None" ] || [ -z "$DIST_ID" ]; then
+        echo "No CloudFront distribution found for this bucket."
+        exit 1
+    fi
+    DIST_DOMAIN=$(aws cloudfront get-distribution --id "$DIST_ID" \
+        --query "Distribution.DomainName" --output text)
+    echo "Comparing https://${DIST_DOMAIN}/${S3_PREFIX}/ against ${SEED_DATA_DIR}/ ..."
+    python3 "${SCRIPT_DIR}/check_seed_data_integrity.py" "${SEED_DATA_DIR}" \
+        --live-base-url "https://${DIST_DOMAIN}/${S3_PREFIX}"
+}
 
 # ── Helper: find existing CloudFront distribution for this bucket ─────────────
 
@@ -58,6 +87,13 @@ find_oac_id() {
         --query "OriginAccessControlList.Items[?Name=='${OAC_NAME}'].Id | [0]" \
         --output text 2>/dev/null || echo "None"
 }
+
+if [ "$VERIFY_LIVE" = true ]; then
+    verify_live
+    exit 0
+fi
+
+ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 
 # ── Cleanup mode ──────────────────────────────────────────────────────────────
 
@@ -102,6 +138,8 @@ fi
 # ── Refresh mode: re-upload CSVs and invalidate CloudFront cache ─────────────
 
 if [ "$REFRESH" = true ]; then
+    check_seed_data_integrity
+
     echo "Uploading CSVs from ${SEED_DATA_DIR}/ to s3://${BUCKET_NAME}/${S3_PREFIX}/ ..."
 
     csv_count=0
@@ -117,6 +155,25 @@ if [ "$REFRESH" = true ]; then
     done
     echo "  Uploaded ${csv_count} CSV files."
 
+    echo "Verifying uploaded objects match local files ..."
+    mismatch=0
+    for csv_file in "${SEED_DATA_DIR}"/*.csv; do
+        [ -f "$csv_file" ] || continue
+        filename="$(basename "$csv_file")"
+        local_md5=$(md5 -q "$csv_file" 2>/dev/null || md5sum "$csv_file" | cut -d' ' -f1)
+        remote_etag=$(aws s3api head-object --bucket "$BUCKET_NAME" \
+            --key "${S3_PREFIX}/${filename}" --query ETag --output text | tr -d '"')
+        if [ "$local_md5" != "$remote_etag" ]; then
+            echo "  MISMATCH: ${filename} (local md5 ${local_md5} != S3 ETag ${remote_etag})"
+            mismatch=$((mismatch + 1))
+        fi
+    done
+    if [ "$mismatch" -gt 0 ]; then
+        echo "  ${mismatch} file(s) failed to upload correctly. Aborting before invalidation."
+        exit 1
+    fi
+    echo "  All ${csv_count} uploaded objects match local files."
+
     DIST_ID=$(find_distribution_id)
     if [ "$DIST_ID" != "None" ] && [ -n "$DIST_ID" ]; then
         echo "Invalidating CloudFront cache ..."
@@ -125,7 +182,7 @@ if [ "$REFRESH" = true ]; then
             --paths "/${S3_PREFIX}/*" \
             --query "Invalidation.Id" --output text)
         echo "  Invalidation created: ${INVALIDATION_ID}"
-        echo "  Cache will clear within a few minutes."
+        echo "  Cache will clear within a few minutes. Run --verify-live after that to confirm."
     else
         echo "  No CloudFront distribution found — skipping invalidation."
     fi
@@ -162,6 +219,8 @@ aws s3api put-public-access-block \
         "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
 
 # ── Upload CSVs ───────────────────────────────────────────────────────────────
+
+check_seed_data_integrity
 
 echo "Uploading CSVs from ${SEED_DATA_DIR}/ to s3://${BUCKET_NAME}/${S3_PREFIX}/ ..."
 
