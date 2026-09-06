@@ -4,7 +4,7 @@
 # Regenerate: ./scripts/sync_workshop_lab.py
 #
 # tests/test_workshop_lab_drift.py fails when the copies disagree.
-"""Step 13b. Call the Bedrock models the workshop's agents and retrieval use.
+"""Step 2b. Call the Bedrock models the workshop's agents and retrieval use.
 
 Every agent in the workshop is a Strands agent, and a Strands agent reaches
 Bedrock through `Converse` and `ConverseStream`. The retrieval labs also need a

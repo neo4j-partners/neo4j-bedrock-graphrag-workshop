@@ -73,7 +73,7 @@ def get_llm():
     config = AgentConfig()
     if not config.llm_model_id:
         raise ValueError("MODEL_ID must be set in .env.")
-    kwargs: dict = {"model_id": config.llm_model_id}
+    kwargs: dict = {"model_name": config.llm_model_id}
     if config.aws_region:
         kwargs["region_name"] = config.aws_region
     return BedrockLLM(**kwargs)
@@ -91,7 +91,7 @@ def get_llm_deterministic():
     if not config.llm_model_id:
         raise ValueError("MODEL_ID must be set in .env.")
     kwargs: dict = {
-        "model_id": config.llm_model_id,
+        "model_name": config.llm_model_id,
         "model_params": {"temperature": 0},
     }
     if config.aws_region:

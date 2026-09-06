@@ -342,7 +342,7 @@ class Harness:
             f"\n{counts[PASS]} passed, {counts[FAIL]} failed, {counts[SKIP]} skipped"
         )
         self.echo(
-            "\nStep 13b checks the Claude models the agent labs call and requests "
+            "\nStep 2b checks the Claude models the agent labs call and requests "
             "Nova and Titan embeddings\nfor the retrieval labs."
         )
         prerequisites_met = all(verdict == PASS for _, verdict, _ in extra)
